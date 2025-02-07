@@ -1,9 +1,8 @@
+import type { TSESTree } from '@typescript-eslint/utils';
+
 type Base = {
   filepath: string;
-  loc: {
-    start: number;
-    end: number;
-  };
+  range: TSESTree.Node['range'];
 };
 
 /* Imports */
@@ -64,7 +63,7 @@ export type BaseCodeFileDetails = {
 
 export type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;
 
-export type BaseProject = {
+export type BaseESMInfo = {
   // Mapping of absolute filepath to file details
   files: Record<string, BaseFileDetails>;
 };

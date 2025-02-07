@@ -4,23 +4,25 @@
     "lib": [
       "esnext"
     ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
+    "module": "nodenext",
+    "sourceMap": true,
     "esModuleInterop": true,
-    "module": "node16",
-    "moduleResolution": "node16",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "skipLibCheck": true,
     "incremental": true,
     "paths": {
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "declaration": true
   },
   "include": [
     "src/**/*.ts",

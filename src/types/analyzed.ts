@@ -52,7 +52,7 @@ export type AnalyzedFileDetails =
   | AnalyzedOtherFileDetails
   | AnalyzedCodeFileDetails;
 
-export type AnalyzedProject = {
+export type AnalyzedESMInfo = {
   // Mapping of absolute filepath to file details
   files: Record<string, AnalyzedFileDetails>;
 };

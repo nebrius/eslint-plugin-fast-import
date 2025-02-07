@@ -54,7 +54,7 @@ export type ResolvedFileDetails =
   | ResolvedOtherFileDetails
   | ResolvedCodeFileDetails;
 
-export type ResolvedProject = {
+export type ResolvedESMInfo = {
   // Mapping of absolute filepath to file details
   files: Record<string, ResolvedFileDetails>;
 };
