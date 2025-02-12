@@ -2,6 +2,7 @@ import type {
   BaseBarrelImport,
   BaseBarrelReexport,
   BaseCodeFileDetails,
+  BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
   BaseSingleImport,
@@ -28,7 +29,11 @@ type Resolved =
 
 export type ResolvedSingleImport = BaseSingleImport & Resolved;
 export type ResolvedBarrelImport = BaseBarrelImport & Resolved;
-export type ResolvedImport = ResolvedSingleImport | ResolvedBarrelImport;
+export type ResolvedDynamicImport = BaseDynamicImport & Resolved;
+export type ResolvedImport =
+  | ResolvedSingleImport
+  | ResolvedBarrelImport
+  | ResolvedDynamicImport;
 
 /* Exports */
 
@@ -55,6 +60,6 @@ export type ResolvedFileDetails =
   | ResolvedCodeFileDetails;
 
 export type ResolvedESMInfo = {
-  // Mapping of absolute filepath to file details
+  // Mapping of absolute filePath to file details
   files: Record<string, ResolvedFileDetails>;
 };

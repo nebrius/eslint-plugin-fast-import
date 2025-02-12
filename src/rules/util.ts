@@ -6,6 +6,6 @@ export const createRule = ESLintUtils.RuleCreator(
     `https://github.com/nebrius/esm-utils/tree/main/src/rules/${name}/README.md`
 );
 
-export function getESMInfo(filepath: string): AnalyzedFileDetails {
+export function getESMInfo(filePath: string): AnalyzedFileDetails {
   return { type: 'other' };
 }

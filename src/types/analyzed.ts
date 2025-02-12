@@ -2,6 +2,7 @@ import type {
   ResolvedBarrelImport,
   ResolvedBarrelReexport,
   ResolvedCodeFileDetails,
+  ResolvedDynamicImport,
   ResolvedExport,
   ResolvedOtherFileDetails,
   ResolvedSingleImport,
@@ -9,7 +10,7 @@ import type {
 } from './resolved';
 
 type AnalyzedImportBase = {
-  rootFilepath: string | undefined;
+  rootFilePath: string | undefined;
   rootName: string;
 };
 
@@ -20,8 +21,11 @@ type AnalyzedExportBase = {
 
 /* Imports */
 
+// Note: barrel and dynamic imports can't be resolved to a single file, since
+// they bundle up multiple exports that could resolve to different files
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
-export type AnalyzedBarrelImport = ResolvedBarrelImport & AnalyzedImportBase;
+export type AnalyzedBarrelImport = ResolvedBarrelImport;
+export type AnalyzedDynamicImport = ResolvedDynamicImport;
 export type AnalyzedImport = AnalyzedSingleImport | AnalyzedBarrelImport;
 
 /* Exports */
@@ -53,6 +57,6 @@ export type AnalyzedFileDetails =
   | AnalyzedCodeFileDetails;
 
 export type AnalyzedESMInfo = {
-  // Mapping of absolute filepath to file details
+  // Mapping of absolute filePath to file details
   files: Record<string, AnalyzedFileDetails>;
 };

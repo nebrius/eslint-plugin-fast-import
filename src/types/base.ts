@@ -1,25 +1,34 @@
 import type { TSESTree } from '@typescript-eslint/utils';
 
 type Base = {
-  filepath: string;
-  range: TSESTree.Node['range'];
+  filePath: string;
+  moduleSpecifier: string;
+  importStatementRange: TSESTree.Node['range'];
 };
 
 /* Imports */
 
 export type BaseSingleImport = Base & {
   type: 'singleImport';
-  moduleSpecifier: string;
+  importSpecifierRange: TSESTree.Node['range'];
   importName: string;
   importAlias: string;
   isTypeImport: boolean;
 };
 
 export type BaseBarrelImport = Base & {
+  importSpecifierRange: TSESTree.Node['range'];
   type: 'barrelImport';
 };
 
-export type BaseImport = BaseSingleImport | BaseBarrelImport;
+export type BaseDynamicImport = Base & {
+  type: 'dynamicImport';
+};
+
+export type BaseImport =
+  | BaseSingleImport
+  | BaseBarrelImport
+  | BaseDynamicImport;
 
 /* Exports */
 
@@ -64,6 +73,6 @@ export type BaseCodeFileDetails = {
 export type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;
 
 export type BaseESMInfo = {
-  // Mapping of absolute filepath to file details
+  // Mapping of absolute filePath to file details
   files: Record<string, BaseFileDetails>;
 };

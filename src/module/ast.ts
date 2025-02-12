@@ -14,7 +14,7 @@ export type ReexportDeclaration =
   | TSESTree.ExportAllDeclaration;
 
 type WalkOptions = {
-  filepath: string;
+  filePath: string;
   fileContents: string;
 
   // Not sure why ESLint is flagging these as errors
@@ -26,7 +26,7 @@ type WalkOptions = {
 };
 
 export function traverse({
-  filepath,
+  filePath,
   fileContents,
   importDeclaration,
   exportDeclaration,
@@ -38,7 +38,7 @@ export function traverse({
 
     // JSX is a proper superset of JavaScript, meaning JSX can appear in both .js and .jsx files. TSX is *not* a
     // proper superset of TypeScript, however, and so JSX can only appear in .tsx files, not .ts files
-    jsx: !filepath.endsWith('.ts'),
+    jsx: !filePath.endsWith('.ts'),
   });
 
   simpleTraverse(ast, {
