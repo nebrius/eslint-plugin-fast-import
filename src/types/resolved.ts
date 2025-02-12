@@ -18,10 +18,28 @@ type Resolved =
     }
   | {
       type: 'firstPartyCode';
+
+      /**
+       * The absolute path of the file that the import/reexport points to. For
+       * the statement in a file at `/Users/bryan/myProject/src/foo.ts`:
+       *
+       * import { bar } from './bar';
+       *
+       * then `resolvedModulePath` is `/Users/bryan/myProject/src/bar/index.ts`
+       */
       resolvedModulePath: string;
     }
   | {
       type: 'firstPartyOther';
+
+      /**
+       * The absolute path of the file that the import/reexport points to. For
+       * the statement in a file at `/Users/bryan/myProject/src/foo.ts`:
+       *
+       * import { bar } from './bar';
+       *
+       * then `resolvedModulePath` is `/Users/bryan/myProject/src/bar/index.ts`
+       */
       resolvedModulePath: string | undefined;
     };
 

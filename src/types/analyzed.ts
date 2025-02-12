@@ -10,12 +10,43 @@ import type {
 } from './resolved';
 
 type AnalyzedImportBase = {
-  rootFilePath: string | undefined;
+  /**
+   * The absolute path of the file with the export that the import/reexport
+   * statement ultimately resolves to. In other words, if we have:
+   *
+   * ```
+   * // foo.ts
+   * import { baz } from './bar'
+   *
+   * // bar.ts
+   * export { baz } from './baz'
+   *
+   * // baz.ts
+   * export const baz = 10;
+   * ```
+   *
+   * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with
+   * `resolvedModulePath` which equals `/path/to/bar.ts`
+   */
+  rootModulePath: string | undefined;
+
+  /**
+   * The name of the original export
+   */
   rootName: string;
 };
 
 type AnalyzedExportBase = {
+  /**
+   * A list of files that imports this export, including indirect imports that
+   * are funneled through reexport statements
+   */
   importedByFiles: string[];
+
+  /**
+   * A list of files that reexport this import, including indirect reexports
+   * that themselves reexport a reexport
+   */
   reexportedByFiles: string[];
 };
 
