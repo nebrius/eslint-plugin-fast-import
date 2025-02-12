@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint \"./src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint --fix \"./src/**/*.{ts,tsx}\"",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest src"
   },
   "author": "",
   "license": "ISC",
@@ -15,12 +16,16 @@
     "typescript-eslint": "^8.19.1"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "global": "^4.4.0",
     "prettier": "^3.4.2",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.7.3"
   }
 }

@@ -5,6 +5,8 @@ import { FlatCompat } from '@eslint/eslintrc';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import jest from 'eslint-plugin-jest';
+import globals from 'globals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +26,9 @@ export default [
         }),
       ],
     },
+    languageOptions: {
+      globals: globals.node,
+    }
   },
   eslintPluginPrettierRecommended,
   ...tseslint.config(
@@ -42,5 +47,9 @@ export default [
       },
     }
   ),
+  {
+    files: ['**/*.test.ts'],
+    ...jest.configs['flat/recommended']
+  },
   ...compat.extends('eslint:recommended'),
 ];
