@@ -34,6 +34,12 @@ export function stripNodes(info: BaseESMInfo) {
         delete importDetails.specifierNode;
       }
     }
+    for (const reexportDetails of fileDetails.reexports) {
+      delete reexportDetails.statementNode;
+      if ('specifierNode' in reexportDetails) {
+        delete reexportDetails.specifierNode;
+      }
+    }
   }
   return clonedInfo;
 }

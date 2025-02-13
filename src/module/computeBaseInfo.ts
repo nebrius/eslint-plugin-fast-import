@@ -29,6 +29,21 @@ export function computeBaseInfo(basePath: string): BaseESMInfo {
 
   return info;
 }
+// Exports are almost always identifiers, but on rare occasions they
+// can actually be strings, such as in:
+//
+// const x = 10;
+// export { x as 'some string' };
+//
+// We actually don't care if the name is an identifier or string
+// though, so this function normalizes the value
+function getIdentifierOrStringValue(
+  node: TSESTree.Identifier | TSESTree.StringLiteral
+) {
+  return node.type === TSESTree.AST_NODE_TYPES.Identifier
+    ? node.name
+    : node.value;
+}
 
 function computeFileDetails({
   filePath,
@@ -55,7 +70,7 @@ function computeFileDetails({
       // `await import('foo' + 'bar' + computeThing())`.
       const moduleSpecifier =
         statementNode.source.type === TSESTree.AST_NODE_TYPES.Literal
-          ? (statementNode.source.value ?? null)
+          ? (statementNode.source.value ?? undefined)
           : undefined;
       if (
         typeof moduleSpecifier !== 'string' &&
@@ -130,18 +145,9 @@ function computeFileDetails({
 
           // import { foo } from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportSpecifier: {
-            // Exports are almost always identifiers, but on rare occasions they
-            // can actually be strings, such as in:
-            //
-            // const x = 10;
-            // export { x as 'some string' };
-            //
-            // We actually don't care if the name is an identifier or string
-            // though, so we normalize it here.
-            const importName =
-              specifierNode.imported.type === TSESTree.AST_NODE_TYPES.Identifier
-                ? specifierNode.imported.name
-                : specifierNode.imported.value;
+            const importName = getIdentifierOrStringValue(
+              specifierNode.imported
+            );
 
             fileDetails.imports.push({
               type: 'singleImport',
@@ -169,8 +175,35 @@ function computeFileDetails({
     exportDeclaration() {
       //
     },
-    reexportDeclaration() {
-      //
+    reexportDeclaration(statementNode) {
+      const moduleSpecifier = statementNode.source.value;
+
+      // Check if this is a barrel reexport, and if so save it
+      if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
+        fileDetails.reexports.push({
+          type: 'barrelReexport',
+          filePath,
+          statementNode,
+          moduleSpecifier,
+          exportName: statementNode.exported?.name,
+          isTypeReexport: statementNode.exportKind === 'type',
+        });
+        return;
+      }
+
+      // Otherwise, this is a single reexport, so we iterate through export specifiers
+      for (const specifierNode of statementNode.specifiers) {
+        fileDetails.reexports.push({
+          type: 'singleReexport',
+          filePath,
+          statementNode,
+          specifierNode,
+          moduleSpecifier,
+          importName: getIdentifierOrStringValue(specifierNode.local),
+          exportName: getIdentifierOrStringValue(specifierNode.exported),
+          isTypeReexport: statementNode.exportKind === 'type',
+        });
+      }
     },
   });
   return fileDetails;

@@ -10,7 +10,6 @@ const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
 describe('computes base info', () => {
   it('does a thing', () => {
     const info = computeBaseInfo(TEST_PROJECT_DIR);
-
     expect(stripNodes(info)).toEqual({
       files: {
         [FILE_A]: {
@@ -108,7 +107,54 @@ describe('computes base info', () => {
         [FILE_C]: {
           exports: [],
           imports: [],
-          reexports: [],
+          reexports: [
+            {
+              type: 'singleReexport',
+              filePath: FILE_C,
+              moduleSpecifier: './a',
+              importName: 'a1',
+              exportName: 'a1',
+              isTypeReexport: false,
+            },
+            {
+              exportName: undefined,
+              filePath: FILE_C,
+              isTypeReexport: false,
+              moduleSpecifier: './a',
+              type: 'barrelReexport',
+            },
+            {
+              type: 'barrelReexport',
+              filePath: FILE_C,
+              moduleSpecifier: './a',
+              exportName: 'c',
+              isTypeReexport: false,
+            },
+            {
+              type: 'singleReexport',
+              filePath: FILE_C,
+              moduleSpecifier: './a',
+              importName: 'default',
+              exportName: 'c1',
+              isTypeReexport: false,
+            },
+            {
+              exportName: 'c2',
+              filePath: FILE_C,
+              importName: 'a1',
+              isTypeReexport: false,
+              moduleSpecifier: './a',
+              type: 'singleReexport',
+            },
+            {
+              exportName: 'Foo',
+              filePath: FILE_C,
+              importName: 'Foo',
+              isTypeReexport: true,
+              moduleSpecifier: './a',
+              type: 'singleReexport',
+            },
+          ],
           type: 'esm',
         },
       },

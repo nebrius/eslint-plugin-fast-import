@@ -110,7 +110,13 @@ export type BaseSingleReexport = Base & {
   /**
    * If true, then this is a TypeScript type reexport, e.g. `export type { Foo } from './bar'`
    */
-  isTypeExport: boolean;
+  isTypeReexport: boolean;
+
+  /**
+   * The original AST node in ESTree format for the specifier in the statement,
+   * e.g. the AST node for `foo as bar` in `import { foo as bar } from './bar`
+   */
+  specifierNode: TSESTree.Node;
 };
 
 export type BaseBarrelReexport = Base & {
@@ -124,12 +130,12 @@ export type BaseBarrelReexport = Base & {
   /**
    * The name of the rollup object, if specified, e.g. `foo` in `export * as foo from './bar'`
    */
-  exportName?: string;
+  exportName: string | undefined;
 
   /**
    * If true, then this is a TypeScript type reexport, e.g. `export type * from './bar'`
    */
-  isTypeExport: boolean;
+  isTypeReexport: boolean;
 };
 
 export type BaseReexport = BaseSingleReexport | BaseBarrelReexport;
