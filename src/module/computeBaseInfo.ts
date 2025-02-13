@@ -139,7 +139,7 @@ function walkExportDestructure(
           type: 'export',
           filePath,
           statementNode,
-          specifierNode: node,
+          specifierNode: node.left,
           exportName: node.left.name,
         });
       }
@@ -207,6 +207,14 @@ function getIdentifierOrStringValue(
   return node.type === TSESTree.AST_NODE_TYPES.Identifier
     ? node.name
     : node.value;
+}
+
+function isDefault(
+  statementNode: ExportDeclaration
+): statementNode is TSESTree.ExportDefaultDeclaration {
+  return (
+    statementNode.type === TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration
+  );
 }
 
 function computeFileDetails({
@@ -337,6 +345,7 @@ function computeFileDetails({
       }
     },
 
+    // TODO: when we have a default export we'd ideally highlight the default token. Need to figure out how to do that
     exportDeclaration(statementNode) {
       // Check if this is export { foo }, which parses very different
       if ('specifiers' in statementNode && statementNode.specifiers.length) {
@@ -367,6 +376,7 @@ function computeFileDetails({
       // hurts readability
       switch (statementNode.declaration.type) {
         // export const ...
+        // Note, const exports can't be default
         case TSESTree.AST_NODE_TYPES.VariableDeclaration: {
           for (const declarationNode of statementNode.declaration
             .declarations) {
@@ -416,6 +426,84 @@ function computeFileDetails({
           break;
         }
 
+        // export interface Foo {} or export type Foo = string
+        case TSESTree.AST_NODE_TYPES.TSInterfaceDeclaration:
+        case TSESTree.AST_NODE_TYPES.TSTypeAliasDeclaration: {
+          fileDetails.exports.push({
+            type: 'export',
+            filePath,
+            statementNode,
+            specifierNode: statementNode.declaration.id,
+            exportName: isDefault(statementNode)
+              ? 'default'
+              : statementNode.declaration.id.name,
+          });
+          break;
+        }
+
+        // export function foo() {}
+        case TSESTree.AST_NODE_TYPES.FunctionDeclaration: {
+          if (isDefault(statementNode)) {
+            fileDetails.exports.push({
+              type: 'export',
+              filePath,
+              statementNode,
+              specifierNode: statementNode.declaration.id
+                ? statementNode.declaration.id
+                : statementNode,
+              exportName: 'default',
+            });
+          } else {
+            // TODO: I'm pretty certain that declaration id missing means that this is a function expression, which
+            // aren't allowed in export statements
+            if (!statementNode.declaration.id) {
+              throw new InternalError(`function id is unexpectedly missing`, {
+                filePath,
+                fileContents,
+                node: statementNode.declaration,
+              });
+            }
+            fileDetails.exports.push({
+              type: 'export',
+              filePath,
+              statementNode,
+              specifierNode: statementNode.declaration.id,
+              exportName: statementNode.declaration.id.name,
+            });
+          }
+
+          break;
+        }
+
+        // export class Foo {}
+        case TSESTree.AST_NODE_TYPES.ClassDeclaration: {
+          if (isDefault(statementNode)) {
+            fileDetails.exports.push({
+              type: 'export',
+              filePath,
+              statementNode,
+              specifierNode: statementNode.declaration.id
+                ? statementNode.declaration.id
+                : statementNode,
+              exportName: 'default',
+            });
+          } else {
+            if (!statementNode.declaration.id) {
+              throw new Error(
+                'Exporting non-default unnamed classes is not supported (e.g. `export class {}`)'
+              );
+            }
+            fileDetails.exports.push({
+              type: 'export',
+              filePath,
+              statementNode,
+              specifierNode: statementNode.declaration.id,
+              exportName: statementNode.declaration.id.name,
+            });
+          }
+          break;
+        }
+
         default: {
           // We don't use UnknownNodeTypeError here because this is typed as a general declaration, which includes a
           // bunch of statements that actual exports don't support (and would be a syntax error), such as:
@@ -431,6 +519,7 @@ function computeFileDetails({
         }
       }
     },
+
     reexportDeclaration(statementNode) {
       const moduleSpecifier = statementNode.source.value;
 

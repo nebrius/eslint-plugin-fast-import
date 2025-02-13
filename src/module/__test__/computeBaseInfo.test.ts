@@ -6,6 +6,7 @@ const TEST_PROJECT_DIR = join(__dirname, 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
+const FILE_D = join(TEST_PROJECT_DIR, 'd.ts');
 
 describe('computes base info', () => {
   it('does a thing', () => {
@@ -14,6 +15,16 @@ describe('computes base info', () => {
       files: {
         [FILE_A]: {
           exports: [
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'Foo',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'Bar',
+            },
             {
               type: 'export',
               filePath: FILE_A,
@@ -43,6 +54,21 @@ describe('computes base info', () => {
               type: 'export',
               filePath: FILE_A,
               exportName: 'a6',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'A7',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a8',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a9',
             },
             {
               type: 'export',
@@ -207,11 +233,23 @@ describe('computes base info', () => {
               moduleSpecifier: './a.js',
             },
           ],
-          exports: [],
+          exports: [
+            {
+              type: 'export',
+              filePath: FILE_B,
+              exportName: 'default',
+            },
+          ],
           reexports: [],
         },
         [FILE_C]: {
-          exports: [],
+          exports: [
+            {
+              type: 'export',
+              filePath: FILE_C,
+              exportName: 'default',
+            },
+          ],
           imports: [],
           reexports: [
             {
@@ -261,6 +299,18 @@ describe('computes base info', () => {
               type: 'singleReexport',
             },
           ],
+          type: 'esm',
+        },
+        [FILE_D]: {
+          exports: [
+            {
+              type: 'export',
+              filePath: FILE_D,
+              exportName: 'default',
+            },
+          ],
+          imports: [],
+          reexports: [],
           type: 'esm',
         },
       },
