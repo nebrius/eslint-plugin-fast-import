@@ -45,81 +45,153 @@ class UnknownNodeTypeError extends InternalError {
   }
 }
 
+// This helper walks export destructure, which is by far the most complicated part of parsing exports because
+// destructures can be destructured recursively, e.g. `export const [ [ { something } ] ] = [ [ { something: 10 } ] ]`
 function walkExportDestructure(
   filePath: string,
   fileContents: string,
   fileDetails: BaseCodeFileDetails,
   statementNode: ExportDeclaration,
-  node: TSESTree.ArrayPattern | TSESTree.ObjectPattern
+  node: TSESTree.DestructuringPattern
 ) {
-  // Check if this is an array destructure
-  if (node.type === TSESTree.AST_NODE_TYPES.ArrayPattern) {
-    for (const elementNode of node.elements) {
-      // First, check if this is an array hole, e.g. the second
-      // element in `[a, , b]`, and if so skip
-      if (!elementNode) {
-        continue;
+  switch (node.type) {
+    // export const [ foo, bar ] = []
+    case TSESTree.AST_NODE_TYPES.ArrayPattern: {
+      for (const elementNode of node.elements) {
+        // Check if this is an array hole, e.g. `[a, , b]`, and if so skip
+        if (elementNode) {
+          walkExportDestructure(
+            filePath,
+            fileContents,
+            fileDetails,
+            statementNode,
+            elementNode
+          );
+        }
       }
+      break;
+    }
 
-      // First check if we need to keep walking the destructure tree
-      if (
-        elementNode.type === TSESTree.AST_NODE_TYPES.ArrayPattern ||
-        elementNode.type === TSESTree.AST_NODE_TYPES.ObjectPattern
-      ) {
+    // export const { ... } = {}
+    case TSESTree.AST_NODE_TYPES.ObjectPattern: {
+      for (const propertyNode of node.properties) {
+        // First check if this is a spread, in which case we directly recurse on it
+        if (propertyNode.type === TSESTree.AST_NODE_TYPES.RestElement) {
+          walkExportDestructure(
+            filePath,
+            fileContents,
+            fileDetails,
+            statementNode,
+            propertyNode
+          );
+          continue;
+        }
+
+        // Otherwise, we need to introspect on what's going on here
+        switch (propertyNode.value.type) {
+          // export const { foo } = {}
+          case TSESTree.AST_NODE_TYPES.Identifier: {
+            fileDetails.exports.push({
+              type: 'export',
+              filePath,
+              statementNode,
+              specifierNode: propertyNode.value,
+              exportName: propertyNode.value.name,
+            });
+            break;
+          }
+
+          // Cases where we need to recurse
+          case TSESTree.AST_NODE_TYPES.ArrayPattern:
+          case TSESTree.AST_NODE_TYPES.ObjectPattern: {
+            walkExportDestructure(
+              filePath,
+              fileContents,
+              fileDetails,
+              statementNode,
+              propertyNode.value
+            );
+            break;
+          }
+
+          default: {
+            // We don't use UnknownNodeTypeError here because this is typed as a general property definition, which
+            // includes a bunch of statements that actual exports don't support (and would be a syntax error), such as:
+            // `export const { foo: doThing() }`
+            throw new InternalError(
+              `unsupported declaration type ${propertyNode.value.type}`,
+              {
+                filePath,
+                fileContents,
+                node: propertyNode.value,
+              }
+            );
+          }
+        }
+      }
+      break;
+    }
+
+    // export const [ foo = 10 ] = [ 10 ]
+    case TSESTree.AST_NODE_TYPES.AssignmentPattern: {
+      if (node.left.type === TSESTree.AST_NODE_TYPES.Identifier) {
+        fileDetails.exports.push({
+          type: 'export',
+          filePath,
+          statementNode,
+          specifierNode: node,
+          exportName: node.left.name,
+        });
+      }
+      // It's possible to do `export const [ { foo } = {} ]`
+      else {
         walkExportDestructure(
           filePath,
           fileContents,
           fileDetails,
           statementNode,
-          elementNode
+          node.left
         );
-        continue;
       }
-
-      // Otherwise we can get the name directly
-      switch (elementNode.type) {
-        // export const [ foo = 10 ] = [ 10 ]
-        case TSESTree.AST_NODE_TYPES.AssignmentPattern: {
-          throw new Error('Unimplemented');
-        }
-
-        // export const [ foo ] = [ 10 ]
-        case TSESTree.AST_NODE_TYPES.Identifier: {
-          fileDetails.exports.push({
-            type: 'export',
-            filePath,
-            statementNode,
-            specifierNode: elementNode,
-            exportName: elementNode.name,
-          });
-          break;
-        }
-
-        // AFAICT this isn't actually valid, since it would imply export const [ foo.bar ], but I'm not 100% certain.
-        // See: https://github.com/estree/estree/issues/162
-        case TSESTree.AST_NODE_TYPES.MemberExpression: {
-          throw new InternalError(
-            `unexpected member expression in array destructure`,
-            { filePath, fileContents, node: elementNode }
-          );
-        }
-
-        // export const [ ...foo ] = [ 10 ]
-        case TSESTree.AST_NODE_TYPES.RestElement: {
-          // Fun fact, did you know that `const [ ...[ foo, bar ] ]`
-          // and friends are actually valid?
-          throw new Error('Unimplemented');
-        }
-
-        default: {
-          throw new UnknownNodeTypeError(filePath, fileContents, elementNode);
-        }
-      }
+      break;
     }
-  }
-  // Otherwise it's an object destructure
-  else {
-    throw new Error('Unimplemented');
+
+    // export const [ foo ] = [ 10 ]
+    case TSESTree.AST_NODE_TYPES.Identifier: {
+      fileDetails.exports.push({
+        type: 'export',
+        filePath,
+        statementNode,
+        specifierNode: node,
+        exportName: node.name,
+      });
+      break;
+    }
+
+    // AFAICT this isn't actually valid, since it would imply export const { foo.bar }, but I'm not 100% certain.
+    // See: https://github.com/estree/estree/issues/162
+    case TSESTree.AST_NODE_TYPES.MemberExpression: {
+      throw new InternalError(
+        `unexpected member expression in array destructure`,
+        { filePath, fileContents, node: node }
+      );
+    }
+
+    // export const [ ... ]
+    case TSESTree.AST_NODE_TYPES.RestElement: {
+      walkExportDestructure(
+        filePath,
+        fileContents,
+        fileDetails,
+        statementNode,
+        node.argument
+      );
+      break;
+    }
+
+    default: {
+      throw new UnknownNodeTypeError(filePath, fileContents, node);
+    }
   }
 }
 

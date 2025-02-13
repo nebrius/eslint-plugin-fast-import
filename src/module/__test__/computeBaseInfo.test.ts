@@ -47,12 +47,32 @@ describe('computes base info', () => {
             {
               type: 'export',
               filePath: FILE_A,
+              exportName: 'a10_1',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a10_2alias',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a10_rest',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
               exportName: 'a11_1',
             },
             {
               type: 'export',
               filePath: FILE_A,
               exportName: 'a11_2',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a11_rest',
             },
             {
               type: 'export',
@@ -83,6 +103,21 @@ describe('computes base info', () => {
               type: 'export',
               filePath: FILE_A,
               exportName: 'default',
+            },
+            {
+              exportName: 'a18_1',
+              filePath: FILE_A,
+              type: 'export',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a18_2',
+            },
+            {
+              exportName: 'a18_3',
+              filePath: FILE_A,
+              type: 'export',
             },
           ],
           imports: [],

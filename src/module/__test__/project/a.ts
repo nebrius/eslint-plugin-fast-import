@@ -5,6 +5,10 @@
 
 export type Foo = string;
 
+export interface Bar {
+  baz: string;
+}
+
 export let a1 = 10, a2 = 10;
 export const a3 = 1, a4 = 2;
 export var a5 = 1, a6 = 2;
@@ -16,7 +20,6 @@ export function* a9() {}
 export const { a10_1, a10_2: a10_2alias, ...a10_rest } = { a10_1: 10, a10_2: 10, a10_3: 10, a10_4: 10 };
 export const [ a11_1, a11_2, ...a11_rest ] = [10, 10, 10, 10];
 
-// Export list
 const a12 = 10;
 export { a12 as 'a twelve' };
 
@@ -28,3 +31,5 @@ export { a15 as a15alias, a16 as a16alias };
 
 const a17 = 10;
 export { a17 as default };
+
+export const [ [a18_1], ...[{a18_2}, a18_3] ] = [ [10], {a18_2: 10}, 10 ];
