@@ -4,7 +4,7 @@ import { extname, join } from 'path';
 import type { ExportDeclaration } from './ast';
 import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
-import { AssertNeverError, InternalError } from '../util/error';
+import { InternalError } from '../util/error';
 
 const VALID_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
 
@@ -31,10 +31,9 @@ export function computeBaseInfo(basePath: string): BaseESMInfo {
   return info;
 }
 
-class UnknownNodeTypeError extends AssertNeverError {
+class UnknownNodeTypeError extends InternalError {
   constructor(filePath: string, fileContents: string, node: never) {
     super(
-      node,
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       `unknown AST node type ${(node as any).type}`,
       {
@@ -96,9 +95,8 @@ function walkExportDestructure(
           break;
         }
 
-        // AFAICT this isn't actually valid, since it would imply
-        // export const [ foo.bar ], but I'm not 100% certain. See:
-        // https://github.com/estree/estree/issues/162
+        // AFAICT this isn't actually valid, since it would imply export const [ foo.bar ], but I'm not 100% certain.
+        // See: https://github.com/estree/estree/issues/162
         case TSESTree.AST_NODE_TYPES.MemberExpression: {
           throw new InternalError(
             `unexpected member expression in array destructure`,
@@ -125,14 +123,12 @@ function walkExportDestructure(
   }
 }
 
-// Exports are almost always identifiers, but on rare occasions they
-// can actually be strings, such as in:
+// Exports are almost always identifiers, but on rare occasions they can actually be strings, such as in:
 //
 // const x = 10;
 // export { x as 'some string' };
 //
-// We actually don't care if the name is an identifier or string
-// though, so this function normalizes the value
+// We actually don't care if the name is an identifier or string though, so this function normalizes the value
 function getIdentifierOrStringValue(
   node: TSESTree.Identifier | TSESTree.StringLiteral
 ) {
@@ -162,9 +158,8 @@ function computeFileDetails({
     fileContents,
     ast,
     importDeclaration(statementNode) {
-      // First, get the module specifier, if present. It might be missing in the
-      // case of a dynamic import where the sourcefile value is computed, e.g.
-      // `await import('foo' + 'bar' + computeThing())`.
+      // First, get the module specifier, if present. It might be missing in the case of a dynamic import where the
+      // sourcefile value is computed, e.g. `await import('foo' + 'bar' + computeThing())`.
       const moduleSpecifier =
         statementNode.source.type === TSESTree.AST_NODE_TYPES.Literal
           ? (statementNode.source.value ?? undefined)
@@ -183,8 +178,8 @@ function computeFileDetails({
         );
       }
 
-      // We check if this is a dynamic import first, since it's the only type of
-      // import that may not have a string module specifier.
+      // We check if this is a dynamic import first, since it's the only type of import that may not have a string
+      // module specifier.
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
         fileDetails.imports.push({
           type: 'dynamicImport',
@@ -195,10 +190,9 @@ function computeFileDetails({
         return;
       }
 
-      // Now that we know this isn't a dynamic import, we can enforce that the
-      // module specifier is a string. In practice this should always be a
-      // string at this point, but we check to make TypeScript happy and just in
-      // case there's some edge case we missed.
+      // Now that we know this isn't a dynamic import, we can enforce that the module specifier is a string. In practice
+      // this should always be a string at this point, but we check to make TypeScript happy and just in case there's
+      // some edge case we missed.
       if (typeof moduleSpecifier !== 'string') {
         throw new InternalError(
           `import source ${String(moduleSpecifier)} is not a string`,
@@ -210,8 +204,8 @@ function computeFileDetails({
         );
       }
 
-      // Now loop through each specifier in the import statement and parse it.
-      // The specifier is `foo` in `import { foo } from './bar'`
+      // Now loop through each specifier in the import statement and parse it. The specifier is `foo` in:
+      // `import { foo } from './bar'`
       for (const specifierNode of statementNode.specifiers) {
         switch (specifierNode.type) {
           // import * as foo from 'bar';
@@ -286,8 +280,7 @@ function computeFileDetails({
         return;
       }
 
-      // TODO: Why would the declaration be undefined? Need to figure this out
-      // and support whatever this edge case is
+      // TODO: Why would the declaration be undefined? Need to figure this out and support whatever this edge case is
       if (!statementNode.declaration) {
         throw new InternalError(`export declaration is undefined`, {
           filePath,
@@ -296,11 +289,10 @@ function computeFileDetails({
         });
       }
 
-      // If we got here we have a single export where we have to introspect the
-      // declaration type to figure out what the name is. Note: we still want
-      // to find the name in the case of default exports so that we can set
-      // `specifierNode` to the name. Otherwise, when we highlight a lint error,
-      // we would highlight entire classes/functions, which hurts readability
+      // If we got here we have a single export where we have to introspect the declaration type to figure out what the
+      // name is. Note: we still want to find the name in the case of default exports so that we can set `specifierNode`
+      // to the name. Otherwise, when we highlight a lint error, we would highlight entire classes/functions, which
+      // hurts readability
       switch (statementNode.declaration.type) {
         // export const ...
         case TSESTree.AST_NODE_TYPES.VariableDeclaration: {
@@ -353,9 +345,8 @@ function computeFileDetails({
         }
 
         default: {
-          // We don't use UnknownNodeTypeError here because this is typed as a
-          // general declaration, which includes a bunch of statements that
-          // actual exports don't support (and would be a syntax error), such as
+          // We don't use UnknownNodeTypeError here because this is typed as a general declaration, which includes a
+          // bunch of statements that actual exports don't support (and would be a syntax error), such as:
           // `export import { foo } from 'bar'`
           throw new InternalError(
             `unsupported declaration type ${statementNode.declaration.type}`,

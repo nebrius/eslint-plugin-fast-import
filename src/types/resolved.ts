@@ -20,10 +20,12 @@ type Resolved =
       type: 'firstPartyCode';
 
       /**
-       * The absolute path of the file that the import/reexport points to. For
-       * the statement in a file at `/Users/bryan/myProject/src/foo.ts`:
+       * The absolute path of the file that the import/reexport points to. For the statement in a file at
+       * `/Users/bryan/myProject/src/foo.ts`:
        *
+       * ```
        * import { bar } from './bar';
+       * ```
        *
        * then `resolvedModulePath` is `/Users/bryan/myProject/src/bar/index.ts`
        */
@@ -33,10 +35,12 @@ type Resolved =
       type: 'firstPartyOther';
 
       /**
-       * The absolute path of the file that the import/reexport points to. For
-       * the statement in a file at `/Users/bryan/myProject/src/foo.ts`:
+       * The absolute path of the file that the import/reexport points to. For the statement in a file at
+       * `/Users/bryan/myProject/src/foo.ts`:
        *
+       * ```
        * import { bar } from './bar';
+       * ```
        *
        * then `resolvedModulePath` is `/Users/bryan/myProject/src/bar/index.ts`
        */

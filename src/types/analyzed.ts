@@ -11,8 +11,8 @@ import type {
 
 type AnalyzedImportBase = {
   /**
-   * The absolute path of the file with the export that the import/reexport
-   * statement ultimately resolves to. In other words, if we have:
+   * The absolute path of the file with the export that the import/reexport statement ultimately resolves to. In other
+   * words, if we have:
    *
    * ```
    * // foo.ts
@@ -25,8 +25,8 @@ type AnalyzedImportBase = {
    * export const baz = 10;
    * ```
    *
-   * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with
-   * `resolvedModulePath` which equals `/path/to/bar.ts`
+   * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
+   * `/path/to/bar.ts`
    */
   rootModulePath: string | undefined;
 
@@ -38,22 +38,20 @@ type AnalyzedImportBase = {
 
 type AnalyzedExportBase = {
   /**
-   * A list of files that imports this export, including indirect imports that
-   * are funneled through reexport statements
+   * A list of files that imports this export, including indirect imports that are funneled through reexport statements
    */
   importedByFiles: string[];
 
   /**
-   * A list of files that reexport this import, including indirect reexports
-   * that themselves reexport a reexport
+   * A list of files that reexport this import, including indirect reexports that themselves reexport a reexport
    */
   reexportedByFiles: string[];
 };
 
 /* Imports */
 
-// Note: barrel and dynamic imports can't be resolved to a single file, since
-// they bundle up multiple exports that could resolve to different files
+// Note: barrel and dynamic imports can't be resolved to a single file, since they bundle up multiple exports that could
+// resolve to different files
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
 export type AnalyzedBarrelImport = ResolvedBarrelImport;
 export type AnalyzedDynamicImport = ResolvedDynamicImport;
