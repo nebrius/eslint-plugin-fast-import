@@ -3,7 +3,7 @@ import * as barrel1 from './a';
 import { a1 } from './a';
 import { a1 as a1Alias } from './a';
 import { default as defaultAlias } from './a';
-import { 'a three' as stringAlias } from './a';
+import { 'a twelve' as stringAlias } from './a';
 import defaultExport2, { a1 as a1WithDefault } from './a';
 import defaultExport3, * as barrel2 from './a';
 import './a';

@@ -78,8 +78,17 @@ export type BaseImport =
 
 export type BaseExport = Base & {
   type: 'export';
-  name: string; // Default exports are represented by the string "default"
-  isTypeExport: boolean;
+
+  /**
+   * What we're export, e.g. `foo` in `export const foo = 10;`
+   */
+  exportName: string; // Default exports are represented by the string "default"
+
+  /**
+   * The original AST node in ESTree format for the specifier in the statement,
+   * e.g. the AST node for `foo as bar` in `import { foo as bar } from './bar`
+   */
+  specifierNode: TSESTree.Node;
 };
 
 /* Reexports */

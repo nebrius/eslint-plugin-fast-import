@@ -40,6 +40,10 @@ export function stripNodes(info: BaseESMInfo) {
         delete reexportDetails.specifierNode;
       }
     }
+    for (const exportDetails of fileDetails.exports) {
+      delete exportDetails.statementNode;
+      delete exportDetails.specifierNode;
+    }
   }
   return clonedInfo;
 }

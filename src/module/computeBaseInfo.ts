@@ -1,9 +1,10 @@
-import type { BaseESMInfo, BaseFileDetails } from '@/types/base';
+import type { BaseCodeFileDetails, BaseESMInfo } from '../types/base';
 import { readdirSync } from 'fs';
 import { extname, join } from 'path';
+import type { ExportDeclaration } from './ast';
 import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
-import { InternalError } from '../util/error';
+import { AssertNeverError, InternalError } from '../util/error';
 
 const VALID_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
 
@@ -29,6 +30,101 @@ export function computeBaseInfo(basePath: string): BaseESMInfo {
 
   return info;
 }
+
+class UnknownNodeTypeError extends AssertNeverError {
+  constructor(filePath: string, fileContents: string, node: never) {
+    super(
+      node,
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      `unknown AST node type ${(node as any).type}`,
+      {
+        filePath,
+        fileContents,
+        node,
+      }
+    );
+  }
+}
+
+function walkExportDestructure(
+  filePath: string,
+  fileContents: string,
+  fileDetails: BaseCodeFileDetails,
+  statementNode: ExportDeclaration,
+  node: TSESTree.ArrayPattern | TSESTree.ObjectPattern
+) {
+  // Check if this is an array destructure
+  if (node.type === TSESTree.AST_NODE_TYPES.ArrayPattern) {
+    for (const elementNode of node.elements) {
+      // First, check if this is an array hole, e.g. the second
+      // element in `[a, , b]`, and if so skip
+      if (!elementNode) {
+        continue;
+      }
+
+      // First check if we need to keep walking the destructure tree
+      if (
+        elementNode.type === TSESTree.AST_NODE_TYPES.ArrayPattern ||
+        elementNode.type === TSESTree.AST_NODE_TYPES.ObjectPattern
+      ) {
+        walkExportDestructure(
+          filePath,
+          fileContents,
+          fileDetails,
+          statementNode,
+          elementNode
+        );
+        continue;
+      }
+
+      // Otherwise we can get the name directly
+      switch (elementNode.type) {
+        // export const [ foo = 10 ] = [ 10 ]
+        case TSESTree.AST_NODE_TYPES.AssignmentPattern: {
+          throw new Error('Unimplemented');
+        }
+
+        // export const [ foo ] = [ 10 ]
+        case TSESTree.AST_NODE_TYPES.Identifier: {
+          fileDetails.exports.push({
+            type: 'export',
+            filePath,
+            statementNode,
+            specifierNode: elementNode,
+            exportName: elementNode.name,
+          });
+          break;
+        }
+
+        // AFAICT this isn't actually valid, since it would imply
+        // export const [ foo.bar ], but I'm not 100% certain. See:
+        // https://github.com/estree/estree/issues/162
+        case TSESTree.AST_NODE_TYPES.MemberExpression: {
+          throw new InternalError(
+            `unexpected member expression in array destructure`,
+            { filePath, fileContents, node: elementNode }
+          );
+        }
+
+        // export const [ ...foo ] = [ 10 ]
+        case TSESTree.AST_NODE_TYPES.RestElement: {
+          // Fun fact, did you know that `const [ ...[ foo, bar ] ]`
+          // and friends are actually valid?
+          throw new Error('Unimplemented');
+        }
+
+        default: {
+          throw new UnknownNodeTypeError(filePath, fileContents, elementNode);
+        }
+      }
+    }
+  }
+  // Otherwise it's an object destructure
+  else {
+    throw new Error('Unimplemented');
+  }
+}
+
 // Exports are almost always identifiers, but on rare occasions they
 // can actually be strings, such as in:
 //
@@ -53,13 +149,14 @@ function computeFileDetails({
   filePath: string;
   fileContents: string;
   ast: TSESTree.Program;
-}): BaseFileDetails {
-  const fileDetails: BaseFileDetails = {
+}): BaseCodeFileDetails {
+  const fileDetails: BaseCodeFileDetails = {
     type: 'esm',
     imports: [],
     exports: [],
     reexports: [],
   };
+
   traverse({
     filePath,
     fileContents,
@@ -164,21 +261,117 @@ function computeFileDetails({
 
           // This shouldn't happen, but is here just in case
           default: {
-            throw new InternalError(
-              `unknown import specifier type ${statementNode.type}`,
-              { filePath, fileContents, node: statementNode }
+            throw new UnknownNodeTypeError(
+              filePath,
+              fileContents,
+              specifierNode
             );
           }
         }
       }
     },
-    exportDeclaration() {
-      //
+
+    exportDeclaration(statementNode) {
+      // Check if this is export { foo }, which parses very different
+      if ('specifiers' in statementNode && statementNode.specifiers.length) {
+        for (const specifierNode of statementNode.specifiers) {
+          fileDetails.exports.push({
+            type: 'export',
+            filePath,
+            statementNode,
+            specifierNode: specifierNode.exported,
+            exportName: getIdentifierOrStringValue(specifierNode.exported),
+          });
+        }
+        return;
+      }
+
+      // TODO: Why would the declaration be undefined? Need to figure this out
+      // and support whatever this edge case is
+      if (!statementNode.declaration) {
+        throw new InternalError(`export declaration is undefined`, {
+          filePath,
+          fileContents,
+          node: statementNode,
+        });
+      }
+
+      // If we got here we have a single export where we have to introspect the
+      // declaration type to figure out what the name is. Note: we still want
+      // to find the name in the case of default exports so that we can set
+      // `specifierNode` to the name. Otherwise, when we highlight a lint error,
+      // we would highlight entire classes/functions, which hurts readability
+      switch (statementNode.declaration.type) {
+        // export const ...
+        case TSESTree.AST_NODE_TYPES.VariableDeclaration: {
+          for (const declarationNode of statementNode.declaration
+            .declarations) {
+            switch (declarationNode.id.type) {
+              // export const foo = 10;
+              case TSESTree.AST_NODE_TYPES.Identifier: {
+                fileDetails.exports.push({
+                  type: 'export',
+                  filePath,
+                  statementNode,
+                  specifierNode: declarationNode.id,
+                  exportName: declarationNode.id.name,
+                });
+                break;
+              }
+              // export const [foo, bar] = [10, 10]
+              case TSESTree.AST_NODE_TYPES.ArrayPattern: {
+                walkExportDestructure(
+                  filePath,
+                  fileContents,
+                  fileDetails,
+                  statementNode,
+                  declarationNode.id
+                );
+                break;
+              }
+              // export const { foo, bar } = { foo: 10, bar: 10 }
+              case TSESTree.AST_NODE_TYPES.ObjectPattern: {
+                walkExportDestructure(
+                  filePath,
+                  fileContents,
+                  fileDetails,
+                  statementNode,
+                  declarationNode.id
+                );
+                break;
+              }
+              default: {
+                throw new UnknownNodeTypeError(
+                  filePath,
+                  fileContents,
+                  declarationNode.id
+                );
+              }
+            }
+          }
+          break;
+        }
+
+        default: {
+          // We don't use UnknownNodeTypeError here because this is typed as a
+          // general declaration, which includes a bunch of statements that
+          // actual exports don't support (and would be a syntax error), such as
+          // `export import { foo } from 'bar'`
+          throw new InternalError(
+            `unsupported declaration type ${statementNode.declaration.type}`,
+            {
+              filePath,
+              fileContents,
+              node: statementNode.declaration,
+            }
+          );
+        }
+      }
     },
     reexportDeclaration(statementNode) {
       const moduleSpecifier = statementNode.source.value;
 
-      // Check if this is a barrel reexport, and if so save it
+      // Check if this is a barrel reexport
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
         fileDetails.reexports.push({
           type: 'barrelReexport',
@@ -191,7 +384,7 @@ function computeFileDetails({
         return;
       }
 
-      // Otherwise, this is a single reexport, so we iterate through export specifiers
+      // Otherwise, this is a single reexport, so we iterate through each specifier
       for (const specifierNode of statementNode.specifiers) {
         fileDetails.reexports.push({
           type: 'singleReexport',

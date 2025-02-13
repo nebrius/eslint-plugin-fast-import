@@ -13,7 +13,78 @@ describe('computes base info', () => {
     expect(stripNodes(info)).toEqual({
       files: {
         [FILE_A]: {
-          exports: [],
+          exports: [
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a1',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a2',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a3',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a4',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a5',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a6',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a11_1',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a11_2',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a twelve',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a13',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a14',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a15alias',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'a16alias',
+            },
+            {
+              type: 'export',
+              filePath: FILE_A,
+              exportName: 'default',
+            },
+          ],
           imports: [],
           reexports: [],
           type: 'esm',
@@ -62,7 +133,7 @@ describe('computes base info', () => {
               type: 'singleImport',
               filePath: FILE_B,
               moduleSpecifier: './a',
-              importName: 'a three',
+              importName: 'a twelve',
               importAlias: 'stringAlias',
               isTypeImport: false,
             },
