@@ -231,7 +231,7 @@ export type BaseCodeFileDetails = {
 
 export type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;
 
-export type BaseESMInfo = {
+export type BaseProjectInfo = {
   /**
    * Mapping of _absolute_ file paths to file details
    */

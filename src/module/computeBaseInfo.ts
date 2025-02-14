@@ -1,4 +1,4 @@
-import type { BaseCodeFileDetails, BaseESMInfo } from '../types/base';
+import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base';
 import { readdirSync } from 'fs';
 import { extname, join } from 'path';
 import type { ExportDeclaration } from './ast';
@@ -11,8 +11,8 @@ const VALID_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
 /**
  * Computes base ESM info for all source files recursively found in basePath
  */
-export function computeBaseInfo(basePath: string): BaseESMInfo {
-  const info: BaseESMInfo = {
+export function computeBaseInfo(basePath: string): BaseProjectInfo {
+  const info: BaseProjectInfo = {
     files: {},
   };
 

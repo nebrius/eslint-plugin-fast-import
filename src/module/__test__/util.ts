@@ -1,5 +1,5 @@
 import type {
-  BaseESMInfo,
+  BaseProjectInfo,
   BaseExport,
   BaseImport,
   BaseOtherFileDetails,
@@ -22,7 +22,7 @@ type PartialBaseESMInfo = {
 // ESM info includes the original AST node for use easy use correlating code
 // together, but they're really difficult to represent in tests and unimportant.
 // This utility strips them out for easier testing.
-export function stripNodes(info: BaseESMInfo) {
+export function stripNodes(info: BaseProjectInfo) {
   const clonedInfo = { ...info } as PartialBaseESMInfo;
   for (const fileDetails of Object.values(clonedInfo.files)) {
     if (fileDetails.type !== 'esm') {

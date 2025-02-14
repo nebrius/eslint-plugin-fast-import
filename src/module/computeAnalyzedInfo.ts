@@ -1,6 +1,6 @@
-import type { AnalyzedESMInfo } from '@/types/analyzed';
+import type { AnalyzedProjectInfo } from '@/types/analyzed';
 
-export function computeAnalyzed(): AnalyzedESMInfo {
+export function computeAnalyzedInfo(): AnalyzedProjectInfo {
   return {
     files: {},
   };
