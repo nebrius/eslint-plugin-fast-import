@@ -299,10 +299,7 @@ function resolveModuleSpecifier({
     moduleSpecifier.startsWith(`${baseInfo.rootImportAlias}/`)
   ) {
     const resolvedModulePath = resolveFirstPartyImport(
-      join(
-        baseInfo.sourceRoot,
-        moduleSpecifier.replace(`${baseInfo.rootImportAlias}/`, '')
-      )
+      join(moduleSpecifier.replace(`${baseInfo.rootImportAlias}/`, ''))
     );
     return formatResolvedEntry(resolvedModulePath);
   }

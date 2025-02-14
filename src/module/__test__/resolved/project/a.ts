@@ -1,5 +1,7 @@
-import { b1 } from './one/b';
-import { c1 } from './one/c';
+/* @ts-expect-error this isn't configured in tsconfig, but works in this project */
+import { b1 } from '@/one/b';
+/* @ts-expect-error this isn't configured in tsconfig, but works in this project */
+import { c1 } from 'one/c';
 /* @ts-expect-error this is allowed in Webpack et al, but not in pure TS projects */
 import data from './one/c/data';
 import type { D2 } from './two/d';

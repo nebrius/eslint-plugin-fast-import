@@ -35,7 +35,7 @@ describe('computes base info', () => {
             {
               type: 'singleImport',
               filePath: FILE_A,
-              moduleSpecifier: './one/b',
+              moduleSpecifier: '@/one/b',
               importName: 'b1',
               importAlias: 'b1',
               isTypeImport: false,
@@ -47,7 +47,7 @@ describe('computes base info', () => {
               importAlias: 'c1',
               importName: 'c1',
               isTypeImport: false,
-              moduleSpecifier: './one/c',
+              moduleSpecifier: 'one/c',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_C,
               type: 'singleImport',
