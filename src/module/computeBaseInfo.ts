@@ -45,7 +45,7 @@ export function computeBaseInfo({
 
   for (const potentialFilePath of potentialFiles) {
     const filePath = join(sourceRoot, potentialFilePath);
-    if (isCodeFile(potentialFilePath)) {
+    if (isCodeFile(filePath)) {
       info.files[filePath] = computeFileDetails(parseFile(filePath));
     } else if (!statSync(filePath).isDirectory()) {
       info.files[filePath] = {
@@ -468,6 +468,7 @@ function computeFileDetails({
         }
 
         // export function foo() {}
+        case TSESTree.AST_NODE_TYPES.TSDeclareFunction:
         case TSESTree.AST_NODE_TYPES.FunctionDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({

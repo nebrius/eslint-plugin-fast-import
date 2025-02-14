@@ -15,6 +15,7 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "incremental": true,
+    "allowJs": true,
     "paths": {
       "@/*": [
         "./src/*"
