@@ -1,17 +1,25 @@
 import { join } from 'path';
-import { computeBaseInfo } from '../computeBaseInfo';
-import { stripNodes } from './util';
+import { computeBaseInfo } from '../../computeBaseInfo';
+import { stripNodes } from '../util';
 
 const TEST_PROJECT_DIR = join(__dirname, 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
 const FILE_D = join(TEST_PROJECT_DIR, 'd.ts');
+const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 
 describe('computes base info', () => {
   it('does a thing', () => {
-    const info = computeBaseInfo(TEST_PROJECT_DIR);
+    const info = computeBaseInfo({
+      sourceRoot: TEST_PROJECT_DIR,
+      rootImportAlias: '@',
+      allowAliaslessRootImports: false,
+    });
     expect(stripNodes(info)).toEqual({
+      rootImportAlias: '@',
+      sourceRoot: TEST_PROJECT_DIR,
+      allowAliaslessRootImports: false,
       files: {
         [FILE_A]: {
           exports: [
@@ -312,6 +320,9 @@ describe('computes base info', () => {
           imports: [],
           reexports: [],
           type: 'esm',
+        },
+        [FILE_E]: {
+          type: 'other',
         },
       },
     });

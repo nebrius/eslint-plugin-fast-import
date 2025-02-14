@@ -5,19 +5,20 @@ import type {
   BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
+  BaseProjectInfo,
   BaseSingleImport,
   BaseSingleReexport,
 } from './base';
 
-type Resolved =
+export type Resolved =
   | {
-      type: 'builtin';
+      moduleType: 'builtin';
     }
   | {
-      type: 'thirdParty';
+      moduleType: 'thirdParty';
     }
   | {
-      type: 'firstPartyCode';
+      moduleType: 'firstPartyCode';
 
       /**
        * The absolute path of the file that the import/reexport points to. For the statement in a file at
@@ -32,7 +33,7 @@ type Resolved =
       resolvedModulePath: string;
     }
   | {
-      type: 'firstPartyOther';
+      moduleType: 'firstPartyOther';
 
       /**
        * The absolute path of the file that the import/reexport points to. For the statement in a file at
@@ -81,7 +82,9 @@ export type ResolvedFileDetails =
   | ResolvedOtherFileDetails
   | ResolvedCodeFileDetails;
 
-export type ResolvedProjectInfo = {
-  // Mapping of absolute filePath to file details
+export type ResolvedProjectInfo = BaseProjectInfo & {
+  /**
+   * Mapping of _absolute_ file paths to file details
+   */
   files: Record<string, ResolvedFileDetails>;
 };

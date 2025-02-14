@@ -1,30 +1,56 @@
 import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base';
-import { readdirSync } from 'fs';
-import { extname, join } from 'path';
+import { readdirSync, statSync } from 'fs';
+import { isAbsolute, join } from 'path';
 import type { ExportDeclaration } from './ast';
 import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
+import { isCodeFile } from '../util/code';
 
-const VALID_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx'];
+type ComputeBaseInfoOptions = {
+  sourceRoot: string;
+  rootImportAlias: string | undefined;
+  allowAliaslessRootImports: boolean;
+};
 
 /**
  * Computes base ESM info for all source files recursively found in basePath
  */
-export function computeBaseInfo(basePath: string): BaseProjectInfo {
+export function computeBaseInfo({
+  sourceRoot,
+  rootImportAlias,
+  allowAliaslessRootImports,
+}: ComputeBaseInfoOptions): BaseProjectInfo {
+  // Trim off the end `/` in case it was supplied
+  if (sourceRoot.endsWith('/')) {
+    sourceRoot = sourceRoot.substring(0, sourceRoot.length - 1);
+  }
+
+  // Make sure sourceRoot is absolute
+  if (!isAbsolute(sourceRoot)) {
+    throw new Error(`sourceRoot "${sourceRoot}" must be absolute`);
+  }
+
   const info: BaseProjectInfo = {
     files: {},
+    sourceRoot,
+    rootImportAlias,
+    allowAliaslessRootImports,
   };
 
-  const potentialFiles = readdirSync(basePath, {
+  const potentialFiles = readdirSync(sourceRoot, {
     recursive: true,
     encoding: 'utf-8',
   });
 
   for (const potentialFilePath of potentialFiles) {
-    if (VALID_EXTENSIONS.includes(extname(potentialFilePath))) {
-      const filePath = join(basePath, potentialFilePath);
+    const filePath = join(sourceRoot, potentialFilePath);
+    if (isCodeFile(potentialFilePath)) {
       info.files[filePath] = computeFileDetails(parseFile(filePath));
+    } else if (!statSync(filePath).isDirectory()) {
+      info.files[filePath] = {
+        type: 'other',
+      };
     }
   }
 

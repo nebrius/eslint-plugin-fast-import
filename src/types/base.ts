@@ -236,4 +236,21 @@ export type BaseProjectInfo = {
    * Mapping of _absolute_ file paths to file details
    */
   files: Record<string, BaseFileDetails>;
+
+  /**
+   * The root path of source code in the project
+   */
+  sourceRoot: string;
+
+  /**
+   * If defined, an alias for referencing first party imports absolutely. For example, Next.js defaults to `@`, meaning
+   * a file at `src/components/foo` can be imported anywhere with `@/components/foo`
+   */
+  rootImportAlias: string | undefined;
+
+  /**
+   * If true, allows using absolute import paths without using a root alias. For example, given a file at
+   * `src/components/foo`, we can import it anywhere with `components/foo`
+   */
+  allowAliaslessRootImports: boolean;
 };

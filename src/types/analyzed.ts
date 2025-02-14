@@ -5,6 +5,7 @@ import type {
   ResolvedDynamicImport,
   ResolvedExport,
   ResolvedOtherFileDetails,
+  ResolvedProjectInfo,
   ResolvedSingleImport,
   ResolvedSingleReexport,
 } from './resolved';
@@ -85,7 +86,9 @@ export type AnalyzedFileDetails =
   | AnalyzedOtherFileDetails
   | AnalyzedCodeFileDetails;
 
-export type AnalyzedProjectInfo = {
-  // Mapping of absolute filePath to file details
+export type AnalyzedProjectInfo = ResolvedProjectInfo & {
+  /**
+   * Mapping of _absolute_ file paths to file details
+   */
   files: Record<string, AnalyzedFileDetails>;
 };
