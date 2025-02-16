@@ -25,139 +25,145 @@ describe('computes base info', () => {
     );
 
     expect(stripNodes(info)).toEqual({
-      sourceRoot: TEST_PROJECT_DIR,
-      rootImportAlias: '@',
       allowAliaslessRootImports: true,
       files: {
         [FILE_A]: {
+          exports: [],
           fileType: 'code',
           imports: [
             {
-              importType: 'single',
-              moduleSpecifier: '@/one/b',
-              importName: 'b1',
               importAlias: 'b1',
+              importName: 'b1',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: '@/one/b',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_B,
             },
             {
               importAlias: 'c1',
               importName: 'c1',
+              importType: 'single',
               isTypeImport: false,
               moduleSpecifier: 'one/c',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_C,
-              importType: 'single',
             },
             {
               importAlias: 'data',
               importName: 'default',
+              importType: 'single',
               isTypeImport: false,
               moduleSpecifier: './one/c/data',
               moduleType: 'firstPartyOther',
               resolvedModulePath: FILE_C_DATA,
-              importType: 'single',
             },
             {
-              importType: 'single',
-              moduleSpecifier: './two/d',
-              importName: 'D2',
               importAlias: 'D2',
+              importName: 'D2',
+              importType: 'single',
               isTypeImport: true,
+              moduleSpecifier: './two/d',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_D_DECLARATION,
             },
             {
-              importType: 'single',
-              moduleSpecifier: './two/d',
-              importName: 'getD1',
               importAlias: 'getD1',
+              importName: 'getD1',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './two/d',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_D,
             },
             {
-              importType: 'single',
-              moduleSpecifier: './two/e',
-              importName: 'e1',
               importAlias: 'e1',
+              importName: 'e1',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './two/e',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_E,
             },
             {
-              importType: 'single',
-              moduleSpecifier: './two/f',
-              importName: 'F1',
               importAlias: 'F1',
+              importName: 'F1',
+              importType: 'single',
               isTypeImport: true,
+              moduleSpecifier: './two/f',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_F_DECLARATION,
             },
             {
-              importType: 'single',
-              moduleSpecifier: './two/f',
-              importName: 'getF1',
               importAlias: 'getF1',
+              importName: 'getF1',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './two/f',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_F,
             },
             {
               importAlias: 'join',
               importName: 'join',
+              importType: 'single',
               isTypeImport: false,
               moduleSpecifier: 'path',
               moduleType: 'builtin',
-              importType: 'single',
             },
             {
               importAlias: 'resolve',
               importName: 'resolve',
+              importType: 'single',
               isTypeImport: false,
               moduleSpecifier: 'node:path',
               moduleType: 'builtin',
-              importType: 'single',
             },
             {
               importAlias: 'parser',
               importName: 'parser',
+              importType: 'single',
               isTypeImport: false,
               moduleSpecifier: 'typescript-eslint',
               moduleType: 'thirdParty',
-              importType: 'single',
             },
           ],
-          exports: [],
           reexports: [],
         },
         [FILE_B]: {
-          fileType: 'code',
-          imports: [],
           exports: [
             {
               exportName: 'b1',
             },
           ],
+          fileType: 'code',
+          imports: [],
           reexports: [],
         },
         [FILE_C]: {
-          fileType: 'code',
-          imports: [],
           exports: [
             {
               exportName: 'c1',
             },
           ],
+          fileType: 'code',
+          imports: [],
           reexports: [],
         },
         [FILE_C_DATA]: {
           fileType: 'other',
         },
-        [FILE_D_DECLARATION]: {
+        [FILE_D]: {
+          exports: [
+            {
+              exportName: 'getD1',
+            },
+          ],
           fileType: 'code',
           imports: [],
+          reexports: [],
+        },
+        [FILE_D_DECLARATION]: {
           exports: [
             {
               exportName: 'getD1',
@@ -166,31 +172,31 @@ describe('computes base info', () => {
               exportName: 'D2',
             },
           ],
-          reexports: [],
-        },
-        [FILE_D]: {
           fileType: 'code',
           imports: [],
-          exports: [
-            {
-              exportName: 'getD1',
-            },
-          ],
           reexports: [],
         },
         [FILE_E]: {
-          fileType: 'code',
-          imports: [],
           exports: [
             {
               exportName: 'e1',
             },
           ],
+          fileType: 'code',
+          imports: [],
+          reexports: [],
+        },
+        [FILE_F]: {
+          exports: [
+            {
+              exportName: 'getF1',
+            },
+          ],
+          fileType: 'code',
+          imports: [],
           reexports: [],
         },
         [FILE_F_DECLARATION]: {
-          fileType: 'code',
-          imports: [],
           exports: [
             {
               exportName: 'F1',
@@ -199,19 +205,13 @@ describe('computes base info', () => {
               exportName: 'getF1',
             },
           ],
-          reexports: [],
-        },
-        [FILE_F]: {
           fileType: 'code',
           imports: [],
-          exports: [
-            {
-              exportName: 'getF1',
-            },
-          ],
           reexports: [],
         },
       },
+      rootImportAlias: '@',
+      sourceRoot: TEST_PROJECT_DIR,
     });
   });
 });

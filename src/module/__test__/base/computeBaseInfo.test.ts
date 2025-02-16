@@ -17,8 +17,6 @@ describe('computes base info', () => {
       allowAliaslessRootImports: false,
     });
     expect(stripNodes(info)).toEqual({
-      rootImportAlias: '@',
-      sourceRoot: TEST_PROJECT_DIR,
       allowAliaslessRootImports: false,
       files: {
         [FILE_A]: {
@@ -102,72 +100,77 @@ describe('computes base info', () => {
               exportName: 'a18_3',
             },
           ],
+          fileType: 'code',
           imports: [],
           reexports: [],
-          fileType: 'code',
         },
         [FILE_B]: {
+          exports: [
+            {
+              exportName: 'default',
+            },
+          ],
           fileType: 'code',
           imports: [
             {
-              importType: 'single',
-              moduleSpecifier: './a',
-              importName: 'default',
               importAlias: 'defaultExport1',
+              importName: 'default',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './a',
             },
             {
               importType: 'barrel',
               moduleSpecifier: './a',
             },
             {
-              importType: 'single',
-              moduleSpecifier: './a',
-              importName: 'a1',
               importAlias: 'a1',
+              importName: 'a1',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './a',
             },
             {
-              importType: 'single',
-              moduleSpecifier: './a',
-              importName: 'a1',
               importAlias: 'a1Alias',
-              isTypeImport: false,
-            },
-            {
-              importType: 'single',
-              moduleSpecifier: './a',
-              importName: 'default',
-              importAlias: 'defaultAlias',
-              isTypeImport: false,
-            },
-            {
-              importType: 'single',
-              moduleSpecifier: './a',
-              importName: 'a twelve',
-              importAlias: 'stringAlias',
-              isTypeImport: false,
-            },
-            {
-              importType: 'single',
-              moduleSpecifier: './a',
-              importName: 'default',
-              importAlias: 'defaultExport2',
-              isTypeImport: false,
-            },
-            {
-              importType: 'single',
-              moduleSpecifier: './a',
               importName: 'a1',
-              importAlias: 'a1WithDefault',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './a',
             },
             {
-              importType: 'single',
-              moduleSpecifier: './a',
+              importAlias: 'defaultAlias',
               importName: 'default',
-              importAlias: 'defaultExport3',
+              importType: 'single',
               isTypeImport: false,
+              moduleSpecifier: './a',
+            },
+            {
+              importAlias: 'stringAlias',
+              importName: 'a twelve',
+              importType: 'single',
+              isTypeImport: false,
+              moduleSpecifier: './a',
+            },
+            {
+              importAlias: 'defaultExport2',
+              importName: 'default',
+              importType: 'single',
+              isTypeImport: false,
+              moduleSpecifier: './a',
+            },
+            {
+              importAlias: 'a1WithDefault',
+              importName: 'a1',
+              importType: 'single',
+              isTypeImport: false,
+              moduleSpecifier: './a',
+            },
+            {
+              importAlias: 'defaultExport3',
+              importName: 'default',
+              importType: 'single',
+              isTypeImport: false,
+              moduleSpecifier: './a',
             },
             {
               importType: 'barrel',
@@ -178,11 +181,6 @@ describe('computes base info', () => {
               moduleSpecifier: './a.js',
             },
           ],
-          exports: [
-            {
-              exportName: 'default',
-            },
-          ],
           reexports: [],
         },
         [FILE_C]: {
@@ -191,14 +189,15 @@ describe('computes base info', () => {
               exportName: 'default',
             },
           ],
+          fileType: 'code',
           imports: [],
           reexports: [
             {
-              reexportType: 'single',
-              moduleSpecifier: './a',
-              importName: 'a1',
               exportName: 'a1',
+              importName: 'a1',
               isTypeReexport: false,
+              moduleSpecifier: './a',
+              reexportType: 'single',
             },
             {
               exportName: undefined,
@@ -207,17 +206,17 @@ describe('computes base info', () => {
               reexportType: 'barrel',
             },
             {
-              reexportType: 'barrel',
-              moduleSpecifier: './a',
               exportName: 'c',
               isTypeReexport: false,
+              moduleSpecifier: './a',
+              reexportType: 'barrel',
             },
             {
-              reexportType: 'single',
-              moduleSpecifier: './a',
-              importName: 'default',
               exportName: 'c1',
+              importName: 'default',
               isTypeReexport: false,
+              moduleSpecifier: './a',
+              reexportType: 'single',
             },
             {
               exportName: 'c2',
@@ -234,7 +233,6 @@ describe('computes base info', () => {
               reexportType: 'single',
             },
           ],
-          fileType: 'code',
         },
         [FILE_D]: {
           exports: [
@@ -242,14 +240,16 @@ describe('computes base info', () => {
               exportName: 'default',
             },
           ],
+          fileType: 'code',
           imports: [],
           reexports: [],
-          fileType: 'code',
         },
         [FILE_E]: {
           fileType: 'other',
         },
       },
+      rootImportAlias: '@',
+      sourceRoot: TEST_PROJECT_DIR,
     });
   });
 });
