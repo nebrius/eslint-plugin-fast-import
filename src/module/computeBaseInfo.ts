@@ -387,13 +387,9 @@ function computeFileDetails({
         return;
       }
 
-      // TODO: Why would the declaration be undefined? Need to figure this out and support whatever this edge case is
+      // This happens when we do `export {}`
       if (!statementNode.declaration) {
-        throw new InternalError(`export declaration is undefined`, {
-          filePath,
-          fileContents,
-          node: statementNode,
-        });
+        return;
       }
 
       // If we got here we have a single export where we have to introspect the declaration type to figure out what the
@@ -454,6 +450,7 @@ function computeFileDetails({
 
         // export interface Foo {} or export type Foo = string
         case TSESTree.AST_NODE_TYPES.TSInterfaceDeclaration:
+        case TSESTree.AST_NODE_TYPES.TSEnumDeclaration:
         case TSESTree.AST_NODE_TYPES.TSTypeAliasDeclaration: {
           fileDetails.exports.push({
             type: 'export',
@@ -531,16 +528,42 @@ function computeFileDetails({
           break;
         }
 
+        // export default foo
+        case TSESTree.AST_NODE_TYPES.Identifier: {
+          const { name } = statementNode.declaration;
+          fileDetails.exports.push({
+            type: 'export',
+            filePath,
+            statementNode,
+            specifierNode: statementNode.declaration,
+            exportName: isDefault(statementNode) ? 'default' : name,
+          });
+          break;
+        }
+
         default: {
-          // We don't use UnknownNodeTypeError here because this is typed as a general declaration, which includes a
-          // bunch of statements that actual exports don't support (and would be a syntax error), such as:
-          // `export import { foo } from 'bar'`
+          // First we check if this is a default export, since we can still process it, even if we can't select a
+          // particularly useful specifier node
+          if (isDefault(statementNode)) {
+            fileDetails.exports.push({
+              type: 'export',
+              filePath,
+              statementNode,
+              specifierNode: statementNode.declaration,
+              exportName: 'default',
+            });
+            break;
+          }
+
+          // Otherwise, we can't process this node. Note: We don't use UnknownNodeTypeError here because this is typed
+          // as a general declaration, which includes a bunch of statements that actual exports don't support (and would
+          // be a syntax error), such as: `export import { foo } from 'bar'`
           throw new InternalError(
             `unsupported declaration type ${statementNode.declaration.type}`,
             {
               filePath,
               fileContents,
-              node: statementNode.declaration,
+              node: statementNode,
             }
           );
         }

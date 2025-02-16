@@ -33,3 +33,5 @@ const a17 = 10;
 export { a17 as default };
 
 export const [ [a18_1], ...[{a18_2}, a18_3] ] = [ [10], {a18_2: 10}, 10 ];
+
+export {};

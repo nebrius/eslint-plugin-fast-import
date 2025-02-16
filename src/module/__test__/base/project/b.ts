@@ -15,5 +15,5 @@ console.log(defaultAlias, stringAlias);
 
 void import('./a.js');
 
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
-export default class Foo {}
+function foo() {}
+export default foo;
