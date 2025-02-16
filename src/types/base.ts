@@ -2,11 +2,6 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 type Base = {
   /**
-   * The absolute path to the file that this ESM statement is in
-   */
-  filePath: string;
-
-  /**
    * The original AST node in ESTree format for this ESM statement
    */
   statementNode: TSESTree.Node;
@@ -15,7 +10,7 @@ type Base = {
 /* Imports */
 
 export type BaseSingleImport = Base & {
-  type: 'singleImport';
+  importType: 'single';
 
   /**
    * Where we're importing from, e.g. `'./bar'` in:
@@ -67,7 +62,7 @@ export type BaseSingleImport = Base & {
 };
 
 export type BaseBarrelImport = Base & {
-  type: 'barrelImport';
+  importType: 'barrel';
 
   /**
    * Where we're importing from, e.g. `'./bar'` in:
@@ -80,7 +75,7 @@ export type BaseBarrelImport = Base & {
 };
 
 export type BaseDynamicImport = Base & {
-  type: 'dynamicImport';
+  importType: 'dynamic';
 
   /**
    * Where we're importing from, e.g. `'./bar'` in:
@@ -102,8 +97,6 @@ export type BaseImport =
 /* Exports */
 
 export type BaseExport = Base & {
-  type: 'export';
-
   /**
    * What we're export, e.g. `foo` in:
    *
@@ -126,7 +119,7 @@ export type BaseExport = Base & {
 /* Reexports */
 
 export type BaseSingleReexport = Base & {
-  type: 'singleReexport';
+  reexportType: 'single';
 
   /**
    * Where we're reexporting from, e.g. `'./bar'` in:
@@ -177,7 +170,7 @@ export type BaseSingleReexport = Base & {
 };
 
 export type BaseBarrelReexport = Base & {
-  type: 'barrelReexport';
+  reexportType: 'barrel';
 
   /**
    * Where we're reexporting from, e.g. `'./bar'` in:
@@ -216,14 +209,14 @@ export type BaseReexport = BaseSingleReexport | BaseBarrelReexport;
  * files. These files get an entry for bookeeping reasons, but otherwise are not parsed or anlayzed
  */
 export type BaseOtherFileDetails = {
-  type: 'other';
+  fileType: 'other';
 };
 
 /**
  * Represents an ESM file and its imports, exports, and reexports.
  */
 export type BaseCodeFileDetails = {
-  type: 'esm';
+  fileType: 'code';
   imports: BaseImport[];
   exports: BaseExport[];
   reexports: BaseReexport[];

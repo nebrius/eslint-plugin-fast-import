@@ -49,7 +49,7 @@ export function computeBaseInfo({
       info.files[filePath] = computeFileDetails(parseFile(filePath));
     } else if (!statSync(filePath).isDirectory()) {
       info.files[filePath] = {
-        type: 'other',
+        fileType: 'other',
       };
     }
   }
@@ -118,8 +118,6 @@ function walkExportDestructure(
           // export const { foo } = {}
           case TSESTree.AST_NODE_TYPES.Identifier: {
             fileDetails.exports.push({
-              type: 'export',
-              filePath,
               statementNode,
               specifierNode: propertyNode.value,
               exportName: propertyNode.value.name,
@@ -162,8 +160,6 @@ function walkExportDestructure(
     case TSESTree.AST_NODE_TYPES.AssignmentPattern: {
       if (node.left.type === TSESTree.AST_NODE_TYPES.Identifier) {
         fileDetails.exports.push({
-          type: 'export',
-          filePath,
           statementNode,
           specifierNode: node.left,
           exportName: node.left.name,
@@ -185,8 +181,6 @@ function walkExportDestructure(
     // export const [ foo ] = [ 10 ]
     case TSESTree.AST_NODE_TYPES.Identifier: {
       fileDetails.exports.push({
-        type: 'export',
-        filePath,
         statementNode,
         specifierNode: node,
         exportName: node.name,
@@ -253,7 +247,7 @@ function computeFileDetails({
   ast: TSESTree.Program;
 }): BaseCodeFileDetails {
   const fileDetails: BaseCodeFileDetails = {
-    type: 'esm',
+    fileType: 'code',
     imports: [],
     exports: [],
     reexports: [],
@@ -288,8 +282,7 @@ function computeFileDetails({
       // module specifier.
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
         fileDetails.imports.push({
-          type: 'dynamicImport',
-          filePath,
+          importType: 'dynamic',
           statementNode,
           moduleSpecifier,
         });
@@ -317,8 +310,7 @@ function computeFileDetails({
           // import * as foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier: {
             fileDetails.imports.push({
-              type: 'barrelImport',
-              filePath,
+              importType: 'barrel',
               statementNode,
               moduleSpecifier,
             });
@@ -328,8 +320,7 @@ function computeFileDetails({
           // import foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier: {
             fileDetails.imports.push({
-              type: 'singleImport',
-              filePath,
+              importType: 'single',
               statementNode,
               specifierNode,
               moduleSpecifier,
@@ -347,8 +338,7 @@ function computeFileDetails({
             );
 
             fileDetails.imports.push({
-              type: 'singleImport',
-              filePath,
+              importType: 'single',
               statementNode,
               specifierNode,
               moduleSpecifier,
@@ -377,8 +367,6 @@ function computeFileDetails({
       if ('specifiers' in statementNode && statementNode.specifiers.length) {
         for (const specifierNode of statementNode.specifiers) {
           fileDetails.exports.push({
-            type: 'export',
-            filePath,
             statementNode,
             specifierNode: specifierNode.exported,
             exportName: getIdentifierOrStringValue(specifierNode.exported),
@@ -406,8 +394,6 @@ function computeFileDetails({
               // export const foo = 10;
               case TSESTree.AST_NODE_TYPES.Identifier: {
                 fileDetails.exports.push({
-                  type: 'export',
-                  filePath,
                   statementNode,
                   specifierNode: declarationNode.id,
                   exportName: declarationNode.id.name,
@@ -453,8 +439,6 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.TSEnumDeclaration:
         case TSESTree.AST_NODE_TYPES.TSTypeAliasDeclaration: {
           fileDetails.exports.push({
-            type: 'export',
-            filePath,
             statementNode,
             specifierNode: statementNode.declaration.id,
             exportName: isDefault(statementNode)
@@ -469,8 +453,6 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.FunctionDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              type: 'export',
-              filePath,
               statementNode,
               specifierNode: statementNode.declaration.id
                 ? statementNode.declaration.id
@@ -488,8 +470,6 @@ function computeFileDetails({
               });
             }
             fileDetails.exports.push({
-              type: 'export',
-              filePath,
               statementNode,
               specifierNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
@@ -503,8 +483,6 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.ClassDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              type: 'export',
-              filePath,
               statementNode,
               specifierNode: statementNode.declaration.id
                 ? statementNode.declaration.id
@@ -518,8 +496,6 @@ function computeFileDetails({
               );
             }
             fileDetails.exports.push({
-              type: 'export',
-              filePath,
               statementNode,
               specifierNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
@@ -532,8 +508,6 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.Identifier: {
           const { name } = statementNode.declaration;
           fileDetails.exports.push({
-            type: 'export',
-            filePath,
             statementNode,
             specifierNode: statementNode.declaration,
             exportName: isDefault(statementNode) ? 'default' : name,
@@ -546,8 +520,6 @@ function computeFileDetails({
           // particularly useful specifier node
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              type: 'export',
-              filePath,
               statementNode,
               specifierNode: statementNode.declaration,
               exportName: 'default',
@@ -576,8 +548,7 @@ function computeFileDetails({
       // Check if this is a barrel reexport
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
         fileDetails.reexports.push({
-          type: 'barrelReexport',
-          filePath,
+          reexportType: 'barrel',
           statementNode,
           moduleSpecifier,
           exportName: statementNode.exported?.name,
@@ -589,8 +560,7 @@ function computeFileDetails({
       // Otherwise, this is a single reexport, so we iterate through each specifier
       for (const specifierNode of statementNode.specifiers) {
         fileDetails.reexports.push({
-          type: 'singleReexport',
-          filePath,
+          reexportType: 'single',
           statementNode,
           specifierNode,
           moduleSpecifier,

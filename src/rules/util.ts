@@ -7,5 +7,5 @@ export const createRule = ESLintUtils.RuleCreator(
 );
 
 export function getESMInfo(filePath: string): AnalyzedFileDetails {
-  return { type: 'other' };
+  return { fileType: 'other' };
 }

@@ -10,7 +10,7 @@ type PartialBaseESMInfo = {
   files: Record<
     string,
     | {
-        type: 'esm';
+        fileType: 'code';
         imports: Partial<BaseImport>[];
         exports: Partial<BaseExport>[];
         reexports: Partial<BaseReexport>[];
@@ -25,7 +25,7 @@ type PartialBaseESMInfo = {
 export function stripNodes(info: BaseProjectInfo) {
   const clonedInfo = { ...info } as PartialBaseESMInfo;
   for (const fileDetails of Object.values(clonedInfo.files)) {
-    if (fileDetails.type !== 'esm') {
+    if (fileDetails.fileType !== 'code') {
       continue;
     }
     for (const importDetails of fileDetails.imports) {

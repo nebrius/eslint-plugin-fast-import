@@ -20,15 +20,15 @@ export function computeResolvedInfo(
   };
 
   for (const [filePath, fileDetails] of Object.entries(baseInfo.files)) {
-    if (fileDetails.type !== 'esm') {
+    if (fileDetails.fileType !== 'code') {
       resolvedInfo.files[filePath] = {
-        type: 'other',
+        fileType: 'other',
       };
       continue;
     }
 
     const resolvedFileInfo: ResolvedCodeFileDetails = {
-      type: 'esm',
+      fileType: 'code',
       imports: [],
       exports: [],
       reexports: [],
@@ -46,7 +46,7 @@ export function computeResolvedInfo(
         filePath,
         moduleSpecifier: importDetails.moduleSpecifier,
         isTypeImport:
-          importDetails.type === 'singleImport'
+          importDetails.importType === 'single'
             ? importDetails.isTypeImport
             : false,
       });
@@ -63,7 +63,7 @@ export function computeResolvedInfo(
         filePath,
         moduleSpecifier: reexportDetails.moduleSpecifier,
         isTypeImport:
-          reexportDetails.type === 'singleReexport'
+          reexportDetails.reexportType === 'single'
             ? reexportDetails.isTypeReexport
             : false,
       });

@@ -30,11 +30,10 @@ describe('computes base info', () => {
       allowAliaslessRootImports: true,
       files: {
         [FILE_A]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [
             {
-              type: 'singleImport',
-              filePath: FILE_A,
+              importType: 'single',
               moduleSpecifier: '@/one/b',
               importName: 'b1',
               importAlias: 'b1',
@@ -43,28 +42,25 @@ describe('computes base info', () => {
               resolvedModulePath: FILE_B,
             },
             {
-              filePath: FILE_A,
               importAlias: 'c1',
               importName: 'c1',
               isTypeImport: false,
               moduleSpecifier: 'one/c',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_C,
-              type: 'singleImport',
+              importType: 'single',
             },
             {
-              filePath: FILE_A,
               importAlias: 'data',
               importName: 'default',
               isTypeImport: false,
               moduleSpecifier: './one/c/data',
               moduleType: 'firstPartyOther',
               resolvedModulePath: FILE_C_DATA,
-              type: 'singleImport',
+              importType: 'single',
             },
             {
-              type: 'singleImport',
-              filePath: FILE_A,
+              importType: 'single',
               moduleSpecifier: './two/d',
               importName: 'D2',
               importAlias: 'D2',
@@ -73,8 +69,7 @@ describe('computes base info', () => {
               resolvedModulePath: FILE_D_DECLARATION,
             },
             {
-              type: 'singleImport',
-              filePath: FILE_A,
+              importType: 'single',
               moduleSpecifier: './two/d',
               importName: 'getD1',
               importAlias: 'getD1',
@@ -83,8 +78,7 @@ describe('computes base info', () => {
               resolvedModulePath: FILE_D,
             },
             {
-              type: 'singleImport',
-              filePath: FILE_A,
+              importType: 'single',
               moduleSpecifier: './two/e',
               importName: 'e1',
               importAlias: 'e1',
@@ -93,8 +87,7 @@ describe('computes base info', () => {
               resolvedModulePath: FILE_E,
             },
             {
-              type: 'singleImport',
-              filePath: FILE_A,
+              importType: 'single',
               moduleSpecifier: './two/f',
               importName: 'F1',
               importAlias: 'F1',
@@ -103,8 +96,7 @@ describe('computes base info', () => {
               resolvedModulePath: FILE_F_DECLARATION,
             },
             {
-              type: 'singleImport',
-              filePath: FILE_A,
+              importType: 'single',
               moduleSpecifier: './two/f',
               importName: 'getF1',
               importAlias: 'getF1',
@@ -113,128 +105,107 @@ describe('computes base info', () => {
               resolvedModulePath: FILE_F,
             },
             {
-              filePath: FILE_A,
               importAlias: 'join',
               importName: 'join',
               isTypeImport: false,
               moduleSpecifier: 'path',
               moduleType: 'builtin',
-              type: 'singleImport',
+              importType: 'single',
             },
             {
-              filePath: FILE_A,
               importAlias: 'resolve',
               importName: 'resolve',
               isTypeImport: false,
               moduleSpecifier: 'node:path',
               moduleType: 'builtin',
-              type: 'singleImport',
+              importType: 'single',
             },
             {
-              filePath: FILE_A,
               importAlias: 'parser',
               importName: 'parser',
               isTypeImport: false,
               moduleSpecifier: 'typescript-eslint',
               moduleType: 'thirdParty',
-              type: 'singleImport',
+              importType: 'single',
             },
           ],
           exports: [],
           reexports: [],
         },
         [FILE_B]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
-              type: 'export',
-              filePath: FILE_B,
               exportName: 'b1',
             },
           ],
           reexports: [],
         },
         [FILE_C]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
               exportName: 'c1',
-              filePath: FILE_C,
-              type: 'export',
             },
           ],
           reexports: [],
         },
         [FILE_C_DATA]: {
-          type: 'other',
+          fileType: 'other',
         },
         [FILE_D_DECLARATION]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
-              type: 'export',
-              filePath: FILE_D_DECLARATION,
               exportName: 'getD1',
             },
             {
-              type: 'export',
-              filePath: FILE_D_DECLARATION,
               exportName: 'D2',
             },
           ],
           reexports: [],
         },
         [FILE_D]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
-              type: 'export',
-              filePath: FILE_D,
               exportName: 'getD1',
             },
           ],
           reexports: [],
         },
         [FILE_E]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
-              type: 'export',
-              filePath: FILE_E,
               exportName: 'e1',
             },
           ],
           reexports: [],
         },
         [FILE_F_DECLARATION]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
-              type: 'export',
-              filePath: FILE_F_DECLARATION,
               exportName: 'F1',
             },
             {
-              type: 'export',
-              filePath: FILE_F_DECLARATION,
               exportName: 'getF1',
             },
           ],
           reexports: [],
         },
         [FILE_F]: {
-          type: 'esm',
+          fileType: 'code',
           imports: [],
           exports: [
             {
-              type: 'export',
-              filePath: FILE_F,
               exportName: 'getF1',
             },
           ],
