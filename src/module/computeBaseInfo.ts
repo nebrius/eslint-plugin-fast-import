@@ -121,6 +121,9 @@ function walkExportDestructure(
               statementNode,
               specifierNode: propertyNode.value,
               exportName: propertyNode.value.name,
+
+              // TODO
+              isEntryPoint: false,
             });
             break;
           }
@@ -163,6 +166,9 @@ function walkExportDestructure(
           statementNode,
           specifierNode: node.left,
           exportName: node.left.name,
+
+          // TODO
+          isEntryPoint: false,
         });
       }
       // It's possible to do `export const [ { foo } = {} ]`
@@ -184,6 +190,9 @@ function walkExportDestructure(
         statementNode,
         specifierNode: node,
         exportName: node.name,
+
+        // TODO
+        isEntryPoint: false,
       });
       break;
     }
@@ -370,6 +379,9 @@ function computeFileDetails({
             statementNode,
             specifierNode: specifierNode.exported,
             exportName: getIdentifierOrStringValue(specifierNode.exported),
+
+            // TODO
+            isEntryPoint: false,
           });
         }
         return;
@@ -397,6 +409,9 @@ function computeFileDetails({
                   statementNode,
                   specifierNode: declarationNode.id,
                   exportName: declarationNode.id.name,
+
+                  // TODO
+                  isEntryPoint: false,
                 });
                 break;
               }
@@ -444,6 +459,9 @@ function computeFileDetails({
             exportName: isDefault(statementNode)
               ? 'default'
               : statementNode.declaration.id.name,
+
+            // TODO
+            isEntryPoint: false,
           });
           break;
         }
@@ -458,6 +476,9 @@ function computeFileDetails({
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
+
+              // TODO
+              isEntryPoint: false,
             });
           } else {
             // TODO: I'm pretty certain that declaration id missing means that this is a function expression, which
@@ -473,6 +494,9 @@ function computeFileDetails({
               statementNode,
               specifierNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
+
+              // TODO
+              isEntryPoint: false,
             });
           }
 
@@ -488,6 +512,9 @@ function computeFileDetails({
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
+
+              // TODO
+              isEntryPoint: false,
             });
           } else {
             if (!statementNode.declaration.id) {
@@ -499,6 +526,9 @@ function computeFileDetails({
               statementNode,
               specifierNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
+
+              // TODO
+              isEntryPoint: false,
             });
           }
           break;
@@ -511,6 +541,9 @@ function computeFileDetails({
             statementNode,
             specifierNode: statementNode.declaration,
             exportName: isDefault(statementNode) ? 'default' : name,
+
+            // TODO
+            isEntryPoint: false,
           });
           break;
         }
@@ -523,6 +556,9 @@ function computeFileDetails({
               statementNode,
               specifierNode: statementNode.declaration,
               exportName: 'default',
+
+              // TODO
+              isEntryPoint: false,
             });
             break;
           }
@@ -567,6 +603,9 @@ function computeFileDetails({
           importName: getIdentifierOrStringValue(specifierNode.local),
           exportName: getIdentifierOrStringValue(specifierNode.exported),
           isTypeReexport: statementNode.exportKind === 'type',
+
+          // TODO
+          isEntryPoint: false,
         });
       }
     },

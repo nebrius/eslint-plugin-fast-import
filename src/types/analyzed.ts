@@ -1,7 +1,6 @@
 import type {
   ResolvedBarrelImport,
   ResolvedBarrelReexport,
-  ResolvedCodeFileDetails,
   ResolvedDynamicImport,
   ResolvedExport,
   ResolvedOtherFileDetails,
@@ -27,14 +26,18 @@ type AnalyzedImportBase = {
    * ```
    *
    * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
-   * `/path/to/bar.ts`
+   * `/path/to/bar.ts`.
+   *
+   * Note: If the module cannot be resolved, this value is `undefined`.
    */
   rootModulePath: string | undefined;
 
   /**
    * The name of the original export
+   *
+   * Note: If the module cannot be resolved, this value is `undefined`.
    */
-  rootName: string;
+  rootName: string | undefined;
 };
 
 type AnalyzedExportBase = {
@@ -56,7 +59,10 @@ type AnalyzedExportBase = {
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
 export type AnalyzedBarrelImport = ResolvedBarrelImport;
 export type AnalyzedDynamicImport = ResolvedDynamicImport;
-export type AnalyzedImport = AnalyzedSingleImport | AnalyzedBarrelImport;
+export type AnalyzedImport =
+  | AnalyzedSingleImport
+  | AnalyzedBarrelImport
+  | AnalyzedDynamicImport;
 
 /* Exports */
 
@@ -68,7 +74,6 @@ export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedImportBase &
   AnalyzedExportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
-  AnalyzedImportBase &
   AnalyzedExportBase;
 export type AnalyzedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
@@ -76,7 +81,8 @@ export type AnalyzedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 export type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
 
-export type AnalyzedCodeFileDetails = ResolvedCodeFileDetails & {
+export type AnalyzedCodeFileDetails = {
+  fileType: 'code';
   imports: AnalyzedImport[];
   exports: AnalyzedExport[];
   reexports: AnalyzedReexport[];
@@ -86,7 +92,7 @@ export type AnalyzedFileDetails =
   | AnalyzedOtherFileDetails
   | AnalyzedCodeFileDetails;
 
-export type AnalyzedProjectInfo = ResolvedProjectInfo & {
+export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
   /**
    * Mapping of _absolute_ file paths to file details
    */

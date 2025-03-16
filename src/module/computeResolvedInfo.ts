@@ -163,7 +163,7 @@ function resolveModuleSpecifier({
   filePath,
   moduleSpecifier,
   isTypeImport,
-}: ResolveModuleSpecifierOptions): Resolved | undefined {
+}: ResolveModuleSpecifierOptions): Resolved {
   // First, check if this is a built-in module
   if (formattedBuiltinModules.includes(moduleSpecifier)) {
     return {

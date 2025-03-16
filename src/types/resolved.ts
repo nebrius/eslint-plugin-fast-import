@@ -1,7 +1,6 @@
 import type {
   BaseBarrelImport,
   BaseBarrelReexport,
-  BaseCodeFileDetails,
   BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
@@ -76,7 +75,8 @@ export type ResolvedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 export type ResolvedOtherFileDetails = BaseOtherFileDetails;
 
-export type ResolvedCodeFileDetails = BaseCodeFileDetails & {
+export type ResolvedCodeFileDetails = {
+  fileType: 'code';
   imports: ResolvedImport[];
   exports: ResolvedExport[];
   reexports: ResolvedReexport[];
@@ -86,7 +86,7 @@ export type ResolvedFileDetails =
   | ResolvedOtherFileDetails
   | ResolvedCodeFileDetails;
 
-export type ResolvedProjectInfo = BaseProjectInfo & {
+export type ResolvedProjectInfo = Omit<BaseProjectInfo, 'files'> & {
   /**
    * Mapping of _absolute_ file paths to file details
    */

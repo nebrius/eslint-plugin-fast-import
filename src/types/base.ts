@@ -114,6 +114,13 @@ export type BaseExport = Base & {
    * ```
    */
   specifierNode: TSESTree.Node;
+
+  /**
+   * Indicates whether or not this rexport is an entry point for the app. For example, if we're running a Next.js app
+   * and this export is `getServerSideProps` in a page file, the we consider this an an entry point export since
+   * we'll never see the import itself
+   */
+  isEntryPoint: boolean;
 };
 
 /* Reexports */
@@ -167,6 +174,13 @@ export type BaseSingleReexport = Base & {
    * ```
    */
   specifierNode: TSESTree.Node;
+
+  /**
+   * Indicates whether or not this reexport is an entry point for the app. For example, if we're running a Next.js app
+   * and this reexport is `getServerSideProps` in a page file, the we consider this an an entry point reexport since
+   * we'll never see the import itself
+   */
+  isEntryPoint: boolean;
 };
 
 export type BaseBarrelReexport = Base & {
