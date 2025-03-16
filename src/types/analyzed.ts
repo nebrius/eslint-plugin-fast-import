@@ -9,36 +9,76 @@ import type {
   ResolvedSingleReexport,
 } from './resolved';
 
-type AnalyzedImportBase = {
-  /**
-   * The absolute path of the file with the export that the import/reexport statement ultimately resolves to. In other
-   * words, if we have:
-   *
-   * ```
-   * // foo.ts
-   * import { baz } from './bar'
-   *
-   * // bar.ts
-   * export { baz } from './baz'
-   *
-   * // baz.ts
-   * export const baz = 10;
-   * ```
-   *
-   * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
-   * `/path/to/bar.ts`.
-   *
-   * Note: If the module cannot be resolved, this value is `undefined`.
-   */
-  rootModulePath: string | undefined;
+type AnalyzedImportBase =
+  | {
+      /**
+       * A rootModuleType of `undefined` indicates we couldn't resolve the root export
+       */
+      rootModuleType: undefined;
+    }
+  | {
+      rootModuleType: 'builtin';
+    }
+  | {
+      rootModuleType: 'thirdParty';
+    }
+  | {
+      rootModuleType: 'firstPartyOther';
 
-  /**
-   * The name of the original export
-   *
-   * Note: If the module cannot be resolved, this value is `undefined`.
-   */
-  rootName: string | undefined;
-};
+      /**
+       * The absolute path of the root file with the export that the import/reexport statement ultimately resolves to. In other
+       * words, if we have:
+       *
+       * ```
+       * // foo.ts
+       * import { baz } from './bar'
+       *
+       * // bar.ts
+       * export { baz } from './baz'
+       *
+       * // baz.ts
+       * export const baz = 10;
+       * ```
+       *
+       * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
+       * `/path/to/bar.ts`.
+       *
+       * Note: If the module cannot be resolved, this value is `undefined`.
+       */
+      rootModulePath: string | undefined;
+    }
+  | {
+      rootModuleType: 'firstPartyCode';
+
+      /**
+       * The absolute path of the root file with the export that the import/reexport statement ultimately resolves to. In other
+       * words, if we have:
+       *
+       * ```
+       * // foo.ts
+       * import { baz } from './bar'
+       *
+       * // bar.ts
+       * export { baz } from './baz'
+       *
+       * // baz.ts
+       * export const baz = 10;
+       * ```
+       *
+       * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
+       * `/path/to/bar.ts`.
+       *
+       * Note: If the module cannot be resolved, this value is `undefined`.
+       */
+      rootModulePath: string | undefined;
+
+      /**
+       * The name of the original export
+       *
+       * Note: If the module cannot be resolved, this value is `undefined`.
+       */
+      rootName: string | undefined;
+    };
 
 type AnalyzedExportBase = {
   /**
@@ -47,9 +87,17 @@ type AnalyzedExportBase = {
   importedByFiles: string[];
 
   /**
-   * A list of files that reexport this import, including indirect reexports that themselves reexport a reexport
+   * A list of files that reexport this export, including indirect reexports that themselves reexport a reexport
    */
   reexportedByFiles: string[];
+};
+
+type AnalyzedReexportBase = {
+  /**
+   * A list of files that imports this reexport, including indirect imports that are funneled through other reexport
+   * statements
+   */
+  importedByFiles: string[];
 };
 
 /* Imports */
@@ -72,9 +120,9 @@ export type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
 
 export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedImportBase &
-  AnalyzedExportBase;
+  AnalyzedReexportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
-  AnalyzedExportBase;
+  AnalyzedReexportBase;
 export type AnalyzedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 /* File Details */

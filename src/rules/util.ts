@@ -1,4 +1,4 @@
-import type { AnalyzedFileDetails } from '@/types/analyzed';
+import type { AnalyzedFileDetails } from '../types/analyzed';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 export const createRule = ESLintUtils.RuleCreator(

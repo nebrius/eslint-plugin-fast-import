@@ -17,11 +17,6 @@
     "skipLibCheck": true,
     "incremental": true,
     "allowJs": true,
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
     "rootDir": "./src",
     "outDir": "./dist",
     "declaration": true
