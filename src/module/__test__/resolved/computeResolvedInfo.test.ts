@@ -193,7 +193,17 @@ describe('computes base info', () => {
             },
           ],
           fileType: 'code',
-          imports: [],
+          imports: [
+            {
+              importAlias: 'fake',
+              importName: 'fake',
+              importType: 'single',
+              isTypeImport: false,
+              moduleSpecifier: './fake',
+              moduleType: 'firstPartyOther',
+              resolvedModulePath: undefined,
+            },
+          ],
           reexports: [],
         },
         [FILE_F_DECLARATION]: {

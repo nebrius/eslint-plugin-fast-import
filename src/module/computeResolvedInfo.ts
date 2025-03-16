@@ -37,7 +37,7 @@ export function computeResolvedInfo(
 
     // Resolve imports
     for (const importDetails of fileDetails.imports) {
-      // TODO: handle dynamic imports with non-static paths, represented by `moduleSpecifier` being undefined
+      // TODO: handle dynamic imports with non-static paths, represented by `moduleSpecifier` being undefined?
       if (!importDetails.moduleSpecifier) {
         continue;
       }
