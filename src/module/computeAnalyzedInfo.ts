@@ -10,6 +10,9 @@ import type {
 } from '../types/analyzed';
 import type { ResolvedProjectInfo } from '../types/resolved';
 
+// TODO: places were `as` casts are used indicate an issue with the analyzed type definitions that don't narrow
+// correctly and should be fixed
+
 export function computeAnalyzedInfo(
   resolvedProjectInfo: ResolvedProjectInfo
 ): AnalyzedProjectInfo {
@@ -42,6 +45,7 @@ export function computeAnalyzedInfo(
       analyzedFileInfo.exports.push({
         ...exportDetails,
         importedByFiles: [],
+        barrelImportedByFiles: [],
         reexportedByFiles: [],
       });
     }
@@ -57,6 +61,7 @@ export function computeAnalyzedInfo(
             // potentially fill in other details
             rootModuleType: undefined,
             importedByFiles: [],
+            barrelImportedByFiles: [],
           };
           analyzedFileInfo.reexports.push(analyzedSingleReexport);
           break;
@@ -65,6 +70,7 @@ export function computeAnalyzedInfo(
           const analyzedSingleReexport: AnalyzedBarrelReexport = {
             ...reexportDetails,
             importedByFiles: [],
+            barrelImportedByFiles: [],
           };
           analyzedFileInfo.reexports.push(analyzedSingleReexport);
           break;
@@ -105,9 +111,21 @@ export function computeAnalyzedInfo(
     }
     for (const importDetails of fileDetails.imports) {
       if (importDetails.importType === 'single') {
-        analyzeSingleImport(filePath, importDetails, analyzedProjectInfo);
+        analyzeSingleImport(
+          filePath,
+          importDetails,
+          analyzedProjectInfo,
+          'single',
+          []
+        );
       } else {
-        analyzeBarrelImport(filePath, importDetails, analyzedProjectInfo);
+        analyzeBarrelImport(
+          filePath,
+          importDetails,
+          analyzedProjectInfo,
+          'barrel',
+          []
+        );
       }
     }
   }
@@ -117,16 +135,20 @@ export function computeAnalyzedInfo(
   return analyzedProjectInfo;
 }
 
+type InitialImportType = 'single' | 'barrel';
+
 function analyzeSingleImport(
-  filePath: string,
-  analyzedImport: AnalyzedSingleImport,
-  analyzedProjectInfo: AnalyzedProjectInfo
+  originFilePath: string,
+  originAnalyzedImport: AnalyzedSingleImport | AnalyzedSingleReexport,
+  analyzedProjectInfo: AnalyzedProjectInfo,
+  initialImportType: InitialImportType,
+
+  // Represents files with reexports found between the origin import and root export
+  reexportFiles: string[]
 ) {
-  if (analyzedImport.moduleType !== 'firstPartyCode') {
+  if (originAnalyzedImport.moduleType !== 'firstPartyCode') {
     return;
   }
-
-  const reexportFiles: string[] = [];
 
   // Return value indicates if we've found the root export yet or not
   function traverse(currentFile: string, currentImportName: string): boolean {
@@ -138,8 +160,8 @@ function analyzeSingleImport(
       throw new InternalError(
         `File ${currentFile} is missing in project info`,
         {
-          filePath,
-          node: analyzedImport.statementNode,
+          filePath: originFilePath,
+          node: originAnalyzedImport.statementNode,
         }
       );
     }
@@ -148,10 +170,10 @@ function analyzeSingleImport(
     // of coming true sometimes
     if (targetFileDetails.fileType !== 'code') {
       throw new InternalError(
-        `moduleType on source is "code", but ${currentFile} type is not code`,
+        `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
-          filePath,
-          node: analyzedImport.statementNode,
+          filePath: originFilePath,
+          node: originAnalyzedImport.statementNode,
         }
       );
     }
@@ -162,17 +184,18 @@ function analyzeSingleImport(
     );
     if (exportEntry?.exportName === currentImportName) {
       // Set the root data for the analyzed import
-      analyzedImport.rootModuleType = 'firstPartyCode';
+      originAnalyzedImport.rootModuleType = 'firstPartyCode';
 
       // Force TypeScript type narrowing on the value we just set
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (analyzedImport.rootModuleType === 'firstPartyCode') {
-        analyzedImport.rootModulePath = currentFile;
-        analyzedImport.rootName = exportEntry.exportName;
+      if (originAnalyzedImport.rootModuleType === 'firstPartyCode') {
+        originAnalyzedImport.rootModulePath = currentFile;
+        originAnalyzedImport.rootName = exportEntry.exportName;
+        originAnalyzedImport.rootExportType = 'export';
       }
 
       // Set the consumers of the export
-      exportEntry.importedByFiles.push(filePath);
+      exportEntry.importedByFiles.push(originFilePath);
       exportEntry.reexportedByFiles.push(...reexportFiles);
       return true;
     }
@@ -185,29 +208,59 @@ function analyzeSingleImport(
       switch (singleReexportEntry.moduleType) {
         case 'builtin':
         case 'thirdParty': {
-          analyzedImport.rootModuleType = singleReexportEntry.moduleType;
+          originAnalyzedImport.rootModuleType = singleReexportEntry.moduleType;
           return true;
         }
         case 'firstPartyOther': {
           // Set the root data for the analyzed import
-          analyzedImport.rootModuleType = 'firstPartyOther';
+          originAnalyzedImport.rootModuleType = 'firstPartyOther';
 
           // Force TypeScript type narrowing on the value we just set
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (analyzedImport.rootModuleType === 'firstPartyOther') {
-            analyzedImport.rootModulePath = currentFile;
+          if (originAnalyzedImport.rootModuleType === 'firstPartyOther') {
+            originAnalyzedImport.rootModulePath = currentFile;
           }
           return true;
         }
         case 'firstPartyCode': {
           reexportFiles.push(currentFile);
-          singleReexportEntry.importedByFiles.push(filePath);
+          singleReexportEntry.importedByFiles.push(originFilePath);
           return traverse(
             singleReexportEntry.resolvedModulePath,
             singleReexportEntry.importName
           );
         }
       }
+    }
+
+    // Now check if there's a named barrel export that matches
+    const barrelReexportEntry = targetFileDetails.reexports.find(
+      (r) => r.reexportType === 'barrel' && r.exportName === currentImportName
+    ) as AnalyzedBarrelReexport | undefined;
+    if (barrelReexportEntry) {
+      if (barrelReexportEntry.moduleType === 'firstPartyCode') {
+        if (initialImportType === 'single' && barrelReexportEntry.exportName) {
+          // Set the root data for the analyzed import
+          originAnalyzedImport.rootModuleType = 'firstPartyCode';
+
+          // Force TypeScript type narrowing on the value we just set
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+          if (originAnalyzedImport.rootModuleType === 'firstPartyCode') {
+            originAnalyzedImport.rootModulePath = currentFile;
+            originAnalyzedImport.rootName = barrelReexportEntry.exportName;
+            originAnalyzedImport.rootExportType = 'namedBarrelReexport';
+          }
+        }
+
+        analyzeBarrelImport(
+          originFilePath,
+          barrelReexportEntry,
+          analyzedProjectInfo,
+          initialImportType,
+          reexportFiles
+        );
+      }
+      return true;
     }
 
     // Finally, check and traverse all barrel re-exports. Since we don't know what barrel exports contain yet, we have
@@ -225,9 +278,8 @@ function analyzeSingleImport(
 
       // If we found the root export, bail early
       if (traverse(reexportEntry.resolvedModulePath, currentImportName)) {
-        // For some reason TypeScript isn't narrowing this type to a barrel reexport, maybe due to the moduleType check?
         (reexportEntry as AnalyzedBarrelReexport).importedByFiles.push(
-          filePath
+          originFilePath
         );
         return true;
       }
@@ -237,18 +289,87 @@ function analyzeSingleImport(
     return false;
   }
 
-  traverse(analyzedImport.resolvedModulePath, analyzedImport.importName);
+  traverse(
+    originAnalyzedImport.resolvedModulePath,
+    originAnalyzedImport.importName
+  );
 }
 
 function analyzeBarrelImport(
-  // @ts-expect-error
-  filePath: string,
-  analyzedImport: AnalyzedBarrelImport | AnalyzedDynamicImport,
-  // @ts-expect-error
-  analyzedProjectInfo: AnalyzedProjectInfo
+  originFilePath: string,
+  originAnalyzedImport:
+    | AnalyzedBarrelImport
+    | AnalyzedBarrelReexport
+    | AnalyzedDynamicImport,
+  analyzedProjectInfo: AnalyzedProjectInfo,
+  initialImportType: InitialImportType,
+
+  // Represents files with reexports found between the origin import and root export
+  reexportFiles: string[]
 ) {
-  if (analyzedImport.moduleType !== 'firstPartyCode') {
+  if (originAnalyzedImport.moduleType !== 'firstPartyCode') {
     return;
   }
-  // TODO
+
+  function traverse(currentFile: string) {
+    // Get the file from the project info
+    const targetFileDetails = analyzedProjectInfo.files[currentFile];
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!targetFileDetails) {
+      throw new InternalError(
+        `File ${currentFile} is missing in project info`,
+        {
+          filePath: originFilePath,
+          node: originAnalyzedImport.statementNode,
+        }
+      );
+    }
+
+    // Shouldn't happen in practice, but check anyways to make TypeScript happy, plus "shouldn't happen" has a funny way
+    // of coming true sometimes
+    if (targetFileDetails.fileType !== 'code') {
+      throw new InternalError(
+        `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
+        {
+          filePath: originFilePath,
+          node: originAnalyzedImport.statementNode,
+        }
+      );
+    }
+
+    // First, mark each export as being barrel imported
+    for (const exportEntry of targetFileDetails.exports) {
+      exportEntry.barrelImportedByFiles.push(originFilePath);
+      exportEntry.reexportedByFiles.push(...reexportFiles);
+    }
+
+    // Now go through reexports and traverse them further)
+    for (const reexportEntry of targetFileDetails.reexports) {
+      // Nothing to do in non-first party code
+      if (reexportEntry.moduleType !== 'firstPartyCode') {
+        continue;
+      }
+      reexportFiles.push(currentFile);
+      if (reexportEntry.reexportType === 'barrel') {
+        (reexportEntry as AnalyzedBarrelReexport).barrelImportedByFiles.push(
+          originFilePath
+        );
+        traverse(reexportEntry.resolvedModulePath);
+      } else {
+        (reexportEntry as AnalyzedSingleReexport).barrelImportedByFiles.push(
+          originFilePath
+        );
+        analyzeSingleImport(
+          originFilePath,
+          reexportEntry as AnalyzedSingleReexport,
+          analyzedProjectInfo,
+          initialImportType,
+          reexportFiles
+        );
+      }
+    }
+  }
+
+  traverse(originAnalyzedImport.resolvedModulePath);
 }

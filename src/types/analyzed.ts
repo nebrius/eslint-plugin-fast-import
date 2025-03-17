@@ -42,10 +42,8 @@ type AnalyzedImportBase =
        *
        * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
        * `/path/to/bar.ts`.
-       *
-       * Note: If the module cannot be resolved, this value is `undefined`.
        */
-      rootModulePath: string | undefined;
+      rootModulePath: string;
     }
   | {
       rootModuleType: 'firstPartyCode';
@@ -67,17 +65,22 @@ type AnalyzedImportBase =
        *
        * then `rootModulePath` in `foo.ts` is `/path/to/baz.ts`. Contrast this with `resolvedModulePath` which equals
        * `/path/to/bar.ts`.
-       *
-       * Note: If the module cannot be resolved, this value is `undefined`.
        */
-      rootModulePath: string | undefined;
+      rootModulePath: string;
 
       /**
        * The name of the original export
-       *
-       * Note: If the module cannot be resolved, this value is `undefined`.
        */
-      rootName: string | undefined;
+      rootName: string;
+
+      /**
+       * What is the actual root export type. Sometimes a named import can trace to a named barrel export, in which case
+       * we can't actually resolve this to an export since it resolves to potentially many exports across files.
+       *
+       * When this happens, we set this value to `namedBarrelReexport`, and `rootModulePath` and `rootName` point to the
+       * named reexport
+       */
+      rootExportType: 'export' | 'namedBarrelReexport';
     };
 
 type AnalyzedExportBase = {
@@ -85,6 +88,14 @@ type AnalyzedExportBase = {
    * A list of files that imports this export, including indirect imports that are funneled through reexport statements
    */
   importedByFiles: string[];
+
+  /**
+   * A list of files that barrel imports this export, including indirect imports that are funneled through reexport
+   * statements.
+   *
+   * Note: unlike `importedByFiles`, entries here do not actually guarantee this import is actually used
+   */
+  barrelImportedByFiles: string[];
 
   /**
    * A list of files that reexport this export, including indirect reexports that themselves reexport a reexport
@@ -98,6 +109,14 @@ type AnalyzedReexportBase = {
    * statements
    */
   importedByFiles: string[];
+
+  /**
+   * A list of files that barrel imports this export, including indirect imports that are funneled through reexport
+   * statements.
+   *
+   * Note: unlike `importedByFiles`, entries here do not actually guarantee this import is actually used
+   */
+  barrelImportedByFiles: string[];
 };
 
 /* Imports */
