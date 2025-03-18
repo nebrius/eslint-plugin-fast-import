@@ -6,3 +6,4 @@ export const rules = {
 
 export { computeBaseInfo } from './module/computeBaseInfo';
 export { computeResolvedInfo } from './module/computeResolvedInfo';
+export { computeAnalyzedInfo } from './module/computeAnalyzedInfo';
