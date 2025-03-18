@@ -233,12 +233,14 @@ it('Computes base info', () => {
             isTypeReexport: false,
             moduleSpecifier: './a',
             reexportType: 'barrel',
+            isEntryPoint: false,
           },
           {
             exportName: 'c',
             isTypeReexport: false,
             moduleSpecifier: './a',
             reexportType: 'barrel',
+            isEntryPoint: false,
           },
           {
             exportName: 'c1',

@@ -593,12 +593,16 @@ function computeFileDetails({
 
       // Check if this is a barrel reexport
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
+        const exportName = statementNode.exported?.name;
         fileDetails.reexports.push({
           reexportType: 'barrel',
           statementNode,
           moduleSpecifier,
-          exportName: statementNode.exported?.name,
+          exportName,
           isTypeReexport: statementNode.exportKind === 'type',
+          isEntryPoint: exportName
+            ? isEntryPointCheck(filePath, exportName)
+            : false,
         });
         return;
       }

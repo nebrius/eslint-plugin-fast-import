@@ -212,6 +212,13 @@ export type BaseBarrelReexport = Base & {
    * ```
    */
   isTypeReexport: boolean;
+
+  /**
+   * Indicates whether or not this reexport is an entry point for the app. For example, if we're running a Next.js app
+   * and this reexport is `getServerSideProps` in a page file, the we consider this an an entry point reexport since
+   * we'll never see the import itself
+   */
+  isEntryPoint: boolean;
 };
 
 export type BaseReexport = BaseSingleReexport | BaseBarrelReexport;

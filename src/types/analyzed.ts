@@ -9,7 +9,7 @@ import type {
   ResolvedSingleReexport,
 } from './resolved';
 
-type AnalyzedImportBase =
+export type AnalyzedImportBase =
   | {
       /**
        * A rootModuleType of `undefined` indicates we couldn't resolve the root export

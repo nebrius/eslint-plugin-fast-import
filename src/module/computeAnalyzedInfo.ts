@@ -4,6 +4,7 @@ import type {
   AnalyzedBarrelReexport,
   AnalyzedCodeFileDetails,
   AnalyzedDynamicImport,
+  AnalyzedImportBase,
   AnalyzedProjectInfo,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
@@ -57,9 +58,14 @@ export function computeAnalyzedInfo(
         case 'single': {
           const analyzedSingleReexport: AnalyzedSingleReexport = {
             ...reexportDetails,
-            // We don't know what the type is yet, but once we determine the type we'll change this value and
-            // potentially fill in other details
-            rootModuleType: undefined,
+            // If this reexport is a builtin or thirdparty reexport, we know what the root module type is. However, if
+            // it's first party then we don't know what the type is yet. In this case, once we determine the type we'll
+            // change this value and potentially fill in other details
+            rootModuleType:
+              reexportDetails.moduleType === 'builtin' ||
+              reexportDetails.moduleType === 'thirdParty'
+                ? reexportDetails.moduleType
+                : undefined,
             importedByFiles: [],
             barrelImportedByFiles: [],
           };
@@ -128,6 +134,31 @@ export function computeAnalyzedInfo(
         );
       }
     }
+
+    // Now, treat reexports that are also entry points as an import, so that we can mark the relevant exports they point
+    // to as being imported too (since in reality they are)
+    for (const reexportDetails of fileDetails.reexports) {
+      if (!reexportDetails.isEntryPoint) {
+        continue;
+      }
+      if (reexportDetails.reexportType === 'single') {
+        analyzeSingleImport(
+          filePath,
+          reexportDetails as AnalyzedSingleReexport,
+          analyzedProjectInfo,
+          'single',
+          []
+        );
+      } else {
+        analyzeBarrelImport(
+          filePath,
+          reexportDetails as AnalyzedBarrelReexport,
+          analyzedProjectInfo,
+          'barrel',
+          []
+        );
+      }
+    }
   }
 
   return analyzedProjectInfo;
@@ -149,7 +180,10 @@ function analyzeSingleImport(
   }
 
   // Return value indicates if we've found the root export yet or not
-  function traverse(currentFile: string, currentImportName: string): boolean {
+  function traverse(
+    currentFile: string,
+    currentImportName: string
+  ): AnalyzedImportBase | undefined {
     // Get the file from the project info
     const targetFileDetails = analyzedProjectInfo.files[currentFile];
 
@@ -181,21 +215,19 @@ function analyzeSingleImport(
       (e) => currentImportName === e.exportName
     );
     if (exportEntry?.exportName === currentImportName) {
-      // Set the root data for the analyzed import
-      originAnalyzedImport.rootModuleType = 'firstPartyCode';
-
-      // Force TypeScript type narrowing on the value we just set
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (originAnalyzedImport.rootModuleType === 'firstPartyCode') {
-        originAnalyzedImport.rootModulePath = currentFile;
-        originAnalyzedImport.rootExportName = exportEntry.exportName;
-        originAnalyzedImport.rootExportType = 'export';
-      }
-
       // Set the consumers of the export
       exportEntry.importedByFiles.push(originFilePath);
       exportEntry.reexportedByFiles.push(...reexportFiles);
-      return true;
+
+      // Set the root info
+      const rootModuleInfo: AnalyzedImportBase = {
+        rootModuleType: 'firstPartyCode',
+        rootModulePath: currentFile,
+        rootExportName: exportEntry.exportName,
+        rootExportType: 'export',
+      };
+      Object.assign(originAnalyzedImport, rootModuleInfo);
+      return rootModuleInfo;
     }
 
     // Next, check if there is a single re-export that matches
@@ -206,29 +238,34 @@ function analyzeSingleImport(
       switch (singleReexportEntry.moduleType) {
         case 'builtin':
         case 'thirdParty': {
-          originAnalyzedImport.rootModuleType = singleReexportEntry.moduleType;
-          return true;
+          const rootModuleInfo: AnalyzedImportBase = {
+            rootModuleType: singleReexportEntry.moduleType,
+          };
+          Object.assign(originAnalyzedImport, rootModuleInfo);
+          return rootModuleInfo;
         }
         case 'firstPartyOther': {
-          // Set the root data for the analyzed import
-          originAnalyzedImport.rootModuleType = 'firstPartyOther';
-
-          // Force TypeScript type narrowing on the value we just set
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (originAnalyzedImport.rootModuleType === 'firstPartyOther') {
-            originAnalyzedImport.rootModulePath = currentFile;
-          }
-          return true;
+          const rootModuleInfo: AnalyzedImportBase = {
+            rootModuleType: 'firstPartyOther',
+            rootModulePath: currentFile,
+          };
+          Object.assign(originAnalyzedImport, rootModuleInfo);
+          Object.assign(singleReexportEntry, rootModuleInfo);
+          return rootModuleInfo;
         }
         case 'firstPartyCode': {
           if (!reexportFiles.includes(currentFile)) {
             reexportFiles.push(currentFile);
           }
           singleReexportEntry.importedByFiles.push(originFilePath);
-          return traverse(
+          const rootModuleInfo = traverse(
             singleReexportEntry.resolvedModulePath,
             singleReexportEntry.importName
           );
+          if (rootModuleInfo) {
+            Object.assign(singleReexportEntry, rootModuleInfo);
+          }
+          return rootModuleInfo;
         }
       }
     }
@@ -240,17 +277,15 @@ function analyzeSingleImport(
     if (barrelReexportEntry) {
       if (barrelReexportEntry.moduleType === 'firstPartyCode') {
         if (initialImportType === 'single' && barrelReexportEntry.exportName) {
-          // Set the root data for the analyzed import
-          originAnalyzedImport.rootModuleType = 'firstPartyCode';
+          const rootModuleInfo: AnalyzedImportBase = {
+            rootModuleType: 'firstPartyCode',
+            rootModulePath: currentFile,
+            rootExportName: barrelReexportEntry.exportName,
+            rootExportType: 'namedBarrelReexport',
+          };
 
-          // Force TypeScript type narrowing on the value we just set
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-          if (originAnalyzedImport.rootModuleType === 'firstPartyCode') {
-            originAnalyzedImport.rootModulePath = currentFile;
-            originAnalyzedImport.rootExportName =
-              barrelReexportEntry.exportName;
-            originAnalyzedImport.rootExportType = 'namedBarrelReexport';
-          }
+          Object.assign(originAnalyzedImport, rootModuleInfo);
+          return rootModuleInfo;
         }
 
         analyzeBarrelImport(
@@ -260,8 +295,34 @@ function analyzeSingleImport(
           initialImportType,
           reexportFiles
         );
+      } else {
+        if (initialImportType === 'single') {
+          if (barrelReexportEntry.moduleType === 'firstPartyOther') {
+            if (!barrelReexportEntry.resolvedModulePath) {
+              return undefined;
+            }
+            return {
+              rootModuleType: 'firstPartyOther',
+              rootModulePath: barrelReexportEntry.resolvedModulePath,
+            };
+          }
+          return {
+            rootModuleType: barrelReexportEntry.moduleType,
+          };
+        }
+        // This is an edge case that we just can't handle, so we pretend we didn't find it. This happens when we have:
+        //
+        // // foo.ts
+        // import { join } from './bar';
+        //
+        // // bar.ts
+        // export * from 'node:path';
+        // export * from 'node:url';
+        //
+        // Since we don't know the names of what's exported from third party/builtin modules, we can't actually know
+        // which module `join` came from
+        return undefined;
       }
-      return true;
     }
 
     // Finally, check and traverse all barrel re-exports. Since we don't know what barrel exports contain yet, we have
@@ -278,16 +339,20 @@ function analyzeSingleImport(
       }
 
       // If we found the root export, bail early
-      if (traverse(reexportEntry.resolvedModulePath, currentImportName)) {
+      const rootModuleInfo = traverse(
+        reexportEntry.resolvedModulePath,
+        currentImportName
+      );
+      if (rootModuleInfo) {
         (reexportEntry as AnalyzedBarrelReexport).importedByFiles.push(
           originFilePath
         );
-        return true;
+        return rootModuleInfo;
       }
     }
 
     // Finally, if we got here, we couldn't resolve the root export
-    return false;
+    return undefined;
   }
 
   traverse(
