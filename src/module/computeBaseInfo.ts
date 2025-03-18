@@ -7,10 +7,15 @@ import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
 import { isCodeFile } from '../util/code';
 
+// ESLint doesn't know what it's talking about, these are used
+// eslint-disable-next-line no-unused-vars
+type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
+
 type ComputeBaseInfoOptions = {
   sourceRoot: string;
   rootImportAlias: string | undefined;
   allowAliaslessRootImports: boolean;
+  isEntryPointCheck: IsEntryPointCheck;
 };
 
 /**
@@ -20,6 +25,7 @@ export function computeBaseInfo({
   sourceRoot,
   rootImportAlias,
   allowAliaslessRootImports,
+  isEntryPointCheck,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   // Trim off the end `/` in case it was supplied
   if (sourceRoot.endsWith('/')) {
@@ -46,7 +52,10 @@ export function computeBaseInfo({
   for (const potentialFilePath of potentialFiles) {
     const filePath = join(sourceRoot, potentialFilePath);
     if (isCodeFile(filePath)) {
-      info.files[filePath] = computeFileDetails(parseFile(filePath));
+      info.files[filePath] = computeFileDetails({
+        ...parseFile(filePath),
+        isEntryPointCheck,
+      });
     } else if (!statSync(filePath).isDirectory()) {
       info.files[filePath] = {
         fileType: 'other',
@@ -78,7 +87,8 @@ function walkExportDestructure(
   fileContents: string,
   fileDetails: BaseCodeFileDetails,
   statementNode: ExportDeclaration,
-  node: TSESTree.DestructuringPattern
+  node: TSESTree.DestructuringPattern,
+  isEntryPointCheck: IsEntryPointCheck
 ) {
   switch (node.type) {
     // export const [ foo, bar ] = []
@@ -91,7 +101,8 @@ function walkExportDestructure(
             fileContents,
             fileDetails,
             statementNode,
-            elementNode
+            elementNode,
+            isEntryPointCheck
           );
         }
       }
@@ -108,7 +119,8 @@ function walkExportDestructure(
             fileContents,
             fileDetails,
             statementNode,
-            propertyNode
+            propertyNode,
+            isEntryPointCheck
           );
           continue;
         }
@@ -121,9 +133,10 @@ function walkExportDestructure(
               statementNode,
               specifierNode: propertyNode.value,
               exportName: propertyNode.value.name,
-
-              // TODO
-              isEntryPoint: false,
+              isEntryPoint: isEntryPointCheck(
+                filePath,
+                propertyNode.value.name
+              ),
             });
             break;
           }
@@ -136,7 +149,8 @@ function walkExportDestructure(
               fileContents,
               fileDetails,
               statementNode,
-              propertyNode.value
+              propertyNode.value,
+              isEntryPointCheck
             );
             break;
           }
@@ -166,9 +180,7 @@ function walkExportDestructure(
           statementNode,
           specifierNode: node.left,
           exportName: node.left.name,
-
-          // TODO
-          isEntryPoint: false,
+          isEntryPoint: isEntryPointCheck(filePath, node.left.name),
         });
       }
       // It's possible to do `export const [ { foo } = {} ]`
@@ -178,7 +190,8 @@ function walkExportDestructure(
           fileContents,
           fileDetails,
           statementNode,
-          node.left
+          node.left,
+          isEntryPointCheck
         );
       }
       break;
@@ -190,9 +203,7 @@ function walkExportDestructure(
         statementNode,
         specifierNode: node,
         exportName: node.name,
-
-        // TODO
-        isEntryPoint: false,
+        isEntryPoint: isEntryPointCheck(filePath, node.name),
       });
       break;
     }
@@ -213,7 +224,8 @@ function walkExportDestructure(
         fileContents,
         fileDetails,
         statementNode,
-        node.argument
+        node.argument,
+        isEntryPointCheck
       );
       break;
     }
@@ -250,10 +262,12 @@ function computeFileDetails({
   filePath,
   fileContents,
   ast,
+  isEntryPointCheck,
 }: {
   filePath: string;
   fileContents: string;
   ast: TSESTree.Program;
+  isEntryPointCheck: IsEntryPointCheck;
 }): BaseCodeFileDetails {
   const fileDetails: BaseCodeFileDetails = {
     fileType: 'code',
@@ -375,13 +389,12 @@ function computeFileDetails({
       // Check if this is export { foo }, which parses very different
       if ('specifiers' in statementNode && statementNode.specifiers.length) {
         for (const specifierNode of statementNode.specifiers) {
+          const exportName = getIdentifierOrStringValue(specifierNode.exported);
           fileDetails.exports.push({
             statementNode,
             specifierNode: specifierNode.exported,
-            exportName: getIdentifierOrStringValue(specifierNode.exported),
-
-            // TODO
-            isEntryPoint: false,
+            exportName,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
         }
         return;
@@ -409,9 +422,10 @@ function computeFileDetails({
                   statementNode,
                   specifierNode: declarationNode.id,
                   exportName: declarationNode.id.name,
-
-                  // TODO
-                  isEntryPoint: false,
+                  isEntryPoint: isEntryPointCheck(
+                    filePath,
+                    declarationNode.id.name
+                  ),
                 });
                 break;
               }
@@ -422,7 +436,8 @@ function computeFileDetails({
                   fileContents,
                   fileDetails,
                   statementNode,
-                  declarationNode.id
+                  declarationNode.id,
+                  isEntryPointCheck
                 );
                 break;
               }
@@ -433,7 +448,8 @@ function computeFileDetails({
                   fileContents,
                   fileDetails,
                   statementNode,
-                  declarationNode.id
+                  declarationNode.id,
+                  isEntryPointCheck
                 );
                 break;
               }
@@ -453,15 +469,14 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.TSInterfaceDeclaration:
         case TSESTree.AST_NODE_TYPES.TSEnumDeclaration:
         case TSESTree.AST_NODE_TYPES.TSTypeAliasDeclaration: {
+          const exportName = isDefault(statementNode)
+            ? 'default'
+            : statementNode.declaration.id.name;
           fileDetails.exports.push({
             statementNode,
             specifierNode: statementNode.declaration.id,
-            exportName: isDefault(statementNode)
-              ? 'default'
-              : statementNode.declaration.id.name,
-
-            // TODO
-            isEntryPoint: false,
+            exportName,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
           break;
         }
@@ -476,9 +491,7 @@ function computeFileDetails({
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
-
-              // TODO
-              isEntryPoint: false,
+              isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
           } else {
             // TODO: I'm pretty certain that declaration id missing means that this is a function expression, which
@@ -494,9 +507,10 @@ function computeFileDetails({
               statementNode,
               specifierNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
-
-              // TODO
-              isEntryPoint: false,
+              isEntryPoint: isEntryPointCheck(
+                filePath,
+                statementNode.declaration.id.name
+              ),
             });
           }
 
@@ -512,9 +526,7 @@ function computeFileDetails({
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
-
-              // TODO
-              isEntryPoint: false,
+              isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
           } else {
             if (!statementNode.declaration.id) {
@@ -526,9 +538,10 @@ function computeFileDetails({
               statementNode,
               specifierNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
-
-              // TODO
-              isEntryPoint: false,
+              isEntryPoint: isEntryPointCheck(
+                filePath,
+                statementNode.declaration.id.name
+              ),
             });
           }
           break;
@@ -537,13 +550,12 @@ function computeFileDetails({
         // export default foo
         case TSESTree.AST_NODE_TYPES.Identifier: {
           const { name } = statementNode.declaration;
+          const exportName = isDefault(statementNode) ? 'default' : name;
           fileDetails.exports.push({
             statementNode,
             specifierNode: statementNode.declaration,
-            exportName: isDefault(statementNode) ? 'default' : name,
-
-            // TODO
-            isEntryPoint: false,
+            exportName,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
           break;
         }
@@ -556,9 +568,7 @@ function computeFileDetails({
               statementNode,
               specifierNode: statementNode.declaration,
               exportName: 'default',
-
-              // TODO
-              isEntryPoint: false,
+              isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
             break;
           }
@@ -595,17 +605,16 @@ function computeFileDetails({
 
       // Otherwise, this is a single reexport, so we iterate through each specifier
       for (const specifierNode of statementNode.specifiers) {
+        const exportName = getIdentifierOrStringValue(specifierNode.exported);
         fileDetails.reexports.push({
           reexportType: 'single',
           statementNode,
           specifierNode,
           moduleSpecifier,
           importName: getIdentifierOrStringValue(specifierNode.local),
-          exportName: getIdentifierOrStringValue(specifierNode.exported),
+          exportName,
           isTypeReexport: statementNode.exportKind === 'type',
-
-          // TODO
-          isEntryPoint: false,
+          isEntryPoint: isEntryPointCheck(filePath, exportName),
         });
       }
     },

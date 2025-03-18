@@ -20,6 +20,7 @@ it('Computes resolved into', () => {
       sourceRoot: TEST_PROJECT_DIR,
       rootImportAlias: '@',
       allowAliaslessRootImports: true,
+      isEntryPointCheck: () => false,
     })
   );
 

@@ -14,6 +14,7 @@ it('Computes base info', () => {
         sourceRoot: TEST_PROJECT_DIR,
         rootImportAlias: '@',
         allowAliaslessRootImports: true,
+        isEntryPointCheck: () => false,
       })
     )
   );
