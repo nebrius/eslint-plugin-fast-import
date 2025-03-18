@@ -71,7 +71,7 @@ type AnalyzedImportBase =
       /**
        * The name of the original export
        */
-      rootName: string;
+      rootExportName: string;
 
       /**
        * What is the actual root export type. Sometimes a named import can trace to a named barrel export, in which case

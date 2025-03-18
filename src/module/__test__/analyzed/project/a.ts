@@ -4,6 +4,9 @@ import { d1, f } from './e';
 import { join } from './f';
 import { SourceCode } from './g';
 
+// entry point reexport
+export type { SourceCode as ASourceCode } from './f';
+
 console.log(c1);
 console.log(b);
 console.log(d1);

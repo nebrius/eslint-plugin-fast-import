@@ -130,8 +130,6 @@ export function computeAnalyzedInfo(
     }
   }
 
-  // TODO: Handle export/reexports that are entry points
-
   return analyzedProjectInfo;
 }
 
@@ -190,7 +188,7 @@ function analyzeSingleImport(
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (originAnalyzedImport.rootModuleType === 'firstPartyCode') {
         originAnalyzedImport.rootModulePath = currentFile;
-        originAnalyzedImport.rootName = exportEntry.exportName;
+        originAnalyzedImport.rootExportName = exportEntry.exportName;
         originAnalyzedImport.rootExportType = 'export';
       }
 
@@ -223,7 +221,9 @@ function analyzeSingleImport(
           return true;
         }
         case 'firstPartyCode': {
-          reexportFiles.push(currentFile);
+          if (!reexportFiles.includes(currentFile)) {
+            reexportFiles.push(currentFile);
+          }
           singleReexportEntry.importedByFiles.push(originFilePath);
           return traverse(
             singleReexportEntry.resolvedModulePath,
@@ -247,7 +247,8 @@ function analyzeSingleImport(
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
           if (originAnalyzedImport.rootModuleType === 'firstPartyCode') {
             originAnalyzedImport.rootModulePath = currentFile;
-            originAnalyzedImport.rootName = barrelReexportEntry.exportName;
+            originAnalyzedImport.rootExportName =
+              barrelReexportEntry.exportName;
             originAnalyzedImport.rootExportType = 'namedBarrelReexport';
           }
         }
@@ -350,7 +351,9 @@ function analyzeBarrelImport(
       if (reexportEntry.moduleType !== 'firstPartyCode') {
         continue;
       }
-      reexportFiles.push(currentFile);
+      if (!reexportFiles.includes(currentFile)) {
+        reexportFiles.push(currentFile);
+      }
       if (reexportEntry.reexportType === 'barrel') {
         (reexportEntry as AnalyzedBarrelReexport).barrelImportedByFiles.push(
           originFilePath
