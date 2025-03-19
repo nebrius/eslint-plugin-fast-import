@@ -226,7 +226,6 @@ function analyzeSingleImport(
         rootExportName: exportEntry.exportName,
         rootExportType: 'export',
       };
-      Object.assign(originAnalyzedImport, rootModuleInfo);
       return rootModuleInfo;
     }
 
@@ -238,18 +237,15 @@ function analyzeSingleImport(
       switch (singleReexportEntry.moduleType) {
         case 'builtin':
         case 'thirdParty': {
-          const rootModuleInfo: AnalyzedImportBase = {
+          return {
             rootModuleType: singleReexportEntry.moduleType,
           };
-          Object.assign(originAnalyzedImport, rootModuleInfo);
-          return rootModuleInfo;
         }
         case 'firstPartyOther': {
           const rootModuleInfo: AnalyzedImportBase = {
             rootModuleType: 'firstPartyOther',
             rootModulePath: currentFile,
           };
-          Object.assign(originAnalyzedImport, rootModuleInfo);
           Object.assign(singleReexportEntry, rootModuleInfo);
           return rootModuleInfo;
         }
@@ -277,15 +273,12 @@ function analyzeSingleImport(
     if (barrelReexportEntry) {
       if (barrelReexportEntry.moduleType === 'firstPartyCode') {
         if (initialImportType === 'single' && barrelReexportEntry.exportName) {
-          const rootModuleInfo: AnalyzedImportBase = {
+          return {
             rootModuleType: 'firstPartyCode',
             rootModulePath: currentFile,
             rootExportName: barrelReexportEntry.exportName,
             rootExportType: 'namedBarrelReexport',
           };
-
-          Object.assign(originAnalyzedImport, rootModuleInfo);
-          return rootModuleInfo;
         }
 
         analyzeBarrelImport(
@@ -355,10 +348,13 @@ function analyzeSingleImport(
     return undefined;
   }
 
-  traverse(
+  const rootModuleInfo = traverse(
     originAnalyzedImport.resolvedModulePath,
     originAnalyzedImport.importName
   );
+  if (rootModuleInfo) {
+    Object.assign(originAnalyzedImport, rootModuleInfo);
+  }
 }
 
 function analyzeBarrelImport(
