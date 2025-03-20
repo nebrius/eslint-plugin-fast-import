@@ -1,4 +1,4 @@
-import { createRule, getESMInfo } from '../util';
+import { createRule } from '../util';
 
 export const noUnusedExports = createRule({
   name: 'no-unused-exports',
@@ -16,7 +16,7 @@ export const noUnusedExports = createRule({
   },
   defaultOptions: [],
   create(context, options) {
-    const esmInfo = getESMInfo(context.filename);
+    console.log(options);
     return {};
   },
 });

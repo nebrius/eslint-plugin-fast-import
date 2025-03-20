@@ -52,4 +52,10 @@ export default [
     ...jest.configs['flat/recommended']
   },
   ...compat.extends('eslint:recommended'),
+  {
+    rules: {
+      // Handled by typescript eslint
+      'no-unused-vars': 'off'
+    }
+  },
 ];

@@ -18,6 +18,22 @@
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
-    }
+    },
+    {
+      "name": "Debug ESLint",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect",
+        "${workspaceRoot}/node_modules/.bin/eslint"
+      ],
+      "args": [
+        "-c",
+        "eslint.config.test.mjs",
+        "src/**/__test__/**/project/**/*"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
   ]
 }
