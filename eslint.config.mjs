@@ -1,5 +1,3 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -7,12 +5,10 @@ import tseslint from 'typescript-eslint';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import jest from 'eslint-plugin-jest';
 import globals from 'globals';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { getDirname } from 'cross-dirname';
 
 const compat = new FlatCompat({
-  baseDirectory: __dirname,
+  baseDirectory: getDirname(),
   recommendedConfig: js.configs.recommended,
   allConfig: js.configs.all,
 });
@@ -39,7 +35,7 @@ export default [
       languageOptions: {
         parserOptions: {
           projectService: true,
-          tsconfigRootDir: import.meta.dirname,
+          tsconfigRootDir: getDirname(),
         },
       },
       rules: {

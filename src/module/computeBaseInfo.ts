@@ -7,15 +7,14 @@ import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
 import { isCodeFile } from '../util/code';
 
-// ESLint doesn't know what it's talking about, these are used
-// eslint-disable-next-line no-unused-vars
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
+// TODO: need an option for ignored files
 type ComputeBaseInfoOptions = {
   sourceRoot: string;
-  rootImportAlias: string | undefined;
-  allowAliaslessRootImports: boolean;
-  isEntryPointCheck: IsEntryPointCheck;
+  rootImportAlias?: string;
+  allowAliaslessRootImports?: boolean;
+  isEntryPointCheck?: IsEntryPointCheck;
 };
 
 /**
@@ -24,8 +23,8 @@ type ComputeBaseInfoOptions = {
 export function computeBaseInfo({
   sourceRoot,
   rootImportAlias,
-  allowAliaslessRootImports,
-  isEntryPointCheck,
+  allowAliaslessRootImports = false,
+  isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   // Trim off the end `/` in case it was supplied
   if (sourceRoot.endsWith('/')) {

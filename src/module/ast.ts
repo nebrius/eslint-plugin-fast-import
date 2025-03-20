@@ -40,8 +40,6 @@ type WalkOptions = {
   fileContents: string;
   ast: TSESTree.Program;
 
-  // Not sure why ESLint is flagging node as unused, since it absolutely is
-  /* eslint-disable no-unused-vars */
   /**
    * A callback to be called for all of the various import statement nodes,
    * including dynamic import statements
@@ -58,7 +56,6 @@ type WalkOptions = {
    * A callback to be called for all of the various reexport statement nodes
    */
   reexportDeclaration: (node: ReexportDeclaration) => void;
-  /* eslint-enable no-unused-vars */
 };
 
 /**
