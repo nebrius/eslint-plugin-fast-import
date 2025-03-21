@@ -6,8 +6,9 @@ import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescrip
 import jest from 'eslint-plugin-jest';
 import globals from 'globals';
 import { getDirname } from 'cross-dirname';
-import { includeIgnoreFile } from "@eslint/compat";
+import { includeIgnoreFile } from '@eslint/compat';
 import { join } from 'node:path';
+import fastEsm from './dist/index.js';
 
 const compat = new FlatCompat({
   baseDirectory: getDirname(),
@@ -24,41 +25,47 @@ export default [
           alwaysTryTypes: true,
         }),
       ],
+      'fast-esm': {
+        sourceRoot: join(getDirname(), 'src'),
+      },
     },
-    files: ['**/*.{js,mjs,jsx,ts,tsx,mts'],
+    files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {
       globals: globals.node,
-    }
+    },
+    plugins: { 'fast-esm': fastEsm.default },
+    rules: {
+      'fast-esm/no-unused-exports': 'error',
+    },
+  },
+  {
+    files: ['**/__test__/**/*.{js,mjs,jsx,ts,tsx,mts}'],
+    rules: {
+      'fast-esm/no-unused-exports': 'off',
+    },
   },
   eslintPluginPrettierRecommended,
-  ...tseslint.config(
-    tseslint.configs.strictTypeChecked,
-    tseslint.configs.strictTypeChecked,
-    {
-      files: ['**/*.{ts,tsx,mts}'],
-      languageOptions: {
-        parserOptions: {
-          projectService: true,
-          tsconfigRootDir: getDirname(),
-        },
+  ...tseslint.config(tseslint.configs.strictTypeChecked, {
+    files: ['**/*.{ts,tsx,mts}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: getDirname(),
       },
-      rules: {
-        '@typescript-eslint/consistent-type-imports': 'error',
-      },
-    }
-  ),
+    },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  }),
   {
     files: ['**/*.test.ts'],
-    ...jest.configs['flat/recommended']
+    ...jest.configs['flat/recommended'],
   },
   ...compat.extends('eslint:recommended'),
   {
     rules: {
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
-
-      // Handled by TypeScript itself
-      'no-undef': 'off'
-    }
+    },
   },
 ];
