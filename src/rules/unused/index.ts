@@ -1,4 +1,5 @@
 import { createRule, getESMInfo } from '../util';
+import type { FromSchema } from 'json-schema-to-ts';
 
 function isNonTestFile(filePath: string) {
   return (
@@ -8,13 +9,26 @@ function isNonTestFile(filePath: string) {
   );
 }
 
-export const noUnusedExports = createRule({
+const schema = {
+  type: 'object',
+  properties: {
+    allowNonTestTypeExports: { type: 'boolean' },
+  },
+  additionalProperties: false,
+} as const;
+
+type Options = FromSchema<typeof schema>;
+
+export const noUnusedExports = createRule<
+  [Options],
+  'noUnusedExports' | 'noTestOnlyImports'
+>({
   name: 'no-unused-exports',
   meta: {
     docs: {
       description: 'Ensures that all exports are imported in another file',
     },
-    schema: [],
+    schema: [schema],
     fixable: undefined,
     type: 'problem',
     messages: {
@@ -23,12 +37,20 @@ export const noUnusedExports = createRule({
         'Exports in non-test files must be imported by other non-test files',
     },
   },
-  defaultOptions: [],
+  defaultOptions: [
+    {
+      allowNonTestTypeExports: true,
+    },
+  ],
   create(context) {
     // .d.ts files by definition don't have direct imports, and so can't be checked
     if (context.filename.endsWith('.d.ts')) {
       return {};
     }
+
+    // For some reason, ESLint isn't applying defaults
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const { allowNonTestTypeExports = true } = context.options[0] ?? {};
 
     const esmInfo = getESMInfo(context);
 
@@ -50,7 +72,8 @@ export const noUnusedExports = createRule({
         });
       } else if (
         isNonTestFile(context.filename) &&
-        !exportEntry.importedByFiles.some(isNonTestFile)
+        !exportEntry.importedByFiles.some(isNonTestFile) &&
+        !allowNonTestTypeExports
       ) {
         context.report({
           messageId: 'noTestOnlyImports',
