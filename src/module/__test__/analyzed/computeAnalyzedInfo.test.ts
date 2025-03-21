@@ -3,8 +3,9 @@ import { stripNodes } from '../util';
 import { computeAnalyzedInfo } from '../../computeAnalyzedInfo';
 import { computeResolvedInfo } from '../../computeResolvedInfo';
 import { computeBaseInfo } from '../../computeBaseInfo';
+import { getDirname } from 'cross-dirname';
 
-const TEST_PROJECT_DIR = join(__dirname, 'project');
+const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');

@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { noUnusedExports } from './rules/unused';
+import { getDirname } from 'cross-dirname';
 
 const { name, version } = JSON.parse(
-  readFileSync(join(__dirname, '..', 'package.json'), 'utf8')
+  readFileSync(join(getDirname(), '..', 'package.json'), 'utf8')
 ) as { name: string; version: string };
 
 const plugin = {

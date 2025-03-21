@@ -2,8 +2,9 @@ import { join } from 'path';
 import { stripNodes } from '../util';
 import { computeResolvedInfo } from '../../computeResolvedInfo';
 import { computeBaseInfo } from '../../computeBaseInfo';
+import { getDirname } from 'cross-dirname';
 
-const TEST_PROJECT_DIR = join(__dirname, 'project');
+const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'one', 'b.ts');
 const FILE_C = join(TEST_PROJECT_DIR, 'one', 'c', 'index.ts');

@@ -65,7 +65,7 @@ export function getESMInfo<
   MessageIds extends string,
   Options extends readonly unknown[],
 >(context: RuleContext<MessageIds, Options>) {
-  const { filename } = context;
+  const filename = context.filename;
   // const { ast } = context.sourceCode;
 
   // If we haven't initialized the project info yet, do so now

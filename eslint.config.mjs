@@ -6,6 +6,8 @@ import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescrip
 import jest from 'eslint-plugin-jest';
 import globals from 'globals';
 import { getDirname } from 'cross-dirname';
+import { includeIgnoreFile } from "@eslint/compat";
+import { join } from 'node:path';
 
 const compat = new FlatCompat({
   baseDirectory: getDirname(),
@@ -14,6 +16,7 @@ const compat = new FlatCompat({
 });
 
 export default [
+  includeIgnoreFile(join(getDirname(), '.gitignore')),
   {
     settings: {
       'import/resolver-next': [
@@ -22,6 +25,7 @@ export default [
         }),
       ],
     },
+    files: ['**/*.{js,mjs,jsx,ts,tsx,mts'],
     languageOptions: {
       globals: globals.node,
     }
@@ -31,7 +35,7 @@ export default [
     tseslint.configs.strictTypeChecked,
     tseslint.configs.strictTypeChecked,
     {
-      files: ['src/**/*.{ts,tsx}'],
+      files: ['**/*.{ts,tsx,mts}'],
       languageOptions: {
         parserOptions: {
           projectService: true,
@@ -50,8 +54,11 @@ export default [
   ...compat.extends('eslint:recommended'),
   {
     rules: {
-      // Handled by typescript eslint
-      'no-unused-vars': 'off'
+      // Handled by TypeScript eslint
+      'no-unused-vars': 'off',
+
+      // Handled by TypeScript itself
+      'no-undef': 'off'
     }
   },
 ];

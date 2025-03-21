@@ -30,7 +30,7 @@
       "args": [
         "-c",
         "eslint.config.test.mjs",
-        "testproject/a.ts"
+        "testProject/**/*"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"

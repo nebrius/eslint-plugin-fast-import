@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint \"./src/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint --fix \"./src/**/*.{ts,tsx}\"",
+    "lint": "eslint \"**/*.{ts,tsx}\"",
+    "lint:fix": "eslint --fix \"**/*.{ts,tsx}\"",
     "build": "tsc",
     "test": "jest src"
   },
@@ -17,6 +17,7 @@
     "typescript-eslint": "^8.19.1"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.7",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
     "eslint": "^9.17.0",

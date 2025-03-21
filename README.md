@@ -11,3 +11,5 @@ export * from 'node:path';
 ```
 
 TODO: create lint rule preventing the above
+
+Case-sensitive weirdness when specifying file patterns to CLI, e.g. it works as case insensitive, but also doesn't
