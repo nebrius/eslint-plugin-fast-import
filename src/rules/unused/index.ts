@@ -25,6 +25,11 @@ export const noUnusedExports = createRule({
   },
   defaultOptions: [],
   create(context) {
+    // .d.ts files by definition don't have direct imports, and so can't be checked
+    if (context.filename.endsWith('.d.ts')) {
+      return {};
+    }
+
     const esmInfo = getESMInfo(context);
 
     // No project info means this file wasn't found as part of the project, e.g. because it's ignored

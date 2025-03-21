@@ -126,14 +126,14 @@ type AnalyzedReexportBase = {
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
 export type AnalyzedBarrelImport = ResolvedBarrelImport;
 export type AnalyzedDynamicImport = ResolvedDynamicImport;
-export type AnalyzedImport =
+type AnalyzedImport =
   | AnalyzedSingleImport
   | AnalyzedBarrelImport
   | AnalyzedDynamicImport;
 
 /* Exports */
 
-export type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
+type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
 
 /* Reexports */
 
@@ -142,11 +142,11 @@ export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedReexportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
   AnalyzedReexportBase;
-export type AnalyzedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
+type AnalyzedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 /* File Details */
 
-export type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
+type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
 
 export type AnalyzedCodeFileDetails = {
   fileType: 'code';
@@ -155,9 +155,7 @@ export type AnalyzedCodeFileDetails = {
   reexports: AnalyzedReexport[];
 };
 
-export type AnalyzedFileDetails =
-  | AnalyzedOtherFileDetails
-  | AnalyzedCodeFileDetails;
+type AnalyzedFileDetails = AnalyzedOtherFileDetails | AnalyzedCodeFileDetails;
 
 export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
   /**

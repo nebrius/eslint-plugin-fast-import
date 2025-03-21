@@ -6,6 +6,7 @@ import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
 import { isCodeFile } from '../util/code';
+import deepEqual from 'fast-deep-equal';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -63,6 +64,59 @@ export function computeBaseInfo({
   }
 
   return info;
+}
+
+type ComputeFileDetailsOptions = {
+  filePath: string;
+  fileContents: string;
+  ast: TSESTree.Program;
+  isEntryPointCheck: IsEntryPointCheck;
+};
+
+export function addBaseInfoForFile(
+  baseProjectInfo: BaseProjectInfo,
+  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
+) {
+  if (isCodeFile(filePath)) {
+    baseProjectInfo.files[filePath] = computeFileDetails({
+      filePath,
+      fileContents,
+      ast,
+      isEntryPointCheck,
+    });
+  } else {
+    baseProjectInfo.files[filePath] = { fileType: 'other' };
+  }
+}
+
+export function updateBaseInfoForFile(
+  baseProjectInfo: BaseProjectInfo,
+  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
+): boolean {
+  if (!isCodeFile(filePath)) {
+    throw new InternalError('updateBaseInfoForFile called for non-code file');
+  }
+  deleteBaseInfoForFile(baseProjectInfo, filePath);
+  const updatedFileDetails = computeFileDetails({
+    filePath,
+    fileContents,
+    ast,
+    isEntryPointCheck,
+  });
+  if (deepEqual(updatedFileDetails, baseProjectInfo.files[filePath])) {
+    return false;
+  }
+  baseProjectInfo.files[filePath] = updatedFileDetails;
+  return true;
+}
+
+// TODO: wire in deletions
+// eslint-disable-next-line fast-esm/no-unused-exports
+export function deleteBaseInfoForFile(
+  baseProjectInfo: BaseProjectInfo,
+  filePath: string
+) {
+  delete baseProjectInfo.files[filePath];
 }
 
 class UnknownNodeTypeError extends InternalError {
@@ -262,12 +316,7 @@ function computeFileDetails({
   fileContents,
   ast,
   isEntryPointCheck,
-}: {
-  filePath: string;
-  fileContents: string;
-  ast: TSESTree.Program;
-  isEntryPointCheck: IsEntryPointCheck;
-}): BaseCodeFileDetails {
+}: ComputeFileDetailsOptions): BaseCodeFileDetails {
   const fileDetails: BaseCodeFileDetails = {
     fileType: 'code',
     imports: [],

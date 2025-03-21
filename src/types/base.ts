@@ -243,7 +243,7 @@ export type BaseCodeFileDetails = {
   reexports: BaseReexport[];
 };
 
-export type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;
+type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;
 
 export type BaseProjectInfo = {
   /**

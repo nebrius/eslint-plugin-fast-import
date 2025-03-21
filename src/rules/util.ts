@@ -2,15 +2,27 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 import type { RuleContext } from '@typescript-eslint/utils/ts-eslint';
 import type { AnalyzedProjectInfo } from '../types/analyzed';
 import { computeAnalyzedInfo } from '../module/computeAnalyzedInfo';
-import { computeResolvedInfo } from '../module/computeResolvedInfo';
-import { computeBaseInfo } from '../module/computeBaseInfo';
+import {
+  addResolvedInfoForFile,
+  computeResolvedInfo,
+  updateResolvedInfoForFile,
+} from '../module/computeResolvedInfo';
+import {
+  addBaseInfoForFile,
+  computeBaseInfo,
+  updateBaseInfoForFile,
+} from '../module/computeBaseInfo';
 import { InternalError } from '../util/error';
+import type { BaseProjectInfo } from '../types/base';
+import type { ResolvedProjectInfo } from '../types/resolved';
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
     `https://github.com/nebrius/esm-utils/tree/main/src/rules/${name}/README.md`
 );
 
+let baseProjectInfo: BaseProjectInfo | null = null;
+let resolvedProjectInfo: ResolvedProjectInfo | null = null;
 let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
 function computeInitialProjectInfo<
   MessageIds extends string,
@@ -47,38 +59,65 @@ function computeInitialProjectInfo<
     );
   }
 
-  analyzedProjectInfo = computeAnalyzedInfo(
-    computeResolvedInfo(
-      computeBaseInfo({
-        sourceRoot,
-        rootImportAlias,
-        allowAliaslessRootImports,
+  baseProjectInfo = computeBaseInfo({
+    sourceRoot,
+    rootImportAlias,
+    allowAliaslessRootImports,
 
-        // TODO
-        isEntryPointCheck: () => false,
-      })
-    )
-  );
+    // TODO
+    isEntryPointCheck: () => false,
+  });
+  resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
+  analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
 }
 
 export function getESMInfo<
   MessageIds extends string,
   Options extends readonly unknown[],
 >(context: RuleContext<MessageIds, Options>) {
-  const filename = context.filename;
-  // const { ast } = context.sourceCode;
-
   // If we haven't initialized the project info yet, do so now
   if (!analyzedProjectInfo) {
     computeInitialProjectInfo(context);
   }
-  if (!analyzedProjectInfo) {
-    throw new InternalError('Analyzed project info not initialized');
+  if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
+    throw new InternalError('Project info not initialized');
   }
 
-  // TODO: cache updating here
+  const baseOptions = {
+    filePath: context.filename,
+    fileContents: context.sourceCode.getText(),
+    ast: context.sourceCode.ast,
 
-  const fileInfo = analyzedProjectInfo.files[filename];
+    // TODO
+    isEntryPointCheck: () => false,
+  };
+
+  // Check if we're updating file info or adding a new file
+  if (context.filename in analyzedProjectInfo.files) {
+    const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
+      baseProjectInfo,
+      baseOptions
+    );
+
+    if (shouldUpdateDerivedProjectInfo) {
+      updateResolvedInfoForFile(
+        context.filename,
+        baseProjectInfo,
+        resolvedProjectInfo
+      );
+      analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+    }
+  } else {
+    addBaseInfoForFile(baseProjectInfo, baseOptions);
+    addResolvedInfoForFile(
+      context.filename,
+      baseProjectInfo,
+      resolvedProjectInfo
+    );
+    analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+  }
+
+  const fileInfo = analyzedProjectInfo.files[context.filename];
 
   // Records are too smart for their own good sometimes, this actually can be undefined
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition

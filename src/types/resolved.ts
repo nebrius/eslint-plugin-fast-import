@@ -56,7 +56,7 @@ export type Resolved =
 export type ResolvedSingleImport = BaseSingleImport & Resolved;
 export type ResolvedBarrelImport = BaseBarrelImport & Resolved;
 export type ResolvedDynamicImport = BaseDynamicImport & Resolved;
-export type ResolvedImport =
+type ResolvedImport =
   | ResolvedSingleImport
   | ResolvedBarrelImport
   | ResolvedDynamicImport;
@@ -69,7 +69,7 @@ export type ResolvedExport = BaseExport;
 
 export type ResolvedSingleReexport = BaseSingleReexport & Resolved;
 export type ResolvedBarrelReexport = BaseBarrelReexport & Resolved;
-export type ResolvedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
+type ResolvedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 /* File Details */
 
@@ -82,9 +82,7 @@ export type ResolvedCodeFileDetails = {
   reexports: ResolvedReexport[];
 };
 
-export type ResolvedFileDetails =
-  | ResolvedOtherFileDetails
-  | ResolvedCodeFileDetails;
+type ResolvedFileDetails = ResolvedOtherFileDetails | ResolvedCodeFileDetails;
 
 export type ResolvedProjectInfo = Omit<BaseProjectInfo, 'files'> & {
   /**

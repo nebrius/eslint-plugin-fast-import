@@ -1,4 +1,4 @@
-import type { BaseProjectInfo } from '../types/base';
+import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base';
 import type {
   Resolved,
   ResolvedCodeFileDetails,
@@ -10,77 +10,200 @@ import { basename, dirname, extname, join, resolve } from 'node:path';
 import { isCodeFile } from '../util/code';
 
 export function computeResolvedInfo(
-  baseInfo: BaseProjectInfo
+  baseProjectInfo: BaseProjectInfo
 ): ResolvedProjectInfo {
-  computeFolderTree(baseInfo);
+  computeFolderTree(baseProjectInfo);
 
-  const resolvedInfo: ResolvedProjectInfo = {
-    ...baseInfo,
+  const resolvedProjectInfo: ResolvedProjectInfo = {
+    ...baseProjectInfo,
     files: {},
   };
 
-  for (const [filePath, fileDetails] of Object.entries(baseInfo.files)) {
-    if (fileDetails.fileType !== 'code') {
-      resolvedInfo.files[filePath] = {
+  for (const [filePath, baseFileDetails] of Object.entries(
+    baseProjectInfo.files
+  )) {
+    if (baseFileDetails.fileType !== 'code') {
+      resolvedProjectInfo.files[filePath] = {
         fileType: 'other',
       };
       continue;
     }
-
-    const resolvedFileInfo: ResolvedCodeFileDetails = {
+    const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       imports: [],
       exports: [],
       reexports: [],
     };
-    resolvedInfo.files[filePath] = resolvedFileInfo;
+    resolvedProjectInfo.files[filePath] = resolvedCodeFileDetails;
+    populateFileDetails(
+      baseProjectInfo,
+      filePath,
+      baseFileDetails,
+      resolvedCodeFileDetails
+    );
+  }
+  return resolvedProjectInfo;
+}
 
-    // Resolve imports
-    for (const importDetails of fileDetails.imports) {
-      // TODO: handle dynamic imports with non-static paths, represented by `moduleSpecifier` being undefined?
-      if (!importDetails.moduleSpecifier) {
-        continue;
-      }
-      const resolvedModuleSpecifier = resolveModuleSpecifier({
-        baseInfo,
-        filePath,
-        moduleSpecifier: importDetails.moduleSpecifier,
-        isTypeImport:
-          importDetails.importType === 'single'
-            ? importDetails.isTypeImport
-            : false,
-      });
-      resolvedFileInfo.imports.push({
-        ...importDetails,
-        ...resolvedModuleSpecifier,
-      });
+export function addResolvedInfoForFile(
+  filePath: string,
+  newBaseProjectInfo: BaseProjectInfo,
+  previousResolvedProjectInfo: ResolvedProjectInfo
+) {
+  if (isCodeFile(filePath)) {
+    const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
+      fileType: 'code',
+      imports: [],
+      exports: [],
+      reexports: [],
+    };
+    previousResolvedProjectInfo.files[filePath] = resolvedCodeFileDetails;
+    populateFileDetails(
+      newBaseProjectInfo,
+      filePath,
+      newBaseProjectInfo.files[filePath] as BaseCodeFileDetails,
+      resolvedCodeFileDetails
+    );
+  } else {
+    previousResolvedProjectInfo.files[filePath] = {
+      fileType: 'other',
+    };
+  }
+}
+
+function getFileReferences(
+  previousResolvedProjectInfo: ResolvedProjectInfo,
+  filePath: string
+) {
+  const fileReferences = [];
+  for (const [candidateFilePath, candidateFileDetails] of Object.entries(
+    previousResolvedProjectInfo.files
+  )) {
+    if (candidateFileDetails.fileType !== 'code') {
+      continue;
     }
-
-    // Resolve re-exports
-    for (const reexportDetails of fileDetails.reexports) {
-      const resolvedModuleSpecifier = resolveModuleSpecifier({
-        baseInfo,
-        filePath,
-        moduleSpecifier: reexportDetails.moduleSpecifier,
-        isTypeImport:
-          reexportDetails.reexportType === 'single'
-            ? reexportDetails.isTypeReexport
-            : false,
-      });
-      resolvedFileInfo.reexports.push({
-        ...reexportDetails,
-        ...resolvedModuleSpecifier,
-      });
-    }
-
-    // We don't need to do anything for resolved exports, but we _do_ want to deep-ish clone each export's details
-    for (const exportDetails of fileDetails.exports) {
-      resolvedFileInfo.exports.push({
-        ...exportDetails,
-      });
+    if (
+      candidateFileDetails.imports.some(
+        (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
+      ) ||
+      candidateFileDetails.reexports.some(
+        (r) => 'resolvedModulePath' in r && r.resolvedModulePath === filePath
+      )
+    ) {
+      fileReferences.push(candidateFilePath);
     }
   }
-  return resolvedInfo;
+  return fileReferences;
+}
+
+export function updateResolvedInfoForFile(
+  filePath: string,
+  newBaseProjectInfo: BaseProjectInfo,
+  previousResolvedProjectInfo: ResolvedProjectInfo
+) {
+  const filePathsToUpdate = [
+    filePath,
+    ...getFileReferences(previousResolvedProjectInfo, filePath),
+  ];
+  for (const filePathToUpdate of filePathsToUpdate) {
+    const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
+      fileType: 'code',
+      imports: [],
+      exports: [],
+      reexports: [],
+    };
+    previousResolvedProjectInfo.files[filePathToUpdate] =
+      resolvedCodeFileDetails;
+    populateFileDetails(
+      newBaseProjectInfo,
+      filePathToUpdate,
+      newBaseProjectInfo.files[filePathToUpdate] as BaseCodeFileDetails,
+      resolvedCodeFileDetails
+    );
+  }
+}
+
+// TODO: wire in deletions
+// eslint-disable-next-line fast-esm/no-unused-exports
+export function deleteResolvedInfoForFile(
+  filePath: string,
+  newBaseProjectInfo: BaseProjectInfo,
+  previousResolvedProjectInfo: ResolvedProjectInfo
+) {
+  const filePathsToUpdate = getFileReferences(
+    previousResolvedProjectInfo,
+    filePath
+  );
+  delete previousResolvedProjectInfo.files[filePath];
+  for (const filePathToUpdate of filePathsToUpdate) {
+    const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
+      fileType: 'code',
+      imports: [],
+      exports: [],
+      reexports: [],
+    };
+    previousResolvedProjectInfo.files[filePathToUpdate] =
+      resolvedCodeFileDetails;
+    populateFileDetails(
+      newBaseProjectInfo,
+      filePathToUpdate,
+      newBaseProjectInfo.files[filePathToUpdate] as BaseCodeFileDetails,
+      resolvedCodeFileDetails
+    );
+  }
+  // TODO
+}
+
+function populateFileDetails(
+  baseProjectInfo: BaseProjectInfo,
+  filePath: string,
+  baseCodeFileDetails: BaseCodeFileDetails,
+  resolvedCodeFileDetails: ResolvedCodeFileDetails
+) {
+  // Resolve imports
+  for (const importDetails of baseCodeFileDetails.imports) {
+    // TODO: handle dynamic imports with non-static paths, represented by `moduleSpecifier` being undefined?
+    if (!importDetails.moduleSpecifier) {
+      continue;
+    }
+    const resolvedModuleSpecifier = resolveModuleSpecifier({
+      baseProjectInfo,
+      filePath,
+      moduleSpecifier: importDetails.moduleSpecifier,
+      isTypeImport:
+        importDetails.importType === 'single'
+          ? importDetails.isTypeImport
+          : false,
+    });
+    resolvedCodeFileDetails.imports.push({
+      ...importDetails,
+      ...resolvedModuleSpecifier,
+    });
+  }
+
+  // Resolve re-exports
+  for (const reexportDetails of baseCodeFileDetails.reexports) {
+    const resolvedModuleSpecifier = resolveModuleSpecifier({
+      baseProjectInfo,
+      filePath,
+      moduleSpecifier: reexportDetails.moduleSpecifier,
+      isTypeImport:
+        reexportDetails.reexportType === 'single'
+          ? reexportDetails.isTypeReexport
+          : false,
+    });
+    resolvedCodeFileDetails.reexports.push({
+      ...reexportDetails,
+      ...resolvedModuleSpecifier,
+    });
+  }
+
+  // We don't need to do anything for resolved exports, but we _do_ want to deep-ish clone each export's details
+  for (const exportDetails of baseCodeFileDetails.exports) {
+    resolvedCodeFileDetails.exports.push({
+      ...exportDetails,
+    });
+  }
 }
 
 type FolderTreeNode = {
@@ -152,14 +275,14 @@ for (let i = formattedBuiltinModules.length - 1; i >= 0; i--) {
 }
 
 type ResolveModuleSpecifierOptions = {
-  baseInfo: BaseProjectInfo;
+  baseProjectInfo: BaseProjectInfo;
   filePath: string;
   moduleSpecifier: string;
   isTypeImport: boolean;
 };
 
 function resolveModuleSpecifier({
-  baseInfo,
+  baseProjectInfo,
   filePath,
   moduleSpecifier,
   isTypeImport,
@@ -200,7 +323,7 @@ function resolveModuleSpecifier({
     }
 
     function computeFilePath(file: string) {
-      return join(baseInfo.sourceRoot, folderSegments.join('/'), file);
+      return join(baseProjectInfo.sourceRoot, folderSegments.join('/'), file);
     }
 
     // First we check if this directly references a file + extension, and shortcircuit, e.g.:
@@ -288,24 +411,27 @@ function resolveModuleSpecifier({
   // Check if this path is relative, which means its first party
   if (moduleSpecifier.startsWith('.')) {
     const resolvedModulePath = resolveFirstPartyImport(
-      resolve(dirPath, moduleSpecifier).replace(baseInfo.sourceRoot + '/', '')
+      resolve(dirPath, moduleSpecifier).replace(
+        baseProjectInfo.sourceRoot + '/',
+        ''
+      )
     );
     return formatResolvedEntry(resolvedModulePath);
   }
 
   // Check if this path starts with the root import alias, which means its first party
   if (
-    baseInfo.rootImportAlias &&
-    moduleSpecifier.startsWith(`${baseInfo.rootImportAlias}/`)
+    baseProjectInfo.rootImportAlias &&
+    moduleSpecifier.startsWith(`${baseProjectInfo.rootImportAlias}/`)
   ) {
     const resolvedModulePath = resolveFirstPartyImport(
-      join(moduleSpecifier.replace(`${baseInfo.rootImportAlias}/`, ''))
+      join(moduleSpecifier.replace(`${baseProjectInfo.rootImportAlias}/`, ''))
     );
     return formatResolvedEntry(resolvedModulePath);
   }
 
   // If we allow aliasless root imports, check if this is one of them
-  if (baseInfo.allowAliaslessRootImports) {
+  if (baseProjectInfo.allowAliaslessRootImports) {
     const firstSegment = moduleSpecifier.split('/')[0];
     if (topLevelFolders.includes(firstSegment)) {
       const resolvedModulePath = resolveFirstPartyImport(moduleSpecifier);

@@ -3,9 +3,7 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
 import { parse, simpleTraverse } from '@typescript-eslint/typescript-estree';
 import { readFileSync } from 'fs';
 
-export type ImportDeclaration =
-  | TSESTree.ImportDeclaration
-  | TSESTree.ImportExpression;
+type ImportDeclaration = TSESTree.ImportDeclaration | TSESTree.ImportExpression;
 
 // Note: technically speaking, ExportNamedDeclarationWithSource is a subtype of
 // ExportDefaultDeclaration and according to TypeScript is represented by this
@@ -14,7 +12,7 @@ export type ExportDeclaration =
   | TSESTree.ExportDefaultDeclaration
   | TSESTree.ExportNamedDeclaration;
 
-export type ReexportDeclaration =
+type ReexportDeclaration =
   | TSESTree.ExportNamedDeclarationWithSource
   | TSESTree.ExportAllDeclaration;
 
