@@ -8,7 +8,7 @@ export default [
     files: ['**/*.ts'],
     settings: {
       'fast-esm': {
-        sourceRoot: join(getDirname(), 'testProject')
+        rootDir: join(getDirname(), 'testProject')
       }
     },
     languageOptions: {

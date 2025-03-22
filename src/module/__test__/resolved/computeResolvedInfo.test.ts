@@ -18,7 +18,7 @@ const FILE_F_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'f', 'index.d.ts');
 it('Computes resolved into', () => {
   const info = computeResolvedInfo(
     computeBaseInfo({
-      sourceRoot: TEST_PROJECT_DIR,
+      rootDir: TEST_PROJECT_DIR,
       rootImportAlias: '@',
       allowAliaslessRootImports: true,
       isEntryPointCheck: () => false,
@@ -231,6 +231,6 @@ it('Computes resolved into', () => {
       },
     },
     rootImportAlias: '@',
-    sourceRoot: TEST_PROJECT_DIR,
+    rootDir: TEST_PROJECT_DIR,
   });
 });

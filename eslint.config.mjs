@@ -26,7 +26,7 @@ export default [
         }),
       ],
       'fast-esm': {
-        sourceRoot: join(getDirname(), 'src'),
+        rootDir: join(getDirname(), 'src'),
       },
     },
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],

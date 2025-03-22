@@ -254,7 +254,7 @@ export type BaseProjectInfo = {
   /**
    * The root path of source code in the project
    */
-  sourceRoot: string;
+  rootDir: string;
 
   /**
    * If defined, an alias for referencing first party imports absolutely. For example, Next.js defaults to `@`, meaning

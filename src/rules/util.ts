@@ -34,12 +34,12 @@ function computeInitialProjectInfo<
   if (!fastEsmSettings) {
     throw new Error(`fast-esm settings are required`);
   }
-  const { sourceRoot, rootImportAlias, allowAliaslessRootImports } =
+  const { rootDir, rootImportAlias, allowAliaslessRootImports } =
     fastEsmSettings;
 
-  if (typeof sourceRoot !== 'string') {
+  if (typeof rootDir !== 'string') {
     throw new Error(
-      `"sourceRoot" must be specified as a string in ESLint settings`
+      `"rootDir" must be specified as a string in ESLint settings`
     );
   }
 
@@ -60,7 +60,7 @@ function computeInitialProjectInfo<
   }
 
   baseProjectInfo = computeBaseInfo({
-    sourceRoot,
+    rootDir,
     rootImportAlias,
     allowAliaslessRootImports,
 

@@ -224,7 +224,7 @@ let topLevelFolders: string[] = [];
 
 function computeFolderTree(baseInfo: BaseProjectInfo) {
   for (const file of Object.keys(baseInfo.files)) {
-    const folders = file.replace(baseInfo.sourceRoot + '/', '').split('/');
+    const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
     const basefile = folders.pop();
     if (!basefile) {
       throw new InternalError(`Could not get basefile for path ${file}`);
@@ -294,7 +294,7 @@ function resolveModuleSpecifier({
     };
   }
 
-  // This function takes in a bath that is "absolute" but relative to sourceRoot, excluding the leading /
+  // This function takes in a bath that is "absolute" but relative to rootDir, excluding the leading /
   function resolveFirstPartyImport(absolutishFilePath: string) {
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
     const segments = absolutishFilePath.split('/');
@@ -323,7 +323,7 @@ function resolveModuleSpecifier({
     }
 
     function computeFilePath(file: string) {
-      return join(baseProjectInfo.sourceRoot, folderSegments.join('/'), file);
+      return join(baseProjectInfo.rootDir, folderSegments.join('/'), file);
     }
 
     // First we check if this directly references a file + extension, and shortcircuit, e.g.:
@@ -412,7 +412,7 @@ function resolveModuleSpecifier({
   if (moduleSpecifier.startsWith('.')) {
     const resolvedModulePath = resolveFirstPartyImport(
       resolve(dirPath, moduleSpecifier).replace(
-        baseProjectInfo.sourceRoot + '/',
+        baseProjectInfo.rootDir + '/',
         ''
       )
     );

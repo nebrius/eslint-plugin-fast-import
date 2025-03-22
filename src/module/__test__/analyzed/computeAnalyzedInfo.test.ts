@@ -22,7 +22,7 @@ it('Computes base info', () => {
   const info = computeAnalyzedInfo(
     computeResolvedInfo(
       computeBaseInfo({
-        sourceRoot: TEST_PROJECT_DIR,
+        rootDir: TEST_PROJECT_DIR,
         rootImportAlias: '@',
         allowAliaslessRootImports: true,
         isEntryPointCheck: (filePath, symbolName) =>
@@ -318,7 +318,7 @@ it('Computes base info', () => {
         ],
       },
     },
-    sourceRoot: TEST_PROJECT_DIR,
+    rootDir: TEST_PROJECT_DIR,
     rootImportAlias: '@',
     allowAliaslessRootImports: true,
   });

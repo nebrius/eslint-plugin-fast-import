@@ -12,7 +12,7 @@ type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
 // TODO: need an option for ignored files
 type ComputeBaseInfoOptions = {
-  sourceRoot: string;
+  rootDir: string;
   rootImportAlias?: string;
   allowAliaslessRootImports?: boolean;
   isEntryPointCheck?: IsEntryPointCheck;
@@ -22,35 +22,35 @@ type ComputeBaseInfoOptions = {
  * Computes base ESM info for all source files recursively found in basePath
  */
 export function computeBaseInfo({
-  sourceRoot,
+  rootDir,
   rootImportAlias,
   allowAliaslessRootImports = false,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   // Trim off the end `/` in case it was supplied
-  if (sourceRoot.endsWith('/')) {
-    sourceRoot = sourceRoot.substring(0, sourceRoot.length - 1);
+  if (rootDir.endsWith('/')) {
+    rootDir = rootDir.substring(0, rootDir.length - 1);
   }
 
-  // Make sure sourceRoot is absolute
-  if (!isAbsolute(sourceRoot)) {
-    throw new Error(`sourceRoot "${sourceRoot}" must be absolute`);
+  // Make sure rootDir is absolute
+  if (!isAbsolute(rootDir)) {
+    throw new Error(`rootDir "${rootDir}" must be absolute`);
   }
 
   const info: BaseProjectInfo = {
     files: {},
-    sourceRoot,
+    rootDir,
     rootImportAlias,
     allowAliaslessRootImports,
   };
 
-  const potentialFiles = readdirSync(sourceRoot, {
+  const potentialFiles = readdirSync(rootDir, {
     recursive: true,
     encoding: 'utf-8',
   });
 
   for (const potentialFilePath of potentialFiles) {
-    const filePath = join(sourceRoot, potentialFilePath);
+    const filePath = join(rootDir, potentialFilePath);
     if (isCodeFile(filePath)) {
       info.files[filePath] = computeFileDetails({
         ...parseFile(filePath),
