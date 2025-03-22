@@ -43,7 +43,6 @@ type ParsedSettings = Pick<Settings, 'rootDir' | 'rootImportAlias'> &
   RequiredDeep<Pick<Settings, 'allowAliaslessRootImports' | 'entryPoints'>>;
 
 let settings: ParsedSettings | null = null;
-
 function getSettingsFromContext(
   context: RuleContext<string, readonly unknown[]>
 ) {
@@ -121,10 +120,12 @@ export function getESMInfo<
 >(context: RuleContext<MessageIds, Options>) {
   const { entryPoints } = getSettingsFromContext(context);
 
-  // If we haven't initialized the project info yet, do so now
+  // If we haven't done our first run of computing project info, do it now
   if (!analyzedProjectInfo) {
     computeInitialProjectInfo(context);
   }
+
+  // This shouldn't be possible in reality and is just to make sure TypeScript is happy
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
     throw new InternalError('Project info not initialized');
   }
@@ -139,7 +140,7 @@ export function getESMInfo<
       ),
   };
 
-  // Check if we're updating file info or adding a new file
+  // Check if we're updating file info or adding a new file, and update project info as appropriate
   if (context.filename in analyzedProjectInfo.files) {
     const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
       baseProjectInfo,
@@ -164,14 +165,11 @@ export function getESMInfo<
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
   }
 
-  const fileInfo = analyzedProjectInfo.files[context.filename];
-
-  // Records are too smart for their own good sometimes, this actually can be undefined
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // Format and return the ESM info
+  const fileInfo = analyzedProjectInfo.files.get(context.filename);
   if (!fileInfo) {
     return;
   }
-
   return {
     fileInfo,
     projectInfo: analyzedProjectInfo,

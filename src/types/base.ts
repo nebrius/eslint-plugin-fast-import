@@ -249,7 +249,7 @@ export type BaseProjectInfo = {
   /**
    * Mapping of _absolute_ file paths to file details
    */
-  files: Record<string, BaseFileDetails>;
+  files: Map<string, BaseFileDetails>;
 
   /**
    * The root path of source code in the project

@@ -38,7 +38,7 @@ export function computeBaseInfo({
   }
 
   const info: BaseProjectInfo = {
-    files: {},
+    files: new Map(),
     rootDir,
     rootImportAlias,
     allowAliaslessRootImports,
@@ -52,14 +52,17 @@ export function computeBaseInfo({
   for (const potentialFilePath of potentialFiles) {
     const filePath = join(rootDir, potentialFilePath);
     if (isCodeFile(filePath)) {
-      info.files[filePath] = computeFileDetails({
-        ...parseFile(filePath),
-        isEntryPointCheck,
-      });
+      info.files.set(
+        filePath,
+        computeFileDetails({
+          ...parseFile(filePath),
+          isEntryPointCheck,
+        })
+      );
     } else if (!statSync(filePath).isDirectory()) {
-      info.files[filePath] = {
+      info.files.set(filePath, {
         fileType: 'other',
-      };
+      });
     }
   }
 
@@ -78,14 +81,17 @@ export function addBaseInfoForFile(
   { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
 ) {
   if (isCodeFile(filePath)) {
-    baseProjectInfo.files[filePath] = computeFileDetails({
+    baseProjectInfo.files.set(
       filePath,
-      fileContents,
-      ast,
-      isEntryPointCheck,
-    });
+      computeFileDetails({
+        filePath,
+        fileContents,
+        ast,
+        isEntryPointCheck,
+      })
+    );
   } else {
-    baseProjectInfo.files[filePath] = { fileType: 'other' };
+    baseProjectInfo.files.set(filePath, { fileType: 'other' });
   }
 }
 
@@ -103,20 +109,20 @@ export function updateBaseInfoForFile(
     ast,
     isEntryPointCheck,
   });
-  if (deepEqual(updatedFileDetails, baseProjectInfo.files[filePath])) {
+  if (deepEqual(updatedFileDetails, baseProjectInfo.files.get(filePath))) {
     return false;
   }
-  baseProjectInfo.files[filePath] = updatedFileDetails;
+  baseProjectInfo.files.set(filePath, updatedFileDetails);
   return true;
 }
 
-// TODO: wire in deletions
+// TODO: wire in deletions to in-editor file watcher once it's implemented
 // eslint-disable-next-line fast-esm/no-unused-exports
 export function deleteBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo,
   filePath: string
 ) {
-  delete baseProjectInfo.files[filePath];
+  baseProjectInfo.files.delete(filePath);
 }
 
 class UnknownNodeTypeError extends InternalError {

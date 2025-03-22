@@ -7,7 +7,7 @@ import type {
 } from '../../types/base';
 
 type PartialBaseESMInfo = {
-  files: Record<
+  files: Map<
     string,
     | {
         fileType: 'code';
@@ -24,7 +24,7 @@ type PartialBaseESMInfo = {
 // This utility strips them out for easier testing.
 export function stripNodes(info: BaseProjectInfo) {
   const clonedInfo = { ...info } as PartialBaseESMInfo;
-  for (const fileDetails of Object.values(clonedInfo.files)) {
+  for (const [, fileDetails] of clonedInfo.files) {
     if (fileDetails.fileType !== 'code') {
       continue;
     }

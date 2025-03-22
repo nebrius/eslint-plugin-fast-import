@@ -19,18 +19,16 @@ export function computeAnalyzedInfo(
 ): AnalyzedProjectInfo {
   const analyzedProjectInfo: AnalyzedProjectInfo = {
     ...resolvedProjectInfo,
-    files: {},
+    files: new Map(),
   };
 
   // First we initialize each detail with placeholder data, since we need a completely initialized `analyzedInfo` object
   // available before we can start traversing/populating analyzed info
-  for (const [filePath, fileDetails] of Object.entries(
-    resolvedProjectInfo.files
-  )) {
+  for (const [filePath, fileDetails] of resolvedProjectInfo.files) {
     if (fileDetails.fileType !== 'code') {
-      analyzedProjectInfo.files[filePath] = {
+      analyzedProjectInfo.files.set(filePath, {
         fileType: 'other',
-      };
+      });
       continue;
     }
 
@@ -40,7 +38,7 @@ export function computeAnalyzedInfo(
       exports: [],
       reexports: [],
     };
-    analyzedProjectInfo.files[filePath] = analyzedFileInfo;
+    analyzedProjectInfo.files.set(filePath, analyzedFileInfo);
 
     for (const exportDetails of fileDetails.exports) {
       analyzedFileInfo.exports.push({
@@ -108,9 +106,7 @@ export function computeAnalyzedInfo(
   }
 
   // Now that we have placeholder values for each entry, we're ready to analyze/traverse the tree
-  for (const [filePath, fileDetails] of Object.entries(
-    analyzedProjectInfo.files
-  )) {
+  for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
     // Nothing to do if this isn't a code file
     if (fileDetails.fileType !== 'code') {
       continue;
@@ -185,9 +181,8 @@ function analyzeSingleImport(
     currentImportName: string
   ): AnalyzedImportBase | undefined {
     // Get the file from the project info
-    const targetFileDetails = analyzedProjectInfo.files[currentFile];
+    const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!targetFileDetails) {
       throw new InternalError(
         `File ${currentFile} is missing in project info`,
@@ -375,9 +370,8 @@ function analyzeBarrelImport(
 
   function traverse(currentFile: string) {
     // Get the file from the project info
-    const targetFileDetails = analyzedProjectInfo.files[currentFile];
+    const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!targetFileDetails) {
       throw new InternalError(
         `File ${currentFile} is missing in project info`,

@@ -88,5 +88,5 @@ export type ResolvedProjectInfo = Omit<BaseProjectInfo, 'files'> & {
   /**
    * Mapping of _absolute_ file paths to file details
    */
-  files: Record<string, ResolvedFileDetails>;
+  files: Map<string, ResolvedFileDetails>;
 };

@@ -161,5 +161,5 @@ export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
   /**
    * Mapping of _absolute_ file paths to file details
    */
-  files: Record<string, AnalyzedFileDetails>;
+  files: Map<string, AnalyzedFileDetails>;
 };

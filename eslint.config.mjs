@@ -66,9 +66,6 @@ export default [
     rules: {
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
-
-      // This rule doesn't make sense for this project, since we want serializable dictionaries
-      '@typescript-eslint/no-dynamic-delete': 'off',
     },
   },
 ];

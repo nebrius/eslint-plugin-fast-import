@@ -16,16 +16,14 @@ export function computeResolvedInfo(
 
   const resolvedProjectInfo: ResolvedProjectInfo = {
     ...baseProjectInfo,
-    files: {},
+    files: new Map(),
   };
 
-  for (const [filePath, baseFileDetails] of Object.entries(
-    baseProjectInfo.files
-  )) {
+  for (const [filePath, baseFileDetails] of baseProjectInfo.files) {
     if (baseFileDetails.fileType !== 'code') {
-      resolvedProjectInfo.files[filePath] = {
+      resolvedProjectInfo.files.set(filePath, {
         fileType: 'other',
-      };
+      });
       continue;
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
@@ -34,7 +32,7 @@ export function computeResolvedInfo(
       exports: [],
       reexports: [],
     };
-    resolvedProjectInfo.files[filePath] = resolvedCodeFileDetails;
+    resolvedProjectInfo.files.set(filePath, resolvedCodeFileDetails);
     populateFileDetails(
       baseProjectInfo,
       filePath,
@@ -50,24 +48,31 @@ export function addResolvedInfoForFile(
   newBaseProjectInfo: BaseProjectInfo,
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
+  const baseFileInfo = newBaseProjectInfo.files.get(filePath);
+  if (!baseFileInfo) {
+    throw new InternalError(`Could not get base file info for ${filePath}`);
+  }
   if (isCodeFile(filePath)) {
+    if (baseFileInfo.fileType !== 'code') {
+      throw new InternalError(`Mismatched file types for ${filePath}`);
+    }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       imports: [],
       exports: [],
       reexports: [],
     };
-    previousResolvedProjectInfo.files[filePath] = resolvedCodeFileDetails;
+    previousResolvedProjectInfo.files.set(filePath, resolvedCodeFileDetails);
     populateFileDetails(
       newBaseProjectInfo,
       filePath,
-      newBaseProjectInfo.files[filePath] as BaseCodeFileDetails,
+      baseFileInfo,
       resolvedCodeFileDetails
     );
   } else {
-    previousResolvedProjectInfo.files[filePath] = {
+    previousResolvedProjectInfo.files.set(filePath, {
       fileType: 'other',
-    };
+    });
   }
 }
 
@@ -76,9 +81,10 @@ function getFileReferences(
   filePath: string
 ) {
   const fileReferences = [];
-  for (const [candidateFilePath, candidateFileDetails] of Object.entries(
-    previousResolvedProjectInfo.files
-  )) {
+  for (const [
+    candidateFilePath,
+    candidateFileDetails,
+  ] of previousResolvedProjectInfo.files) {
     if (candidateFileDetails.fileType !== 'code') {
       continue;
     }
@@ -101,6 +107,14 @@ export function updateResolvedInfoForFile(
   newBaseProjectInfo: BaseProjectInfo,
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
+  const baseFileInfo = newBaseProjectInfo.files.get(filePath);
+  if (!baseFileInfo) {
+    throw new InternalError(`Could not get base file info for ${filePath}`);
+  }
+  if (baseFileInfo.fileType !== 'code') {
+    throw new InternalError(`Mismatched file types for ${filePath}`);
+  }
+
   const filePathsToUpdate = [
     filePath,
     ...getFileReferences(previousResolvedProjectInfo, filePath),
@@ -112,29 +126,38 @@ export function updateResolvedInfoForFile(
       exports: [],
       reexports: [],
     };
-    previousResolvedProjectInfo.files[filePathToUpdate] =
-      resolvedCodeFileDetails;
+    previousResolvedProjectInfo.files.set(
+      filePathToUpdate,
+      resolvedCodeFileDetails
+    );
     populateFileDetails(
       newBaseProjectInfo,
       filePathToUpdate,
-      newBaseProjectInfo.files[filePathToUpdate] as BaseCodeFileDetails,
+      baseFileInfo,
       resolvedCodeFileDetails
     );
   }
 }
 
-// TODO: wire in deletions
+// TODO: wire in deletions to in-editor file watcher once it's implemented
 // eslint-disable-next-line fast-esm/no-unused-exports
 export function deleteResolvedInfoForFile(
   filePath: string,
   newBaseProjectInfo: BaseProjectInfo,
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
+  const baseFileInfo = newBaseProjectInfo.files.get(filePath);
+  if (!baseFileInfo) {
+    throw new InternalError(`Could not get base file info for ${filePath}`);
+  }
+  if (baseFileInfo.fileType !== 'code') {
+    throw new InternalError(`Mismatched file types for ${filePath}`);
+  }
   const filePathsToUpdate = getFileReferences(
     previousResolvedProjectInfo,
     filePath
   );
-  delete previousResolvedProjectInfo.files[filePath];
+  previousResolvedProjectInfo.files.delete(filePath);
   for (const filePathToUpdate of filePathsToUpdate) {
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
@@ -142,12 +165,14 @@ export function deleteResolvedInfoForFile(
       exports: [],
       reexports: [],
     };
-    previousResolvedProjectInfo.files[filePathToUpdate] =
-      resolvedCodeFileDetails;
+    previousResolvedProjectInfo.files.set(
+      filePathToUpdate,
+      resolvedCodeFileDetails
+    );
     populateFileDetails(
       newBaseProjectInfo,
       filePathToUpdate,
-      newBaseProjectInfo.files[filePathToUpdate] as BaseCodeFileDetails,
+      baseFileInfo,
       resolvedCodeFileDetails
     );
   }
@@ -222,7 +247,7 @@ const folderTree: FolderTreeNode = {
 let topLevelFolders: string[] = [];
 
 function computeFolderTree(baseInfo: BaseProjectInfo) {
-  for (const file of Object.keys(baseInfo.files)) {
+  for (const [file] of baseInfo.files) {
     const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
     const basefile = folders.pop();
     if (!basefile) {
