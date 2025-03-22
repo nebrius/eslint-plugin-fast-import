@@ -1,7 +1,6 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-extraneous-class */
 /* eslint-disable prefer-const */
-/* eslint-disable prettier/prettier */
 
 export type Foo = string;
 

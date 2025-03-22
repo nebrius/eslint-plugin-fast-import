@@ -16,6 +16,7 @@ import { InternalError } from '../util/error';
 import type { BaseProjectInfo } from '../types/base';
 import type { ResolvedProjectInfo } from '../types/resolved';
 import { z } from 'zod';
+import type { RequiredDeep } from 'type-fest';
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -36,15 +37,29 @@ const settingsSchema = z.strictObject({
     .optional(),
 });
 
+// Settings are what the user supplies, and ParseSettings have defaults filled in
+type Settings = z.infer<typeof settingsSchema>;
+type ParsedSettings = Pick<Settings, 'rootDir' | 'rootImportAlias'> &
+  RequiredDeep<Pick<Settings, 'allowAliaslessRootImports' | 'entryPoints'>>;
+
+let settings: ParsedSettings | null = null;
+
 function getSettingsFromContext(
   context: RuleContext<string, readonly unknown[]>
 ) {
+  // Return the cached copy if we have it
+  if (settings) {
+    return settings;
+  }
+
+  // Parse the raw settings, if supplied
   const fastEsmSettings = context.settings['fast-esm'];
   if (!fastEsmSettings) {
     throw new Error(`fast-esm settings are required`);
   }
   const parseResult = settingsSchema.safeParse(fastEsmSettings);
 
+  // If there were errors, print a friendly-ish explanation of them
   if (!parseResult.success) {
     const issues: string[] = [];
     for (const issue of parseResult.error.issues) {
@@ -65,15 +80,16 @@ function getSettingsFromContext(
     throw new Error('Invalid fast-esm settings:\n' + issues.join('\n'));
   }
 
+  // Apply defaults and save to the cache
   const { rootDir, rootImportAlias, allowAliaslessRootImports, entryPoints } =
     parseResult.data;
-
-  return {
+  settings = {
     rootDir,
     rootImportAlias,
     allowAliaslessRootImports: allowAliaslessRootImports ?? false,
     entryPoints: entryPoints ?? [],
   };
+  return settings;
 }
 
 let baseProjectInfo: BaseProjectInfo | null = null;
