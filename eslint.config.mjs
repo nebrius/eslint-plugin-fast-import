@@ -9,6 +9,7 @@ import { getDirname } from 'cross-dirname';
 import { includeIgnoreFile } from '@eslint/compat';
 import { join } from 'node:path';
 import fastEsm from './dist/index.js';
+import { symbolName } from 'typescript';
 
 const compat = new FlatCompat({
   baseDirectory: getDirname(),
@@ -27,6 +28,12 @@ export default [
       ],
       'fast-esm': {
         rootDir: join(getDirname(), 'src'),
+        entryPoints: [
+          {
+            file: join(getDirname(), 'src', 'index.ts'),
+            symbol: 'default'
+          },
+        ],
       },
     },
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],

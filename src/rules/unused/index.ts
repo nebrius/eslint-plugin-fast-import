@@ -65,12 +65,16 @@ export const noUnusedExports = createRule<
     }
 
     for (const exportEntry of fileInfo.exports) {
-      if (exportEntry.importedByFiles.length === 0) {
+      if (
+        !exportEntry.isEntryPoint &&
+        exportEntry.importedByFiles.length === 0
+      ) {
         context.report({
           messageId: 'noUnusedExports',
           node: exportEntry.specifierNode,
         });
       } else if (
+        !exportEntry.isEntryPoint &&
         isNonTestFile(context.filename) &&
         !exportEntry.importedByFiles.some(isNonTestFile) &&
         !allowNonTestTypeExports
