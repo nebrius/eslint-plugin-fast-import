@@ -1,5 +1,7 @@
+import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { createRule, getESMInfo } from '../util';
-import type { FromSchema } from 'json-schema-to-ts';
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 function isNonTestFile(filePath: string) {
   return (
@@ -9,15 +11,13 @@ function isNonTestFile(filePath: string) {
   );
 }
 
-const schema = {
-  type: 'object',
-  properties: {
-    allowNonTestTypeExports: { type: 'boolean' },
-  },
-  additionalProperties: false,
-} as const;
+const schema = z
+  .strictObject({
+    allowNonTestTypeExports: z.boolean(),
+  })
+  .optional();
 
-type Options = FromSchema<typeof schema>;
+type Options = z.infer<typeof schema>;
 
 export const noUnusedExports = createRule<
   [Options],
@@ -28,7 +28,7 @@ export const noUnusedExports = createRule<
     docs: {
       description: 'Ensures that all exports are imported in another file',
     },
-    schema: [schema],
+    schema: [zodToJsonSchema(schema) as JSONSchema4],
     fixable: undefined,
     type: 'problem',
     messages: {
@@ -48,8 +48,8 @@ export const noUnusedExports = createRule<
       return {};
     }
 
-    // For some reason, ESLint isn't applying defaults
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // ESLint isn't applying defaults and options is length 0 when consumers don't specify options, even though ESLint
+    // is supposed to do that. I'm not sure what's going on
     const { allowNonTestTypeExports = true } = context.options[0] ?? {};
 
     const esmInfo = getESMInfo(context);

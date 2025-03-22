@@ -151,7 +151,6 @@ export function deleteResolvedInfoForFile(
       resolvedCodeFileDetails
     );
   }
-  // TODO
 }
 
 function populateFileDetails(
