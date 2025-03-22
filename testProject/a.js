@@ -1,5 +1,5 @@
-import { c } from './b'
+import { c } from './b';
 
-console.log(c)
+console.log(c);
 
 export const a = 10;

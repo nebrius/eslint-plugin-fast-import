@@ -1,15 +1,15 @@
-import { join } from 'node:path'
-import { getDirname } from 'cross-dirname'
+import { join } from 'node:path';
+import { getDirname } from 'cross-dirname';
 import globals from 'globals';
-import fastEsm from './dist/index.js'
+import fastEsm from './dist/index.js';
 
 export default [
   {
     files: ['**/*.ts'],
     settings: {
       'fast-esm': {
-        rootDir: join(getDirname(), 'testProject')
-      }
+        rootDir: join(getDirname(), 'testProject'),
+      },
     },
     languageOptions: {
       globals: globals.node,
@@ -17,7 +17,7 @@ export default [
     // TODO: fix this weird double default thing
     plugins: { 'fast-esm': fastEsm.default },
     rules: {
-      'fast-esm/no-unused-exports': 'error'
+      'fast-esm/no-unused-exports': 'error',
     },
-  }
-]
+  },
+];

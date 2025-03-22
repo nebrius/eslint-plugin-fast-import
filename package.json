@@ -4,11 +4,11 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint \"**/*.{ts,tsx}\"",
-    "lint:fix": "eslint --fix \"**/*.{ts,tsx}\"",
+    "lint": "eslint \"**/*.{js,jsx,mjsts,tsx,mts}\"",
+    "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "build": "tsc",
     "test": "jest src",
-    "format": "prettier --write \"**/*.{ts,tsx}\""
+    "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\""
   },
   "author": "",
   "license": "ISC",
