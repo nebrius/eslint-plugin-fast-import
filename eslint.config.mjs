@@ -27,7 +27,6 @@ export default [
         }),
       ],
       'fast-esm': {
-        rootDir: join(getDirname(), 'src'),
         entryPoints: [
           {
             file: join(getDirname(), 'src', 'index.ts'),
