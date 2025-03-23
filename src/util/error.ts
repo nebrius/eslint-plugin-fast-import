@@ -12,7 +12,7 @@ type SourceDetails = {
  */
 export class InternalError extends Error {
   constructor(message: string, sourceDetails?: SourceDetails) {
-    let formattedMessage = `Internal error: ${message}. This is a bug, please report the message and the stack trace to the maintainer at https://github.com/nebrius/esm-lint/issues`;
+    let formattedMessage = `Internal error: ${message}. This is a bug, please report the message and the stack trace to the maintainer at https://github.com/nebrius/fast-esm/issues`;
     if (sourceDetails) {
       if (sourceDetails.fileContents) {
         formattedMessage += `\n\nIn ${sourceDetails.filePath}:\n\n${sourceDetails.fileContents.substring(sourceDetails.node.range[0], sourceDetails.node.range[1])}\n`;

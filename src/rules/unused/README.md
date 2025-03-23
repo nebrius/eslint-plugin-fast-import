@@ -1,3 +1,3 @@
-# @esm-lint/no-unused
+# @fast-esm/no-unused-exports
 
 TODO
