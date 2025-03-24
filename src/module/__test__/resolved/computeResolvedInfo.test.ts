@@ -19,7 +19,7 @@ it('Computes resolved into', () => {
   const info = computeResolvedInfo(
     computeBaseInfo({
       rootDir: TEST_PROJECT_DIR,
-      rootImportAlias: '@',
+      paths: { '@': './' },
       allowAliaslessRootImports: true,
       isEntryPointCheck: () => false,
     })
@@ -149,40 +149,6 @@ it('Computes resolved into', () => {
         },
       ],
       [
-        FILE_C,
-        {
-          exports: [
-            {
-              exportName: 'c1',
-              isEntryPoint: false,
-            },
-          ],
-          fileType: 'code',
-          imports: [],
-          reexports: [],
-        },
-      ],
-      [
-        FILE_C_DATA,
-        {
-          fileType: 'other',
-        },
-      ],
-      [
-        FILE_D,
-        {
-          exports: [
-            {
-              exportName: 'getD1',
-              isEntryPoint: false,
-            },
-          ],
-          fileType: 'code',
-          imports: [],
-          reexports: [],
-        },
-      ],
-      [
         FILE_D_DECLARATION,
         {
           exports: [
@@ -201,11 +167,63 @@ it('Computes resolved into', () => {
         },
       ],
       [
+        FILE_D,
+        {
+          exports: [
+            {
+              exportName: 'getD1',
+              isEntryPoint: false,
+            },
+          ],
+          fileType: 'code',
+          imports: [],
+          reexports: [],
+        },
+      ],
+      [
         FILE_E,
         {
           exports: [
             {
               exportName: 'e1',
+              isEntryPoint: false,
+            },
+          ],
+          fileType: 'code',
+          imports: [],
+          reexports: [],
+        },
+      ],
+      [
+        FILE_C_DATA,
+        {
+          fileType: 'other',
+        },
+      ],
+      [
+        FILE_C,
+        {
+          exports: [
+            {
+              exportName: 'c1',
+              isEntryPoint: false,
+            },
+          ],
+          fileType: 'code',
+          imports: [],
+          reexports: [],
+        },
+      ],
+      [
+        FILE_F_DECLARATION,
+        {
+          exports: [
+            {
+              exportName: 'F1',
+              isEntryPoint: false,
+            },
+            {
+              exportName: 'getF1',
               isEntryPoint: false,
             },
           ],
@@ -238,26 +256,8 @@ it('Computes resolved into', () => {
           reexports: [],
         },
       ],
-      [
-        FILE_F_DECLARATION,
-        {
-          exports: [
-            {
-              exportName: 'F1',
-              isEntryPoint: false,
-            },
-            {
-              exportName: 'getF1',
-              isEntryPoint: false,
-            },
-          ],
-          fileType: 'code',
-          imports: [],
-          reexports: [],
-        },
-      ],
     ]),
-    rootImportAlias: '@',
+    paths: { '@': './' },
     rootDir: TEST_PROJECT_DIR,
   });
 });

@@ -23,7 +23,7 @@ it('Computes base info', () => {
     computeResolvedInfo(
       computeBaseInfo({
         rootDir: TEST_PROJECT_DIR,
-        rootImportAlias: '@',
+        paths: { '@': './' },
         allowAliaslessRootImports: true,
         isEntryPointCheck: (filePath, symbolName) =>
           filePath === FILE_A && symbolName === 'ASourceCode',
@@ -171,6 +171,75 @@ it('Computes base info', () => {
         },
       ],
       [
+        CIRCULAR_FILE_A,
+        {
+          exports: [],
+          fileType: 'code',
+          imports: [],
+          reexports: [
+            {
+              barrelImportedByFiles: [],
+              exportName: 'a',
+              importName: 'a',
+              importedByFiles: [],
+              isEntryPoint: false,
+              isTypeReexport: false,
+              moduleSpecifier: './circular-b',
+              moduleType: 'firstPartyCode',
+              reexportType: 'single',
+              resolvedModulePath: CIRCULAR_FILE_B,
+              rootModuleType: undefined,
+            },
+          ],
+        },
+      ],
+      [
+        CIRCULAR_FILE_B,
+        {
+          exports: [],
+          fileType: 'code',
+          imports: [],
+          reexports: [
+            {
+              barrelImportedByFiles: [],
+              exportName: 'a',
+              importName: 'a',
+              importedByFiles: [],
+              isEntryPoint: false,
+              isTypeReexport: false,
+              moduleSpecifier: './circular-c',
+              moduleType: 'firstPartyCode',
+              reexportType: 'single',
+              resolvedModulePath: CIRCULAR_FILE_C,
+              rootModuleType: undefined,
+            },
+          ],
+        },
+      ],
+      [
+        CIRCULAR_FILE_C,
+        {
+          exports: [],
+          fileType: 'code',
+          imports: [],
+          reexports: [
+            {
+              barrelImportedByFiles: [],
+              exportName: 'a',
+              importName: 'a',
+              importedByFiles: [],
+              isEntryPoint: false,
+              isTypeReexport: false,
+              moduleSpecifier: './circular-a',
+              moduleType: 'firstPartyCode',
+              reexportType: 'single',
+              resolvedModulePath: CIRCULAR_FILE_A,
+              rootModuleType: undefined,
+            },
+          ],
+        },
+      ],
+      [
         FILE_D,
         {
           fileType: 'code',
@@ -278,78 +347,9 @@ it('Computes base info', () => {
           ],
         },
       ],
-      [
-        CIRCULAR_FILE_A,
-        {
-          exports: [],
-          fileType: 'code',
-          imports: [],
-          reexports: [
-            {
-              barrelImportedByFiles: [],
-              exportName: 'a',
-              importName: 'a',
-              importedByFiles: [],
-              isEntryPoint: false,
-              isTypeReexport: false,
-              moduleSpecifier: './circular-b',
-              moduleType: 'firstPartyCode',
-              reexportType: 'single',
-              resolvedModulePath: CIRCULAR_FILE_B,
-              rootModuleType: undefined,
-            },
-          ],
-        },
-      ],
-      [
-        CIRCULAR_FILE_B,
-        {
-          exports: [],
-          fileType: 'code',
-          imports: [],
-          reexports: [
-            {
-              barrelImportedByFiles: [],
-              exportName: 'a',
-              importName: 'a',
-              importedByFiles: [],
-              isEntryPoint: false,
-              isTypeReexport: false,
-              moduleSpecifier: './circular-c',
-              moduleType: 'firstPartyCode',
-              reexportType: 'single',
-              resolvedModulePath: CIRCULAR_FILE_C,
-              rootModuleType: undefined,
-            },
-          ],
-        },
-      ],
-      [
-        CIRCULAR_FILE_C,
-        {
-          exports: [],
-          fileType: 'code',
-          imports: [],
-          reexports: [
-            {
-              barrelImportedByFiles: [],
-              exportName: 'a',
-              importName: 'a',
-              importedByFiles: [],
-              isEntryPoint: false,
-              isTypeReexport: false,
-              moduleSpecifier: './circular-a',
-              moduleType: 'firstPartyCode',
-              reexportType: 'single',
-              resolvedModulePath: CIRCULAR_FILE_A,
-              rootModuleType: undefined,
-            },
-          ],
-        },
-      ],
     ]),
     rootDir: TEST_PROJECT_DIR,
-    rootImportAlias: '@',
+    paths: { '@': './' },
     allowAliaslessRootImports: true,
   });
 });

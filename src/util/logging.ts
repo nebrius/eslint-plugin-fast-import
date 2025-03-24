@@ -1,7 +1,7 @@
 export function warn(msg: string) {
-  console.warn(`(warn) fast-esm: ${msg}`);
+  console.warn(`[Warn] fast-esm: ${msg}`);
 }
 
 export function error(msg: string) {
-  console.error(`(error) fast-esm: ${msg}`);
+  console.error(`[Error] fast-esm: ${msg}`);
 }

@@ -260,7 +260,7 @@ export type BaseProjectInfo = {
    * If defined, an alias for referencing first party imports absolutely. For example, Next.js defaults to `@`, meaning
    * a file at `src/components/foo` can be imported anywhere with `@/components/foo`
    */
-  rootImportAlias: string | undefined;
+  paths: Record<string, string>;
 
   /**
    * If true, allows using absolute import paths without using a root alias. For example, given a file at

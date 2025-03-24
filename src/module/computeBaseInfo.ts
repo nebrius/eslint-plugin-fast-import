@@ -1,6 +1,6 @@
 import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base';
 import { readdirSync, statSync } from 'fs';
-import { isAbsolute, join } from 'path';
+import { join } from 'path';
 import type { ExportDeclaration } from './ast';
 import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
@@ -13,7 +13,7 @@ type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 // TODO: need an option for ignored files
 type ComputeBaseInfoOptions = {
   rootDir: string;
-  rootImportAlias?: string;
+  paths?: Record<string, string>;
   allowAliaslessRootImports?: boolean;
   isEntryPointCheck?: IsEntryPointCheck;
 };
@@ -23,24 +23,14 @@ type ComputeBaseInfoOptions = {
  */
 export function computeBaseInfo({
   rootDir,
-  rootImportAlias,
+  paths = {},
   allowAliaslessRootImports = false,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
-  // Trim off the end `/` in case it was supplied
-  if (rootDir.endsWith('/')) {
-    rootDir = rootDir.substring(0, rootDir.length - 1);
-  }
-
-  // Make sure rootDir is absolute
-  if (!isAbsolute(rootDir)) {
-    throw new Error(`rootDir "${rootDir}" must be absolute`);
-  }
-
   const info: BaseProjectInfo = {
     files: new Map(),
     rootDir,
-    rootImportAlias,
+    paths,
     allowAliaslessRootImports,
   };
 

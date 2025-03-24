@@ -3,14 +3,13 @@ import type { RequiredDeep } from 'type-fest';
 import { getTypeScriptSettings } from './typescript';
 import { error } from '../util/logging';
 import type { GenericContext } from '../types/context';
+import { isAbsolute, join, resolve } from 'node:path';
 
 // TODO: need better support of relative vs absolute paths supplied by users
 
-// TODO: replace singleton rootImportAlias with generic alias dictionary
-
 const settingsSchema = z.strictObject({
   rootDir: z.string().optional(),
-  rootImportAlias: z.string().optional(),
+  paths: z.record(z.string(), z.string()).optional(),
   allowAliaslessRootImports: z.boolean().optional(),
   entryPoints: z
     .array(
@@ -23,8 +22,7 @@ const settingsSchema = z.strictObject({
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
-type ParsedSettings = RequiredDeep<Omit<Settings, 'rootImportAlias'>> &
-  Pick<Settings, 'rootImportAlias'>;
+type ParsedSettings = RequiredDeep<Settings>;
 
 let settings: ParsedSettings | null = null;
 export function getSettings(context: GenericContext): ParsedSettings {
@@ -35,9 +33,6 @@ export function getSettings(context: GenericContext): ParsedSettings {
 
   // Parse the raw settings, if supplied
   const fastEsmSettings = context.settings['fast-esm'];
-  if (!fastEsmSettings) {
-    throw new Error(`fast-esm settings are required`);
-  }
   const parseResult = settingsSchema.safeParse(fastEsmSettings);
 
   // If there were errors, print a friendly-ish explanation of them
@@ -58,7 +53,8 @@ export function getSettings(context: GenericContext): ParsedSettings {
       }
       issues.push(formattedIssue);
     }
-    throw new Error('Invalid fast-esm settings:\n' + issues.join('\n'));
+    error('Invalid settings:\n' + issues.join('\n'));
+    process.exit(-1);
   }
 
   // Get TypeScript supplied settings
@@ -67,20 +63,47 @@ export function getSettings(context: GenericContext): ParsedSettings {
   // Get user supplied settings
   const userSettings = parseResult.data;
 
-  const { rootDir, rootImportAlias, allowAliaslessRootImports, entryPoints } = {
+  const mergedSettings = {
     ...typeScriptSettings,
     ...userSettings,
   };
+
+  let { rootDir } = mergedSettings;
+  const { paths = {}, allowAliaslessRootImports, entryPoints } = mergedSettings;
 
   if (!rootDir) {
     error(`rootDir must be specified in tsconfig.json or in fast-esm settings`);
     process.exit(-1);
   }
 
+  // Trim off the end `/` in case it was supplied
+  if (rootDir.endsWith('/')) {
+    rootDir = rootDir.substring(0, rootDir.length - 1);
+  }
+
+  // Make sure rootDir is absolute
+  if (!isAbsolute(rootDir)) {
+    throw new Error(`rootDir "${rootDir}" must be absolute`);
+  }
+
+  // Slice off any trailing commas in path and validate alias paths
+  const parsedPaths: Record<string, string> = {};
+  for (let [alias, path] of Object.entries(paths)) {
+    if (alias.endsWith('/')) {
+      alias = alias.slice(0, -1);
+    }
+    if (!path.startsWith('./')) {
+      error(`Invalid alias path "${path}". Alias paths must start with "./"`);
+      process.exit(-1);
+    }
+    path = resolve(join(rootDir, path));
+    parsedPaths[alias] = path;
+  }
+
   // Apply defaults and save to the cache
   settings = {
     rootDir,
-    rootImportAlias,
+    paths,
     allowAliaslessRootImports: allowAliaslessRootImports ?? false,
     entryPoints: entryPoints ?? [],
   };

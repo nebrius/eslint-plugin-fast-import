@@ -444,14 +444,13 @@ function resolveModuleSpecifier({
   }
 
   // Check if this path starts with the root import alias, which means its first party
-  if (
-    baseProjectInfo.rootImportAlias &&
-    moduleSpecifier.startsWith(`${baseProjectInfo.rootImportAlias}/`)
-  ) {
-    const resolvedModulePath = resolveFirstPartyImport(
-      join(moduleSpecifier.replace(`${baseProjectInfo.rootImportAlias}/`, ''))
-    );
-    return formatResolvedEntry(resolvedModulePath);
+  for (const [alias, path] of Object.entries(baseProjectInfo.paths)) {
+    if (moduleSpecifier.startsWith(`${alias}/`)) {
+      const resolvedModulePath = resolveFirstPartyImport(
+        join(moduleSpecifier.replace(`${alias}/`, path).replace('./', ''))
+      );
+      return formatResolvedEntry(resolvedModulePath);
+    }
   }
 
   // If we allow aliasless root imports, check if this is one of them
