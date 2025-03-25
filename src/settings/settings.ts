@@ -3,7 +3,8 @@ import type { RequiredDeep } from 'type-fest';
 import { getTypeScriptSettings } from './typescript';
 import { error } from '../util/logging';
 import type { GenericContext } from '../types/context';
-import { isAbsolute, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { readdirSync } from 'node:fs';
 
 // TODO: need better support of relative vs absolute paths supplied by users
 
@@ -71,8 +72,36 @@ export function getSettings(context: GenericContext): ParsedSettings {
   let { rootDir } = mergedSettings;
   const { paths = {}, allowAliaslessRootImports, entryPoints } = mergedSettings;
 
+  // If we don't have rootDir yet, default to setting it to the ESLint config file directory
   if (!rootDir) {
-    error(`rootDir must be specified in tsconfig.json or in fast-esm settings`);
+    let currentDir = dirname(context.filename);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      const dirContents = readdirSync(currentDir);
+      if (
+        dirContents.includes('eslint.config.js') ||
+        dirContents.includes('eslint.config.mjs') ||
+        dirContents.includes('eslint.config.cjs') ||
+        dirContents.includes('eslint.config.ts') ||
+        dirContents.includes('eslint.config.mjs') ||
+        dirContents.includes('eslint.config.mts') ||
+        dirContents.includes('eslint.config.cts')
+      ) {
+        rootDir = currentDir;
+        break;
+      }
+
+      // Move up a level
+      const nextPath = resolve(join(currentDir, '..'));
+      if (currentDir === nextPath) {
+        break;
+      }
+      currentDir = nextPath;
+    }
+  }
+
+  if (!rootDir) {
+    error(`Could not determine rootDir`);
     process.exit(-1);
   }
 
