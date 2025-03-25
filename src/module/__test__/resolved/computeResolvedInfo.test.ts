@@ -19,7 +19,7 @@ it('Computes resolved into', () => {
   const info = computeResolvedInfo(
     computeBaseInfo({
       rootDir: TEST_PROJECT_DIR,
-      paths: { '@': './' },
+      alias: { '@': './' },
       allowAliaslessRootImports: true,
       isEntryPointCheck: () => false,
     })
@@ -257,7 +257,7 @@ it('Computes resolved into', () => {
         },
       ],
     ]),
-    paths: { '@': './' },
+    alias: { '@': './' },
     rootDir: TEST_PROJECT_DIR,
   });
 });

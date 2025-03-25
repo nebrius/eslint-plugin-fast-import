@@ -444,7 +444,7 @@ function resolveModuleSpecifier({
   }
 
   // Check if this path starts with the root import alias, which means its first party
-  for (const [alias, path] of Object.entries(baseProjectInfo.paths)) {
+  for (const [alias, path] of Object.entries(baseProjectInfo.alias)) {
     if (moduleSpecifier.startsWith(`${alias}/`)) {
       const resolvedModulePath = resolveFirstPartyImport(
         join(moduleSpecifier.replace(`${alias}/`, path).replace('./', ''))

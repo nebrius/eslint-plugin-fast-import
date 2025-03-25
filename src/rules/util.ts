@@ -26,12 +26,12 @@ let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
 let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
 function computeInitialProjectInfo(context: GenericContext) {
-  const { rootDir, paths, allowAliaslessRootImports, entryPoints } =
+  const { rootDir, alias, allowAliaslessRootImports, entryPoints } =
     getSettings(context);
 
   baseProjectInfo = computeBaseInfo({
     rootDir,
-    paths,
+    alias,
     allowAliaslessRootImports,
     isEntryPointCheck: (filePath, symbolName) =>
       entryPoints.some(

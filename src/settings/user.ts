@@ -4,7 +4,7 @@ import { error } from '../util/logging';
 
 const settingsSchema = z.strictObject({
   rootDir: z.string().optional(),
-  paths: z.record(z.string(), z.string()).optional(),
+  alias: z.record(z.string(), z.string()).optional(),
   allowAliaslessRootImports: z.boolean().optional(),
   entryPoints: z
     .array(
@@ -45,7 +45,7 @@ export function getUserSettings(context: GenericContext): Settings {
     process.exit(-1);
   }
 
-  // Trim off the end `/` in case it was supplied
+  // Trim off the end `/` in case it was supplied with rootDir
   if (parseResult.data.rootDir?.endsWith('/')) {
     parseResult.data.rootDir = parseResult.data.rootDir.substring(
       0,

@@ -13,7 +13,7 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 it('Computes base info', () => {
   const info = computeBaseInfo({
     rootDir: TEST_PROJECT_DIR,
-    paths: { '@': './' },
+    alias: { '@': './' },
     allowAliaslessRootImports: false,
     isEntryPointCheck: () => false,
   });
@@ -299,7 +299,7 @@ it('Computes base info', () => {
         },
       ],
     ]),
-    paths: { '@': './' },
+    alias: { '@': './' },
     rootDir: TEST_PROJECT_DIR,
   });
 });

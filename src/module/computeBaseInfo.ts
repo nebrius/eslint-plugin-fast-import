@@ -13,7 +13,7 @@ type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 // TODO: need an option for ignored files
 type ComputeBaseInfoOptions = {
   rootDir: string;
-  paths?: Record<string, string>;
+  alias?: Record<string, string>;
   allowAliaslessRootImports?: boolean;
   isEntryPointCheck?: IsEntryPointCheck;
 };
@@ -23,14 +23,14 @@ type ComputeBaseInfoOptions = {
  */
 export function computeBaseInfo({
   rootDir,
-  paths = {},
+  alias = {},
   allowAliaslessRootImports = false,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
     files: new Map(),
     rootDir,
-    paths,
+    alias,
     allowAliaslessRootImports,
   };
 
@@ -262,7 +262,7 @@ function walkExportDestructure(
     case TSESTree.AST_NODE_TYPES.MemberExpression: {
       throw new InternalError(
         `unexpected member expression in array destructure`,
-        { filePath, fileContents, node: node }
+        { filePath, fileContents, node }
       );
     }
 

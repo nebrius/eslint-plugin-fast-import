@@ -49,6 +49,8 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
     ? join(dirname(configPath), rootDir)
     : undefined;
 
+  // TODO: read in paths and resolve here
+
   // Fallback to the directory containing tsconfig.json if rootDir isn't
   // supplied (like TypeScript itself does)
   return { rootDir: absoluteRootDir ?? dirname(configPath) };

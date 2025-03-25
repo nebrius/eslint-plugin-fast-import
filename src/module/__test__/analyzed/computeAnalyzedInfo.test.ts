@@ -23,7 +23,7 @@ it('Computes base info', () => {
     computeResolvedInfo(
       computeBaseInfo({
         rootDir: TEST_PROJECT_DIR,
-        paths: { '@': './' },
+        alias: { '@': './' },
         allowAliaslessRootImports: true,
         isEntryPointCheck: (filePath, symbolName) =>
           filePath === FILE_A && symbolName === 'ASourceCode',
@@ -349,7 +349,7 @@ it('Computes base info', () => {
       ],
     ]),
     rootDir: TEST_PROJECT_DIR,
-    paths: { '@': './' },
+    alias: { '@': './' },
     allowAliaslessRootImports: true,
   });
 });
