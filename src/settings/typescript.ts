@@ -1,9 +1,9 @@
 import ts from 'typescript';
-import type { Settings } from './settings';
 import { readFileSync } from 'node:fs';
 import { warn } from '../util/logging';
 import type { GenericContext } from '../types/context';
 import { dirname, join } from 'node:path';
+import type { Settings } from './user';
 
 export function getTypeScriptSettings(context: GenericContext): Settings {
   // Read in the file
@@ -21,8 +21,9 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
 
   // Handle errors in reading the file
   if (config.error) {
-    // Technically there could be multiple errors in a chain, but we pretend as if there's only one, since users will
-    // have other, more detailed errors in their editor
+    // Technically there could be multiple errors in a chain, but we pretend as
+    // if there's only one, since users will have other, more detailed errors in
+    // their editor
     const errorText =
       typeof config.error.messageText === 'string'
         ? config.error.messageText
@@ -33,8 +34,8 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
     return {};
   }
 
-  // I'm pretty sure this is impossible since we already checked error above, and the TS types for config are just too
-  // loose, but check just in case
+  // I'm pretty sure this is impossible since we already checked error above,
+  // and the TS types for config are just too loose, but check just in case
   if (!config.config) {
     warn(
       `Could not load TypeScript config, skipping settings analysis:\n  empty config`
@@ -48,5 +49,7 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
     ? join(dirname(configPath), rootDir)
     : undefined;
 
-  return { rootDir: absoluteRootDir };
+  // Fallback to the directory containing tsconfig.json if rootDir isn't
+  // supplied (like TypeScript itself does)
+  return { rootDir: absoluteRootDir ?? dirname(configPath) };
 }
