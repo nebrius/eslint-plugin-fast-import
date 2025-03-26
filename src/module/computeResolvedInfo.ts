@@ -48,6 +48,8 @@ export function addResolvedInfoForFile(
   newBaseProjectInfo: BaseProjectInfo,
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
+  computeFolderTree(newBaseProjectInfo);
+
   const baseFileInfo = newBaseProjectInfo.files.get(filePath);
   if (!baseFileInfo) {
     throw new InternalError(`Could not get base file info for ${filePath}`);
@@ -238,7 +240,7 @@ type FolderTreeNode = {
   filesAndExtensions: Record<string, string[]>;
 };
 
-const folderTree: FolderTreeNode = {
+let folderTree: FolderTreeNode = {
   folders: {},
   files: {},
   filesAndExtensions: {},
@@ -247,6 +249,12 @@ const folderTree: FolderTreeNode = {
 let topLevelFolders: string[] = [];
 
 function computeFolderTree(baseInfo: BaseProjectInfo) {
+  // Reset the cache before we start
+  folderTree = {
+    folders: {},
+    files: {},
+    filesAndExtensions: {},
+  };
   for (const [file] of baseInfo.files) {
     const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
     const basefile = folders.pop();

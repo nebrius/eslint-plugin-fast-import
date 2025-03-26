@@ -1,4 +1,8 @@
-import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base';
+import type {
+  BaseBarrelImport,
+  BaseCodeFileDetails,
+  BaseProjectInfo,
+} from '../types/base';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import type { ExportDeclaration } from './ast';
@@ -6,7 +10,6 @@ import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
 import { isCodeFile } from '../util/code';
-import deepEqual from 'fast-deep-equal';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -85,25 +88,91 @@ export function addBaseInfoForFile(
   }
 }
 
+function isFileUnchanged(
+  previousFileDetails: BaseCodeFileDetails,
+  updatedFileDetails: BaseCodeFileDetails
+) {
+  if (
+    updatedFileDetails.exports.length !== previousFileDetails.exports.length ||
+    updatedFileDetails.reexports.length !==
+      previousFileDetails.reexports.length ||
+    updatedFileDetails.imports.length !== previousFileDetails.imports.length
+  ) {
+    return true;
+  } else {
+    for (const exportEntry of previousFileDetails.exports) {
+      if (
+        updatedFileDetails.exports.some(
+          (e) => exportEntry.exportName === e.exportName
+        )
+      ) {
+        return true;
+      }
+    }
+    for (const reexportEntry of previousFileDetails.reexports) {
+      if (
+        updatedFileDetails.reexports.some(
+          (r) =>
+            reexportEntry.reexportType === r.reexportType &&
+            reexportEntry.exportName === r.exportName &&
+            reexportEntry.moduleSpecifier === r.moduleSpecifier
+        )
+      ) {
+        return true;
+      }
+    }
+    for (const importEntry of previousFileDetails.imports) {
+      if (
+        updatedFileDetails.imports.some(
+          (i) =>
+            importEntry.moduleSpecifier === i.moduleSpecifier &&
+            importEntry.importType === i.importType &&
+            ('importAlias' in importEntry
+              ? importEntry.importAlias === (i as BaseBarrelImport).importAlias
+              : true)
+        )
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function updateBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo,
   { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
 ): boolean {
+  console.log(baseProjectInfo.files.has(filePath));
+  const previousFileDetails = baseProjectInfo.files.get(filePath);
   if (!isCodeFile(filePath)) {
-    throw new InternalError('updateBaseInfoForFile called for non-code file');
+    throw new InternalError(
+      `updateBaseInfoForFile called for non-code file ${filePath}`
+    );
   }
-  deleteBaseInfoForFile(baseProjectInfo, filePath);
+  if (!previousFileDetails) {
+    throw new InternalError(
+      `updateBaseInfoForFile called for file ${filePath} that didn't previously exist`
+    );
+  }
+  if (previousFileDetails.fileType !== 'code') {
+    throw new InternalError(
+      `previous file type was not code for file ${filePath}`
+    );
+  }
   const updatedFileDetails = computeFileDetails({
     filePath,
     fileContents,
     ast,
     isEntryPointCheck,
   });
-  if (deepEqual(updatedFileDetails, baseProjectInfo.files.get(filePath))) {
+
+  if (isFileUnchanged(previousFileDetails, updatedFileDetails)) {
     return false;
   }
+  deleteBaseInfoForFile(baseProjectInfo, filePath);
   baseProjectInfo.files.set(filePath, updatedFileDetails);
-  return true;
+  return isFileUnchanged(previousFileDetails, updatedFileDetails);
 }
 
 // TODO: wire in deletions to in-editor file watcher once it's implemented
@@ -379,7 +448,9 @@ function computeFileDetails({
             fileDetails.imports.push({
               importType: 'barrel',
               statementNode,
+              specifierNode,
               moduleSpecifier,
+              importAlias: specifierNode.local.name,
             });
             break;
           }

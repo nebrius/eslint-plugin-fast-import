@@ -72,6 +72,28 @@ export type BaseBarrelImport = Base & {
    * ```
    */
   moduleSpecifier: string;
+
+  /**
+   * What we're calling the import, named for consistency with single imports. If
+   * we do:
+   *
+   * ```
+   * import * as foo from './bar'
+   * ```
+   *
+   * then `importAlias` equals `foo`
+   */
+  importAlias: string;
+
+  /**
+   * The original AST node in ESTree format for the specifier in the statement,
+   * e.g. the AST node for `foo` in:
+   *
+   * ```
+   * import * as foo from './bar'
+   * ```
+   */
+  specifierNode: TSESTree.Node;
 };
 
 export type BaseDynamicImport = Base & {
