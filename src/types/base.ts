@@ -2,9 +2,16 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 type Base = {
   /**
-   * The original AST node in ESTree format for this ESM statement
+   * The AST node in ESTree format of the complete ESM statement for this entry
    */
   statementNode: TSESTree.Node;
+
+  /**
+   * The AST node in ESTree format to report an error on, if one exists.
+   *
+   * Note: this may not be the node representing the entire ESM statement
+   */
+  reportNode: TSESTree.Node;
 };
 
 /* Imports */
@@ -50,15 +57,6 @@ export type BaseSingleImport = Base & {
    * ```
    */
   isTypeImport: boolean;
-
-  /**
-   * The original AST node in ESTree format for the specifier in the statement, e.g. the AST node for `foo as bar` in:
-   *
-   * ```
-   * import { foo as bar } from './bar'
-   * ```
-   */
-  specifierNode: TSESTree.Node;
 };
 
 export type BaseBarrelImport = Base & {
@@ -84,16 +82,6 @@ export type BaseBarrelImport = Base & {
    * then `importAlias` equals `foo`
    */
   importAlias: string;
-
-  /**
-   * The original AST node in ESTree format for the specifier in the statement,
-   * e.g. the AST node for `foo` in:
-   *
-   * ```
-   * import * as foo from './bar'
-   * ```
-   */
-  specifierNode: TSESTree.Node;
 };
 
 export type BaseDynamicImport = Base & {
@@ -127,15 +115,6 @@ export type BaseExport = Base & {
    * ```
    */
   exportName: string; // Default exports are represented by the string "default"
-
-  /**
-   * The original AST node in ESTree format for the specifier in the statement, e.g. the AST node for `foo as bar` in:
-   *
-   * ```
-   * import { foo as bar } from './bar'
-   * ```
-   */
-  specifierNode: TSESTree.Node;
 
   /**
    * Indicates whether or not this rexport is an entry point for the app. For example, if we're running a Next.js app
@@ -187,15 +166,6 @@ export type BaseSingleReexport = Base & {
    * ```
    */
   isTypeReexport: boolean;
-
-  /**
-   * The original AST node in ESTree format for the specifier in the statement, e.g. the AST node for `foo as bar` in:
-   *
-   * ```
-   * import { foo as bar } from './bar'
-   * ```
-   */
-  specifierNode: TSESTree.Node;
 
   /**
    * Indicates whether or not this reexport is an entry point for the app. For example, if we're running a Next.js app

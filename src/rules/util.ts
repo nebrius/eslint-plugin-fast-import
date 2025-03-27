@@ -95,8 +95,43 @@ function updateCacheForFile(context: GenericContext) {
       debug(`  resolved info: ${formatMilliseconds(resolveEnd - start)}`);
       debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - start)}`);
     } else {
+      // Even if we don't need to update information we compute, we still need
+      // to update the AST nodes to take into account potentially changed locs
+      const baseFileInfo = baseProjectInfo.files.get(context.filename);
+      const resolvedFileInfo = resolvedProjectInfo.files.get(context.filename);
+      const analyzedFileInfo = analyzedProjectInfo.files.get(context.filename);
+      if (
+        !baseFileInfo ||
+        baseFileInfo.fileType !== 'code' ||
+        !resolvedFileInfo ||
+        resolvedFileInfo.fileType !== 'code' ||
+        !analyzedFileInfo ||
+        analyzedFileInfo.fileType !== 'code'
+      ) {
+        throw new InternalError(
+          `Could not get file info for "${context.filename}"`
+        );
+      }
+      for (let i = 0; i < baseFileInfo.exports.length; i++) {
+        resolvedFileInfo.exports[i].reportNode =
+          baseFileInfo.exports[i].reportNode;
+        analyzedFileInfo.exports[i].reportNode =
+          baseFileInfo.exports[i].reportNode;
+      }
+      for (let i = 0; i < baseFileInfo.reexports.length; i++) {
+        resolvedFileInfo.reexports[i].reportNode =
+          baseFileInfo.reexports[i].reportNode;
+        analyzedFileInfo.reexports[i].reportNode =
+          baseFileInfo.reexports[i].reportNode;
+      }
+      for (let i = 0; i < baseFileInfo.imports.length; i++) {
+        resolvedFileInfo.imports[i].reportNode =
+          baseFileInfo.imports[i].reportNode;
+        analyzedFileInfo.imports[i].reportNode =
+          baseFileInfo.imports[i].reportNode;
+      }
       debug(
-        `No updates needed for ${context.filename.replace(rootDir, '')} complete in ${formatMilliseconds(baseEnd - start)}`
+        `Update for ${context.filename.replace(rootDir, '')} base only complete in ${formatMilliseconds(baseEnd - start)}`
       );
     }
   } else {
@@ -119,7 +154,7 @@ function updateCacheForFile(context: GenericContext) {
   }
 }
 
-const filesWithFirstRun = new Set<string>();
+const filesCheckedAtLeastOnce = new Set<string>();
 
 export function getESMInfo(context: GenericContext) {
   // If we haven't done our first run of computing project info, do it now
@@ -128,11 +163,12 @@ export function getESMInfo(context: GenericContext) {
   }
 
   // Check if this file has been analyzed before. If it has, there may have been
-  // an edit/fix that we need to repopulate our cache for first
-  if (filesWithFirstRun.has(context.filename)) {
+  // an edit/fix that we need to repopulate our cache for first. If not, then
+  // the initial computation a few lines above is sufficient
+  if (filesCheckedAtLeastOnce.has(context.filename)) {
     updateCacheForFile(context);
   } else {
-    filesWithFirstRun.add(context.filename);
+    filesCheckedAtLeastOnce.add(context.filename);
   }
 
   // This shouldn't be possible and is just to make sure TypeScript is happy

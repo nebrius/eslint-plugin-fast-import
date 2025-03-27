@@ -153,6 +153,7 @@ it('Computes base info', () => {
               moduleSpecifier: './a',
             },
             {
+              importAlias: 'barrel1',
               importType: 'barrel',
               moduleSpecifier: './a',
             },
@@ -206,6 +207,7 @@ it('Computes base info', () => {
               moduleSpecifier: './a',
             },
             {
+              importAlias: 'barrel2',
               importType: 'barrel',
               moduleSpecifier: './a',
             },

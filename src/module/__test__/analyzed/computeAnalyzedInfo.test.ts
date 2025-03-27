@@ -51,6 +51,7 @@ it('Computes base info', () => {
               rootExportType: 'export',
             },
             {
+              importAlias: 'b',
               importType: 'barrel',
               moduleSpecifier: './b',
               moduleType: 'firstPartyCode',

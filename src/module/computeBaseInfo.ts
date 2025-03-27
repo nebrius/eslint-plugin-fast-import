@@ -143,7 +143,6 @@ export function updateBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo,
   { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
 ): boolean {
-  console.log(baseProjectInfo.files.has(filePath));
   const previousFileDetails = baseProjectInfo.files.get(filePath);
   if (!isCodeFile(filePath)) {
     throw new InternalError(
@@ -167,12 +166,8 @@ export function updateBaseInfoForFile(
     isEntryPointCheck,
   });
 
-  if (isFileUnchanged(previousFileDetails, updatedFileDetails)) {
-    return false;
-  }
-  deleteBaseInfoForFile(baseProjectInfo, filePath);
   baseProjectInfo.files.set(filePath, updatedFileDetails);
-  return isFileUnchanged(previousFileDetails, updatedFileDetails);
+  return !isFileUnchanged(previousFileDetails, updatedFileDetails);
 }
 
 // TODO: wire in deletions to in-editor file watcher once it's implemented
@@ -249,7 +244,7 @@ function walkExportDestructure(
           case TSESTree.AST_NODE_TYPES.Identifier: {
             fileDetails.exports.push({
               statementNode,
-              specifierNode: propertyNode.value,
+              reportNode: propertyNode.value,
               exportName: propertyNode.value.name,
               isEntryPoint: isEntryPointCheck(
                 filePath,
@@ -296,7 +291,7 @@ function walkExportDestructure(
       if (node.left.type === TSESTree.AST_NODE_TYPES.Identifier) {
         fileDetails.exports.push({
           statementNode,
-          specifierNode: node.left,
+          reportNode: node.left,
           exportName: node.left.name,
           isEntryPoint: isEntryPointCheck(filePath, node.left.name),
         });
@@ -319,7 +314,7 @@ function walkExportDestructure(
     case TSESTree.AST_NODE_TYPES.Identifier: {
       fileDetails.exports.push({
         statementNode,
-        specifierNode: node,
+        reportNode: node,
         exportName: node.name,
         isEntryPoint: isEntryPointCheck(filePath, node.name),
       });
@@ -418,8 +413,9 @@ function computeFileDetails({
       // module specifier.
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
         fileDetails.imports.push({
-          importType: 'dynamic',
           statementNode,
+          reportNode: statementNode,
+          importType: 'dynamic',
           moduleSpecifier,
         });
         return;
@@ -446,9 +442,9 @@ function computeFileDetails({
           // import * as foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier: {
             fileDetails.imports.push({
-              importType: 'barrel',
               statementNode,
-              specifierNode,
+              reportNode: specifierNode,
+              importType: 'barrel',
               moduleSpecifier,
               importAlias: specifierNode.local.name,
             });
@@ -458,9 +454,9 @@ function computeFileDetails({
           // import foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier: {
             fileDetails.imports.push({
-              importType: 'single',
               statementNode,
-              specifierNode,
+              reportNode: specifierNode,
+              importType: 'single',
               moduleSpecifier,
               importName: 'default',
               importAlias: specifierNode.local.name,
@@ -476,9 +472,9 @@ function computeFileDetails({
             );
 
             fileDetails.imports.push({
-              importType: 'single',
               statementNode,
-              specifierNode,
+              reportNode: specifierNode,
+              importType: 'single',
               moduleSpecifier,
               importName,
               importAlias: specifierNode.local.name,
@@ -507,7 +503,7 @@ function computeFileDetails({
           const exportName = getIdentifierOrStringValue(specifierNode.exported);
           fileDetails.exports.push({
             statementNode,
-            specifierNode: specifierNode.exported,
+            reportNode: specifierNode.exported,
             exportName,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
@@ -535,7 +531,7 @@ function computeFileDetails({
               case TSESTree.AST_NODE_TYPES.Identifier: {
                 fileDetails.exports.push({
                   statementNode,
-                  specifierNode: declarationNode.id,
+                  reportNode: declarationNode.id,
                   exportName: declarationNode.id.name,
                   isEntryPoint: isEntryPointCheck(
                     filePath,
@@ -589,7 +585,7 @@ function computeFileDetails({
             : statementNode.declaration.id.name;
           fileDetails.exports.push({
             statementNode,
-            specifierNode: statementNode.declaration.id,
+            reportNode: statementNode.declaration.id,
             exportName,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
@@ -602,7 +598,7 @@ function computeFileDetails({
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
               statementNode,
-              specifierNode: statementNode.declaration.id
+              reportNode: statementNode.declaration.id
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
@@ -620,7 +616,7 @@ function computeFileDetails({
             }
             fileDetails.exports.push({
               statementNode,
-              specifierNode: statementNode.declaration.id,
+              reportNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
               isEntryPoint: isEntryPointCheck(
                 filePath,
@@ -637,7 +633,7 @@ function computeFileDetails({
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
               statementNode,
-              specifierNode: statementNode.declaration.id
+              reportNode: statementNode.declaration.id
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
@@ -651,7 +647,7 @@ function computeFileDetails({
             }
             fileDetails.exports.push({
               statementNode,
-              specifierNode: statementNode.declaration.id,
+              reportNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
               isEntryPoint: isEntryPointCheck(
                 filePath,
@@ -668,7 +664,7 @@ function computeFileDetails({
           const exportName = isDefault(statementNode) ? 'default' : name;
           fileDetails.exports.push({
             statementNode,
-            specifierNode: statementNode.declaration,
+            reportNode: statementNode.declaration,
             exportName,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
@@ -681,7 +677,7 @@ function computeFileDetails({
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
               statementNode,
-              specifierNode: statementNode.declaration,
+              reportNode: statementNode.declaration,
               exportName: 'default',
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
@@ -710,8 +706,9 @@ function computeFileDetails({
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
         const exportName = statementNode.exported?.name;
         fileDetails.reexports.push({
-          reexportType: 'barrel',
           statementNode,
+          reportNode: statementNode,
+          reexportType: 'barrel',
           moduleSpecifier,
           exportName,
           isTypeReexport: statementNode.exportKind === 'type',
@@ -726,9 +723,9 @@ function computeFileDetails({
       for (const specifierNode of statementNode.specifiers) {
         const exportName = getIdentifierOrStringValue(specifierNode.exported);
         fileDetails.reexports.push({
-          reexportType: 'single',
           statementNode,
-          specifierNode,
+          reportNode: specifierNode,
+          reexportType: 'single',
           moduleSpecifier,
           importName: getIdentifierOrStringValue(specifierNode.local),
           exportName,

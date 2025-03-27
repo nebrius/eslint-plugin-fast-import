@@ -30,19 +30,15 @@ export function stripNodes(info: BaseProjectInfo) {
     }
     for (const importDetails of fileDetails.imports) {
       delete importDetails.statementNode;
-      if ('specifierNode' in importDetails) {
-        delete importDetails.specifierNode;
-      }
+      delete importDetails.reportNode;
     }
     for (const reexportDetails of fileDetails.reexports) {
       delete reexportDetails.statementNode;
-      if ('specifierNode' in reexportDetails) {
-        delete reexportDetails.specifierNode;
-      }
+      delete reexportDetails.reportNode;
     }
     for (const exportDetails of fileDetails.exports) {
       delete exportDetails.statementNode;
-      delete exportDetails.specifierNode;
+      delete exportDetails.reportNode;
     }
   }
   return clonedInfo;

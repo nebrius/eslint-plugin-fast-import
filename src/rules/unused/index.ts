@@ -71,7 +71,7 @@ export const noUnusedExports = createRule<
       ) {
         context.report({
           messageId: 'noUnusedExports',
-          node: exportEntry.specifierNode,
+          node: exportEntry.reportNode,
         });
       } else if (
         !exportEntry.isEntryPoint &&
@@ -81,7 +81,7 @@ export const noUnusedExports = createRule<
       ) {
         context.report({
           messageId: 'noTestOnlyImports',
-          node: exportEntry.specifierNode,
+          node: exportEntry.reportNode,
         });
       }
     }
