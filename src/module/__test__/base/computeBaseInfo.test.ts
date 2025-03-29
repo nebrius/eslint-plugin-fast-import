@@ -14,11 +14,9 @@ it('Computes base info', () => {
   const info = computeBaseInfo({
     rootDir: TEST_PROJECT_DIR,
     alias: { '@': './' },
-    allowAliaslessRootImports: false,
     isEntryPointCheck: () => false,
   });
   expect(stripNodes(info)).toEqual({
-    allowAliaslessRootImports: false,
     files: new Map([
       [
         FILE_A,

@@ -20,13 +20,11 @@ it('Computes resolved into', () => {
     computeBaseInfo({
       rootDir: TEST_PROJECT_DIR,
       alias: { '@': './' },
-      allowAliaslessRootImports: true,
       isEntryPointCheck: () => false,
     })
   );
 
   expect(stripNodes(info)).toEqual({
-    allowAliaslessRootImports: true,
     files: new Map([
       [
         FILE_A,
@@ -42,15 +40,6 @@ it('Computes resolved into', () => {
               moduleSpecifier: '@/one/b',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_B,
-            },
-            {
-              importAlias: 'c1',
-              importName: 'c1',
-              importType: 'single',
-              isTypeImport: false,
-              moduleSpecifier: 'one/c',
-              moduleType: 'firstPartyCode',
-              resolvedModulePath: FILE_C,
             },
             {
               importAlias: 'data',

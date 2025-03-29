@@ -17,7 +17,6 @@ type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 type ComputeBaseInfoOptions = {
   rootDir: string;
   alias?: Record<string, string>;
-  allowAliaslessRootImports?: boolean;
   isEntryPointCheck?: IsEntryPointCheck;
 };
 
@@ -27,14 +26,12 @@ type ComputeBaseInfoOptions = {
 export function computeBaseInfo({
   rootDir,
   alias = {},
-  allowAliaslessRootImports = false,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
     files: new Map(),
     rootDir,
     alias,
-    allowAliaslessRootImports,
   };
 
   const potentialFiles = readdirSync(rootDir, {
@@ -637,8 +634,8 @@ function computeFileDetails({
             });
           } else {
             // TODO: I'm pretty certain that declaration id missing means that
-            // this is a function expression, which aren't allowed in export
-            // statements
+            // this is a function expression, aka `export function () {}` which
+            // isn't allowed in an export statement
             if (!statementNode.declaration.id) {
               throw new InternalError(`function id is unexpectedly missing`, {
                 filePath,

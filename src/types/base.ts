@@ -253,10 +253,4 @@ export type BaseProjectInfo = {
    * a file at `src/components/foo` can be imported anywhere with `@/components/foo`
    */
   alias: Record<string, string>;
-
-  /**
-   * If true, allows using absolute import paths without using a root alias. For example, given a file at
-   * `src/components/foo`, we can import it anywhere with `components/foo`
-   */
-  allowAliaslessRootImports: boolean;
 };

@@ -25,11 +25,7 @@ export function getSettings(context: GenericContext): ParsedSettings {
   };
 
   let { rootDir } = mergedSettings;
-  const {
-    alias = {},
-    allowAliaslessRootImports,
-    entryPoints = [],
-  } = mergedSettings;
+  const { alias = {}, entryPoints = [] } = mergedSettings;
 
   // If we don't have rootDir yet, default to setting it to the ESLint config
   // file directory. If we do have it but it's a relative path, make it absolute
@@ -90,7 +86,6 @@ export function getSettings(context: GenericContext): ParsedSettings {
   // Apply defaults and save to the cache
   settings = {
     rootDir,
-    allowAliaslessRootImports: allowAliaslessRootImports ?? false,
     alias: parsedAlias,
     entryPoints: parsedEntryPoints,
   };

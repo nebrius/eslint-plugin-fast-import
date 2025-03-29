@@ -5,7 +5,6 @@ import { error } from '../util/logging';
 const settingsSchema = z.strictObject({
   rootDir: z.string().optional(),
   alias: z.record(z.string(), z.string()).optional(),
-  allowAliaslessRootImports: z.boolean().optional(),
   entryPoints: z
     .array(
       z.strictObject({

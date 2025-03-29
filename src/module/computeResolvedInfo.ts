@@ -246,8 +246,6 @@ let folderTree: FolderTreeNode = {
   filesAndExtensions: {},
 };
 
-let topLevelFolders: string[] = [];
-
 function computeFolderTree(baseInfo: BaseProjectInfo) {
   // Reset the cache before we start
   folderTree = {
@@ -294,8 +292,6 @@ function computeFolderTree(baseInfo: BaseProjectInfo) {
     }
     currentFolderTreeNode.filesAndExtensions[baseFileName].push(extension);
   }
-
-  topLevelFolders = Object.keys(folderTree.folders);
 }
 
 const formattedBuiltinModules = builtinModules.filter(
@@ -457,15 +453,6 @@ function resolveModuleSpecifier({
       const resolvedModulePath = resolveFirstPartyImport(
         join(moduleSpecifier.replace(`${alias}/`, path).replace('./', ''))
       );
-      return formatResolvedEntry(resolvedModulePath);
-    }
-  }
-
-  // If we allow aliasless root imports, check if this is one of them
-  if (baseProjectInfo.allowAliaslessRootImports) {
-    const firstSegment = moduleSpecifier.split('/')[0];
-    if (topLevelFolders.includes(firstSegment)) {
-      const resolvedModulePath = resolveFirstPartyImport(moduleSpecifier);
       return formatResolvedEntry(resolvedModulePath);
     }
   }
