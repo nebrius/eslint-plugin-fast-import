@@ -48,13 +48,15 @@ export const noUnusedExports = createRule<
       return {};
     }
 
-    // ESLint isn't applying defaults and options is length 0 when consumers don't specify options, even though ESLint
-    // is supposed to do that. I'm not sure what's going on
+    // ESLint isn't applying defaults, so options is length 0 when consumers
+    // don't specify options, even though ESLint is supposed to do that. I'm not
+    // sure what's going on
     const { allowNonTestTypeExports = true } = context.options[0] ?? {};
 
     const esmInfo = getESMInfo(context);
 
-    // No project info means this file wasn't found as part of the project, e.g. because it's ignored
+    // No project info means this file wasn't found as part of the project, e.g.
+    // because it's ignored
     if (!esmInfo) {
       return {};
     }
@@ -64,17 +66,23 @@ export const noUnusedExports = createRule<
       return {};
     }
 
-    for (const exportEntry of fileInfo.exports) {
-      if (
-        !exportEntry.isEntryPoint &&
-        exportEntry.importedByFiles.length === 0
-      ) {
+    // Check each export and reexport to make sure it's being used
+    for (const exportEntry of [...fileInfo.exports, ...fileInfo.reexports]) {
+      // If this is an entry point, then it's being imported externally
+      if (exportEntry.isEntryPoint) {
+        continue;
+      }
+
+      // If imported by is empty, then this isn't used anywhere
+      if (exportEntry.importedByFiles.length === 0) {
         context.report({
           messageId: 'noUnusedExports',
           node: exportEntry.reportNode,
         });
-      } else if (
-        !exportEntry.isEntryPoint &&
+      }
+
+      // Otherwise, check to see if all of its imports are only in tests
+      else if (
         isNonTestFile(context.filename) &&
         !exportEntry.importedByFiles.some(isNonTestFile) &&
         !allowNonTestTypeExports
