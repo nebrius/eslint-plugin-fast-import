@@ -192,8 +192,34 @@ class UnknownNodeTypeError extends InternalError {
   }
 }
 
-// This helper walks export destructure, which is by far the most complicated part of parsing exports because
-// destructures can be destructured recursively, e.g. `export const [ [ { something } ] ] = [ [ { something: 10 } ] ]`
+function getLocationOfDefaultToken(
+  node: TSESTree.Node,
+  tokens: TSESTree.Token[] | undefined,
+  filePath: string
+) {
+  if (!tokens) {
+    throw new InternalError(`tokens is unexpectedly undefined`);
+  }
+  for (const token of tokens) {
+    if (token.range[0] < node.range[0] || token.range[1] > node.range[1]) {
+      continue;
+    }
+    if (
+      token.type === TSESTree.AST_TOKEN_TYPES.Keyword &&
+      token.value === 'default'
+    ) {
+      return token;
+    }
+  }
+  throw new InternalError('Could not get report nore', {
+    filePath,
+    node,
+  });
+}
+
+// This helper walks export destructure, which is by far the most complicated
+// part of parsing exports because destructures can be destructured recursively,
+// e.g. `export const [ [ { something } ] ] = [ [ { something: 10 } ] ]`
 function walkExportDestructure(
   filePath: string,
   fileContents: string,
@@ -224,7 +250,7 @@ function walkExportDestructure(
     // export const { ... } = {}
     case TSESTree.AST_NODE_TYPES.ObjectPattern: {
       for (const propertyNode of node.properties) {
-        // First check if this is a spread, in which case we directly recurse on it
+        // First check if this is a spread, in which case we directly recurse
         if (propertyNode.type === TSESTree.AST_NODE_TYPES.RestElement) {
           walkExportDestructure(
             filePath,
@@ -268,9 +294,10 @@ function walkExportDestructure(
           }
 
           default: {
-            // We don't use UnknownNodeTypeError here because this is typed as a general property definition, which
-            // includes a bunch of statements that actual exports don't support (and would be a syntax error), such as:
-            // `export const { foo: doThing() }`
+            // We don't use UnknownNodeTypeError here because this is typed as a
+            // general property definition, which includes a bunch of statements
+            // that actual exports don't support (and would be a syntax error),
+            // such as: `export const { foo: doThing() }`
             throw new InternalError(
               `unsupported declaration type ${propertyNode.value.type}`,
               {
@@ -320,7 +347,8 @@ function walkExportDestructure(
       break;
     }
 
-    // AFAICT this isn't actually valid, since it would imply export const { foo.bar }, but I'm not 100% certain.
+    // AFAICT this isn't actually valid, since it would imply
+    // `export const { foo.bar }`, but I'm not 100% certain.
     // See: https://github.com/estree/estree/issues/162
     case TSESTree.AST_NODE_TYPES.MemberExpression: {
       throw new InternalError(
@@ -348,12 +376,14 @@ function walkExportDestructure(
   }
 }
 
-// Exports are almost always identifiers, but on rare occasions they can actually be strings, such as in:
+// Exports are almost always identifiers, but on rare occasions they can
+// actually be strings, such as in:
 //
 // const x = 10;
 // export { x as 'some string' };
 //
-// We actually don't care if the name is an identifier or string though, so this function normalizes the value
+// We actually don't care if the name is an identifier or string though, so this
+// function normalizes the value
 function getIdentifierOrStringValue(
   node: TSESTree.Identifier | TSESTree.StringLiteral
 ) {
@@ -388,8 +418,9 @@ function computeFileDetails({
     fileContents,
     ast,
     importDeclaration(statementNode) {
-      // First, get the module specifier, if present. It might be missing in the case of a dynamic import where the
-      // sourcefile value is computed, e.g. `await import('foo' + 'bar' + computeThing())`.
+      // First, get the module specifier, if present. It might be missing in the
+      // case of a dynamic import where the sourcefile value is computed, e.g.
+      // `await import('foo' + 'bar' + computeThing())`.
       const moduleSpecifier =
         statementNode.source.type === TSESTree.AST_NODE_TYPES.Literal
           ? (statementNode.source.value ?? undefined)
@@ -408,8 +439,8 @@ function computeFileDetails({
         );
       }
 
-      // We check if this is a dynamic import first, since it's the only type of import that may not have a string
-      // module specifier.
+      // We check if this is a dynamic import first, since it's the only type of
+      // import that may not have a string module specifier.
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
         fileDetails.imports.push({
           statementNode,
@@ -420,9 +451,10 @@ function computeFileDetails({
         return;
       }
 
-      // Now that we know this isn't a dynamic import, we can enforce that the module specifier is a string. In practice
-      // this should always be a string at this point, but we check to make TypeScript happy and just in case there's
-      // some edge case we missed.
+      // Now that we know this isn't a dynamic import, we can enforce that the
+      // module specifier is a string. In practice this should always be a
+      // string at this point, but we check to make TypeScript happy and just in
+      // case there's some edge case we missed.
       if (typeof moduleSpecifier !== 'string') {
         throw new InternalError(
           `import source ${String(moduleSpecifier)} is not a string`,
@@ -434,8 +466,8 @@ function computeFileDetails({
         );
       }
 
-      // Now loop through each specifier in the import statement and parse it. The specifier is `foo` in:
-      // `import { foo } from './bar'`
+      // Now loop through each specifier in the import statement and parse it.
+      // The specifier is `foo` in: `import { foo } from './bar'`
       for (const specifierNode of statementNode.specifiers) {
         switch (specifierNode.type) {
           // import * as foo from 'bar';
@@ -494,7 +526,6 @@ function computeFileDetails({
       }
     },
 
-    // TODO: when we have a default export we'd ideally highlight the default token. Need to figure out how to do that
     exportDeclaration(statementNode) {
       // Check if this is export { foo }, which parses very different
       if ('specifiers' in statementNode && statementNode.specifiers.length) {
@@ -515,13 +546,14 @@ function computeFileDetails({
         return;
       }
 
-      // If we got here we have a single export where we have to introspect the declaration type to figure out what the
-      // name is. Note: we still want to find the name in the case of default exports so that we can set `specifierNode`
-      // to the name. Otherwise, when we highlight a lint error, we would highlight entire classes/functions, which
-      // hurts readability
+      // If we got here we have a single export where we have to introspect the
+      // declaration type to figure out what the name is. Note: we still want to
+      // find the name in the case of default exports so that we can set
+      // `specifierNode` to the name. Otherwise, when we highlight a lint error,
+      // we would highlight entire classes/functions, which hurts readability
       switch (statementNode.declaration.type) {
         // export const ...
-        // Note, const exports can't be default
+        // Note: const exports can't be default
         case TSESTree.AST_NODE_TYPES.VariableDeclaration: {
           for (const declarationNode of statementNode.declaration
             .declarations) {
@@ -604,8 +636,9 @@ function computeFileDetails({
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
           } else {
-            // TODO: I'm pretty certain that declaration id missing means that this is a function expression, which
-            // aren't allowed in export statements
+            // TODO: I'm pretty certain that declaration id missing means that
+            // this is a function expression, which aren't allowed in export
+            // statements
             if (!statementNode.declaration.id) {
               throw new InternalError(`function id is unexpectedly missing`, {
                 filePath,
@@ -660,7 +693,8 @@ function computeFileDetails({
         // export default foo
         case TSESTree.AST_NODE_TYPES.Identifier: {
           const { name } = statementNode.declaration;
-          const exportName = isDefault(statementNode) ? 'default' : name;
+          const isNodeDefault = isDefault(statementNode);
+          const exportName = isNodeDefault ? 'default' : name;
           fileDetails.exports.push({
             statementNode,
             reportNode: statementNode.declaration,
@@ -671,21 +705,28 @@ function computeFileDetails({
         }
 
         default: {
-          // First we check if this is a default export, since we can still process it, even if we can't select a
-          // particularly useful specifier node
+          // First we check if this is a default export, since we can still
+          // process it, even if we can't select a particularly useful specifier
+          // node
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
               statementNode,
-              reportNode: statementNode.declaration,
+              reportNode: getLocationOfDefaultToken(
+                statementNode,
+                ast.tokens,
+                filePath
+              ),
               exportName: 'default',
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
             break;
           }
 
-          // Otherwise, we can't process this node. Note: We don't use UnknownNodeTypeError here because this is typed
-          // as a general declaration, which includes a bunch of statements that actual exports don't support (and would
-          // be a syntax error), such as: `export import { foo } from 'bar'`
+          // Otherwise, we can't process this node. Note: We don't use
+          // UnknownNodeTypeError here because this is typed as a general
+          // declaration, which includes a bunch of statements that actual
+          // exports don't support (and would be a syntax error), such as:
+          // `export import { foo } from 'bar'`
           throw new InternalError(
             `unsupported declaration type ${statementNode.declaration.type}`,
             {
@@ -718,7 +759,7 @@ function computeFileDetails({
         return;
       }
 
-      // Otherwise, this is a single reexport, so we iterate through each specifier
+      // Otherwise this is a single reexport, so we iterate through each specifier
       for (const specifierNode of statementNode.specifiers) {
         const exportName = getIdentifierOrStringValue(specifierNode.exported);
         fileDetails.reexports.push({

@@ -11,7 +11,7 @@ type Base = {
    *
    * Note: this may not be the node representing the entire ESM statement
    */
-  reportNode: TSESTree.Node;
+  reportNode: TSESTree.Node | TSESTree.Token;
 };
 
 /* Imports */

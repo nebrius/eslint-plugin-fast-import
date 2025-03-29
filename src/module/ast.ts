@@ -25,6 +25,7 @@ export function parseFile(filePath: string) {
   const ast = parse(fileContents, {
     loc: true,
     range: true,
+    tokens: true,
 
     // JSX is a proper superset of JavaScript, meaning JSX can appear in both .js and .jsx files. TSX is *not* a
     // proper superset of TypeScript, however, and so JSX can only appear in .tsx files, not .ts files

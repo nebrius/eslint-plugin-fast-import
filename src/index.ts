@@ -11,7 +11,7 @@ const { name, version } = JSON.parse(
 // setVerbose(!!process.env.FAST_ESM_VERBOSE);
 setVerbose(true);
 
-const plugin = {
+export default {
   meta: {
     name,
     version,
@@ -22,5 +22,3 @@ const plugin = {
   },
   processors: {},
 };
-
-export default plugin;
