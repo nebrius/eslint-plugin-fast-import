@@ -88,10 +88,11 @@ export function addBaseInfoForFile(
   }
 }
 
-function isFileUnchanged(
+function hasFileChanged(
   previousFileDetails: BaseCodeFileDetails,
   updatedFileDetails: BaseCodeFileDetails
 ) {
+  // First, check if the number of exports, reexports, or imports has changed
   if (
     updatedFileDetails.exports.length !== previousFileDetails.exports.length ||
     updatedFileDetails.reexports.length !==
@@ -99,43 +100,41 @@ function isFileUnchanged(
     updatedFileDetails.imports.length !== previousFileDetails.imports.length
   ) {
     return true;
-  } else {
-    for (const exportEntry of previousFileDetails.exports) {
-      if (
-        updatedFileDetails.exports.some(
-          (e) => exportEntry.exportName === e.exportName
-        )
-      ) {
-        return true;
-      }
-    }
-    for (const reexportEntry of previousFileDetails.reexports) {
-      if (
-        updatedFileDetails.reexports.some(
-          (r) =>
-            reexportEntry.reexportType === r.reexportType &&
-            reexportEntry.exportName === r.exportName &&
-            reexportEntry.moduleSpecifier === r.moduleSpecifier
-        )
-      ) {
-        return true;
-      }
-    }
-    for (const importEntry of previousFileDetails.imports) {
-      if (
-        updatedFileDetails.imports.some(
-          (i) =>
-            importEntry.moduleSpecifier === i.moduleSpecifier &&
-            importEntry.importType === i.importType &&
-            ('importAlias' in importEntry
-              ? importEntry.importAlias === (i as BaseBarrelImport).importAlias
-              : true)
-        )
-      ) {
-        return true;
-      }
+  }
+
+  // Now, compare each import and export to see if any of their details changed
+  for (let i = 0; i < previousFileDetails.exports.length; i++) {
+    const previousExport = previousFileDetails.exports[i];
+    const updatedExport = updatedFileDetails.exports[i];
+    if (previousExport.exportName !== updatedExport.exportName) {
+      return true;
     }
   }
+  for (let i = 0; i < previousFileDetails.reexports.length; i++) {
+    const previousReexport = previousFileDetails.reexports[i];
+    const updatedReexport = updatedFileDetails.reexports[i];
+    if (
+      previousReexport.reexportType !== updatedReexport.reexportType ||
+      previousReexport.exportName !== updatedReexport.exportName ||
+      previousReexport.moduleSpecifier !== previousReexport.moduleSpecifier
+    ) {
+      return true;
+    }
+  }
+  for (let i = 0; i < previousFileDetails.imports.length; i++) {
+    const previousImport = previousFileDetails.imports[i];
+    const updatedImport = updatedFileDetails.imports[i];
+    if (
+      previousImport.moduleSpecifier !== updatedImport.moduleSpecifier ||
+      previousImport.importType !== updatedImport.importType ||
+      ('importAlias' in previousImport &&
+        previousImport.importAlias !==
+          (updatedImport as BaseBarrelImport).importAlias)
+    ) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -167,7 +166,7 @@ export function updateBaseInfoForFile(
   });
 
   baseProjectInfo.files.set(filePath, updatedFileDetails);
-  return !isFileUnchanged(previousFileDetails, updatedFileDetails);
+  return hasFileChanged(previousFileDetails, updatedFileDetails);
 }
 
 // TODO: wire in deletions to in-editor file watcher once it's implemented
