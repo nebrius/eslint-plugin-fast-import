@@ -11,9 +11,6 @@ import type {
 } from '../types/analyzed';
 import type { ResolvedProjectInfo } from '../types/resolved';
 
-// TODO: places were `as` casts are used indicate an issue with the analyzed type definitions that don't narrow
-// correctly and should be fixed
-
 export function computeAnalyzedInfo(
   resolvedProjectInfo: ResolvedProjectInfo
 ): AnalyzedProjectInfo {
@@ -140,7 +137,7 @@ export function computeAnalyzedInfo(
       if (reexportDetails.reexportType === 'single') {
         analyzeSingleImport(
           filePath,
-          reexportDetails as AnalyzedSingleReexport,
+          reexportDetails,
           analyzedProjectInfo,
           'single',
           []
@@ -148,7 +145,7 @@ export function computeAnalyzedInfo(
       } else {
         analyzeBarrelImport(
           filePath,
-          reexportDetails as AnalyzedBarrelReexport,
+          reexportDetails,
           analyzedProjectInfo,
           'barrel',
           []
@@ -332,9 +329,7 @@ function analyzeSingleImport(
         currentImportName
       );
       if (rootModuleInfo) {
-        (reexportEntry as AnalyzedBarrelReexport).importedByFiles.push(
-          originFilePath
-        );
+        reexportEntry.importedByFiles.push(originFilePath);
         return rootModuleInfo;
       }
     }
@@ -410,17 +405,13 @@ function analyzeBarrelImport(
         reexportFiles.push(currentFile);
       }
       if (reexportEntry.reexportType === 'barrel') {
-        (reexportEntry as AnalyzedBarrelReexport).barrelImportedByFiles.push(
-          originFilePath
-        );
+        reexportEntry.barrelImportedByFiles.push(originFilePath);
         traverse(reexportEntry.resolvedModulePath);
       } else {
-        (reexportEntry as AnalyzedSingleReexport).barrelImportedByFiles.push(
-          originFilePath
-        );
+        reexportEntry.barrelImportedByFiles.push(originFilePath);
         analyzeSingleImport(
           originFilePath,
-          reexportEntry as AnalyzedSingleReexport,
+          reexportEntry,
           analyzedProjectInfo,
           initialImportType,
           reexportFiles

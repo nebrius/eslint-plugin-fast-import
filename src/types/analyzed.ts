@@ -142,7 +142,7 @@ export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedReexportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
   AnalyzedReexportBase;
-type AnalyzedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
+type AnalyzedReexport = AnalyzedSingleReexport | AnalyzedBarrelReexport;
 
 /* File Details */
 
