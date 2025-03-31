@@ -78,66 +78,86 @@ export function addResolvedInfoForFile(
   }
 }
 
+// Find all files that import/reexport from this file, or that this file is imported from
 function getFileReferences(
   previousResolvedProjectInfo: ResolvedProjectInfo,
   filePath: string
 ) {
   const fileReferences = [];
+  const previousResolvedFileEntry =
+    previousResolvedProjectInfo.files.get(filePath);
+  if (!previousResolvedFileEntry) {
+    throw new InternalError(
+      `Could not get previous resolved entry for ${filePath}`
+    );
+  }
+  if (previousResolvedFileEntry.fileType !== 'code') {
+    throw new InternalError(`Previous file type for ${filePath} is not code`);
+  }
+
   for (const [
     candidateFilePath,
     candidateFileDetails,
   ] of previousResolvedProjectInfo.files) {
-    if (candidateFileDetails.fileType !== 'code') {
+    if (
+      candidateFileDetails.fileType !== 'code' ||
+      candidateFilePath === filePath
+    ) {
       continue;
     }
     if (
-      candidateFileDetails.imports.some(
+      // Look for imports or the import side of reexports to see if they reference this file
+      [...candidateFileDetails.imports, ...candidateFileDetails.reexports].some(
         (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
       ) ||
-      candidateFileDetails.reexports.some(
-        (r) => 'resolvedModulePath' in r && r.resolvedModulePath === filePath
+      // Look for exports or the export side of reexports to see if this file references them
+      [
+        ...previousResolvedFileEntry.imports,
+        ...previousResolvedFileEntry.reexports,
+      ].some(
+        (i) =>
+          i.moduleType === 'firstPartyCode' && i.resolvedModulePath === filePath
       )
     ) {
       fileReferences.push(candidateFilePath);
     }
   }
+
   return fileReferences;
 }
 
 export function updateResolvedInfoForFile(
   filePath: string,
-  newBaseProjectInfo: BaseProjectInfo,
-  previousResolvedProjectInfo: ResolvedProjectInfo
+  baseProjectInfo: BaseProjectInfo,
+  resolvedProjectInfo: ResolvedProjectInfo
 ) {
-  const baseFileInfo = newBaseProjectInfo.files.get(filePath);
-  if (!baseFileInfo) {
-    throw new InternalError(`Could not get base file info for ${filePath}`);
-  }
-  if (baseFileInfo.fileType !== 'code') {
-    throw new InternalError(`Mismatched file types for ${filePath}`);
-  }
-
   const filePathsToUpdate = [
     filePath,
-    ...getFileReferences(previousResolvedProjectInfo, filePath),
+    ...getFileReferences(resolvedProjectInfo, filePath),
   ];
   for (const filePathToUpdate of filePathsToUpdate) {
+    const baseFileInfo = baseProjectInfo.files.get(filePathToUpdate);
+    if (!baseFileInfo) {
+      throw new InternalError(
+        `Could not get base file info for ${filePathToUpdate}`
+      );
+    }
+    if (baseFileInfo.fileType !== 'code') {
+      throw new InternalError(`Mismatched file types for ${filePathToUpdate}`);
+    }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       imports: [],
       exports: [],
       reexports: [],
     };
-    previousResolvedProjectInfo.files.set(
-      filePathToUpdate,
-      resolvedCodeFileDetails
-    );
     populateFileDetails(
-      newBaseProjectInfo,
+      baseProjectInfo,
       filePathToUpdate,
       baseFileInfo,
       resolvedCodeFileDetails
     );
+    resolvedProjectInfo.files.set(filePathToUpdate, resolvedCodeFileDetails);
   }
 }
 

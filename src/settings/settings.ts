@@ -7,7 +7,7 @@ import { getUserSettings, type Settings } from './user';
 import { getEslintConfigDir } from './util';
 import { existsSync } from 'node:fs';
 
-type ParsedSettings = RequiredDeep<Settings>;
+export type ParsedSettings = RequiredDeep<Settings>;
 
 let settings: ParsedSettings | null = null;
 export function getSettings(context: GenericContext): ParsedSettings {
