@@ -1,10 +1,6 @@
 import { getDirname } from 'cross-dirname';
 import { join } from 'node:path';
-import {
-  getProjectInfo,
-  initializeProject,
-  updateCacheForFile,
-} from '../../computeProjectInfo';
+import { getProjectInfo, initializeProject, updateCacheForFile } from '../..';
 import { stripNodes } from '../util';
 import { parse } from '@typescript-eslint/typescript-estree';
 

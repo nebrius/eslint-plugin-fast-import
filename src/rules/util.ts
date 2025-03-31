@@ -4,7 +4,7 @@ import {
   getProjectInfo,
   initializeProject,
   updateCacheForFile,
-} from '../module/computeProjectInfo';
+} from '../module';
 import { getSettings } from '../settings/settings';
 
 export const createRule = ESLintUtils.RuleCreator(

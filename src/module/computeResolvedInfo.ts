@@ -159,6 +159,11 @@ export function updateResolvedInfoForFile(
     );
     resolvedProjectInfo.files.set(filePathToUpdate, resolvedCodeFileDetails);
   }
+  console.log(
+    resolvedProjectInfo.files.get(
+      '/Users/nebrius/Projects/fast-esm/src/types/analyzed.ts'
+    )
+  );
 }
 
 // TODO: wire in deletions to in-editor file watcher once it's implemented

@@ -1,15 +1,15 @@
 import type { AnalyzedProjectInfo } from '../types/analyzed';
-import { computeAnalyzedInfo } from '../module/computeAnalyzedInfo';
+import { computeAnalyzedInfo } from './computeAnalyzedInfo';
 import {
   addResolvedInfoForFile,
   computeResolvedInfo,
   updateResolvedInfoForFile,
-} from '../module/computeResolvedInfo';
+} from './computeResolvedInfo';
 import {
   addBaseInfoForFile,
   computeBaseInfo,
   updateBaseInfoForFile,
-} from '../module/computeBaseInfo';
+} from './computeBaseInfo';
 import { InternalError } from '../util/error';
 import type { BaseProjectInfo } from '../types/base';
 import type { ResolvedProjectInfo } from '../types/resolved';

@@ -268,6 +268,7 @@ function walkExportDestructure(
               statementNode,
               reportNode: propertyNode.value,
               exportName: propertyNode.value.name,
+              isTypeExport: statementNode.exportKind === 'type',
               isEntryPoint: isEntryPointCheck(
                 filePath,
                 propertyNode.value.name
@@ -316,6 +317,7 @@ function walkExportDestructure(
           statementNode,
           reportNode: node.left,
           exportName: node.left.name,
+          isTypeExport: statementNode.exportKind === 'type',
           isEntryPoint: isEntryPointCheck(filePath, node.left.name),
         });
       }
@@ -339,6 +341,7 @@ function walkExportDestructure(
         statementNode,
         reportNode: node,
         exportName: node.name,
+        isTypeExport: statementNode.exportKind === 'type',
         isEntryPoint: isEntryPointCheck(filePath, node.name),
       });
       break;
@@ -474,6 +477,7 @@ function computeFileDetails({
               reportNode: specifierNode,
               importType: 'barrel',
               moduleSpecifier,
+              isTypeImport: statementNode.importKind === 'type',
               importAlias: specifierNode.local.name,
             });
             break;
@@ -532,6 +536,7 @@ function computeFileDetails({
             statementNode,
             reportNode: specifierNode.exported,
             exportName,
+            isTypeExport: statementNode.exportKind === 'type',
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
         }
@@ -561,6 +566,7 @@ function computeFileDetails({
                   statementNode,
                   reportNode: declarationNode.id,
                   exportName: declarationNode.id.name,
+                  isTypeExport: statementNode.exportKind === 'type',
                   isEntryPoint: isEntryPointCheck(
                     filePath,
                     declarationNode.id.name
@@ -615,6 +621,7 @@ function computeFileDetails({
             statementNode,
             reportNode: statementNode.declaration.id,
             exportName,
+            isTypeExport: statementNode.exportKind === 'type',
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
           break;
@@ -630,6 +637,7 @@ function computeFileDetails({
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
+              isTypeExport: false, // functions can never be types
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
           } else {
@@ -647,6 +655,7 @@ function computeFileDetails({
               statementNode,
               reportNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
+              isTypeExport: statementNode.exportKind === 'type',
               isEntryPoint: isEntryPointCheck(
                 filePath,
                 statementNode.declaration.id.name
@@ -666,6 +675,7 @@ function computeFileDetails({
                 ? statementNode.declaration.id
                 : statementNode,
               exportName: 'default',
+              isTypeExport: false, // Classes can never be types
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
           } else {
@@ -678,6 +688,7 @@ function computeFileDetails({
               statementNode,
               reportNode: statementNode.declaration.id,
               exportName: statementNode.declaration.id.name,
+              isTypeExport: statementNode.exportKind === 'type',
               isEntryPoint: isEntryPointCheck(
                 filePath,
                 statementNode.declaration.id.name
@@ -696,6 +707,7 @@ function computeFileDetails({
             statementNode,
             reportNode: statementNode.declaration,
             exportName,
+            isTypeExport: statementNode.exportKind === 'type',
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
           break;
@@ -714,6 +726,7 @@ function computeFileDetails({
                 filePath
               ),
               exportName: 'default',
+              isTypeExport: false, // Turns out default exports can't be types
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
             break;

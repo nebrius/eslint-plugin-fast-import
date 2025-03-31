@@ -82,6 +82,15 @@ export type BaseBarrelImport = Base & {
    * then `importAlias` equals `foo`
    */
   importAlias: string;
+
+  /**
+   * If true, then this is a TypeScript type import, e.g.
+   *
+   * ```
+   * import type * as Foo from './bar'
+   * ```
+   */
+  isTypeImport: boolean;
 };
 
 export type BaseDynamicImport = Base & {
@@ -122,6 +131,15 @@ export type BaseExport = Base & {
    * we'll never see the import itself
    */
   isEntryPoint: boolean;
+
+  /**
+   * If true, then this is a TypeScript type import, e.g.
+   *
+   * ```
+   * export type Foo = 10;
+   * ```
+   */
+  isTypeExport: boolean;
 };
 
 /* Reexports */

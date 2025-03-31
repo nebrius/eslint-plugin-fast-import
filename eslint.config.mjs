@@ -41,6 +41,7 @@ export default [
     plugins: { 'fast-esm': fastEsm.default },
     rules: {
       'fast-esm/no-unused-exports': 'error',
+      'fast-esm/no-circular-imports': 'error',
     },
   },
   {
