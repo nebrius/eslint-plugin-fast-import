@@ -86,7 +86,8 @@ export function computeAnalyzedInfo(
           });
           break;
         }
-        case 'barrel': {
+        case 'barrel':
+        case 'dynamic': {
           analyzedFileInfo.imports.push({
             ...importDetails,
           });
