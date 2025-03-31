@@ -3,11 +3,12 @@ import { createRule, getESMInfo } from '../util';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-function isNonTestFile(filePath: string) {
+function isNonTestFile(filePath: string, rootDir: string) {
+  const relativeFilePath = filePath.replace(`${rootDir}/`, '');
   return (
-    !filePath.includes('.test.') &&
-    !filePath.includes('__test__') &&
-    !filePath.includes('__tests__')
+    !relativeFilePath.includes('.test.') &&
+    !relativeFilePath.includes('__test__') &&
+    !relativeFilePath.includes('__tests__')
   );
 }
 
@@ -61,7 +62,10 @@ export const noUnusedExports = createRule<
       return {};
     }
 
-    const { fileInfo } = esmInfo;
+    const {
+      fileInfo,
+      projectInfo: { rootDir },
+    } = esmInfo;
     if (fileInfo.fileType !== 'code') {
       return {};
     }
@@ -83,8 +87,8 @@ export const noUnusedExports = createRule<
 
       // Otherwise, check to see if all of its imports are only in tests
       else if (
-        isNonTestFile(context.filename) &&
-        !exportEntry.importedByFiles.some(isNonTestFile) &&
+        isNonTestFile(context.filename, rootDir) &&
+        !exportEntry.importedByFiles.some((i) => isNonTestFile(i, rootDir)) &&
         !allowNonTestTypeExports
       ) {
         context.report({

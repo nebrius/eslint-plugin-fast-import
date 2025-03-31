@@ -44,7 +44,7 @@ export default [
     },
   },
   {
-    files: ['src/module/__test__/**/*.{js,mjs,jsx,ts,tsx,mts}'],
+    files: ['src/module/__test__/projectInfo/**/*.{js,mjs,jsx,ts,tsx,mts}'],
     rules: {
       'fast-esm/no-unused-exports': 'off',
     },

@@ -1,8 +1,8 @@
 import { join } from 'path';
-import { stripNodes } from '../util';
-import { computeAnalyzedInfo } from '../../computeAnalyzedInfo';
-import { computeResolvedInfo } from '../../computeResolvedInfo';
-import { computeBaseInfo } from '../../computeBaseInfo';
+import { stripNodes } from '../../util';
+import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo';
+import { computeResolvedInfo } from '../../../computeResolvedInfo';
+import { computeBaseInfo } from '../../../computeBaseInfo';
 import { getDirname } from 'cross-dirname';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');

@@ -47,11 +47,9 @@ export function computeAnalyzedInfo(
     }
 
     for (const reexportDetails of fileDetails.reexports) {
-      // For some reason, type narrowing isn't working on this one, so I have to manually set the top on a const and
-      // then push the variable into the array
       switch (reexportDetails.reexportType) {
         case 'single': {
-          const analyzedSingleReexport: AnalyzedSingleReexport = {
+          analyzedFileInfo.reexports.push({
             ...reexportDetails,
             // If this reexport is a builtin or thirdparty reexport, we know what the root module type is. However, if
             // it's first party then we don't know what the type is yet. In this case, once we determine the type we'll
@@ -63,17 +61,15 @@ export function computeAnalyzedInfo(
                 : undefined,
             importedByFiles: [],
             barrelImportedByFiles: [],
-          };
-          analyzedFileInfo.reexports.push(analyzedSingleReexport);
+          });
           break;
         }
         case 'barrel': {
-          const analyzedSingleReexport: AnalyzedBarrelReexport = {
+          analyzedFileInfo.reexports.push({
             ...reexportDetails,
             importedByFiles: [],
             barrelImportedByFiles: [],
-          };
-          analyzedFileInfo.reexports.push(analyzedSingleReexport);
+          });
           break;
         }
       }
@@ -82,20 +78,18 @@ export function computeAnalyzedInfo(
     for (const importDetails of fileDetails.imports) {
       switch (importDetails.importType) {
         case 'single': {
-          const analyzedSingleReexport: AnalyzedSingleImport = {
+          analyzedFileInfo.imports.push({
             ...importDetails,
             // We don't know what the type is yet, but once we determine the type we'll change this value and
             // potentially fill in other details
             rootModuleType: undefined,
-          };
-          analyzedFileInfo.imports.push(analyzedSingleReexport);
+          });
           break;
         }
         case 'barrel': {
-          const analyzedSingleReexport: AnalyzedBarrelImport = {
+          analyzedFileInfo.imports.push({
             ...importDetails,
-          };
-          analyzedFileInfo.imports.push(analyzedSingleReexport);
+          });
           break;
         }
       }
