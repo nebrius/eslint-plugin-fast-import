@@ -20,6 +20,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
 let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
+
 export function initializeProject({
   rootDir,
   alias,
@@ -30,7 +31,7 @@ export function initializeProject({
     return;
   }
 
-  const start = Date.now();
+  const baseStart = Date.now();
   baseProjectInfo = computeBaseInfo({
     rootDir,
     alias,
@@ -40,17 +41,19 @@ export function initializeProject({
       ),
   });
   const baseEnd = Date.now();
+
+  const resolveStart = Date.now();
   resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
   const resolveEnd = Date.now();
+
+  const analyzestart = Date.now();
   analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
   const analyzeEnd = Date.now();
 
   debug(`Initial computation complete:`);
-  debug(`  base info:     ${formatMilliseconds(baseEnd - start)}`);
-  debug(`  resolved info: ${formatMilliseconds(resolveEnd - start)}`);
-  debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - start)}`);
-
-  return analyzedProjectInfo;
+  debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
+  debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
+  debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
 }
 
 export function getProjectInfo() {
@@ -83,7 +86,7 @@ export function updateCacheForFile(
 
   // Check if we're updating file info or adding a new file
   if (analyzedProjectInfo.files.has(filePath)) {
-    const start = Date.now();
+    const baseStart = Date.now();
     const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
       baseProjectInfo,
       baseOptions
@@ -92,15 +95,24 @@ export function updateCacheForFile(
 
     // If we don't need to update
     if (shouldUpdateDerivedProjectInfo) {
+      const resolveStart = Date.now();
       updateResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
       const resolveEnd = Date.now();
+
+      const analyzeStart = Date.now();
       analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
       const analyzeEnd = Date.now();
 
       debug(`Update for ${filePath.replace(rootDir, '')} complete:`);
-      debug(`  base info:     ${formatMilliseconds(baseEnd - start)}`);
-      debug(`  resolved info: ${formatMilliseconds(resolveEnd - start)}`);
-      debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - start)}`);
+      debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
+      debug(
+        `  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`
+      );
+      debug(
+        `  analyzed info: ${formatMilliseconds(analyzeEnd - analyzeStart)}`
+      );
+
+      return true;
     } else {
       // Even if we don't need to update information we compute, we still need
       // to update the AST nodes to take into account potentially changed locs
@@ -136,21 +148,29 @@ export function updateCacheForFile(
           baseFileInfo.imports[i].reportNode;
       }
       debug(
-        `Update for ${filePath.replace(rootDir, '')} base only complete in ${formatMilliseconds(baseEnd - start)}`
+        `Update for ${filePath.replace(rootDir, '')} base only complete in ${formatMilliseconds(baseEnd - baseStart)}`
       );
+
+      return false;
     }
   } else {
-    const start = Date.now();
+    const baseStart = Date.now();
     addBaseInfoForFile(baseProjectInfo, baseOptions);
     const baseEnd = Date.now();
+
+    const resolveStart = Date.now();
     addResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
     const resolveEnd = Date.now();
+
+    const anazlyzeStart = Date.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
     const analyzeEnd = Date.now();
 
     debug(`${filePath.replace(rootDir, '')} add complete:`);
-    debug(`  base info:     ${formatMilliseconds(baseEnd - start)}`);
-    debug(`  resolved info: ${formatMilliseconds(resolveEnd - start)}`);
-    debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - start)}`);
+    debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
+    debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
+    debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - anazlyzeStart)}`);
+
+    return true;
   }
 }

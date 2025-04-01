@@ -12,17 +12,28 @@ export const createRule = ESLintUtils.RuleCreator(
     `https://github.com/nebrius/esm-utils/tree/main/src/rules/${name}/README.md`
 );
 
+const updateListeners = new Set<() => void>();
+export function registerUpdateListener(cb: () => void) {
+  updateListeners.add(cb);
+}
+
 export function getESMInfo(context: GenericContext) {
   const settings = getSettings(context);
   initializeProject(settings);
 
   // TODO: don't run this in single shot mode
-  updateCacheForFile(
-    context.filename,
-    context.sourceCode.getText(),
-    context.sourceCode.ast,
-    settings
-  );
+  if (
+    updateCacheForFile(
+      context.filename,
+      context.sourceCode.getText(),
+      context.sourceCode.ast,
+      settings
+    )
+  ) {
+    for (const updateListener of updateListeners) {
+      updateListener();
+    }
+  }
 
   const projectInfo = getProjectInfo();
 

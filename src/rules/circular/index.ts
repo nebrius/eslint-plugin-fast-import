@@ -1,4 +1,4 @@
-import { createRule, getESMInfo } from '../util';
+import { createRule, getESMInfo, registerUpdateListener } from '../util';
 import type { AnalyzedProjectInfo } from '../../types/analyzed';
 import { InternalError } from '../../util/error';
 import type { TSESTree } from '@typescript-eslint/utils';
@@ -65,6 +65,10 @@ function checkFile(
 // Map of filepaths to imports/reexports with circular dependencies
 const circularImportMap = new Map<string, TSESTree.Node[]>();
 
+registerUpdateListener(() => {
+  circularImportMap.clear();
+});
+
 export const noCircularImports = createRule<Options, MessageIds>({
   name: 'no-circular-imports',
   meta: {
@@ -94,7 +98,7 @@ export const noCircularImports = createRule<Options, MessageIds>({
     }
 
     // If we recomputed on this run, then we need to recompute cycles
-    if (esmInfo.infoWasRecomputed || !circularImportMap.has(context.filename)) {
+    if (!circularImportMap.has(context.filename)) {
       const importedFilesSearched = new Set<string>();
       const circularImportNodes: TSESTree.Node[] = [];
       circularImportMap.set(context.filename, circularImportNodes);
