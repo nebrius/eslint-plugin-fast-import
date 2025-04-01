@@ -1,49 +1,36 @@
-import type { RuleContext } from '@typescript-eslint/utils/ts-eslint';
-import type {
-  AnalyzedImport,
-  AnalyzedProjectInfo,
-  AnalyzedReexport,
-} from '../../types/analyzed';
 import { createRule, getESMInfo } from '../util';
+import type { AnalyzedProjectInfo } from '../../types/analyzed';
 import { InternalError } from '../../util/error';
+import type { TSESTree } from '@typescript-eslint/utils';
 
 type Options = [];
 type MessageIds = 'noCircularImports';
 
 function checkFile(
-  context: RuleContext<MessageIds, Options>,
-  filePath: string,
+  originalFilePath: string,
+  currentFilePath: string,
   projectInfo: AnalyzedProjectInfo,
-  importStack: Array<{
-    filePath: string;
-    importEntry: AnalyzedImport | AnalyzedReexport;
-  }>,
+  importStack: string[],
   visitedFiles: string[]
 ) {
-  const fileDetails = projectInfo.files.get(filePath);
+  const fileDetails = projectInfo.files.get(currentFilePath);
   if (!fileDetails) {
-    throw new InternalError(`Could not get file info for "${filePath}"`);
+    throw new InternalError(`Could not get file info for "${currentFilePath}"`);
   }
 
   // Non-JS files by definition can't be circilar, since they can't import JS
   if (fileDetails.fileType !== 'code') {
-    return;
+    return false;
   }
 
   // Mark this file as visited
-  visitedFiles.push(filePath);
+  visitedFiles.push(currentFilePath);
 
-  // Now check if this next file is part of a cycle
-  const firstInstance = importStack.find((i) => i.filePath === filePath);
-  if (firstInstance) {
-    const filesInCycle = importStack.slice(importStack.indexOf(firstInstance));
-    for (const fileInCycle of filesInCycle) {
-      context.report({
-        messageId: 'noCircularImports',
-        node: fileInCycle.importEntry.statementNode,
-      });
-    }
-    return;
+  // Now check if this file is part of a cycle
+  const firstInstanceIndex = importStack.indexOf(currentFilePath);
+  if (firstInstanceIndex !== -1) {
+    const filesInCycle = importStack.slice(firstInstanceIndex);
+    return filesInCycle.includes(originalFilePath);
   }
 
   // If this wasn't a cycle, then keep exploring
@@ -59,8 +46,24 @@ function checkFile(
     ) {
       continue;
     }
+    if (
+      checkFile(
+        originalFilePath,
+        importEntry.resolvedModulePath,
+        projectInfo,
+        [...importStack, currentFilePath],
+        visitedFiles
+      )
+    ) {
+      return true;
+    }
   }
+
+  return false;
 }
+
+// Map of filepaths to imports/reexports with circular dependencies
+const circularImportMap = new Map<string, TSESTree.Node[]>();
 
 export const noCircularImports = createRule<Options, MessageIds>({
   name: 'no-circular-imports',
@@ -85,7 +88,53 @@ export const noCircularImports = createRule<Options, MessageIds>({
       return {};
     }
 
-    checkFile(context, context.filename, esmInfo.projectInfo, [], []);
+    const { fileInfo, projectInfo } = esmInfo;
+    if (fileInfo.fileType !== 'code') {
+      return {};
+    }
+
+    // If we recomputed on this run, then we need to recompute cycles
+    if (esmInfo.infoWasRecomputed || !circularImportMap.has(context.filename)) {
+      const importedFilesSearched = new Set<string>();
+      const circularImportNodes: TSESTree.Node[] = [];
+      circularImportMap.set(context.filename, circularImportNodes);
+      for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
+        if (
+          !('resolvedModulePath' in importEntry) ||
+          !importEntry.resolvedModulePath ||
+          importedFilesSearched.has(importEntry.resolvedModulePath)
+        ) {
+          continue;
+        }
+        importedFilesSearched.add(importEntry.resolvedModulePath);
+        if (
+          checkFile(
+            context.filename,
+            importEntry.resolvedModulePath,
+            projectInfo,
+            [context.filename],
+            []
+          )
+        ) {
+          circularImportNodes.push(importEntry.statementNode);
+        }
+      }
+    }
+
+    const circularImports = circularImportMap.get(context.filename);
+    if (!circularImports) {
+      throw new InternalError(
+        `Circular imports are undefined for ${context.filename}`
+      );
+    }
+
+    for (const circularImport of circularImports) {
+      context.report({
+        messageId: 'noCircularImports',
+        node: circularImport,
+      });
+    }
+
     return {};
   },
 });
