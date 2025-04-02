@@ -32,6 +32,7 @@ it('Updates cache when an unused export is added', () => {
             {
               barrelImportedByFiles: [],
               exportName: 'One',
+              isTypeExport: true,
               importedByFiles: [FILE_B],
               isEntryPoint: false,
               reexportedByFiles: [],
@@ -93,6 +94,7 @@ it('Updates cache when an unused export is added', () => {
             {
               barrelImportedByFiles: [],
               exportName: 'One',
+              isTypeExport: true,
               importedByFiles: [FILE_B],
               isEntryPoint: false,
               reexportedByFiles: [],
@@ -100,6 +102,7 @@ it('Updates cache when an unused export is added', () => {
             {
               barrelImportedByFiles: [],
               exportName: 'Two',
+              isTypeExport: true,
               importedByFiles: [],
               isEntryPoint: false,
               reexportedByFiles: [],

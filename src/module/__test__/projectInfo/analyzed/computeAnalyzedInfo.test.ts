@@ -52,6 +52,7 @@ it('Computes base info', () => {
             {
               importAlias: 'b',
               importType: 'barrel',
+              isTypeImport: false,
               moduleSpecifier: './b',
               moduleType: 'firstPartyCode',
               resolvedModulePath: FILE_B,
@@ -162,6 +163,7 @@ it('Computes base info', () => {
             {
               exportName: 'c1',
               isEntryPoint: false,
+              isTypeExport: false,
               importedByFiles: [FILE_A],
               barrelImportedByFiles: [FILE_A],
               reexportedByFiles: [FILE_B],
@@ -248,6 +250,7 @@ it('Computes base info', () => {
             {
               exportName: 'd1',
               isEntryPoint: false,
+              isTypeExport: false,
               importedByFiles: [FILE_A],
               barrelImportedByFiles: [FILE_A],
               reexportedByFiles: [FILE_B, FILE_E],

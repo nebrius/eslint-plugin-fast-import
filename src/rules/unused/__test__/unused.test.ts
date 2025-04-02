@@ -27,7 +27,6 @@ export const a2 = 10;
       settings: {
         'fast-esm': {
           rootDir: TEST_PROJECT_DIR,
-          debugLogging: true,
         },
       },
     },
@@ -45,7 +44,6 @@ export const a2 = 10;
       settings: {
         'fast-esm': {
           rootDir: TEST_PROJECT_DIR,
-          debugLogging: true,
         },
       },
     },
@@ -60,7 +58,6 @@ export const a2 = 10;
       settings: {
         'fast-esm': {
           rootDir: TEST_PROJECT_DIR,
-          debugLogging: true,
         },
       },
     },

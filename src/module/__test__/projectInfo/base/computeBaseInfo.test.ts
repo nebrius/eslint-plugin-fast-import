@@ -25,106 +25,132 @@ it('Computes base info', () => {
             {
               exportName: 'Foo',
               isEntryPoint: false,
+              isTypeExport: true,
             },
             {
               exportName: 'Bar',
               isEntryPoint: false,
+              isTypeExport: true,
             },
             {
               exportName: 'a1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a2',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a3',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a4',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a5',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a6',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'A7',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a8',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a9',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a10_1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a10_2alias',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a10_rest',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a11_1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a11_2',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a11_rest',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a twelve',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a13',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a14',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a15alias',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a16alias',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'default',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a18_1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a18_2',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'a18_3',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -139,6 +165,7 @@ it('Computes base info', () => {
             {
               exportName: 'default',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -153,6 +180,7 @@ it('Computes base info', () => {
             {
               importAlias: 'barrel1',
               importType: 'barrel',
+              isTypeImport: false,
               moduleSpecifier: './a',
             },
             {
@@ -207,6 +235,7 @@ it('Computes base info', () => {
             {
               importAlias: 'barrel2',
               importType: 'barrel',
+              isTypeImport: false,
               moduleSpecifier: './a',
             },
             {
@@ -224,6 +253,7 @@ it('Computes base info', () => {
             {
               exportName: 'default',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -285,6 +315,7 @@ it('Computes base info', () => {
             {
               exportName: 'default',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',

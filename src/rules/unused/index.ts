@@ -88,13 +88,18 @@ export const noUnusedExports = createRule<
       // Otherwise, check to see if all of its imports are only in tests
       else if (
         isNonTestFile(context.filename, rootDir) &&
-        !exportEntry.importedByFiles.some((i) => isNonTestFile(i, rootDir)) &&
-        !allowNonTestTypeExports
+        !exportEntry.importedByFiles.some((i) => isNonTestFile(i, rootDir))
       ) {
-        context.report({
-          messageId: 'noTestOnlyImports',
-          node: exportEntry.reportNode,
-        });
+        if (
+          !(`isTypeExport` in exportEntry) ||
+          !exportEntry.isTypeExport ||
+          !allowNonTestTypeExports
+        ) {
+          context.report({
+            messageId: 'noTestOnlyImports',
+            node: exportEntry.reportNode,
+          });
+        }
       }
     }
 

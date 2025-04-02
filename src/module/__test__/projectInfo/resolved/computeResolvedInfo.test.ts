@@ -130,6 +130,7 @@ it('Computes resolved into', () => {
             {
               exportName: 'b1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -144,10 +145,12 @@ it('Computes resolved into', () => {
             {
               exportName: 'getD1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
             {
               exportName: 'D2',
               isEntryPoint: false,
+              isTypeExport: true,
             },
           ],
           fileType: 'code',
@@ -162,6 +165,7 @@ it('Computes resolved into', () => {
             {
               exportName: 'getD1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -176,6 +180,7 @@ it('Computes resolved into', () => {
             {
               exportName: 'e1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -196,6 +201,7 @@ it('Computes resolved into', () => {
             {
               exportName: 'c1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -210,10 +216,12 @@ it('Computes resolved into', () => {
             {
               exportName: 'F1',
               isEntryPoint: false,
+              isTypeExport: true,
             },
             {
               exportName: 'getF1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
@@ -228,6 +236,7 @@ it('Computes resolved into', () => {
             {
               exportName: 'getF1',
               isEntryPoint: false,
+              isTypeExport: false,
             },
           ],
           fileType: 'code',
