@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { GenericContext } from '../types/context';
-import { error } from '../util/logging';
+import { error, setVerbose } from '../util/logging';
 
 const settingsSchema = z.strictObject({
   rootDir: z.string().optional(),
@@ -13,9 +13,10 @@ const settingsSchema = z.strictObject({
       })
     )
     .optional(),
+  debugLogging: z.boolean().optional(),
 });
 
-export type Settings = z.infer<typeof settingsSchema>;
+export type Settings = Omit<z.infer<typeof settingsSchema>, 'debugLogging'>;
 
 export function getUserSettings(context: GenericContext): Settings {
   // Parse the raw settings, if supplied
@@ -51,6 +52,9 @@ export function getUserSettings(context: GenericContext): Settings {
       parseResult.data.rootDir.length - 1
     );
   }
+
+  // Set verbose logging, if enabled
+  setVerbose(!!parseResult.data.debugLogging);
 
   // Get user supplied settings
   return parseResult.data;

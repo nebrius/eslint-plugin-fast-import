@@ -32,6 +32,7 @@ export default [
             symbol: 'default'
           },
         ],
+        debugLogging: true
       },
     },
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],

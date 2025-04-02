@@ -147,10 +147,6 @@ export function updateCacheForFile(
         analyzedFileInfo.imports[i].reportNode =
           baseFileInfo.imports[i].reportNode;
       }
-      debug(
-        `Update for ${filePath.replace(rootDir, '')} base only complete in ${formatMilliseconds(baseEnd - baseStart)}`
-      );
-
       return false;
     }
   } else {
