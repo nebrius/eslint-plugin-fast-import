@@ -45,12 +45,7 @@ export default [
       'fast-esm/no-circular-imports': 'error',
     },
   },
-  {
-    files: ['src/module/__test__/projectInfo/**/*.{js,mjs,jsx,ts,tsx,mts}'],
-    rules: {
-      'fast-esm/no-unused-exports': 'off',
-    },
-  },
+
   eslintPluginPrettierRecommended,
   ...tseslint.config(tseslint.configs.strictTypeChecked, {
     files: ['**/*.{ts,tsx,mts}'],
@@ -75,6 +70,18 @@ export default [
 
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
+    },
+  },
+  {
+    files: ['src/module/__test__/projectInfo/**/*'],
+    rules: {
+      'fast-esm/no-unused-exports': 'off',
+    },
+  },
+  {
+    files: ['src/rules/circular/__test__/**/*'],
+    rules: {
+      'fast-esm/no-circular-exports': 'off',
     },
   },
 ];

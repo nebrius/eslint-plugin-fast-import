@@ -126,7 +126,7 @@ type AnalyzedReexportBase = {
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
 export type AnalyzedBarrelImport = ResolvedBarrelImport;
 export type AnalyzedDynamicImport = ResolvedDynamicImport;
-export type AnalyzedImport =
+type AnalyzedImport =
   | AnalyzedSingleImport
   | AnalyzedBarrelImport
   | AnalyzedDynamicImport;
@@ -142,7 +142,7 @@ export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedReexportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
   AnalyzedReexportBase;
-export type AnalyzedReexport = AnalyzedSingleReexport | AnalyzedBarrelReexport;
+type AnalyzedReexport = AnalyzedSingleReexport | AnalyzedBarrelReexport;
 
 /* File Details */
 
