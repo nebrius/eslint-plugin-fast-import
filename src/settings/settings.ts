@@ -106,7 +106,10 @@ export function getSettings(context: GenericContext): ParsedSettings {
     rootDir,
     alias: parsedAlias,
     entryPoints: parsedEntryPoints,
-    mode: mergedSettings.mode ?? DEFAULT_MODE,
+    mode:
+      mergedSettings.mode !== 'auto' && mergedSettings.mode !== undefined
+        ? mergedSettings.mode
+        : DEFAULT_MODE,
   };
   return settings;
 }
