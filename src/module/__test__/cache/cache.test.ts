@@ -17,6 +17,7 @@ it('Updates cache when an unused export is added', () => {
     rootDir: TEST_PROJECT_DIR,
     alias: { '@': './' },
     entryPoints: [],
+    mode: 'one-shot' as const,
   };
   initializeProject(settings);
 

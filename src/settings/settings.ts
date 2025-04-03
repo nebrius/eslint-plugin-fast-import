@@ -1,6 +1,6 @@
 import type { RequiredDeep } from 'type-fest';
 import { getTypeScriptSettings } from './typescript';
-import { error } from '../util/logging';
+import { debug, error } from '../util/logging';
 import type { GenericContext } from '../types/context';
 import { isAbsolute, join, resolve } from 'node:path';
 import { getUserSettings, type Settings } from './user';
@@ -8,6 +8,21 @@ import { getEslintConfigDir } from './util';
 import { existsSync } from 'node:fs';
 
 export type ParsedSettings = RequiredDeep<Settings>;
+
+function argsInclude(strs: string[]) {
+  for (const str of strs) {
+    if (process.argv.some((arg) => arg.includes(str))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const DEFAULT_MODE = process.argv[0].includes('Visual Studio Code.app')
+  ? 'editor'
+  : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
+    ? 'fix'
+    : 'one-shot';
 
 let settings: ParsedSettings | null = null;
 export function getSettings(context: GenericContext): ParsedSettings {
@@ -83,11 +98,15 @@ export function getSettings(context: GenericContext): ParsedSettings {
     });
   }
 
+  const mode = mergedSettings.mode ?? DEFAULT_MODE;
+  debug(`Running in mode "${mode}"`);
+
   // Apply defaults and save to the cache
   settings = {
     rootDir,
     alias: parsedAlias,
     entryPoints: parsedEntryPoints,
+    mode: mergedSettings.mode ?? DEFAULT_MODE,
   };
   return settings;
 }

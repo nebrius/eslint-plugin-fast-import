@@ -21,8 +21,10 @@ export function getESMInfo(context: GenericContext) {
   const settings = getSettings(context);
   initializeProject(settings);
 
-  // TODO: don't run this in single shot mode
+  // If we're not in one-shot mode, update the cache, and if there were changes
+  // call any esm change subscribers
   if (
+    settings.mode !== 'one-shot' &&
     updateCacheForFile(
       context.filename,
       context.sourceCode.getText(),
@@ -45,5 +47,6 @@ export function getESMInfo(context: GenericContext) {
   return {
     fileInfo,
     projectInfo,
+    settings,
   };
 }
