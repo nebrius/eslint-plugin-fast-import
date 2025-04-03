@@ -1,7 +1,6 @@
 import { createRule, getESMInfo, registerUpdateListener } from '../util';
 import type { AnalyzedProjectInfo } from '../../types/analyzed';
 import { InternalError } from '../../util/error';
-import type { TSESTree } from '@typescript-eslint/utils';
 
 type Options = [];
 type MessageIds = 'noCircularImports';
@@ -63,7 +62,7 @@ function checkFile(
 }
 
 // Map of filepaths to imports/reexports with circular dependencies
-const circularImportMap = new Map<string, TSESTree.Node[]>();
+const circularImportMap = new Map<string, string[]>();
 
 registerUpdateListener(() => {
   circularImportMap.clear();
@@ -100,8 +99,7 @@ export const noCircularImports = createRule<Options, MessageIds>({
     // If we recomputed on this run, then we need to recompute cycles
     if (!circularImportMap.has(context.filename)) {
       const importedFilesSearched = new Set<string>();
-      const circularImportNodes: TSESTree.Node[] = [];
-      circularImportMap.set(context.filename, circularImportNodes);
+      const circularImportNodes: string[] = [];
       for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
         if (
           !('resolvedModulePath' in importEntry) ||
@@ -120,9 +118,10 @@ export const noCircularImports = createRule<Options, MessageIds>({
             []
           )
         ) {
-          circularImportNodes.push(importEntry.statementNode);
+          circularImportNodes.push(importEntry.resolvedModulePath);
         }
       }
+      circularImportMap.set(context.filename, circularImportNodes);
     }
 
     const circularImports = circularImportMap.get(context.filename);
@@ -133,10 +132,18 @@ export const noCircularImports = createRule<Options, MessageIds>({
     }
 
     for (const circularImport of circularImports) {
-      context.report({
-        messageId: 'noCircularImports',
-        node: circularImport,
-      });
+      for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
+        if (
+          importEntry.moduleType === 'firstPartyCode' &&
+          importEntry.resolvedModulePath === circularImport
+        ) {
+          context.report({
+            messageId: 'noCircularImports',
+            node: importEntry.statementNode,
+          });
+          continue;
+        }
+      }
     }
 
     return {};

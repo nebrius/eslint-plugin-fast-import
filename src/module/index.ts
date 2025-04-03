@@ -130,20 +130,32 @@ export function updateCacheForFile(
         throw new InternalError(`Could not get file info for "${filePath}"`);
       }
       for (let i = 0; i < baseFileInfo.exports.length; i++) {
+        resolvedFileInfo.exports[i].statementNode =
+          baseFileInfo.exports[i].statementNode;
         resolvedFileInfo.exports[i].reportNode =
           baseFileInfo.exports[i].reportNode;
+        analyzedFileInfo.exports[i].statementNode =
+          baseFileInfo.exports[i].statementNode;
         analyzedFileInfo.exports[i].reportNode =
           baseFileInfo.exports[i].reportNode;
       }
       for (let i = 0; i < baseFileInfo.reexports.length; i++) {
+        resolvedFileInfo.reexports[i].statementNode =
+          baseFileInfo.reexports[i].statementNode;
         resolvedFileInfo.reexports[i].reportNode =
           baseFileInfo.reexports[i].reportNode;
+        analyzedFileInfo.reexports[i].statementNode =
+          baseFileInfo.reexports[i].statementNode;
         analyzedFileInfo.reexports[i].reportNode =
           baseFileInfo.reexports[i].reportNode;
       }
       for (let i = 0; i < baseFileInfo.imports.length; i++) {
+        resolvedFileInfo.imports[i].statementNode =
+          baseFileInfo.imports[i].statementNode;
         resolvedFileInfo.imports[i].reportNode =
           baseFileInfo.imports[i].reportNode;
+        analyzedFileInfo.imports[i].statementNode =
+          baseFileInfo.imports[i].statementNode;
         analyzedFileInfo.imports[i].reportNode =
           baseFileInfo.imports[i].reportNode;
       }

@@ -5,4 +5,5 @@ export const a2 = 10;
 export const a3 = 10;
 
 // This one is not imported, thus a lint error
+// eslint-disable-next-line fast-esm/no-unused-exports
 export const a4 = 10;

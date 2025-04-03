@@ -1,4 +1,5 @@
-import { c } from './c';
+// eslint-disable-next-line fast-esm/no-circular-imports
+import { c } from './a-barrel';
 
 export const a = 10;
 
