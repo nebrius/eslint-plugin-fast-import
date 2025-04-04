@@ -11,6 +11,7 @@ type PartialBaseESMInfo = {
     string,
     | {
         fileType: 'code';
+        lastUpdatedAt?: number;
         imports: Partial<BaseImport>[];
         exports: Partial<BaseExport>[];
         reexports: Partial<BaseReexport>[];
@@ -28,6 +29,7 @@ export function stripNodes(info: BaseProjectInfo) {
     if (fileDetails.fileType !== 'code') {
       continue;
     }
+    delete fileDetails.lastUpdatedAt;
     for (const importDetails of fileDetails.imports) {
       delete importDetails.statementNode;
       delete importDetails.reportNode;

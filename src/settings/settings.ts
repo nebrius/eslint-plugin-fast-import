@@ -99,7 +99,7 @@ export function getSettings(context: GenericContext): ParsedSettings {
   }
 
   const mode = mergedSettings.mode ?? DEFAULT_MODE;
-  debug(`Running in mode "${mode}"`);
+  debug(`Running in ${mode} mode`);
 
   // Apply defaults and save to the cache
   settings = {

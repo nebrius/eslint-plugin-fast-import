@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint \"**/*.{ts,tsx,mts}\"",
+    "lint": "eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts}\"",
     "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "build": "tsc",
     "test": "jest src",

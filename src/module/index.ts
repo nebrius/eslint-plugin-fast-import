@@ -95,16 +95,17 @@ export function updateCacheFromFileSystem(
 
   // We may have a list of added/deleted/modified files from the file system,
   // but there's a chance we've already processed those changes through an
-  // editor change. We track whether or not the list actually caused in changes
-  let hasChanges = false;
+  // editor change. We track whether or not the list actually caused in changes.
+  // We use this counter to track these actual changes
+  let numChanges = 0;
 
   // First, process any file deletes
   const baseStart = Date.now();
   for (const filePath of changes.deleted) {
     if (baseProjectInfo.files.has(filePath)) {
-      hasChanges = true;
-      deleteBaseInfoForFile(filePath, baseProjectInfo);
+      numChanges++;
       deleteResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+      deleteBaseInfoForFile(filePath, baseProjectInfo);
     }
   }
   const baseEnd = Date.now();
@@ -115,7 +116,7 @@ export function updateCacheFromFileSystem(
     // We might already have this new file in memory if it was created in editor
     // and previously linted while it was only in memory
     if (!baseProjectInfo.files.has(filePath)) {
-      hasChanges = true;
+      numChanges++;
       addBaseInfoForFile(
         {
           ...parseFile(filePath),
@@ -131,18 +132,12 @@ export function updateCacheFromFileSystem(
   // Next, process any modified files
   for (const { filePath, latestUpdatedAt } of changes.modified) {
     const previousFileInfo = baseProjectInfo.files.get(filePath);
-    console.log(
-      previousFileInfo &&
-        previousFileInfo.fileType === 'code' &&
-        previousFileInfo.lastUpdatedAt,
-      latestUpdatedAt
-    );
     if (
       !previousFileInfo ||
       (previousFileInfo.fileType === 'code' &&
         previousFileInfo.lastUpdatedAt < latestUpdatedAt)
     ) {
-      hasChanges = true;
+      numChanges++;
       updateBaseInfoForFile(
         {
           ...parseFile(filePath),
@@ -155,12 +150,12 @@ export function updateCacheFromFileSystem(
   }
 
   // Finally, recompute analyzed info
-  if (hasChanges) {
+  if (numChanges) {
     const analyzestart = Date.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
     const analyzeEnd = Date.now();
 
-    debug(`Updated cache from file system:`);
+    debug(`Updated cache for ${numChanges.toString()} files from file system:`);
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
