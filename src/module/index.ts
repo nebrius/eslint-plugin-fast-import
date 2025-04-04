@@ -155,7 +155,9 @@ export function updateCacheFromFileSystem(
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
     const analyzeEnd = Date.now();
 
-    debug(`Updated cache for ${numChanges.toString()} files from file system:`);
+    debug(
+      `Updated cache for ${numChanges === 1 ? '1 file' : `${numChanges.toString()} files`} from file system:`
+    );
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);

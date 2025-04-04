@@ -161,8 +161,6 @@ export function updateBaseInfoForFile(
   return hasFileChanged(previousFileDetails, updatedFileDetails);
 }
 
-// TODO: wire in deletions to in-editor file watcher once it's implemented
-
 export function deleteBaseInfoForFile(
   filePath: string,
   baseProjectInfo: BaseProjectInfo
