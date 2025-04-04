@@ -3,11 +3,13 @@ import { computeAnalyzedInfo } from './computeAnalyzedInfo';
 import {
   addResolvedInfoForFile,
   computeResolvedInfo,
+  deleteResolvedInfoForFile,
   updateResolvedInfoForFile,
 } from './computeResolvedInfo';
 import {
   addBaseInfoForFile,
   computeBaseInfo,
+  deleteBaseInfoForFile,
   updateBaseInfoForFile,
 } from './computeBaseInfo';
 import { InternalError } from '../util/error';
@@ -16,10 +18,18 @@ import type { ResolvedProjectInfo } from '../types/resolved';
 import type { ParsedSettings } from '../settings/settings';
 import { debug, formatMilliseconds } from '../util/logging';
 import type { TSESTree } from '@typescript-eslint/utils';
+import { parseFile } from './ast';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
 let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
+
+function getEntryPointCheck(entryPoints: ParsedSettings['entryPoints']) {
+  return (filePath: string, symbolName: string) =>
+    entryPoints.some(
+      ({ file, symbol }) => file === filePath && symbol === symbolName
+    );
+}
 
 export function initializeProject({
   rootDir,
@@ -35,10 +45,7 @@ export function initializeProject({
   baseProjectInfo = computeBaseInfo({
     rootDir,
     alias,
-    isEntryPointCheck: (filePath, symbolName) =>
-      entryPoints.some(
-        ({ file, symbol }) => file === filePath && symbol === symbolName
-      ),
+    isEntryPointCheck: getEntryPointCheck(entryPoints),
   });
   const baseEnd = Date.now();
 
@@ -61,6 +68,106 @@ export function getProjectInfo() {
     throw new InternalError('Project info requested before initialization');
   }
   return analyzedProjectInfo;
+}
+
+type Changes = {
+  added: Array<{
+    filePath: string;
+    latestUpdatedAt: number;
+  }>;
+  deleted: string[];
+  modified: Array<{
+    filePath: string;
+    latestUpdatedAt: number;
+  }>;
+};
+
+// Batch updates file changes. Note that the order of operations (delete, then
+// add, then modified) is critical
+export function updateCacheFromFileSystem(
+  changes: Changes,
+  settings: ParsedSettings
+) {
+  // This shouldn't be possible and is just to make sure TypeScript is happy
+  if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
+    throw new InternalError('Project info not initialized');
+  }
+
+  // We may have a list of added/deleted/modified files from the file system,
+  // but there's a chance we've already processed those changes through an
+  // editor change. We track whether or not the list actually caused in changes
+  let hasChanges = false;
+
+  // First, process any file deletes
+  const baseStart = Date.now();
+  for (const filePath of changes.deleted) {
+    if (baseProjectInfo.files.has(filePath)) {
+      hasChanges = true;
+      deleteBaseInfoForFile(filePath, baseProjectInfo);
+      deleteResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+    }
+  }
+  const baseEnd = Date.now();
+
+  // Next, process any file adds
+  const resolveStart = Date.now();
+  for (const { filePath } of changes.added) {
+    // We might already have this new file in memory if it was created in editor
+    // and previously linted while it was only in memory
+    if (!baseProjectInfo.files.has(filePath)) {
+      hasChanges = true;
+      addBaseInfoForFile(
+        {
+          ...parseFile(filePath),
+          isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+        },
+        baseProjectInfo
+      );
+      addResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+    }
+  }
+  const resolveEnd = Date.now();
+
+  // Next, process any modified files
+  for (const { filePath, latestUpdatedAt } of changes.modified) {
+    const previousFileInfo = baseProjectInfo.files.get(filePath);
+    console.log(
+      previousFileInfo &&
+        previousFileInfo.fileType === 'code' &&
+        previousFileInfo.lastUpdatedAt,
+      latestUpdatedAt
+    );
+    if (
+      !previousFileInfo ||
+      (previousFileInfo.fileType === 'code' &&
+        previousFileInfo.lastUpdatedAt < latestUpdatedAt)
+    ) {
+      hasChanges = true;
+      updateBaseInfoForFile(
+        {
+          ...parseFile(filePath),
+          isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+        },
+        baseProjectInfo
+      );
+      updateResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+    }
+  }
+
+  // Finally, recompute analyzed info
+  if (hasChanges) {
+    const analyzestart = Date.now();
+    analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+    const analyzeEnd = Date.now();
+
+    debug(`Updated cache from file system:`);
+    debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
+    debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
+    debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
+
+    return true;
+  }
+  return false;
 }
 
 export function updateCacheForFile(
@@ -88,8 +195,8 @@ export function updateCacheForFile(
   if (analyzedProjectInfo.files.has(filePath)) {
     const baseStart = Date.now();
     const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
-      baseProjectInfo,
-      baseOptions
+      baseOptions,
+      baseProjectInfo
     );
     const baseEnd = Date.now();
 
@@ -163,7 +270,7 @@ export function updateCacheForFile(
     }
   } else {
     const baseStart = Date.now();
-    addBaseInfoForFile(baseProjectInfo, baseOptions);
+    addBaseInfoForFile(baseOptions, baseProjectInfo);
     const baseEnd = Date.now();
 
     const resolveStart = Date.now();

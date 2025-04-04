@@ -3,9 +3,15 @@ import type { GenericContext } from '../types/context';
 import {
   getProjectInfo,
   initializeProject,
+  updateCacheFromFileSystem,
   updateCacheForFile,
 } from '../module';
+import type { ParsedSettings } from '../settings/settings';
 import { getSettings } from '../settings/settings';
+import { getFiles } from '../util/files';
+
+// TODO: expose this as a setting
+const FILE_WATCHER_UPDATE_TIME = 5_000;
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -39,6 +45,11 @@ export function getESMInfo(context: GenericContext) {
 
   const projectInfo = getProjectInfo();
 
+  // Initialize file watching if we're in editor mode
+  if (settings.mode === 'editor') {
+    void initializeFileWatching(settings);
+  }
+
   // Format and return the ESM info
   const fileInfo = projectInfo.files.get(context.filename);
   if (!fileInfo) {
@@ -49,4 +60,79 @@ export function getESMInfo(context: GenericContext) {
     projectInfo,
     settings,
   };
+}
+
+let fileWatchingInitialized = false;
+async function initializeFileWatching(settings: ParsedSettings) {
+  if (fileWatchingInitialized) {
+    return;
+  }
+  fileWatchingInitialized = true;
+
+  async function getUpdatedAtTimes() {
+    const projectInfo = getProjectInfo();
+    const files = await getFiles(projectInfo.rootDir);
+    return new Map(
+      files.map(({ filePath, latestUpdatedAt }) => [filePath, latestUpdatedAt])
+    );
+  }
+
+  let updatedAtTimes = await getUpdatedAtTimes();
+
+  async function refresh() {
+    try {
+      const latestUpdatedTimes = await getUpdatedAtTimes();
+
+      // First, find files that were deleted, represented by entries that are in
+      // the previous list of modified times but are not in the new list
+      const deleted: string[] = [];
+      for (const [filePath] of updatedAtTimes) {
+        if (!latestUpdatedTimes.has(filePath)) {
+          deleted.push(filePath);
+        }
+      }
+
+      // Now, find files that were added, represented by entries that are in
+      // the new list of modified times but are not in the previous list
+      const added: Array<{
+        filePath: string;
+        latestUpdatedAt: number;
+      }> = [];
+      for (const [filePath, latestUpdatedAt] of latestUpdatedTimes) {
+        if (!updatedAtTimes.has(filePath)) {
+          added.push({ filePath, latestUpdatedAt });
+        }
+      }
+
+      // Finally, find files that were modified, represented by entries that are
+      // in both the previous and new list of modified times but have different
+      // last modified at times
+      const modified: Array<{
+        filePath: string;
+        latestUpdatedAt: number;
+      }> = [];
+      for (const [filePath, latestUpdatedAt] of latestUpdatedTimes) {
+        if (
+          updatedAtTimes.has(filePath) &&
+          updatedAtTimes.get(filePath) !== latestUpdatedAt
+        ) {
+          modified.push({ filePath, latestUpdatedAt });
+        }
+      }
+
+      // Update the cache
+      if (updateCacheFromFileSystem({ added, deleted, modified }, settings)) {
+        for (const updateListener of updateListeners) {
+          updateListener();
+        }
+      }
+
+      // Set up for the next refresh
+      updatedAtTimes = latestUpdatedTimes;
+    } finally {
+      setTimeout(() => void refresh(), FILE_WATCHER_UPDATE_TIME);
+    }
+  }
+
+  setTimeout(() => void refresh(), FILE_WATCHER_UPDATE_TIME);
 }

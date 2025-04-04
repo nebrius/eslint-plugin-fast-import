@@ -3,13 +3,12 @@ import type {
   BaseCodeFileDetails,
   BaseProjectInfo,
 } from '../types/base';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
 import type { ExportDeclaration } from './ast';
 import { parseFile, traverse } from './ast';
 import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
 import { isCodeFile } from '../util/code';
+import { getFilesSync } from '../util/files';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -34,13 +33,9 @@ export function computeBaseInfo({
     alias,
   };
 
-  const potentialFiles = readdirSync(rootDir, {
-    recursive: true,
-    encoding: 'utf-8',
-  });
+  const potentialFiles = getFilesSync(rootDir);
 
-  for (const potentialFilePath of potentialFiles) {
-    const filePath = join(rootDir, potentialFilePath);
+  for (const { filePath } of potentialFiles) {
     if (isCodeFile(filePath)) {
       info.files.set(
         filePath,
@@ -49,7 +44,7 @@ export function computeBaseInfo({
           isEntryPointCheck,
         })
       );
-    } else if (!statSync(filePath).isDirectory()) {
+    } else {
       info.files.set(filePath, {
         fileType: 'other',
       });
@@ -67,8 +62,8 @@ type ComputeFileDetailsOptions = {
 };
 
 export function addBaseInfoForFile(
-  baseProjectInfo: BaseProjectInfo,
-  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
+  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions,
+  baseProjectInfo: BaseProjectInfo
 ) {
   if (isCodeFile(filePath)) {
     baseProjectInfo.files.set(
@@ -136,8 +131,8 @@ function hasFileChanged(
 }
 
 export function updateBaseInfoForFile(
-  baseProjectInfo: BaseProjectInfo,
-  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions
+  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions,
+  baseProjectInfo: BaseProjectInfo
 ): boolean {
   const previousFileDetails = baseProjectInfo.files.get(filePath);
   if (!isCodeFile(filePath)) {
@@ -167,10 +162,10 @@ export function updateBaseInfoForFile(
 }
 
 // TODO: wire in deletions to in-editor file watcher once it's implemented
-// eslint-disable-next-line fast-esm/no-unused-exports
+
 export function deleteBaseInfoForFile(
-  baseProjectInfo: BaseProjectInfo,
-  filePath: string
+  filePath: string,
+  baseProjectInfo: BaseProjectInfo
 ) {
   baseProjectInfo.files.delete(filePath);
 }
@@ -408,6 +403,7 @@ function computeFileDetails({
 }: ComputeFileDetailsOptions): BaseCodeFileDetails {
   const fileDetails: BaseCodeFileDetails = {
     fileType: 'code',
+    lastUpdatedAt: Date.now(),
     imports: [],
     exports: [],
     reexports: [],

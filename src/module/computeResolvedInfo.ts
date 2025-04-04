@@ -28,6 +28,7 @@ export function computeResolvedInfo(
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      lastUpdatedAt: baseFileDetails.lastUpdatedAt,
       imports: [],
       exports: [],
       reexports: [],
@@ -60,6 +61,7 @@ export function addResolvedInfoForFile(
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       imports: [],
       exports: [],
       reexports: [],
@@ -147,6 +149,7 @@ export function updateResolvedInfoForFile(
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       imports: [],
       exports: [],
       reexports: [],
@@ -161,8 +164,6 @@ export function updateResolvedInfoForFile(
   }
 }
 
-// TODO: wire in deletions to in-editor file watcher once it's implemented
-// eslint-disable-next-line fast-esm/no-unused-exports
 export function deleteResolvedInfoForFile(
   filePath: string,
   newBaseProjectInfo: BaseProjectInfo,
@@ -183,6 +184,7 @@ export function deleteResolvedInfoForFile(
   for (const filePathToUpdate of filePathsToUpdate) {
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       imports: [],
       exports: [],
       reexports: [],

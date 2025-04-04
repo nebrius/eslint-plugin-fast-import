@@ -77,6 +77,7 @@ export type ResolvedOtherFileDetails = BaseOtherFileDetails;
 
 export type ResolvedCodeFileDetails = {
   fileType: 'code';
+  lastUpdatedAt: number;
   imports: ResolvedImport[];
   exports: ResolvedExport[];
   reexports: ResolvedReexport[];

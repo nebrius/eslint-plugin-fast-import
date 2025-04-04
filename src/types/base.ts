@@ -248,6 +248,7 @@ export type BaseOtherFileDetails = {
  */
 export type BaseCodeFileDetails = {
   fileType: 'code';
+  lastUpdatedAt: number;
   imports: BaseImport[];
   exports: BaseExport[];
   reexports: BaseReexport[];

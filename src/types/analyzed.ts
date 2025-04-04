@@ -150,6 +150,7 @@ type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
 
 export type AnalyzedCodeFileDetails = {
   fileType: 'code';
+  lastUpdatedAt: number;
   imports: AnalyzedImport[];
   exports: AnalyzedExport[];
   reexports: AnalyzedReexport[];
