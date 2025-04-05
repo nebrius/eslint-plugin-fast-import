@@ -347,7 +347,7 @@ function resolveModuleSpecifier({
   // This function takes in a bath that is "absolute" but relative to rootDir, excluding the leading /
   function resolveFirstPartyImport(absolutishFilePath: string) {
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-    const segments = absolutishFilePath.split('/');
+    const segments = absolutishFilePath.split('/').filter((s) => s);
     const lastSegment = segments.pop();
     const folderSegments = [...segments];
     if (!lastSegment) {
@@ -460,12 +460,18 @@ function resolveModuleSpecifier({
 
   // Check if this path is relative, which means its first party
   if (moduleSpecifier.startsWith('.')) {
-    const resolvedModulePath = resolveFirstPartyImport(
-      resolve(dirPath, moduleSpecifier).replace(
-        baseProjectInfo.rootDir + '/',
-        ''
-      )
-    );
+    const resolvedPath = resolve(dirPath, moduleSpecifier);
+    // We have to account for a very specific edge case. When a user does an
+    // import with a specifier like `../..` such that the absolitish path
+    // resolves to the root dir itself, then the standard absolitish path is
+    // computed to be '' (empty string). In this case, the import may still be
+    // valid though if there is an index file in the root door. We pre-apply
+    // index in this case so that there are still path segments to resolve.
+    const absolutish =
+      resolvedPath === baseProjectInfo.rootDir
+        ? 'index'
+        : resolvedPath.replace(baseProjectInfo.rootDir + '/', '');
+    const resolvedModulePath = resolveFirstPartyImport(absolutish);
     return formatResolvedEntry(resolvedModulePath);
   }
 

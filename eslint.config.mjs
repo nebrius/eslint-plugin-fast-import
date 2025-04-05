@@ -43,6 +43,7 @@ export default [
     rules: {
       'fast-esm/no-unused-exports': 'error',
       'fast-esm/no-circular-imports': 'error',
+      'fast-esm/no-entry-point-imports': 'error'
     },
   },
 
