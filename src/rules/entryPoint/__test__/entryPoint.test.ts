@@ -1,14 +1,14 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noCircularImports, _resetCircularMap } from '..';
+import { noEntryPointImportsImports } from '..';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
+import { readFileSync } from 'node:fs';
+import { _resetSettings } from '../../../settings/settings';
+import { _resetProjectInfo } from '../../../module';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-
-beforeEach(() => {
-  _resetCircularMap();
-});
+const FILE_A_CONTENTS = readFileSync(FILE_A, 'utf-8');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -21,10 +21,15 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('no-circular-exports', noCircularImports, {
+beforeEach(() => {
+  _resetSettings();
+  _resetProjectInfo();
+});
+
+ruleTester.run('no-entry-point-imports', noEntryPointImportsImports, {
   valid: [
     {
-      code: `export const a = 10;`,
+      code: FILE_A_CONTENTS,
       filename: FILE_A,
       settings: {
         'fast-esm': {
@@ -34,37 +39,21 @@ ruleTester.run('no-circular-exports', noCircularImports, {
       },
     },
   ],
-
   invalid: [
     {
-      code: `import { c } from './c';
-
-export const a = 10;
-
-console.log(c);
-`,
+      code: FILE_A_CONTENTS,
       filename: FILE_A,
-      errors: [{ messageId: 'noCircularImports' }],
+      errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
         'fast-esm': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-        },
-      },
-    },
-    {
-      code: `export * from './c';
-
-export const a = 10;
-
-console.log(c);
-`,
-      filename: FILE_A,
-      errors: [{ messageId: 'noCircularImports' }],
-      settings: {
-        'fast-esm': {
-          rootDir: TEST_PROJECT_DIR,
-          mode: 'fix',
+          entryPoints: [
+            {
+              file: 'a.ts',
+              symbol: 'a',
+            },
+          ],
         },
       },
     },

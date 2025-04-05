@@ -14,7 +14,7 @@
         "--runInBand"
       ],
       "args": [
-        "src"
+        "src/rules/circular/__test__/circular.test.ts"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"

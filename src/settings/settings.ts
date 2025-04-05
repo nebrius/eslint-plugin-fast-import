@@ -25,6 +25,13 @@ const DEFAULT_MODE = process.argv[0].includes('Visual Studio Code')
     : 'one-shot';
 
 let settings: ParsedSettings | null = null;
+
+// We need to reset settings between runs, since some tests try different settings
+// eslint-disable-next-line fast-esm/no-unused-exports
+export function _resetSettings() {
+  settings = null;
+}
+
 export function getSettings(context: GenericContext): ParsedSettings {
   // Return the cached copy if we have it
   if (settings) {

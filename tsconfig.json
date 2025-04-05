@@ -5,6 +5,8 @@
       "esnext"
     ],
     "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "isolatedModules": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

@@ -68,6 +68,13 @@ registerUpdateListener(() => {
   circularImportMap.clear();
 });
 
+// This is only used in tests, since update listeners aren't guaranteed to
+// be called on each run
+// eslint-disable-next-line fast-esm/no-unused-exports
+export function _resetCircularMap() {
+  circularImportMap.clear();
+}
+
 export const noCircularImports = createRule<Options, MessageIds>({
   name: 'no-circular-imports',
   meta: {

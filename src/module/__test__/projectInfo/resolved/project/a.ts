@@ -10,6 +10,7 @@ import { getF1 } from './two/f';
 import { join } from 'path';
 import { resolve } from 'node:path';
 import { parser } from 'typescript-eslint';
+import { index } from '.';
 
 console.log(b1);
 console.log(data);
@@ -20,3 +21,4 @@ console.log(getF1() as F1);
 console.log(e1);
 console.log(join, resolve);
 console.log(parser);
+console.log(index);

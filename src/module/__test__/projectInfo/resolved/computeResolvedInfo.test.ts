@@ -5,6 +5,7 @@ import { computeBaseInfo } from '../../../computeBaseInfo';
 import { getDirname } from 'cross-dirname';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const FILE_INDEX = join(TEST_PROJECT_DIR, 'index.ts');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'one', 'b.ts');
 const FILE_C = join(TEST_PROJECT_DIR, 'one', 'c', 'index.ts');
@@ -118,6 +119,15 @@ it('Computes resolved into', () => {
               isTypeImport: false,
               moduleSpecifier: 'typescript-eslint',
               moduleType: 'thirdParty',
+            },
+            {
+              importAlias: 'index',
+              importName: 'index',
+              importType: 'single',
+              isTypeImport: false,
+              moduleSpecifier: '.',
+              moduleType: 'firstPartyCode',
+              resolvedModulePath: FILE_INDEX,
             },
           ],
           reexports: [],
@@ -251,6 +261,21 @@ it('Computes resolved into', () => {
               resolvedModulePath: undefined,
             },
           ],
+          reexports: [],
+        },
+      ],
+      [
+        FILE_INDEX,
+        {
+          exports: [
+            {
+              exportName: 'index',
+              isEntryPoint: false,
+              isTypeExport: false,
+            },
+          ],
+          fileType: 'code',
+          imports: [],
           reexports: [],
         },
       ],

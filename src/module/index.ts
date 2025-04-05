@@ -1,4 +1,8 @@
-import type { AnalyzedProjectInfo } from '../types/analyzed';
+import type {
+  AnalyzedImport,
+  AnalyzedProjectInfo,
+  AnalyzedReexport,
+} from '../types/analyzed';
 import { computeAnalyzedInfo } from './computeAnalyzedInfo';
 import {
   addResolvedInfoForFile,
@@ -31,12 +35,20 @@ function getEntryPointCheck(entryPoints: ParsedSettings['entryPoints']) {
     );
 }
 
+// We need to reset settings between runs, since some tests try different settings
+// eslint-disable-next-line fast-esm/no-unused-exports
+export function _resetProjectInfo() {
+  baseProjectInfo = null;
+  resolvedProjectInfo = null;
+  analyzedProjectInfo = null;
+}
+
 export function initializeProject({
   rootDir,
   alias,
   entryPoints,
 }: ParsedSettings) {
-  // If we've already analyzed the project, bail
+  // If we've already analyzed the project and settings haven't changed, bail
   if (analyzedProjectInfo) {
     return;
   }
@@ -234,34 +246,36 @@ export function updateCacheForFile(
         throw new InternalError(`Could not get file info for "${filePath}"`);
       }
       for (let i = 0; i < baseFileInfo.exports.length; i++) {
-        resolvedFileInfo.exports[i].statementNode =
-          baseFileInfo.exports[i].statementNode;
-        resolvedFileInfo.exports[i].reportNode =
-          baseFileInfo.exports[i].reportNode;
-        analyzedFileInfo.exports[i].statementNode =
-          baseFileInfo.exports[i].statementNode;
-        analyzedFileInfo.exports[i].reportNode =
-          baseFileInfo.exports[i].reportNode;
+        resolvedFileInfo.exports[i] = {
+          ...resolvedFileInfo.exports[i],
+          ...baseFileInfo.exports[i],
+        };
+        analyzedFileInfo.exports[i] = {
+          ...analyzedFileInfo.exports[i],
+          ...resolvedFileInfo.exports[i],
+        };
       }
       for (let i = 0; i < baseFileInfo.reexports.length; i++) {
-        resolvedFileInfo.reexports[i].statementNode =
-          baseFileInfo.reexports[i].statementNode;
-        resolvedFileInfo.reexports[i].reportNode =
-          baseFileInfo.reexports[i].reportNode;
-        analyzedFileInfo.reexports[i].statementNode =
-          baseFileInfo.reexports[i].statementNode;
-        analyzedFileInfo.reexports[i].reportNode =
-          baseFileInfo.reexports[i].reportNode;
+        resolvedFileInfo.reexports[i] = {
+          ...resolvedFileInfo.reexports[i],
+          ...baseFileInfo.reexports[i],
+        };
+        analyzedFileInfo.reexports[i] = {
+          ...analyzedFileInfo.reexports[i],
+          ...baseFileInfo.reexports[i],
+          // TODO: figure out why this doesn't work without the cast
+        } as AnalyzedReexport;
       }
       for (let i = 0; i < baseFileInfo.imports.length; i++) {
-        resolvedFileInfo.imports[i].statementNode =
-          baseFileInfo.imports[i].statementNode;
-        resolvedFileInfo.imports[i].reportNode =
-          baseFileInfo.imports[i].reportNode;
-        analyzedFileInfo.imports[i].statementNode =
-          baseFileInfo.imports[i].statementNode;
-        analyzedFileInfo.imports[i].reportNode =
-          baseFileInfo.imports[i].reportNode;
+        resolvedFileInfo.imports[i] = {
+          ...resolvedFileInfo.imports[i],
+          ...baseFileInfo.imports[i],
+        };
+        analyzedFileInfo.imports[i] = {
+          ...analyzedFileInfo.imports[i],
+          ...baseFileInfo.imports[i],
+          // TODO: figure out why this doesn't work without the cast
+        } as AnalyzedImport;
       }
       return false;
     }
