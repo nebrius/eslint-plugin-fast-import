@@ -18,6 +18,7 @@ it('Updates cache when an unused export is added', () => {
     alias: { '@': './' },
     entryPoints: [],
     mode: 'one-shot' as const,
+    editorUpdateRate: 5_000,
   };
   initializeProject(settings);
 

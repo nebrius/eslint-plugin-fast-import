@@ -15,6 +15,7 @@ const settingsSchema = z.strictObject({
     .optional(),
   debugLogging: z.boolean().optional(),
   mode: z.enum(['auto', 'one-shot', 'fix', 'editor']).optional(),
+  editorUpdateRate: z.number().optional(),
 });
 
 export type Settings = Omit<z.infer<typeof settingsSchema>, 'debugLogging'>;

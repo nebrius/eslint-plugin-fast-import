@@ -10,9 +10,6 @@ import type { ParsedSettings } from '../settings/settings';
 import { getSettings } from '../settings/settings';
 import { getFiles } from '../util/files';
 
-// TODO: expose this as a setting
-const FILE_WATCHER_UPDATE_TIME = 5_000;
-
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
     `https://github.com/nebrius/esm-utils/tree/main/src/rules/${name}/README.md`
@@ -130,9 +127,9 @@ async function initializeFileWatching(settings: ParsedSettings) {
       // Set up for the next refresh
       updatedAtTimes = latestUpdatedTimes;
     } finally {
-      setTimeout(() => void refresh(), FILE_WATCHER_UPDATE_TIME);
+      setTimeout(() => void refresh(), settings.editorUpdateRate);
     }
   }
 
-  setTimeout(() => void refresh(), FILE_WATCHER_UPDATE_TIME);
+  setTimeout(() => void refresh(), settings.editorUpdateRate);
 }
