@@ -19,7 +19,7 @@ import {
 import { InternalError } from '../util/error';
 import type { BaseProjectInfo } from '../types/base';
 import type { ResolvedProjectInfo } from '../types/resolved';
-import type { ParsedSettings } from '../settings/settings';
+import type { ParsedSettings } from '../settings';
 import { debug, formatMilliseconds } from '../util/logging';
 import type { TSESTree } from '@typescript-eslint/utils';
 import { parseFile } from './ast';

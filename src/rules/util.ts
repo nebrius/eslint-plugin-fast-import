@@ -6,8 +6,8 @@ import {
   updateCacheFromFileSystem,
   updateCacheForFile,
 } from '../module';
-import type { ParsedSettings } from '../settings/settings';
-import { getSettings } from '../settings/settings';
+import type { ParsedSettings } from '../settings';
+import { getSettings } from '../settings';
 import { getFiles } from '../util/files';
 
 export const createRule = ESLintUtils.RuleCreator(

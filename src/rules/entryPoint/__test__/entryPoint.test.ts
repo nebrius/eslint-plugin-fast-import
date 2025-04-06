@@ -3,7 +3,7 @@ import { noEntryPointImportsImports } from '..';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 import { readFileSync } from 'node:fs';
-import { _resetSettings } from '../../../settings/settings';
+import { _resetSettings } from '../../../settings';
 import { _resetProjectInfo } from '../../../module';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
