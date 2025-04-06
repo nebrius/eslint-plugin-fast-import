@@ -39,17 +39,8 @@ export default tseslint.config(
     languageOptions: {
       globals: globals.node,
     },
-    plugins: { 'fast-esm': fastEsm.default },
-    rules: {
-      'fast-esm/no-unused-exports': 'error',
-      'fast-esm/no-circular-imports': 'error',
-      'fast-esm/no-entry-point-imports': 'error',
-      'fast-esm/no-missing-imports': 'error',
-      'fast-esm/no-external-barrel-reexports': 'error',
-      'fast-esm/no-test-imports-in-prod': 'error',
-    },
   },
-
+  fastEsm.default.configs.recommended,
   eslintPluginPrettierRecommended,
   tseslint.configs.strictTypeChecked,
   {
@@ -84,13 +75,6 @@ export default tseslint.config(
   },
   {
     files: ['src/**/__test__/**/*'],
-    rules: {
-      'fast-esm/no-unused-exports': 'off',
-      'fast-esm/no-circular-imports': 'off',
-      'fast-esm/no-entry-point-imports': 'off',
-      'fast-esm/no-missing-imports': 'off',
-      'fast-esm/no-external-barrel-reexports': 'off',
-      'fast-esm/no-test-imports-in-prod': 'off',
-    },
+    ...fastEsm.default.configs.off,
   }
 );

@@ -12,7 +12,7 @@ const { name, version } = JSON.parse(
   readFileSync(join(getDirname(), '..', 'package.json'), 'utf8')
 ) as { name: string; version: string };
 
-export default {
+const plugin = {
   meta: {
     name,
     version,
@@ -28,3 +28,35 @@ export default {
   },
   processors: {},
 };
+
+// assign configs here so we can reference `plugin`
+Object.assign(plugin.configs, {
+  recommended: {
+    plugins: {
+      'fast-esm': plugin,
+    },
+    rules: {
+      'fast-esm/no-unused-exports': 'error',
+      'fast-esm/no-circular-imports': 'error',
+      'fast-esm/no-entry-point-imports': 'error',
+      'fast-esm/no-missing-imports': 'error',
+      'fast-esm/no-external-barrel-reexports': 'error',
+      'fast-esm/no-test-imports-in-prod': 'error',
+    },
+  },
+  off: {
+    plugins: {
+      'fast-esm': plugin,
+    },
+    rules: {
+      'fast-esm/no-unused-exports': 'off',
+      'fast-esm/no-circular-imports': 'off',
+      'fast-esm/no-entry-point-imports': 'off',
+      'fast-esm/no-missing-imports': 'off',
+      'fast-esm/no-external-barrel-reexports': 'off',
+      'fast-esm/no-test-imports-in-prod': 'off',
+    },
+  },
+});
+
+export default plugin;

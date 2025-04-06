@@ -1,4 +1,4 @@
-# fast-esm
+# eslint-plugin-fast-esm
 
 TODO: make sure to mention that this won't resolve fully and will cause false positives:
 
