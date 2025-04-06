@@ -15,6 +15,7 @@
   "dependencies": {
     "@typescript-eslint/utils": "^8.19.1",
     "cross-dirname": "^0.1.0",
+    "ignore": "^7.0.3",
     "zod": "^3.24.2",
     "zod-to-json-schema": "^3.24.5"
   },
