@@ -16,7 +16,7 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-export default [
+export default tseslint.config(
   includeIgnoreFile(join(getDirname(), '.gitignore')),
   {
     settings: {
@@ -29,10 +29,10 @@ export default [
         entryPoints: [
           {
             file: 'index.ts',
-            symbol: 'default'
+            symbol: 'default',
           },
         ],
-        debugLogging: true
+        debugLogging: true,
       },
     },
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
@@ -43,12 +43,13 @@ export default [
     rules: {
       'fast-esm/no-unused-exports': 'error',
       'fast-esm/no-circular-imports': 'error',
-      'fast-esm/no-entry-point-imports': 'error'
+      'fast-esm/no-entry-point-imports': 'error',
     },
   },
 
   eslintPluginPrettierRecommended,
-  ...tseslint.config(tseslint.configs.strictTypeChecked, {
+  tseslint.configs.strictTypeChecked,
+  {
     files: ['**/*.{ts,tsx,mts}'],
     languageOptions: {
       parserOptions: {
@@ -59,15 +60,20 @@ export default [
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
     },
-  }),
+  },
   {
     files: ['**/*.test.ts'],
     ...jest.configs['flat/recommended'],
   },
+  {
+    // disable type-aware linting on JS files
+    files: ['**/*.{js,jsx,mjs}'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
   ...compat.extends('eslint:recommended'),
   {
     rules: {
-      'object-shorthand': "error",
+      'object-shorthand': 'error',
 
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
@@ -84,5 +90,5 @@ export default [
     rules: {
       'fast-esm/no-circular-exports': 'off',
     },
-  },
-];
+  }
+);
