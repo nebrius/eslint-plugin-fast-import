@@ -44,7 +44,9 @@ export const noUnusedExports = createRule<
     },
   ],
   create(context) {
-    // .d.ts files by definition don't have direct imports, and so can't be checked
+    // .d.ts files are not typically referenced directly, and instead are used
+    // to type ambient modules. Sometimes they are used directly though when
+    // paired with a neighboring vanilla JS file.
     if (context.filename.endsWith('.d.ts')) {
       return {};
     }
@@ -55,9 +57,6 @@ export const noUnusedExports = createRule<
     const { allowNonTestTypeExports = true } = context.options[0] ?? {};
 
     const esmInfo = getESMInfo(context);
-
-    // No project info means this file wasn't found as part of the project, e.g.
-    // because it's ignored
     if (!esmInfo) {
       return {};
     }

@@ -1,14 +1,10 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noEntryPointImports } from '..';
+import { noMissingImports } from '..';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
-import { readFileSync } from 'node:fs';
-import { _resetSettings } from '../../../settings';
-import { _resetProjectInfo } from '../../../module';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_A_CONTENTS = readFileSync(FILE_A, 'utf-8');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -21,15 +17,10 @@ const ruleTester = new RuleTester({
   },
 });
 
-beforeEach(() => {
-  _resetSettings();
-  _resetProjectInfo();
-});
-
-ruleTester.run('no-entry-point-imports', noEntryPointImports, {
+ruleTester.run('no-missing-exports', noMissingImports, {
   valid: [
     {
-      code: FILE_A_CONTENTS,
+      code: ``,
       filename: FILE_A,
       settings: {
         'fast-esm': {
@@ -39,21 +30,16 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       },
     },
   ],
+
   invalid: [
     {
-      code: FILE_A_CONTENTS,
+      code: `import { b } from './b'`,
       filename: FILE_A,
-      errors: [{ messageId: 'noEntryPointImports' }],
+      errors: [{ messageId: 'noMissingImports' }],
       settings: {
         'fast-esm': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: [
-            {
-              file: 'a.ts',
-              symbol: 'a',
-            },
-          ],
         },
       },
     },

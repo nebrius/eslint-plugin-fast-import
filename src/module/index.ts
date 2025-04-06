@@ -148,7 +148,7 @@ export function updateCacheFromFileSystem(
   // these changes into account, since files may have been renamed. Renames are
   // especially tricky since it may just be an extension change(.js->.ts), and
   // we might have already seen the new .ts file in a previous update.
-  // TODO: it's probably possible to do a more surgical recomputation
+  // TODO: it's probably possible to do a more performant+surgical recomputation
   if (numDeletes || numAdditions) {
     resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
   }

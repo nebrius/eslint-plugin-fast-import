@@ -3,7 +3,8 @@ import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 import { noUnusedExports } from './rules/unused';
 import { noCircularImports } from './rules/circular';
-import { noEntryPointImportsImports } from './rules/entryPoint';
+import { noEntryPointImports } from './rules/entryPoint';
+import { noMissingImports } from './rules/missing';
 
 const { name, version } = JSON.parse(
   readFileSync(join(getDirname(), '..', 'package.json'), 'utf8')
@@ -18,7 +19,8 @@ export default {
   rules: {
     'no-unused-exports': noUnusedExports,
     'no-circular-imports': noCircularImports,
-    'no-entry-point-imports': noEntryPointImportsImports,
+    'no-entry-point-imports': noEntryPointImports,
+    'no-missing-imports': noMissingImports,
   },
   processors: {},
 };

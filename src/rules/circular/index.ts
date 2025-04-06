@@ -91,9 +91,6 @@ export const noCircularImports = createRule<Options, MessageIds>({
   defaultOptions: [],
   create(context) {
     const esmInfo = getESMInfo(context);
-
-    // No project info means this file wasn't found as part of the project, e.g.
-    // because it's ignored
     if (!esmInfo) {
       return {};
     }

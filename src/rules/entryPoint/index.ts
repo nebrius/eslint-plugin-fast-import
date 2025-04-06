@@ -1,6 +1,6 @@
 import { createRule, getESMInfo } from '../util';
 
-export const noEntryPointImportsImports = createRule({
+export const noEntryPointImports = createRule({
   name: 'no-entry-point-imports',
   meta: {
     docs: {

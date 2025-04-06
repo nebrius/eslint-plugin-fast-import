@@ -44,6 +44,7 @@ export default tseslint.config(
       'fast-esm/no-unused-exports': 'error',
       'fast-esm/no-circular-imports': 'error',
       'fast-esm/no-entry-point-imports': 'error',
+      'fast-esm/no-missing-imports': 'error',
     },
   },
 
@@ -80,14 +81,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/module/__test__/projectInfo/**/*'],
+    files: ['src/**/__test__/projectInfo/**/*'],
     rules: {
       'fast-esm/no-unused-exports': 'off',
-    },
-  },
-  {
-    files: ['src/rules/circular/__test__/**/*'],
-    rules: {
+      'fast-esm/no-missing-imports': 'off',
       'fast-esm/no-circular-exports': 'off',
     },
   }
