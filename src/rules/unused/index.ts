@@ -1,16 +1,7 @@
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
-import { createRule, getESMInfo } from '../util';
+import { createRule, getESMInfo, isNonTestFile } from '../util';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-
-function isNonTestFile(filePath: string, rootDir: string) {
-  const relativeFilePath = filePath.replace(`${rootDir}/`, '');
-  return (
-    !relativeFilePath.includes('.test.') &&
-    !relativeFilePath.includes('__test__') &&
-    !relativeFilePath.includes('__tests__')
-  );
-}
 
 const schema = z
   .strictObject({
