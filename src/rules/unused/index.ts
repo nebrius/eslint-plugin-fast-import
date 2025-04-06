@@ -46,7 +46,8 @@ export const noUnusedExports = createRule<
   create(context) {
     // .d.ts files are not typically referenced directly, and instead are used
     // to type ambient modules. Sometimes they are used directly though when
-    // paired with a neighboring vanilla JS file.
+    // paired with a neighboring vanilla JS file. Either way, we're making the
+    // tradeoff of potentially missing an unused type export for better DX.
     if (context.filename.endsWith('.d.ts')) {
       return {};
     }
