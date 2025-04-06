@@ -56,7 +56,7 @@ export type Resolved =
 export type ResolvedSingleImport = BaseSingleImport & Resolved;
 export type ResolvedBarrelImport = BaseBarrelImport & Resolved;
 export type ResolvedDynamicImport = BaseDynamicImport & Resolved;
-type ResolvedImport =
+export type ResolvedImport =
   | ResolvedSingleImport
   | ResolvedBarrelImport
   | ResolvedDynamicImport;
@@ -69,7 +69,7 @@ export type ResolvedExport = BaseExport;
 
 export type ResolvedSingleReexport = BaseSingleReexport & Resolved;
 export type ResolvedBarrelReexport = BaseBarrelReexport & Resolved;
-type ResolvedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
+export type ResolvedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 /* File Details */
 

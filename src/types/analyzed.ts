@@ -133,7 +133,7 @@ export type AnalyzedImport =
 
 /* Exports */
 
-type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
+export type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
 
 /* Reexports */
 
@@ -146,7 +146,7 @@ export type AnalyzedReexport = AnalyzedSingleReexport | AnalyzedBarrelReexport;
 
 /* File Details */
 
-type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
+export type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
 
 export type AnalyzedCodeFileDetails = {
   fileType: 'code';

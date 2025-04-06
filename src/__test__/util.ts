@@ -1,47 +1,135 @@
 import type {
+  AnalyzedCodeFileDetails,
+  AnalyzedExport,
+  AnalyzedImport,
+  AnalyzedOtherFileDetails,
+  AnalyzedProjectInfo,
+  AnalyzedReexport,
+} from '../types/analyzed';
+import type {
   BaseProjectInfo,
   BaseExport,
   BaseImport,
   BaseOtherFileDetails,
   BaseReexport,
+  BaseCodeFileDetails,
 } from '../types/base';
+import type {
+  ResolvedCodeFileDetails,
+  ResolvedExport,
+  ResolvedImport,
+  ResolvedOtherFileDetails,
+  ResolvedProjectInfo,
+  ResolvedReexport,
+} from '../types/resolved';
 
-type PartialBaseESMInfo = {
-  files: Map<
-    string,
-    | {
-        fileType: 'code';
-        lastUpdatedAt?: number;
-        imports: Partial<BaseImport>[];
-        exports: Partial<BaseExport>[];
-        reexports: Partial<BaseReexport>[];
-      }
-    | BaseOtherFileDetails
-  >;
+type StrippedFileDetails<
+  OtherFileDetails extends BaseOtherFileDetails,
+  CodeFileDetails extends BaseCodeFileDetails,
+  Import extends BaseImport,
+  Export extends BaseExport,
+  Reexport extends BaseReexport,
+> =
+  | OtherFileDetails
+  | (Omit<
+      CodeFileDetails,
+      'imports' | 'exports' | 'reexports' | 'lastUpdatedAt'
+    > & {
+      imports: Array<Omit<Import, 'statementNode' | 'reportNode'>>;
+      exports: Array<Omit<Export, 'statementNode' | 'reportNode'>>;
+      reexports: Array<Omit<Reexport, 'statementNode' | 'reportNode'>>;
+    });
+
+type StrippedBaseFileDetails = StrippedFileDetails<
+  BaseOtherFileDetails,
+  BaseCodeFileDetails,
+  BaseImport,
+  BaseExport,
+  BaseReexport
+>;
+
+type StrippedResolvedFileDetails = StrippedFileDetails<
+  ResolvedOtherFileDetails,
+  ResolvedCodeFileDetails,
+  ResolvedImport,
+  ResolvedExport,
+  ResolvedReexport
+>;
+
+type StrippedAnalyzedFileDetails = StrippedFileDetails<
+  AnalyzedOtherFileDetails,
+  AnalyzedCodeFileDetails,
+  AnalyzedImport,
+  AnalyzedExport,
+  AnalyzedReexport
+>;
+
+export type StrippedBaseProjectInfo = Omit<BaseProjectInfo, 'files'> & {
+  files: Map<string, StrippedBaseFileDetails>;
 };
 
-// ESM info includes the original AST node for use easy use correlating code
-// together, but they're really difficult to represent in tests and unimportant.
-// This utility strips them out for easier testing.
-export function stripNodes(info: BaseProjectInfo) {
-  const clonedInfo = { ...info } as PartialBaseESMInfo;
-  for (const [, fileDetails] of clonedInfo.files) {
+export type StrippedResolvedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
+  files: Map<string, StrippedResolvedFileDetails>;
+};
+
+export type StrippedAnalyzedProjectInfo = Omit<AnalyzedProjectInfo, 'files'> & {
+  files: Map<string, StrippedAnalyzedFileDetails>;
+};
+
+// Strip info from
+export function stripNodesFromBaseInfo(info: BaseProjectInfo) {
+  const clonedInfo: StrippedBaseProjectInfo = {
+    rootDir: info.rootDir,
+    alias: info.alias,
+    files: new Map(),
+  };
+  for (const [filePath, fileDetails] of info.files) {
     if (fileDetails.fileType !== 'code') {
+      clonedInfo.files.set(filePath, fileDetails);
       continue;
     }
-    delete fileDetails.lastUpdatedAt;
-    for (const importDetails of fileDetails.imports) {
-      delete importDetails.statementNode;
-      delete importDetails.reportNode;
+    const newFileDetails: StrippedBaseFileDetails = {
+      fileType: fileDetails.fileType,
+      imports: [],
+      exports: [],
+      reexports: [],
+    };
+    for (const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      statementNode,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reportNode,
+      ...strippedDetails
+    } of fileDetails.imports) {
+      newFileDetails.imports.push(strippedDetails);
     }
-    for (const reexportDetails of fileDetails.reexports) {
-      delete reexportDetails.statementNode;
-      delete reexportDetails.reportNode;
+    for (const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      statementNode,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reportNode,
+      ...strippedDetails
+    } of fileDetails.reexports) {
+      newFileDetails.reexports.push(strippedDetails);
     }
-    for (const exportDetails of fileDetails.exports) {
-      delete exportDetails.statementNode;
-      delete exportDetails.reportNode;
+    for (const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      statementNode,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reportNode,
+      ...strippedDetails
+    } of fileDetails.exports) {
+      newFileDetails.exports.push(strippedDetails);
     }
+    clonedInfo.files.set(filePath, newFileDetails);
   }
   return clonedInfo;
+}
+
+export function stripNodesFromResolvedInfo(info: ResolvedProjectInfo) {
+  return stripNodesFromBaseInfo(info) as StrippedResolvedProjectInfo;
+}
+
+export function stripNodesFromAnalyzedInfo(info: AnalyzedProjectInfo) {
+  return stripNodesFromBaseInfo(info) as StrippedAnalyzedProjectInfo;
 }

@@ -1,7 +1,8 @@
 import { getDirname } from 'cross-dirname';
 import { join } from 'node:path';
 import { getProjectInfo, initializeProject, updateCacheForFile } from '../..';
-import { stripNodes } from '../../../__test__/util';
+import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util';
+import { stripNodesFromAnalyzedInfo } from '../../../__test__/util';
 import { parse } from '@typescript-eslint/typescript-estree';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
@@ -23,7 +24,7 @@ it('Updates cache when an unused export is added', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
-  expect(stripNodes(projectInfo)).toEqual({
+  const expected1: StrippedAnalyzedProjectInfo = {
     files: new Map([
       [
         FILE_A,
@@ -70,7 +71,8 @@ it('Updates cache when an unused export is added', () => {
     rootDir:
       '/Users/nebrius/Projects/fast-esm/src/module/__test__/cache/project',
     alias: { '@': './' },
-  });
+  };
+  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected1);
 
   updateCacheForFile(
     FILE_A,
@@ -85,7 +87,7 @@ it('Updates cache when an unused export is added', () => {
   );
 
   projectInfo = getProjectInfo();
-  expect(stripNodes(projectInfo)).toEqual({
+  const expected2: StrippedAnalyzedProjectInfo = {
     files: new Map([
       [
         FILE_A,
@@ -140,5 +142,6 @@ it('Updates cache when an unused export is added', () => {
     rootDir:
       '/Users/nebrius/Projects/fast-esm/src/module/__test__/cache/project',
     alias: { '@': './' },
-  });
+  };
+  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
 });
