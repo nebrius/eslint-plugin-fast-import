@@ -1,7 +1,7 @@
 import { getDirname } from 'cross-dirname';
 import { join } from 'node:path';
 import { getProjectInfo, initializeProject, updateCacheForFile } from '../..';
-import { stripNodes } from '../util';
+import { stripNodes } from '../../../__test__/util';
 import { parse } from '@typescript-eslint/typescript-estree';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
@@ -17,7 +17,7 @@ it('Updates cache when an unused export is added', () => {
     rootDir: TEST_PROJECT_DIR,
     alias: { '@': './' },
     entryPoints: [],
-    mode: 'one-shot' as const,
+    mode: 'fix' as const,
     editorUpdateRate: 5_000,
   };
   initializeProject(settings);

@@ -12,7 +12,6 @@ import { getFilesSync } from '../util/files';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
-// TODO: need an option for ignored files
 type ComputeBaseInfoOptions = {
   rootDir: string;
   alias?: Record<string, string>;

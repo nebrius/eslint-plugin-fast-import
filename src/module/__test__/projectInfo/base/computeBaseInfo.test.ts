@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { computeBaseInfo } from '../../../computeBaseInfo';
-import { stripNodes } from '../../util';
+import { stripNodes } from '../../../../__test__/util';
 import { getDirname } from 'cross-dirname';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');

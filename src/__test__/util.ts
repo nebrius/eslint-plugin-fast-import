@@ -4,7 +4,7 @@ import type {
   BaseImport,
   BaseOtherFileDetails,
   BaseReexport,
-} from '../../types/base';
+} from '../types/base';
 
 type PartialBaseESMInfo = {
   files: Map<

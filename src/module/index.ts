@@ -262,7 +262,7 @@ export function updateCacheForFile(
         };
         analyzedFileInfo.reexports[i] = {
           ...analyzedFileInfo.reexports[i],
-          ...baseFileInfo.reexports[i],
+          ...resolvedFileInfo.reexports[i],
           // TODO: figure out why this doesn't work without the cast
         } as AnalyzedReexport;
       }
@@ -273,7 +273,7 @@ export function updateCacheForFile(
         };
         analyzedFileInfo.imports[i] = {
           ...analyzedFileInfo.imports[i],
-          ...baseFileInfo.imports[i],
+          ...resolvedFileInfo.imports[i],
           // TODO: figure out why this doesn't work without the cast
         } as AnalyzedImport;
       }

@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { stripNodes } from '../../util';
+import { stripNodes } from '../../../../__test__/util';
 import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo';
 import { computeResolvedInfo } from '../../../computeResolvedInfo';
 import { computeBaseInfo } from '../../../computeBaseInfo';
