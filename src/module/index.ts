@@ -6,6 +6,7 @@ import type {
 import { computeAnalyzedInfo } from './computeAnalyzedInfo';
 import {
   addResolvedInfoForFile,
+  computeFolderTree,
   computeResolvedInfo,
   deleteResolvedInfoForFile,
   updateResolvedInfoForFile,
@@ -70,6 +71,7 @@ export function initializeProject({
   const analyzeEnd = Date.now();
 
   debug(`Initial computation complete:`);
+  debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
   debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
   debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
   debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
@@ -98,7 +100,8 @@ type Changes = {
 // add, then modified) is critical
 export function updateCacheFromFileSystem(
   changes: Changes,
-  settings: ParsedSettings
+  settings: ParsedSettings,
+  operationStart: number
 ) {
   // This shouldn't be possible and is just to make sure TypeScript is happy
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
@@ -109,13 +112,15 @@ export function updateCacheFromFileSystem(
   // but there's a chance we've already processed those changes through an
   // editor change. We track whether or not the list actually caused in changes.
   // We use this counter to track these actual changes
-  let numChanges = 0;
+  let numDeletes = 0;
+  let numAdditions = 0;
+  let numModified = 0;
 
   // First, process any file deletes
   const baseStart = Date.now();
   for (const filePath of changes.deleted) {
     if (baseProjectInfo.files.has(filePath)) {
-      numChanges++;
+      numDeletes++;
       deleteResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
       deleteBaseInfoForFile(filePath, baseProjectInfo);
     }
@@ -128,7 +133,7 @@ export function updateCacheFromFileSystem(
     // We might already have this new file in memory if it was created in editor
     // and previously linted while it was only in memory
     if (!baseProjectInfo.files.has(filePath)) {
-      numChanges++;
+      numAdditions++;
       addBaseInfoForFile(
         {
           ...parseFile(filePath),
@@ -136,8 +141,16 @@ export function updateCacheFromFileSystem(
         },
         baseProjectInfo
       );
-      addResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
     }
+  }
+
+  // If we added or deleted any files, we fully recompute resolutions to take
+  // these changes into account, since files may have been renamed. Renames are
+  // especially tricky since it may just be an extension change(.js->.ts), and
+  // we might have already seen the new .ts file in a previous update.
+  // TODO: it's probably possible to do a more surgical recomputation
+  if (numDeletes || numAdditions) {
+    resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
   }
   const resolveEnd = Date.now();
 
@@ -149,7 +162,7 @@ export function updateCacheFromFileSystem(
       (previousFileInfo.fileType === 'code' &&
         previousFileInfo.lastUpdatedAt < latestUpdatedAt)
     ) {
-      numChanges++;
+      numModified++;
       updateBaseInfoForFile(
         {
           ...parseFile(filePath),
@@ -162,13 +175,16 @@ export function updateCacheFromFileSystem(
   }
 
   // Finally, recompute analyzed info
-  if (numChanges) {
+  if (numDeletes || numAdditions | numModified) {
     const analyzestart = Date.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
     const analyzeEnd = Date.now();
 
     debug(
-      `Updated cache for ${numChanges === 1 ? '1 file' : `${numChanges.toString()} files`} from file system:`
+      `Synchronized changes from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
+    );
+    debug(
+      `  total:         ${formatMilliseconds(analyzeEnd - operationStart)}`
     );
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
@@ -220,6 +236,7 @@ export function updateCacheForFile(
       const analyzeEnd = Date.now();
 
       debug(`Update for ${filePath.replace(rootDir, '')} complete:`);
+      debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
       debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
       debug(
         `  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`
@@ -285,6 +302,7 @@ export function updateCacheForFile(
     const baseEnd = Date.now();
 
     const resolveStart = Date.now();
+    computeFolderTree(baseProjectInfo);
     addResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
     const resolveEnd = Date.now();
 
@@ -293,6 +311,7 @@ export function updateCacheForFile(
     const analyzeEnd = Date.now();
 
     debug(`${filePath.replace(rootDir, '')} add complete:`);
+    debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - anazlyzeStart)}`);

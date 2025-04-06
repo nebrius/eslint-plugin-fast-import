@@ -78,6 +78,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
 
   async function refresh() {
     try {
+      const start = Date.now();
       const latestUpdatedTimes = await getUpdatedAtTimes();
 
       // First, find files that were deleted, represented by entries that are in
@@ -118,7 +119,9 @@ async function initializeFileWatching(settings: ParsedSettings) {
       }
 
       // Update the cache
-      if (updateCacheFromFileSystem({ added, deleted, modified }, settings)) {
+      if (
+        updateCacheFromFileSystem({ added, deleted, modified }, settings, start)
+      ) {
         for (const updateListener of updateListeners) {
           updateListener();
         }

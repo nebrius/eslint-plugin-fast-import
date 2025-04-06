@@ -12,6 +12,7 @@ import { isCodeFile } from '../util/code';
 export function computeResolvedInfo(
   baseProjectInfo: BaseProjectInfo
 ): ResolvedProjectInfo {
+  // Always recompute the folder tree when we're starting from scratch
   computeFolderTree(baseProjectInfo);
 
   const resolvedProjectInfo: ResolvedProjectInfo = {
@@ -49,8 +50,6 @@ export function addResolvedInfoForFile(
   newBaseProjectInfo: BaseProjectInfo,
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
-  computeFolderTree(newBaseProjectInfo);
-
   const baseFileInfo = newBaseProjectInfo.files.get(filePath);
   if (!baseFileInfo) {
     throw new InternalError(`Could not get base file info for ${filePath}`);
@@ -78,54 +77,6 @@ export function addResolvedInfoForFile(
       fileType: 'other',
     });
   }
-}
-
-// Find all files that import/reexport from this file, or that this file is imported from
-function getFileReferences(
-  previousResolvedProjectInfo: ResolvedProjectInfo,
-  filePath: string
-) {
-  const fileReferences = [];
-  const previousResolvedFileEntry =
-    previousResolvedProjectInfo.files.get(filePath);
-  if (!previousResolvedFileEntry) {
-    throw new InternalError(
-      `Could not get previous resolved entry for ${filePath}`
-    );
-  }
-  if (previousResolvedFileEntry.fileType !== 'code') {
-    throw new InternalError(`Previous file type for ${filePath} is not code`);
-  }
-
-  for (const [
-    candidateFilePath,
-    candidateFileDetails,
-  ] of previousResolvedProjectInfo.files) {
-    if (
-      candidateFileDetails.fileType !== 'code' ||
-      candidateFilePath === filePath
-    ) {
-      continue;
-    }
-    if (
-      // Look for imports or the import side of reexports to see if they reference this file
-      [...candidateFileDetails.imports, ...candidateFileDetails.reexports].some(
-        (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
-      ) ||
-      // Look for exports or the export side of reexports to see if this file references them
-      [
-        ...previousResolvedFileEntry.imports,
-        ...previousResolvedFileEntry.reexports,
-      ].some(
-        (i) =>
-          i.moduleType === 'firstPartyCode' && i.resolvedModulePath === filePath
-      )
-    ) {
-      fileReferences.push(candidateFilePath);
-    }
-  }
-
-  return fileReferences;
 }
 
 export function updateResolvedInfoForFile(
@@ -202,6 +153,102 @@ export function deleteResolvedInfoForFile(
   }
 }
 
+export function computeFolderTree(baseInfo: BaseProjectInfo) {
+  // Reset the cache before we start
+  folderTree = {
+    folders: {},
+    files: {},
+    filesAndExtensions: {},
+  };
+  for (const [file] of baseInfo.files) {
+    const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
+    const basefile = folders.pop();
+    if (!basefile) {
+      throw new InternalError(`Could not get basefile for path ${file}`);
+    }
+
+    let currentFolderTreeNode = folderTree;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    while (true) {
+      const currentFolder = folders.shift();
+      if (!currentFolder) {
+        break;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!currentFolderTreeNode.folders[currentFolder]) {
+        currentFolderTreeNode.folders[currentFolder] = {
+          folders: {},
+          files: {},
+          filesAndExtensions: {},
+        };
+      }
+      currentFolderTreeNode = currentFolderTreeNode.folders[currentFolder];
+    }
+
+    currentFolderTreeNode.files[basefile] = 1;
+    const extension = basefile.endsWith('.d.ts')
+      ? '.d.ts'
+      : basefile.endsWith('.d.tsx')
+        ? '.d.tsx'
+        : extname(basefile);
+    const baseFileName = basename(basefile, extension);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!currentFolderTreeNode.filesAndExtensions[baseFileName]) {
+      currentFolderTreeNode.filesAndExtensions[baseFileName] = [];
+    }
+    currentFolderTreeNode.filesAndExtensions[baseFileName].push(extension);
+  }
+}
+
+// Find all files that import/reexport from this file, or that this file is imported from
+function getFileReferences(
+  previousResolvedProjectInfo: ResolvedProjectInfo,
+  filePath: string
+) {
+  const fileReferences = [];
+  const previousResolvedFileEntry =
+    previousResolvedProjectInfo.files.get(filePath);
+  if (!previousResolvedFileEntry) {
+    throw new InternalError(
+      `Could not get previous resolved entry for ${filePath}`
+    );
+  }
+  if (previousResolvedFileEntry.fileType !== 'code') {
+    throw new InternalError(`Previous file type for ${filePath} is not code`);
+  }
+
+  for (const [
+    candidateFilePath,
+    candidateFileDetails,
+  ] of previousResolvedProjectInfo.files) {
+    if (
+      candidateFileDetails.fileType !== 'code' ||
+      candidateFilePath === filePath
+    ) {
+      continue;
+    }
+    if (
+      // Look for imports or the import side of reexports to see if they reference this file
+      [...candidateFileDetails.imports, ...candidateFileDetails.reexports].some(
+        (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
+      ) ||
+      // Look for exports or the export side of reexports to see if this file references them
+      [
+        ...previousResolvedFileEntry.imports,
+        ...previousResolvedFileEntry.reexports,
+      ].some(
+        (i) =>
+          i.moduleType === 'firstPartyCode' && i.resolvedModulePath === filePath
+      )
+    ) {
+      fileReferences.push(candidateFilePath);
+    }
+  }
+
+  return fileReferences;
+}
+
 function populateFileDetails(
   baseProjectInfo: BaseProjectInfo,
   filePath: string,
@@ -267,54 +314,6 @@ let folderTree: FolderTreeNode = {
   files: {},
   filesAndExtensions: {},
 };
-
-function computeFolderTree(baseInfo: BaseProjectInfo) {
-  // Reset the cache before we start
-  folderTree = {
-    folders: {},
-    files: {},
-    filesAndExtensions: {},
-  };
-  for (const [file] of baseInfo.files) {
-    const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
-    const basefile = folders.pop();
-    if (!basefile) {
-      throw new InternalError(`Could not get basefile for path ${file}`);
-    }
-
-    let currentFolderTreeNode = folderTree;
-
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-      const currentFolder = folders.shift();
-      if (!currentFolder) {
-        break;
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (!currentFolderTreeNode.folders[currentFolder]) {
-        currentFolderTreeNode.folders[currentFolder] = {
-          folders: {},
-          files: {},
-          filesAndExtensions: {},
-        };
-      }
-      currentFolderTreeNode = currentFolderTreeNode.folders[currentFolder];
-    }
-
-    currentFolderTreeNode.files[basefile] = 1;
-    const extension = basefile.endsWith('.d.ts')
-      ? '.d.ts'
-      : basefile.endsWith('.d.tsx')
-        ? '.d.tsx'
-        : extname(basefile);
-    const baseFileName = basename(basefile, extension);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!currentFolderTreeNode.filesAndExtensions[baseFileName]) {
-      currentFolderTreeNode.filesAndExtensions[baseFileName] = [];
-    }
-    currentFolderTreeNode.filesAndExtensions[baseFileName].push(extension);
-  }
-}
 
 const formattedBuiltinModules = builtinModules.filter(
   (m) => !m.startsWith('_')
