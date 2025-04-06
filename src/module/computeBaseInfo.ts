@@ -3,8 +3,8 @@ import type {
   BaseCodeFileDetails,
   BaseProjectInfo,
 } from '../types/base';
-import type { ExportDeclaration } from './ast';
-import { parseFile, traverse } from './ast';
+import type { ExportDeclaration } from './util';
+import { parseFile, traverse } from './util';
 import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error';
 import { isCodeFile } from '../util/code';

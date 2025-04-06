@@ -22,7 +22,7 @@ import type { ResolvedProjectInfo } from '../types/resolved';
 import type { ParsedSettings } from '../settings';
 import { debug, formatMilliseconds } from '../util/logging';
 import type { TSESTree } from '@typescript-eslint/utils';
-import { parseFile } from './ast';
+import { parseFile } from './util';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
