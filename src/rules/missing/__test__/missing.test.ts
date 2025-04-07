@@ -23,7 +23,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
       code: ``,
       filename: FILE_A,
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -37,7 +37,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noMissingImports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },

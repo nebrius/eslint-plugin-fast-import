@@ -139,7 +139,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
 
 export function isNonTestFile(filePath: string, rootDir: string) {
   // We want to ignore folders named __test__ outside of this project, in case
-  // the entire project is itself a test (e.g. the unit tests for fast-esm)
+  // the entire project is itself a test (e.g. the unit tests for fast-import)
   const relativeFilePath = filePath.replace(`${rootDir}/`, '');
   return (
     !relativeFilePath.includes('.test.') &&

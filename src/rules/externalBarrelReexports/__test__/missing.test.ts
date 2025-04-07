@@ -23,7 +23,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       code: ``,
       filename: FILE_A,
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -37,7 +37,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       filename: FILE_A,
       errors: [{ messageId: 'noExternalBarrelReexports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -48,7 +48,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       filename: FILE_A,
       errors: [{ messageId: 'noExternalBarrelReexports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },

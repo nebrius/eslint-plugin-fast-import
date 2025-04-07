@@ -1,3 +1,3 @@
-# @fast-esm/no-entry-point-imports
+# @fast-import/no-entry-point-imports
 
 TODO

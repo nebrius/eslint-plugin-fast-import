@@ -1,9 +1,9 @@
 export function warn(msg: string) {
-  console.warn(`[Warn] fast-esm: ${msg}`);
+  console.warn(`[Warn] fast-import: ${msg}`);
 }
 
 export function error(msg: string) {
-  console.error(`[Error] fast-esm: ${msg}`);
+  console.error(`[Error] fast-import: ${msg}`);
 }
 
 let verboseEnabled = false;
@@ -13,7 +13,7 @@ export function setVerbose(verbose: boolean) {
 
 export function debug(msg: string) {
   if (verboseEnabled) {
-    console.debug(`[Debug] fast-esm: ${msg}`);
+    console.debug(`[Debug] fast-import: ${msg}`);
   }
 }
 

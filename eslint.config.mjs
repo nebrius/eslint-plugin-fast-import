@@ -27,7 +27,7 @@ export default tseslint.config(
           alwaysTryTypes: true,
         }),
       ],
-      'fast-esm': {
+      'fast-import': {
         entryPoints: [
           {
             file: 'plugin.ts',

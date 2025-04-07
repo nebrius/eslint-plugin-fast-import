@@ -27,7 +27,7 @@ const DEFAULT_MODE = process.argv[0].includes('Visual Studio Code')
 let settings: ParsedSettings | null = null;
 
 // We need to reset settings between runs, since some tests try different settings
-// eslint-disable-next-line fast-esm/no-unused-exports
+// eslint-disable-next-line fast-import/no-unused-exports
 export function _resetSettings() {
   settings = null;
 }
@@ -64,7 +64,7 @@ export function getSettings(context: GenericContext): ParsedSettings {
   // Make sure we could find a rootDir
   if (!rootDir) {
     error(
-      `Could not determine rootDir. Please add it to fast-esm settings. See https://github.com/nebrius/fast-esm for details`
+      `Could not determine rootDir. Please add it to fast-import settings. See https://github.com/nebrius/fast-import for details`
     );
     process.exit(-1);
   }

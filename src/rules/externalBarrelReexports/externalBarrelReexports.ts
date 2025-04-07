@@ -5,7 +5,7 @@ export const noExternalBarrelReexports = createRule({
   meta: {
     docs: {
       description:
-        'Ensures that code does not barrel reexport builtin or third party modules. Doing so is not supported by fast-esm for performance reasons',
+        'Ensures that code does not barrel reexport builtin or third party modules. Doing so is not supported by fast-import for performance reasons',
     },
     schema: [],
     fixable: undefined,

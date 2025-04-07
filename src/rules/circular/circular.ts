@@ -70,7 +70,7 @@ registerUpdateListener(() => {
 
 // This is only used in tests, since update listeners aren't guaranteed to
 // be called on each run
-// eslint-disable-next-line fast-esm/no-unused-exports
+// eslint-disable-next-line fast-import/no-unused-exports
 export function _resetCircularMap() {
   circularImportMap.clear();
 }

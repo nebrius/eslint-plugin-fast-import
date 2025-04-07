@@ -27,7 +27,7 @@ ruleTester.run('no-circular-exports', noCircularImports, {
       code: `export const a = 10;`,
       filename: FILE_A,
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -46,7 +46,7 @@ console.log(c);
       filename: FILE_A,
       errors: [{ messageId: 'noCircularImports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -62,7 +62,7 @@ console.log(c);
       filename: FILE_A,
       errors: [{ messageId: 'noCircularImports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },

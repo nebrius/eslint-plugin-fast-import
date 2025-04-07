@@ -22,7 +22,7 @@ export type Settings = Omit<z.infer<typeof settingsSchema>, 'debugLogging'>;
 
 export function getUserSettings(context: GenericContext): Settings {
   // Parse the raw settings, if supplied
-  const fastEsmSettings = context.settings['fast-esm'];
+  const fastEsmSettings = context.settings['fast-import'];
   const parseResult = settingsSchema.safeParse(fastEsmSettings);
 
   // If there were errors, print a friendly-ish explanation of them

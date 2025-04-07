@@ -1,3 +1,3 @@
-# @fast-esm/no-missing-exports
+# @fast-import/no-missing-exports
 
 TODO

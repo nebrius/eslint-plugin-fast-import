@@ -1,4 +1,4 @@
-# eslint-plugin-fast-esm
+# eslint-plugin-fast-import
 
 TODO: make sure to mention that this won't resolve fully and will cause false positives:
 

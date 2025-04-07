@@ -1,2 +1,2 @@
-# @fast-esm/no-test-imports-in-prod
+# @fast-import/no-test-imports-in-prod
 TODO

@@ -37,7 +37,7 @@ function getEntryPointCheck(entryPoints: ParsedSettings['entryPoints']) {
 }
 
 // We need to reset settings between runs, since some tests try different settings
-// eslint-disable-next-line fast-esm/no-unused-exports
+// eslint-disable-next-line fast-import/no-unused-exports
 export function _resetProjectInfo() {
   baseProjectInfo = null;
   resolvedProjectInfo = null;

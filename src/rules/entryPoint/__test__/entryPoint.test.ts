@@ -32,7 +32,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       code: FILE_A_CONTENTS,
       filename: FILE_A,
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -45,7 +45,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPoints: [

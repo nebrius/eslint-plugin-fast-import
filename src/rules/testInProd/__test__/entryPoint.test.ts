@@ -30,7 +30,7 @@ ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
       code: ``,
       filename: FILE_A,
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -46,7 +46,7 @@ console.log(bTest);
       filename: FILE_A,
       errors: [{ messageId: 'noTestImports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPoints: [

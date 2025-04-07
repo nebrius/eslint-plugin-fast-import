@@ -1,3 +1,3 @@
-# @fast-esm/no-circular-imports
+# @fast-import/no-circular-imports
 
 TODO

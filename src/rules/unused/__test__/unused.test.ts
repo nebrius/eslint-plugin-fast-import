@@ -25,7 +25,7 @@ export const a2 = 10;
 `,
       filename: FILE_A,
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -43,7 +43,7 @@ export const a2 = 10;
       filename: FILE_A,
       errors: [{ messageId: 'noUnusedExports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
@@ -58,7 +58,7 @@ export const a2 = 10;
       filename: FILE_A,
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
-        'fast-esm': {
+        'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },

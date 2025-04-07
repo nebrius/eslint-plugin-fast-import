@@ -33,28 +33,28 @@ const plugin = {
 Object.assign(plugin.configs, {
   recommended: {
     plugins: {
-      'fast-esm': plugin,
+      'fast-import': plugin,
     },
     rules: {
-      'fast-esm/no-unused-exports': 'error',
-      'fast-esm/no-circular-imports': 'error',
-      'fast-esm/no-entry-point-imports': 'error',
-      'fast-esm/no-missing-imports': 'error',
-      'fast-esm/no-external-barrel-reexports': 'error',
-      'fast-esm/no-test-imports-in-prod': 'error',
+      'fast-import/no-unused-exports': 'error',
+      'fast-import/no-circular-imports': 'error',
+      'fast-import/no-entry-point-imports': 'error',
+      'fast-import/no-missing-imports': 'error',
+      'fast-import/no-external-barrel-reexports': 'error',
+      'fast-import/no-test-imports-in-prod': 'error',
     },
   },
   off: {
     plugins: {
-      'fast-esm': plugin,
+      'fast-import': plugin,
     },
     rules: {
-      'fast-esm/no-unused-exports': 'off',
-      'fast-esm/no-circular-imports': 'off',
-      'fast-esm/no-entry-point-imports': 'off',
-      'fast-esm/no-missing-imports': 'off',
-      'fast-esm/no-external-barrel-reexports': 'off',
-      'fast-esm/no-test-imports-in-prod': 'off',
+      'fast-import/no-unused-exports': 'off',
+      'fast-import/no-circular-imports': 'off',
+      'fast-import/no-entry-point-imports': 'off',
+      'fast-import/no-missing-imports': 'off',
+      'fast-import/no-external-barrel-reexports': 'off',
+      'fast-import/no-test-imports-in-prod': 'off',
     },
   },
 });

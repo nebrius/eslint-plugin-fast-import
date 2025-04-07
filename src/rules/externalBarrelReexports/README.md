@@ -1,3 +1,3 @@
-# @fast-esm/no-external-barrel-reexports
+# @fast-import/no-external-barrel-reexports
 
 TODO
