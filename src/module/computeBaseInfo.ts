@@ -9,12 +9,14 @@ import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error.js';
 import { isCodeFile } from '../util/code.js';
 import { getFilesSync } from '../util/files.js';
+import type { IgnorePattern } from '../settings/settings.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
 type ComputeBaseInfoOptions = {
   rootDir: string;
   alias?: Record<string, string>;
+  ignorePatterns: IgnorePattern[];
   isEntryPointCheck?: IsEntryPointCheck;
 };
 
@@ -24,6 +26,7 @@ type ComputeBaseInfoOptions = {
 export function computeBaseInfo({
   rootDir,
   alias = {},
+  ignorePatterns,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
@@ -32,7 +35,7 @@ export function computeBaseInfo({
     alias,
   };
 
-  const potentialFiles = getFilesSync(rootDir);
+  const potentialFiles = getFilesSync(rootDir, ignorePatterns);
 
   for (const { filePath } of potentialFiles) {
     if (isCodeFile(filePath)) {

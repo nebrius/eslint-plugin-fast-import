@@ -2,27 +2,77 @@ import type { Stats } from 'node:fs';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { basename, dirname, join, relative } from 'node:path';
+import type { Ignore } from 'ignore';
 import ignore from 'ignore';
+import type { IgnorePattern } from '../settings/settings.js';
 
 type PotentialFile = {
   filePath: string;
   stats: Stats;
 };
 
-type IgnoreFile = {
-  filePath: string;
-  contents: string;
-};
+export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
+  // Read in the files and their stats, and filter out directories
+  const potentialFiles = readdirSync(rootDir, {
+    recursive: true,
+    encoding: 'utf-8',
+  })
+    .map((f) => join(rootDir, f))
+    // Stats will be used for multiple checks later, so we want to cache it now.
+    // Unfortunately we need more than what {withFileTypes: true} provides, so
+    // we still need to call statSync separately
+    .map((filePath) => ({ filePath, stats: statSync(filePath) }))
+
+    // Filter out any directories, so that this is only a file list
+    .filter((f) => !f.stats.isDirectory());
+
+  // Return the list of files
+  return buildFileList(
+    rootDir,
+    ignorePatterns,
+    potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
+  );
+}
+
+export async function getFiles(
+  rootDir: string,
+  ignorePatterns: IgnorePattern[]
+) {
+  // First, read in the files and convert the results to absolute path
+  const potentialFilePaths = (
+    await readdir(rootDir, {
+      recursive: true,
+      encoding: 'utf-8',
+    })
+  ).map((f) => join(rootDir, f));
+
+  // Now add the stats to each file
+  const potentialFiles = (
+    await Promise.all(
+      potentialFilePaths.map(async (filePath) => {
+        const stats = await stat(filePath);
+        return { filePath, stats };
+      })
+    )
+  )
+    // Filter out any directories, so that this is only a file list
+    .filter((f) => !f.stats.isDirectory());
+
+  // Return the list of files
+  return buildFileList(
+    rootDir,
+    ignorePatterns,
+    potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
+  );
+}
 
 function buildFileList(
-  potentialFiles: PotentialFile[],
-  ignoreFiles: IgnoreFile[]
+  rootDir: string,
+  ignorePatterns: IgnorePattern[],
+  potentialFiles: PotentialFile[]
 ) {
   // Create the ignore instances for use in filtering
-  const ignores = ignoreFiles.map((i) => ({
-    dir: dirname(i.filePath),
-    ig: ignore().add(i.contents),
-  }));
+  const ignores = getIgnores(rootDir, ignorePatterns, potentialFiles);
 
   // Filter out ignored files
   const files: Array<{
@@ -47,10 +97,14 @@ function buildFileList(
   return files;
 }
 
-let ignoreFiles: IgnoreFile[] | null = null;
-function getIgnoreFiles(rootDir: string, potentialFiles: PotentialFile[]) {
-  if (ignoreFiles) {
-    return ignoreFiles;
+let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
+function getIgnores(
+  rootDir: string,
+  ignorePatterns: IgnorePattern[],
+  potentialFiles: PotentialFile[]
+) {
+  if (ignores) {
+    return ignores;
   }
 
   // First, we need to traverse up the folder tree until we find the git root
@@ -81,7 +135,7 @@ function getIgnoreFiles(rootDir: string, potentialFiles: PotentialFile[]) {
   }
 
   // Normalize and read in all ignore file contents
-  ignoreFiles = [
+  const ignoreFiles = [
     ...extraIgnoreFiles,
     ...potentialFiles
       .filter(({ filePath }) => basename(filePath) === '.gitignore')
@@ -90,63 +144,17 @@ function getIgnoreFiles(rootDir: string, potentialFiles: PotentialFile[]) {
     filePath,
     contents: readFileSync(filePath, 'utf-8'),
   }));
-  return ignoreFiles;
-}
 
-export function getFilesSync(rootDir: string) {
-  // Read in the files and their stats, and filter out directories
-  const potentialFiles = readdirSync(rootDir, {
-    recursive: true,
-    encoding: 'utf-8',
-  })
-    .map((f) => join(rootDir, f))
-    // Stats will be used for multiple checks later, so we want to cache it now.
-    // Unfortunately we need more than what {withFileTypes: true} provides, so
-    // we still need to call statSync separately
-    .map((filePath) => ({ filePath, stats: statSync(filePath) }))
+  ignores = [
+    ...ignorePatterns.map((i) => ({
+      dir: i.dir,
+      ig: ignore().add(i.contents),
+    })),
+    ...ignoreFiles.map((i) => ({
+      dir: dirname(i.filePath),
+      ig: ignore().add(i.contents),
+    })),
+  ];
 
-    // Filter out any directories, so that this is only a file list
-    .filter((f) => !f.stats.isDirectory());
-
-  // Return the list of files
-  return buildFileList(
-    potentialFiles.filter(
-      ({ filePath }) => basename(filePath) !== '.gitignore'
-    ),
-    getIgnoreFiles(rootDir, potentialFiles)
-  );
-}
-
-export async function getFiles(rootDir: string) {
-  // First, read in the files and convert the results to absolute path
-  const potentialFilePaths = (
-    await readdir(rootDir, {
-      recursive: true,
-      encoding: 'utf-8',
-    })
-  ).map((f) => join(rootDir, f));
-
-  // Now add the stats to each file
-  const potentialFiles = (
-    await Promise.all(
-      potentialFilePaths.map(async (filePath) => {
-        const stats = await stat(filePath);
-        return { filePath, stats };
-      })
-    )
-  )
-    // Filter out any directories, so that this is only a file list
-    .filter((f) => !f.stats.isDirectory());
-
-  // Return the list of files
-  return buildFileList(
-    potentialFiles.filter(
-      ({ filePath }) => basename(filePath) !== '.gitignore'
-    ),
-
-    // Although this is synchronous, we'll always get the cached copy since the
-    // synchronous version of getFiles is always called first and will populate
-    // the cache for us
-    getIgnoreFiles(rootDir, potentialFiles)
-  );
+  return ignores;
 }

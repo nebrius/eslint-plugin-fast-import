@@ -351,6 +351,7 @@ it('Computes base info', () => {
       computeBaseInfo({
         rootDir: TEST_PROJECT_DIR,
         alias: { '@': './' },
+        ignorePatterns: [],
         isEntryPointCheck: (filePath, symbolName) =>
           filePath === FILE_A && symbolName === 'ASourceCode',
       })

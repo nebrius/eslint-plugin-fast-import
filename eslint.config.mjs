@@ -44,7 +44,14 @@ export default tseslint.config(
   },
   fastEsm.configs.recommended,
   eslintPluginPrettierRecommended,
-  tseslint.configs.strictTypeChecked,
+  ...tseslint.configs.strictTypeChecked.map((r) =>
+    r.name === 'typescript-eslint/strict-type-checked'
+      ? {
+          ...r,
+          files: ['**/*.{ts,tsx,mts}'],
+        }
+      : r
+  ),
   {
     files: ['**/*.{ts,tsx,mts}'],
     languageOptions: {

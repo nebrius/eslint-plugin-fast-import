@@ -333,6 +333,7 @@ it('Computes base info', () => {
   const info = computeBaseInfo({
     rootDir: TEST_PROJECT_DIR,
     alias: { '@': './' },
+    ignorePatterns: [],
     isEntryPointCheck: () => false,
   });
   expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);

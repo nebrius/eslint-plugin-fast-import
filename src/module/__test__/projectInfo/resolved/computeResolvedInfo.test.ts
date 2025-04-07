@@ -281,6 +281,7 @@ it('Computes resolved into', () => {
     computeBaseInfo({
       rootDir: TEST_PROJECT_DIR,
       alias: { '@': './' },
+      ignorePatterns: [],
       isEntryPointCheck: () => false,
     })
   );

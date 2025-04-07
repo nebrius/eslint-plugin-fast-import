@@ -22,6 +22,7 @@ it('Updates cache when an unused export is added', () => {
     rootDir: TEST_PROJECT_DIR,
     alias: { '@': './' },
     entryPoints: [],
+    ignorePatterns: [],
     mode: 'fix' as const,
     editorUpdateRate: 5_000,
   };

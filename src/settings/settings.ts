@@ -7,7 +7,35 @@ import { getUserSettings, type Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 import { existsSync } from 'node:fs';
 
-export type ParsedSettings = RequiredDeep<Settings>;
+function getDefaultIgnores(eslintConfigDir: string) {
+  const patterns = [
+    'eslint.config.',
+    'prettierrc.',
+    'prettier.config.',
+    'jest.config.',
+    'webpack.config.',
+  ];
+
+  const extensions = ['js', 'jsx', 'mjs', 'cjs', 'ts', 'tsx', 'mts', 'cts'];
+
+  const computedFiles: string[] = [];
+  for (const pattern of patterns) {
+    for (const extension of extensions) {
+      computedFiles.push(join(eslintConfigDir, pattern + extension));
+    }
+  }
+
+  return computedFiles;
+}
+
+export type IgnorePattern = {
+  dir: string;
+  contents: string;
+};
+
+export type ParsedSettings = Omit<RequiredDeep<Settings>, 'ignorePatterns'> & {
+  ignorePatterns: IgnorePattern[];
+};
 
 function argsInclude(strs: string[]) {
   for (const str of strs) {
@@ -37,6 +65,8 @@ export function getSettings(context: GenericContext): ParsedSettings {
   if (settings) {
     return settings;
   }
+
+  const eslintConfigDir = getEslintConfigDir(context);
 
   // Get TypeScript supplied settings
   const typeScriptSettings = getTypeScriptSettings(context);
@@ -108,11 +138,22 @@ export function getSettings(context: GenericContext): ParsedSettings {
   const mode = mergedSettings.mode ?? DEFAULT_MODE;
   debug(`Running in ${mode} mode`);
 
+  const ignorePatterns = [
+    ...getDefaultIgnores(eslintConfigDir),
+    ...(mergedSettings.ignorePatterns ?? []).map(
+      (g) => `${eslintConfigDir}/${g}`
+    ),
+  ].map((p) => ({
+    dir: eslintConfigDir,
+    contents: p,
+  }));
+
   // Apply defaults and save to the settings cache
   settings = {
     rootDir,
     alias: parsedAlias,
     entryPoints: parsedEntryPoints,
+    ignorePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode:
       mergedSettings.mode !== 'auto' && mergedSettings.mode !== undefined

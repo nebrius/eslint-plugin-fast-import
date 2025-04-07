@@ -47,6 +47,7 @@ export function _resetProjectInfo() {
 export function initializeProject({
   rootDir,
   alias,
+  ignorePatterns,
   entryPoints,
 }: ParsedSettings) {
   // If we've already analyzed the project and settings haven't changed, bail
@@ -58,6 +59,7 @@ export function initializeProject({
   baseProjectInfo = computeBaseInfo({
     rootDir,
     alias,
+    ignorePatterns,
     isEntryPointCheck: getEntryPointCheck(entryPoints),
   });
   const baseEnd = Date.now();
