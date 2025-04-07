@@ -1,6 +1,6 @@
 {
-  "name": "eslint-plugin-fast-esm",
-  "version": "1.0.0",
+  "name": "eslint-plugin-fast-import",
+  "version": "1.0.0-beta1",
   "description": "",
   "main": "dist/plugin.js",
   "type": "module",
