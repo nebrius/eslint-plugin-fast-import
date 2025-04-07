@@ -26,7 +26,7 @@ export function getESMInfo(context: GenericContext) {
 
   // We have to call initializeProject first before we can check if this file
   // is ignored, because initializeProject initializes the ignore cache
-  if (isFileIgnored(context.filename)) {
+  if (isFileIgnored(settings.rootDir, context.filename)) {
     return;
   }
 

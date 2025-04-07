@@ -68,9 +68,12 @@ export async function getFiles(
 }
 
 let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
-export function isFileIgnored(filePath: string) {
+export function isFileIgnored(rootDir: string, filePath: string) {
   if (!ignores) {
     throw new InternalError(`isFileIgnored called before ignores initialized`);
+  }
+  if (!filePath.startsWith(rootDir)) {
+    return true;
   }
   for (const { dir, ig } of ignores) {
     // Ignore file paths are relative to the directory the ignore file is in,
@@ -97,7 +100,7 @@ function buildFileList(
     latestUpdatedAt: number;
   }> = [];
   for (const { filePath, stats } of potentialFiles) {
-    if (isFileIgnored(filePath)) {
+    if (isFileIgnored(rootDir, filePath)) {
       continue;
     }
     files.push({

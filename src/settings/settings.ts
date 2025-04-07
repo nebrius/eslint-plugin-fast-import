@@ -7,27 +7,6 @@ import { getUserSettings, type Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 import { existsSync } from 'node:fs';
 
-function getDefaultIgnores() {
-  const patterns = [
-    '/eslint.config.',
-    '/prettierrc.',
-    '/prettier.config.',
-    '/jest.config.',
-    '/webpack.config.',
-  ];
-
-  const extensions = ['js', 'jsx', 'mjs', 'cjs', 'ts', 'tsx', 'mts', 'cts'];
-
-  const computedFiles: string[] = [];
-  for (const pattern of patterns) {
-    for (const extension of extensions) {
-      computedFiles.push(pattern + extension);
-    }
-  }
-
-  return computedFiles;
-}
-
 export type IgnorePattern = {
   dir: string;
   contents: string;
@@ -138,14 +117,9 @@ export function getSettings(context: GenericContext): ParsedSettings {
   const mode = mergedSettings.mode ?? DEFAULT_MODE;
   debug(`Running in ${mode} mode`);
 
-  const ignorePatterns = [
-    ...getDefaultIgnores(),
-    ...(mergedSettings.ignorePatterns ?? []).map(
-      (g) => `${eslintConfigDir}/${g}`
-    ),
-  ].map((p) => ({
+  const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
     dir: eslintConfigDir,
-    contents: p,
+    contents: `${eslintConfigDir}/${p}`,
   }));
 
   // Apply defaults and save to the settings cache
