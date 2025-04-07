@@ -19,7 +19,7 @@ const compat = new FlatCompat({
 
 export default tseslint.config(
   includeIgnoreFile(join(getDirname(), '.gitignore')),
-  globalIgnores(['src/**/__test__/**/project/*']),
+  globalIgnores(['src/**/__test__/**/project/*', 'jest.config.ts']),
   {
     settings: {
       'import/resolver-next': [
