@@ -8,7 +8,7 @@
     "lint": "eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts}\"",
     "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "build": "tsc",
-    "test": "jest src",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js src",
     "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\""
   },
   "author": "Bryan Hughes <bryan@nebri.us>",
@@ -32,6 +32,8 @@
     "global": "^4.4.0",
     "prettier": "^3.4.2",
     "ts-jest": "^29.2.5",
+    "ts-jest-resolver": "^2.0.1",
+    "ts-node": "^10.9.2",
     "type-fest": "^4.37.0",
     "typescript": "^5.8.2"
   },

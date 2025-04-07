@@ -142,8 +142,7 @@ it('Updates cache when an unused export is added', () => {
         },
       ],
     ]),
-    rootDir:
-      '/Users/nebrius/Projects/fast-import/src/module/__test__/cache/project',
+    rootDir: TEST_PROJECT_DIR,
     alias: { '@': './' },
   };
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
