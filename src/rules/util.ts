@@ -1,6 +1,6 @@
 import { ESLintUtils } from '@typescript-eslint/utils';
 import type { GenericContext } from '../types/context.js';
-import { getFiles } from '../util/files.js';
+import { getFiles, isFileIgnored } from '../util/files.js';
 import type { ParsedSettings } from '../settings/settings.js';
 import { getSettings } from '../settings/settings.js';
 import {
@@ -23,6 +23,12 @@ export function registerUpdateListener(cb: () => void) {
 export function getESMInfo(context: GenericContext) {
   const settings = getSettings(context);
   initializeProject(settings);
+
+  // We have to call initializeProject first before we can check if this file
+  // is ignored, because initializeProject initializes the ignore cache
+  if (isFileIgnored(context.filename)) {
+    return;
+  }
 
   // If we're not in one-shot mode, update the cache, and if there were changes
   // call any esm change subscribers

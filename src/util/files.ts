@@ -5,6 +5,7 @@ import { basename, dirname, join, relative } from 'node:path';
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
 import type { IgnorePattern } from '../settings/settings.js';
+import { InternalError } from './error.js';
 
 type PotentialFile = {
   filePath: string;
@@ -66,27 +67,38 @@ export async function getFiles(
   );
 }
 
+let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
+export function isFileIgnored(filePath: string) {
+  if (!ignores) {
+    throw new InternalError(`isFileIgnored called before ignores initialized`);
+  }
+  for (const { dir, ig } of ignores) {
+    // Ignore file paths are relative to the directory the ignore file is in,
+    // and needs files passed in to check to also be relative to that same
+    // directory, so we get the relative path to the ignore file directory
+    if (filePath.startsWith(dir) && ig.ignores(relative(dir, filePath))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function buildFileList(
   rootDir: string,
   ignorePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
   // Create the ignore instances for use in filtering
-  const ignores = getIgnores(rootDir, ignorePatterns, potentialFiles);
+  initializeIgnores(rootDir, ignorePatterns, potentialFiles);
 
   // Filter out ignored files
   const files: Array<{
     filePath: string;
     latestUpdatedAt: number;
   }> = [];
-  outer: for (const { filePath, stats } of potentialFiles) {
-    for (const { dir, ig } of ignores) {
-      // Ignore file paths are relative to the directory the ignore file is in,
-      // and needs files passed in to check to also be relative to that same
-      // directory, so we get the relative path to the ignore file directory
-      if (filePath.startsWith(dir) && ig.ignores(relative(dir, filePath))) {
-        continue outer;
-      }
+  for (const { filePath, stats } of potentialFiles) {
+    if (isFileIgnored(filePath)) {
+      continue;
     }
     files.push({
       filePath,
@@ -97,14 +109,13 @@ function buildFileList(
   return files;
 }
 
-let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
-function getIgnores(
+function initializeIgnores(
   rootDir: string,
   ignorePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
   if (ignores) {
-    return ignores;
+    return;
   }
 
   // First, we need to traverse up the folder tree until we find the git root
@@ -155,6 +166,4 @@ function getIgnores(
       ig: ignore().add(i.contents),
     })),
   ];
-
-  return ignores;
 }

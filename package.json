@@ -5,7 +5,7 @@
   "main": "dist/plugin.js",
   "type": "module",
   "scripts": {
-    "lint": "eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts}\"",
+    "lint": "eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts,js,jsx,mjs}\"",
     "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js src",
