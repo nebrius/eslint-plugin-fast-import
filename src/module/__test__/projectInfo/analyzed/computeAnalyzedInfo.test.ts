@@ -1,9 +1,9 @@
 import { join } from 'path';
-import type { StrippedAnalyzedProjectInfo } from '../../../../__test__/util';
-import { stripNodesFromAnalyzedInfo } from '../../../../__test__/util';
-import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo';
-import { computeResolvedInfo } from '../../../computeResolvedInfo';
-import { computeBaseInfo } from '../../../computeBaseInfo';
+import type { StrippedAnalyzedProjectInfo } from '../../../../__test__/util.js';
+import { stripNodesFromAnalyzedInfo } from '../../../../__test__/util.js';
+import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
+import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
+import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { getDirname } from 'cross-dirname';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');

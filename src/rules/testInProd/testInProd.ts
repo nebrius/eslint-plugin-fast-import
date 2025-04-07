@@ -1,4 +1,4 @@
-import { createRule, getESMInfo, isNonTestFile } from '../util';
+import { createRule, getESMInfo, isNonTestFile } from '../util.js';
 
 export const noTestImportsInProd = createRule({
   name: 'no-test-imports-in-prod',

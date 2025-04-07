@@ -1,10 +1,10 @@
 import type { RequiredDeep } from 'type-fest';
-import { getTypeScriptSettings } from './typescript';
-import { debug, error } from '../util/logging';
-import type { GenericContext } from '../types/context';
+import { getTypeScriptSettings } from './typescript.js';
+import { debug, error } from '../util/logging.js';
+import type { GenericContext } from '../types/context.js';
 import { isAbsolute, join, resolve } from 'node:path';
-import { getUserSettings, type Settings } from './user';
-import { getEslintConfigDir } from './util';
+import { getUserSettings, type Settings } from './user.js';
+import { getEslintConfigDir } from './util.js';
 import { existsSync } from 'node:fs';
 
 export type ParsedSettings = RequiredDeep<Settings>;

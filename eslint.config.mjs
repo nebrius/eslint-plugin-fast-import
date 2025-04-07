@@ -8,7 +8,8 @@ import globals from 'globals';
 import { getDirname } from 'cross-dirname';
 import { includeIgnoreFile } from '@eslint/compat';
 import { join } from 'node:path';
-import fastEsm from './dist/index.js';
+import fastEsm from './dist/plugin.js';
+import { globalIgnores } from 'eslint/config';
 
 const compat = new FlatCompat({
   baseDirectory: getDirname(),
@@ -18,6 +19,7 @@ const compat = new FlatCompat({
 
 export default tseslint.config(
   includeIgnoreFile(join(getDirname(), '.gitignore')),
+  globalIgnores(['src/**/__test__/**/project/*']),
   {
     settings: {
       'import/resolver-next': [
@@ -28,7 +30,7 @@ export default tseslint.config(
       'fast-esm': {
         entryPoints: [
           {
-            file: 'index.ts',
+            file: 'plugin.ts',
             symbol: 'default',
           },
         ],
@@ -40,7 +42,7 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
-  fastEsm.default.configs.recommended,
+  fastEsm.configs.recommended,
   eslintPluginPrettierRecommended,
   tseslint.configs.strictTypeChecked,
   {
@@ -61,7 +63,7 @@ export default tseslint.config(
   },
   {
     // disable type-aware linting on JS files
-    files: ['**/*.{js,jsx,mjs}'],
+    files: ['**/*..jsx,mjs}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
   ...compat.extends('eslint:recommended'),
@@ -72,9 +74,5 @@ export default tseslint.config(
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
     },
-  },
-  {
-    files: ['src/**/__test__/**/*'],
-    ...fastEsm.default.configs.off,
   }
 );

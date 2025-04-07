@@ -1,13 +1,13 @@
-import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base';
+import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base.js';
 import type {
   Resolved,
   ResolvedCodeFileDetails,
   ResolvedProjectInfo,
-} from '../types/resolved';
-import { InternalError } from '../util/error';
+} from '../types/resolved.js';
+import { InternalError } from '../util/error.js';
 import { builtinModules } from 'node:module';
 import { basename, dirname, extname, join, resolve } from 'node:path';
-import { isCodeFile } from '../util/code';
+import { isCodeFile } from '../util/code.js';
 
 export function computeResolvedInfo(
   baseProjectInfo: BaseProjectInfo

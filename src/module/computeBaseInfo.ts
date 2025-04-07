@@ -2,13 +2,13 @@ import type {
   BaseBarrelImport,
   BaseCodeFileDetails,
   BaseProjectInfo,
-} from '../types/base';
-import type { ExportDeclaration } from './util';
-import { parseFile, traverse } from './util';
+} from '../types/base.js';
+import type { ExportDeclaration } from './util.js';
+import { parseFile, traverse } from './util.js';
 import { TSESTree } from '@typescript-eslint/utils';
-import { InternalError } from '../util/error';
-import { isCodeFile } from '../util/code';
-import { getFilesSync } from '../util/files';
+import { InternalError } from '../util/error.js';
+import { isCodeFile } from '../util/code.js';
+import { getFilesSync } from '../util/files.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 

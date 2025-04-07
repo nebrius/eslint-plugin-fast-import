@@ -1,10 +1,10 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noEntryPointImports } from '..';
+import { noEntryPointImports } from '../entryPoint.js';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 import { readFileSync } from 'node:fs';
-import { _resetSettings } from '../../../settings';
-import { _resetProjectInfo } from '../../../module';
+import { _resetSettings } from '../../../settings/settings.js';
+import { _resetProjectInfo } from '../../../module/module.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

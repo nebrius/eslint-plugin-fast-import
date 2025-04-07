@@ -2,28 +2,28 @@ import type {
   AnalyzedImport,
   AnalyzedProjectInfo,
   AnalyzedReexport,
-} from '../types/analyzed';
-import { computeAnalyzedInfo } from './computeAnalyzedInfo';
+} from '../types/analyzed.js';
+import { computeAnalyzedInfo } from './computeAnalyzedInfo.js';
 import {
   addResolvedInfoForFile,
   computeFolderTree,
   computeResolvedInfo,
   deleteResolvedInfoForFile,
   updateResolvedInfoForFile,
-} from './computeResolvedInfo';
+} from './computeResolvedInfo.js';
 import {
   addBaseInfoForFile,
   computeBaseInfo,
   deleteBaseInfoForFile,
   updateBaseInfoForFile,
-} from './computeBaseInfo';
-import { InternalError } from '../util/error';
-import type { BaseProjectInfo } from '../types/base';
-import type { ResolvedProjectInfo } from '../types/resolved';
-import type { ParsedSettings } from '../settings';
-import { debug, formatMilliseconds } from '../util/logging';
+} from './computeBaseInfo.js';
+import { InternalError } from '../util/error.js';
+import type { BaseProjectInfo } from '../types/base.js';
+import type { ResolvedProjectInfo } from '../types/resolved.js';
+import type { ParsedSettings } from '../settings/settings.js';
+import { debug, formatMilliseconds } from '../util/logging.js';
 import type { TSESTree } from '@typescript-eslint/utils';
-import { parseFile } from './util';
+import { parseFile } from './util.js';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;

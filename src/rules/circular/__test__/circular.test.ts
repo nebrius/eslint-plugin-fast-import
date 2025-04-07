@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noCircularImports, _resetCircularMap } from '..';
+import { noCircularImports, _resetCircularMap } from '../circular.js';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 

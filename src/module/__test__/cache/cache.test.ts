@@ -1,8 +1,12 @@
 import { getDirname } from 'cross-dirname';
 import { join } from 'node:path';
-import { getProjectInfo, initializeProject, updateCacheForFile } from '../..';
-import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util';
-import { stripNodesFromAnalyzedInfo } from '../../../__test__/util';
+import {
+  getProjectInfo,
+  initializeProject,
+  updateCacheForFile,
+} from '../../module.js';
+import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util.js';
+import { stripNodesFromAnalyzedInfo } from '../../../__test__/util.js';
 import { parse } from '@typescript-eslint/typescript-estree';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');

@@ -1,7 +1,7 @@
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
-import { createRule, getESMInfo, isNonTestFile } from '../util';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { createRule, getESMInfo, isNonTestFile } from '../util.js';
 
 const schema = z
   .strictObject({

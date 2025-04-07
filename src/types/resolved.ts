@@ -7,7 +7,7 @@ import type {
   BaseProjectInfo,
   BaseSingleImport,
   BaseSingleReexport,
-} from './base';
+} from './base.js';
 
 export type Resolved =
   | {

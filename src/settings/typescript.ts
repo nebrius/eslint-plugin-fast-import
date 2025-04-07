@@ -1,9 +1,9 @@
 import ts from 'typescript';
 import { readFileSync } from 'node:fs';
-import { warn } from '../util/logging';
-import type { GenericContext } from '../types/context';
+import { warn } from '../util/logging.js';
+import type { GenericContext } from '../types/context.js';
 import { dirname, join } from 'node:path';
-import type { Settings } from './user';
+import type { Settings } from './user.js';
 
 export function getTypeScriptSettings(context: GenericContext): Settings {
   // Read in the file

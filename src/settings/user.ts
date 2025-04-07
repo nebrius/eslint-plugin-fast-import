@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { GenericContext } from '../types/context';
-import { error, setVerbose } from '../util/logging';
+import type { GenericContext } from '../types/context.js';
+import { error, setVerbose } from '../util/logging.js';
 
 const settingsSchema = z.strictObject({
   rootDir: z.string().optional(),

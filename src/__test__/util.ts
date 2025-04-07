@@ -5,7 +5,7 @@ import type {
   AnalyzedOtherFileDetails,
   AnalyzedProjectInfo,
   AnalyzedReexport,
-} from '../types/analyzed';
+} from '../types/analyzed.js';
 import type {
   BaseProjectInfo,
   BaseExport,
@@ -13,7 +13,7 @@ import type {
   BaseOtherFileDetails,
   BaseReexport,
   BaseCodeFileDetails,
-} from '../types/base';
+} from '../types/base.js';
 import type {
   ResolvedCodeFileDetails,
   ResolvedExport,
@@ -21,7 +21,7 @@ import type {
   ResolvedOtherFileDetails,
   ResolvedProjectInfo,
   ResolvedReexport,
-} from '../types/resolved';
+} from '../types/resolved.js';
 
 type StrippedFileDetails<
   OtherFileDetails extends BaseOtherFileDetails,

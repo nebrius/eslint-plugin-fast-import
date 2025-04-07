@@ -1,14 +1,8 @@
 import { ESLintUtils } from '@typescript-eslint/utils';
-import type { GenericContext } from '../types/context';
-import {
-  getProjectInfo,
-  initializeProject,
-  updateCacheFromFileSystem,
-  updateCacheForFile,
-} from '../module';
-import type { ParsedSettings } from '../settings';
-import { getSettings } from '../settings';
-import { getFiles } from '../util/files';
+import type { GenericContext } from '../types/context.js';
+import { getFiles } from '../util/files.js';
+import { getSettings, ParsedSettings } from '../settings/settings.js';
+import { getProjectInfo, initializeProject, updateCacheForFile, updateCacheFromFileSystem } from '../module/module.js';
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>

@@ -1,7 +1,7 @@
 import { dirname, join, resolve } from 'node:path';
-import type { GenericContext } from '../types/context';
+import type { GenericContext } from '../types/context.js';
 import { readdirSync } from 'node:fs';
-import { error } from '../util/logging';
+import { error } from '../util/logging.js';
 
 let eslintConfigDir: string | undefined;
 export function getEslintConfigDir(context: GenericContext) {

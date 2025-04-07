@@ -1,7 +1,7 @@
 import { join } from 'path';
-import { computeBaseInfo } from '../../../computeBaseInfo';
-import type { StrippedBaseProjectInfo } from '../../../../__test__/util';
-import { stripNodesFromBaseInfo } from '../../../../__test__/util';
+import { computeBaseInfo } from '../../../computeBaseInfo.js';
+import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
+import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
 import { getDirname } from 'cross-dirname';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');

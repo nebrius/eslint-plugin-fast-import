@@ -7,7 +7,7 @@ import type {
   ResolvedProjectInfo,
   ResolvedSingleImport,
   ResolvedSingleReexport,
-} from './resolved';
+} from './resolved.js';
 
 export type AnalyzedImportBase =
   | {

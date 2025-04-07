@@ -1,6 +1,6 @@
-import { createRule, getESMInfo, registerUpdateListener } from '../util';
-import type { AnalyzedProjectInfo } from '../../types/analyzed';
-import { InternalError } from '../../util/error';
+import { createRule, getESMInfo, registerUpdateListener } from '../util.js';
+import type { AnalyzedProjectInfo } from '../../types/analyzed.js';
+import { InternalError } from '../../util/error.js';
 
 type Options = [];
 type MessageIds = 'noCircularImports';

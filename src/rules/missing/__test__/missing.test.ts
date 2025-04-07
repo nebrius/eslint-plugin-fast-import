@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noMissingImports } from '..';
+import { noMissingImports } from '../missing.js';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 

@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
-import { noUnusedExports } from './rules/unused';
-import { noCircularImports } from './rules/circular';
-import { noEntryPointImports } from './rules/entryPoint';
-import { noMissingImports } from './rules/missing';
-import { noExternalBarrelReexports } from './rules/externalBarrelReexports';
-import { noTestImportsInProd } from './rules/testInProd';
+import { noUnusedExports } from './rules/unused/unused.js';
+import { noCircularImports } from './rules/circular/circular.js';
+import { noEntryPointImports } from './rules/entryPoint/entryPoint.js';
+import { noMissingImports } from './rules/missing/missing.js';
+import { noExternalBarrelReexports } from './rules/externalBarrelReexports/externalBarrelReexports.js';
+import { noTestImportsInProd } from './rules/testInProd/testInProd.js';
 
 const { name, version } = JSON.parse(
   readFileSync(join(getDirname(), '..', 'package.json'), 'utf8')

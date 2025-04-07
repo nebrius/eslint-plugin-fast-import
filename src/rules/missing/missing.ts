@@ -1,4 +1,4 @@
-import { createRule, getESMInfo } from '../util';
+import { createRule, getESMInfo } from '../util.js';
 
 export const noMissingImports = createRule({
   name: 'no-missing-imports',

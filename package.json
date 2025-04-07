@@ -2,7 +2,8 @@
   "name": "eslint-plugin-fast-esm",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/plugin.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts}\"",
     "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
