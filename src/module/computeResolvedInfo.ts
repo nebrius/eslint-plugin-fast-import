@@ -347,7 +347,7 @@ function resolveModuleSpecifier({
   function resolveFirstPartyImport(absolutishFilePath: string) {
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
     const segments = absolutishFilePath.split('/').filter((s) => s);
-    const lastSegment = segments.pop();
+    let lastSegment = segments.pop();
     const folderSegments = [...segments];
     if (!lastSegment) {
       throw new InternalError(
@@ -365,7 +365,6 @@ function resolveModuleSpecifier({
         currentFolderTreeNode.folders[currentFolderSegment];
 
       // If there is no folder segment present, then that means this is a missing import
-
       if (!currentFolderTreeNode) {
         return undefined;
       }
@@ -379,6 +378,13 @@ function resolveModuleSpecifier({
     // `import { foo } from './foo.ts'` => 'foo.ts'
     if (currentFolderTreeNode.files[lastSegment]) {
       return computeFilePath(lastSegment);
+    }
+
+    // Check the special edge case of importing a file in TypeScript with
+    // nodenext resolution, where the extension has `.js`, not `.ts`. To support
+    // this edge case, we just strip off the .js since we support that anways
+    if (lastSegment.endsWith('.js')) {
+      lastSegment = lastSegment.slice(0, lastSegment.length - 3);
     }
 
     function findFileWithExtension(basename: string) {
