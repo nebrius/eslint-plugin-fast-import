@@ -2,7 +2,7 @@ import type { RequiredDeep } from 'type-fest';
 import { getTypeScriptSettings } from './typescript.js';
 import { debug, error } from '../util/logging.js';
 import type { GenericContext } from '../types/context.js';
-import { isAbsolute, join, resolve } from 'node:path';
+import { isAbsolute, join, resolve, sep } from 'node:path';
 import { getUserSettings, type Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 import { existsSync } from 'node:fs';
@@ -114,8 +114,24 @@ export function getSettings(context: GenericContext): ParsedSettings {
     });
   }
 
-  const mode = mergedSettings.mode ?? DEFAULT_MODE;
+  const mode =
+    mergedSettings.mode !== 'auto' && mergedSettings.mode !== undefined
+      ? mergedSettings.mode
+      : DEFAULT_MODE;
   debug(`Running in ${mode} mode`);
+  debug(`Setting root dir to ${rootDir}`);
+  if (!Object.keys(parsedAlias).length) {
+    debug(`No aliases defined`);
+  } else {
+    debug(`Aliases:`);
+    for (const [symbol, path] of Object.entries(parsedAlias)) {
+      debug(`  ${symbol}: ${path}`);
+    }
+  }
+  debug(`Entry points:`);
+  for (const { file, symbol } of parsedEntryPoints) {
+    debug(`  ${file.replace(eslintConfigDir + sep, '')}: ${symbol}`);
+  }
 
   const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
     dir: eslintConfigDir,
@@ -129,10 +145,7 @@ export function getSettings(context: GenericContext): ParsedSettings {
     entryPoints: parsedEntryPoints,
     ignorePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
-    mode:
-      mergedSettings.mode !== 'auto' && mergedSettings.mode !== undefined
-        ? mergedSettings.mode
-        : DEFAULT_MODE,
+    mode,
   };
   return settings;
 }
