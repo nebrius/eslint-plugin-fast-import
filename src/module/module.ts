@@ -24,6 +24,7 @@ import type { ParsedSettings } from '../settings/settings.js';
 import { debug, formatMilliseconds } from '../util/logging.js';
 import type { TSESTree } from '@typescript-eslint/utils';
 import { parseFile } from './util.js';
+import { TSError } from '@typescript-eslint/typescript-estree';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
@@ -138,13 +139,22 @@ export function updateCacheFromFileSystem(
     // and previously linted while it was only in memory
     if (!baseProjectInfo.files.has(filePath)) {
       numAdditions++;
-      addBaseInfoForFile(
-        {
-          ...parseFile(filePath),
-          isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
-        },
-        baseProjectInfo
-      );
+      try {
+        addBaseInfoForFile(
+          {
+            ...parseFile(filePath),
+            isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+          },
+          baseProjectInfo
+        );
+      } catch (e) {
+        // If we failed to parse due to a syntax error, bail silently since this
+        // is due to user-error and we don't want to clutter up the output
+        if (e instanceof TSError) {
+          return;
+        }
+        throw e;
+      }
     }
   }
 
@@ -167,13 +177,22 @@ export function updateCacheFromFileSystem(
         previousFileInfo.lastUpdatedAt < latestUpdatedAt)
     ) {
       numModified++;
-      updateBaseInfoForFile(
-        {
-          ...parseFile(filePath),
-          isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
-        },
-        baseProjectInfo
-      );
+      try {
+        updateBaseInfoForFile(
+          {
+            ...parseFile(filePath),
+            isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+          },
+          baseProjectInfo
+        );
+      } catch (e) {
+        // If we failed to parse due to a syntax error, bail silently since this
+        // is due to user-error and we don't want to clutter up the output
+        if (e instanceof TSError) {
+          return;
+        }
+        throw e;
+      }
       updateResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
     }
   }
