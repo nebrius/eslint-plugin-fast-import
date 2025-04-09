@@ -12,8 +12,13 @@ export type IgnorePattern = {
   contents: string;
 };
 
-export type ParsedSettings = Omit<RequiredDeep<Settings>, 'ignorePatterns'> & {
+export type ParsedSettings = Omit<
+  RequiredDeep<Settings>,
+  'ignorePatterns' | 'alias'
+> & {
   ignorePatterns: IgnorePattern[];
+  wildcardAliases: Record<string, string>;
+  fixedAliases: Record<string, string>;
 };
 
 function argsInclude(strs: string[]) {
@@ -79,16 +84,38 @@ export function getSettings(context: GenericContext): ParsedSettings {
   }
 
   // Clean up any aliases
-  const parsedAlias: ParsedSettings['alias'] = {};
+  const wildcardAliases: ParsedSettings['wildcardAliases'] = {};
+  const fixedAliases: ParsedSettings['fixedAliases'] = {};
   for (let [symbol, path] of Object.entries(alias)) {
+    // Compute the absolute version of the path if needed (TypeScript does this
+    // already since it has different resolution rules)
+    if (!isAbsolute(path)) {
+      path = resolve(eslintConfigDir, path);
+    }
     if (symbol.endsWith('/')) {
       symbol = symbol.slice(0, -1);
     }
-    if (!isAbsolute(path)) {
-      path = resolve(join(getEslintConfigDir(context), path));
+
+    // Filter out paths that don't resolve to files inside rootDir, since they're
+    // either third party or doing something not supported
+    if (!path.startsWith(rootDir)) {
+      continue;
     }
-    path = resolve(join(rootDir, path));
-    parsedAlias[symbol] = path;
+
+    // Determine if this is a wildcard or fixed alias, and validate consistency
+    if (symbol.endsWith('/*')) {
+      if (!path.endsWith('/*')) {
+        error(`Alias path ${path} must end with "/*" when ${symbol} does`);
+      }
+      wildcardAliases[symbol.replace(/\*$/, '')] = path.replace(/\*$/, '');
+    } else {
+      if (path.endsWith('/*')) {
+        error(
+          `Alias path ${path} must not end with "/*" when ${symbol} does not`
+        );
+      }
+      fixedAliases[symbol] = path;
+    }
   }
 
   // Clean up any entry points
@@ -120,11 +147,19 @@ export function getSettings(context: GenericContext): ParsedSettings {
       : DEFAULT_MODE;
   debug(`Running in ${mode} mode`);
   debug(`Setting root dir to ${rootDir}`);
-  if (!Object.keys(parsedAlias).length) {
-    debug(`No aliases defined`);
+  if (!Object.keys(wildcardAliases).length) {
+    debug(`No wildcard aliases defined`);
   } else {
-    debug(`Aliases:`);
-    for (const [symbol, path] of Object.entries(parsedAlias)) {
+    debug(`Wildcard aliases:`);
+    for (const [symbol, path] of Object.entries(wildcardAliases)) {
+      debug(`  ${symbol}: ${path}`);
+    }
+  }
+  if (!Object.keys(fixedAliases).length) {
+    debug(`No fixed aliases defined`);
+  } else {
+    debug(`Fixed aliases:`);
+    for (const [symbol, path] of Object.entries(fixedAliases)) {
       debug(`  ${symbol}: ${path}`);
     }
   }
@@ -141,7 +176,8 @@ export function getSettings(context: GenericContext): ParsedSettings {
   // Apply defaults and save to the settings cache
   settings = {
     rootDir,
-    alias: parsedAlias,
+    wildcardAliases,
+    fixedAliases,
     entryPoints: parsedEntryPoints,
     ignorePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,

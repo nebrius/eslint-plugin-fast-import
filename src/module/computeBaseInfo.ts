@@ -9,14 +9,14 @@ import { TSESTree } from '@typescript-eslint/utils';
 import { InternalError } from '../util/error.js';
 import { isCodeFile } from '../util/code.js';
 import { getFilesSync } from '../util/files.js';
-import type { IgnorePattern } from '../settings/settings.js';
+import type { ParsedSettings } from '../settings/settings.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
-type ComputeBaseInfoOptions = {
-  rootDir: string;
-  alias?: Record<string, string>;
-  ignorePatterns: IgnorePattern[];
+type ComputeBaseInfoOptions = Pick<
+  ParsedSettings,
+  'rootDir' | 'fixedAliases' | 'wildcardAliases' | 'ignorePatterns'
+> & {
   isEntryPointCheck?: IsEntryPointCheck;
 };
 
@@ -25,14 +25,16 @@ type ComputeBaseInfoOptions = {
  */
 export function computeBaseInfo({
   rootDir,
-  alias = {},
+  fixedAliases,
+  wildcardAliases,
   ignorePatterns,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
     files: new Map(),
     rootDir,
-    alias,
+    fixedAliases,
+    wildcardAliases,
   };
 
   const potentialFiles = getFilesSync(rootDir, ignorePatterns);

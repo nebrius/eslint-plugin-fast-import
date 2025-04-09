@@ -325,14 +325,16 @@ const EXPECTED: StrippedBaseProjectInfo = {
       },
     ],
   ]),
-  alias: { '@': './' },
+  wildcardAliases: {},
+  fixedAliases: {},
   rootDir: TEST_PROJECT_DIR,
 };
 
 it('Computes base info', () => {
   const info = computeBaseInfo({
     rootDir: TEST_PROJECT_DIR,
-    alias: { '@': './' },
+    wildcardAliases: {},
+    fixedAliases: {},
     ignorePatterns: [],
     isEntryPointCheck: () => false,
   });

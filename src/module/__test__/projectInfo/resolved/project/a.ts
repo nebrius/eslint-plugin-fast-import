@@ -11,6 +11,8 @@ import { join } from 'path';
 import { resolve } from 'node:path';
 import { parser } from 'typescript-eslint';
 import { index } from '.';
+/* @ts-expect-error this isn't configured in tsconfig, but works in this project */
+import { b1 } from '@alias';
 
 console.log(b1);
 console.log(data);

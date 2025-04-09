@@ -2,7 +2,7 @@ import ts from 'typescript';
 import { readFileSync } from 'node:fs';
 import { warn } from '../util/logging.js';
 import type { GenericContext } from '../types/context.js';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import type { Settings } from './user.js';
 
 export function getTypeScriptSettings(context: GenericContext): Settings {
@@ -47,11 +47,46 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
   const rootDir = config.config?.compilerOptions?.rootDir as string | undefined;
   const absoluteRootDir = rootDir
     ? join(dirname(configPath), rootDir)
-    : undefined;
+    : dirname(configPath);
 
-  // TODO: read in `paths` property and resolve here
+  const baseUrl =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (config.config?.compilerOptions?.baseUrl as string | undefined) ??
+    dirname(configPath);
+
+  const paths =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (config.config?.compilerOptions?.paths as
+      | Record<string, string[]>
+      | undefined) ?? {};
+
+  const parsedPaths: Record<string, string> = {};
+  for (const [symbol, path] of Object.entries(paths)) {
+    if (path.length !== 1) {
+      warn(
+        `fast-import only supports tsconfig.compilerOptions.paths entries with exactly one path. ${symbol} will be ignored.`
+      );
+      continue;
+    }
+    const pathEntry = path[0];
+    if (!pathEntry.startsWith('./')) {
+      warn(
+        `fast-import only supports tsconfig.compilerOptions.paths that start with "./". ${symbol} will be ignored.`
+      );
+    }
+
+    const absolutePathEntry = resolve(baseUrl, pathEntry);
+    if (
+      !absolutePathEntry.startsWith(absoluteRootDir) ||
+      absolutePathEntry.includes('node_modules')
+    ) {
+      continue;
+    }
+
+    parsedPaths[symbol] = absolutePathEntry;
+  }
 
   // Fallback to the directory containing tsconfig.json if rootDir isn't
   // supplied (like TypeScript itself does)
-  return { rootDir: absoluteRootDir ?? dirname(configPath) };
+  return { rootDir: absoluteRootDir, alias: parsedPaths };
 }

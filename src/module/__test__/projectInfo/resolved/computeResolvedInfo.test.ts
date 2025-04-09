@@ -121,7 +121,31 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             moduleType: 'firstPartyCode',
             resolvedModulePath: FILE_INDEX,
           },
+          {
+            importAlias: 'b1',
+            importName: 'b1',
+            importType: 'single',
+            isTypeImport: false,
+            moduleSpecifier: '@alias',
+            moduleType: 'firstPartyCode',
+            resolvedModulePath: FILE_B,
+          },
         ],
+        reexports: [],
+      },
+    ],
+    [
+      FILE_INDEX,
+      {
+        exports: [
+          {
+            exportName: 'index',
+            isEntryPoint: false,
+            isTypeExport: false,
+          },
+        ],
+        fileType: 'code',
+        imports: [],
         reexports: [],
       },
     ],
@@ -256,23 +280,10 @@ const EXPECTED: StrippedResolvedProjectInfo = {
         reexports: [],
       },
     ],
-    [
-      FILE_INDEX,
-      {
-        exports: [
-          {
-            exportName: 'index',
-            isEntryPoint: false,
-            isTypeExport: false,
-          },
-        ],
-        fileType: 'code',
-        imports: [],
-        reexports: [],
-      },
-    ],
   ]),
-  alias: { '@': './' },
+  // This takes in the already formatted version, hence why we join() here
+  wildcardAliases: { '@/': TEST_PROJECT_DIR },
+  fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
   rootDir: TEST_PROJECT_DIR,
 };
 
@@ -280,7 +291,9 @@ it('Computes resolved into', () => {
   const info = computeResolvedInfo(
     computeBaseInfo({
       rootDir: TEST_PROJECT_DIR,
-      alias: { '@': './' },
+      // This takes in the already formatted version, hence why we join() here
+      wildcardAliases: { '@/': TEST_PROJECT_DIR },
+      fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
       ignorePatterns: [],
       isEntryPointCheck: () => false,
     })

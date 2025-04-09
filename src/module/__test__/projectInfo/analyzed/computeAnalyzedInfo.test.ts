@@ -342,7 +342,8 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
     ],
   ]),
   rootDir: TEST_PROJECT_DIR,
-  alias: { '@': './' },
+  wildcardAliases: {},
+  fixedAliases: {},
 };
 
 it('Computes base info', () => {
@@ -350,7 +351,8 @@ it('Computes base info', () => {
     computeResolvedInfo(
       computeBaseInfo({
         rootDir: TEST_PROJECT_DIR,
-        alias: { '@': './' },
+        wildcardAliases: {},
+        fixedAliases: {},
         ignorePatterns: [],
         isEntryPointCheck: (filePath, symbolName) =>
           filePath === FILE_A && symbolName === 'ASourceCode',

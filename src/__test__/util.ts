@@ -80,7 +80,8 @@ export type StrippedAnalyzedProjectInfo = Omit<AnalyzedProjectInfo, 'files'> & {
 export function stripNodesFromBaseInfo(info: BaseProjectInfo) {
   const clonedInfo: StrippedBaseProjectInfo = {
     rootDir: info.rootDir,
-    alias: info.alias,
+    wildcardAliases: info.wildcardAliases,
+    fixedAliases: info.fixedAliases,
     files: new Map(),
   };
   for (const [filePath, fileDetails] of info.files) {

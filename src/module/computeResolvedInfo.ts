@@ -480,13 +480,24 @@ function resolveModuleSpecifier({
     return formatResolvedEntry(resolvedModulePath);
   }
 
-  // Check if this path starts with the root import alias, which means its first party
-  for (const [alias, path] of Object.entries(baseProjectInfo.alias)) {
-    if (moduleSpecifier.startsWith(`${alias}/`)) {
+  // Check if this path starts with the a wildcard alias, which means its first party
+  for (const [alias, path] of Object.entries(baseProjectInfo.wildcardAliases)) {
+    if (moduleSpecifier.startsWith(alias)) {
+      let absolutishPath = path.replace(baseProjectInfo.rootDir, '');
+      if (absolutishPath.startsWith('/')) {
+        absolutishPath = absolutishPath.substring(1);
+      }
       const resolvedModulePath = resolveFirstPartyImport(
-        join(moduleSpecifier.replace(`${alias}/`, path).replace('./', ''))
+        join(moduleSpecifier.replace(alias, absolutishPath))
       );
       return formatResolvedEntry(resolvedModulePath);
+    }
+  }
+
+  // Check if this path is exactly a fixed alias, which means its first party
+  for (const [alias, path] of Object.entries(baseProjectInfo.fixedAliases)) {
+    if (moduleSpecifier === alias) {
+      return formatResolvedEntry(path);
     }
   }
 

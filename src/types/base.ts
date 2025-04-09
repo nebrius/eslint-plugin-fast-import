@@ -1,3 +1,4 @@
+import type { ParsedSettings } from '../settings/settings.js';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 type Base = {
@@ -268,8 +269,13 @@ export type BaseProjectInfo = {
   rootDir: string;
 
   /**
-   * If defined, an alias for referencing first party imports absolutely. For example, Next.js defaults to `@`, meaning
+   * An alias for referencing first party imports absolutely.
+   */
+  fixedAliases: ParsedSettings['fixedAliases'];
+
+  /**
+   * For example, Next.js defaults to `@`, meaning
    * a file at `src/components/foo` can be imported anywhere with `@/components/foo`
    */
-  alias: Record<string, string>;
+  wildcardAliases: ParsedSettings['wildcardAliases'];
 };

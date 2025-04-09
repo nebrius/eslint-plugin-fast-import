@@ -9,12 +9,13 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": [
+        "--experimental-vm-modules",
         "--inspect-brk",
         "${workspaceRoot}/node_modules/.bin/jest",
         "--runInBand"
       ],
       "args": [
-        "src/**/*"
+        "src"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"

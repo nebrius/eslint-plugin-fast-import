@@ -20,7 +20,8 @@ export type Two = string;
 it('Updates cache when an unused export is added', () => {
   const settings = {
     rootDir: TEST_PROJECT_DIR,
-    alias: { '@': './' },
+    wildcardAliases: {},
+    fixedAliases: {},
     entryPoints: [],
     ignorePatterns: [],
     mode: 'fix' as const,
@@ -74,7 +75,8 @@ it('Updates cache when an unused export is added', () => {
       ],
     ]),
     rootDir: TEST_PROJECT_DIR,
-    alias: { '@': './' },
+    wildcardAliases: {},
+    fixedAliases: {},
   };
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected1);
 
@@ -144,7 +146,8 @@ it('Updates cache when an unused export is added', () => {
       ],
     ]),
     rootDir: TEST_PROJECT_DIR,
-    alias: { '@': './' },
+    wildcardAliases: {},
+    fixedAliases: {},
   };
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
 });
