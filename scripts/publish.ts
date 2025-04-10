@@ -73,7 +73,7 @@ if (DRY_RUN) {
 // git tag
 console.log(`Tagging git with version ${version}`);
 if (!DRY_RUN) {
-  await git.addTag(version);
+  await git.addAnnotatedTag(version, `Published v${version} to npm`);
 }
 
 // git push
