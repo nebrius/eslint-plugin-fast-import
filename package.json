@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "1.0.0-beta2",
+  "version": "1.0.0-beta3",
   "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
   "keywords": [
     "eslint",
@@ -14,7 +14,8 @@
     "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js src",
-    "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\""
+    "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
+    "publish-package": "node --experimental-strip-types scripts/publish.ts"
   },
   "author": "Bryan Hughes <bryan@nebri.us>",
   "license": "MIT",
@@ -37,6 +38,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "global": "^4.4.0",
     "prettier": "^3.4.2",
+    "simple-git": "^3.27.0",
     "ts-jest": "^29.2.5",
     "ts-jest-resolver": "^2.0.1",
     "ts-node": "^10.9.2",
