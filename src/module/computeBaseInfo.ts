@@ -10,6 +10,8 @@ import { InternalError } from '../util/error.js';
 import { isCodeFile } from '../util/code.js';
 import { getFilesSync } from '../util/files.js';
 import type { ParsedSettings } from '../settings/settings.js';
+import { TSError } from '@typescript-eslint/typescript-estree';
+import { debug } from '../util/logging.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -41,13 +43,23 @@ export function computeBaseInfo({
 
   for (const { filePath } of potentialFiles) {
     if (isCodeFile(filePath)) {
-      info.files.set(
-        filePath,
-        computeFileDetails({
-          ...parseFile(filePath),
-          isEntryPointCheck,
-        })
-      );
+      try {
+        info.files.set(
+          filePath,
+          computeFileDetails({
+            ...parseFile(filePath),
+            isEntryPointCheck,
+          })
+        );
+      } catch (e) {
+        // If we failed to parse due to a syntax error, fail silently so we can
+        // continue parsing and not fail linting on all files
+        if (e instanceof TSError) {
+          debug(`Could not parse ${filePath}, file will be ignored`);
+          continue;
+        }
+        throw e;
+      }
     } else {
       info.files.set(filePath, {
         fileType: 'other',

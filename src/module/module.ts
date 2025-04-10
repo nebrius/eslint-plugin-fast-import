@@ -151,6 +151,7 @@ export function updateCacheFromFileSystem(
         // If we failed to parse due to a syntax error, bail silently since this
         // is due to user-error and we don't want to clutter up the output
         if (e instanceof TSError) {
+          debug(`Could not parse ${filePath}, reusing previously parsed info`);
           return;
         }
         throw e;
@@ -189,6 +190,7 @@ export function updateCacheFromFileSystem(
         // If we failed to parse due to a syntax error, bail silently since this
         // is due to user-error and we don't want to clutter up the output
         if (e instanceof TSError) {
+          debug(`Could not parse ${filePath}, reusing previously parsed info`);
           return;
         }
         throw e;
