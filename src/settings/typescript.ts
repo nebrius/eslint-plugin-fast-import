@@ -4,11 +4,12 @@ import { warn } from '../util/logging.js';
 import type { GenericContext } from '../types/context.js';
 import { dirname, join, resolve } from 'node:path';
 import type { Settings } from './user.js';
+import { getEslintConfigDir } from './util.js';
 
 export function getTypeScriptSettings(context: GenericContext): Settings {
   // Read in the file
   const configPath = ts.findConfigFile(
-    dirname(context.filename),
+    getEslintConfigDir(context.filename),
     ts.sys.fileExists.bind(ts.sys),
     'tsconfig.json'
   );

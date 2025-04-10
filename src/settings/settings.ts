@@ -50,7 +50,7 @@ export function getSettings(context: GenericContext): ParsedSettings {
     return settings;
   }
 
-  const eslintConfigDir = getEslintConfigDir(context);
+  const eslintConfigDir = getEslintConfigDir(context.filename);
 
   // Get TypeScript supplied settings
   const typeScriptSettings = getTypeScriptSettings(context);
@@ -60,6 +60,10 @@ export function getSettings(context: GenericContext): ParsedSettings {
     ...userSettings,
   };
 
+  // We can't call debug until after parsing user settings, so we log this here,
+  // even if we could do it sooner.
+  debug(`Launched via "${process.argv[0]}"`);
+
   let { rootDir } = mergedSettings;
   const { alias = {}, entryPoints = [] } = mergedSettings;
 
@@ -67,7 +71,7 @@ export function getSettings(context: GenericContext): ParsedSettings {
   // file directory. If we do have it but it's a relative path, make it absolute
   // by joining+resolving with the ESLint config file directory.
   if (!rootDir || !isAbsolute(rootDir)) {
-    const eslintConfigDir = getEslintConfigDir(context);
+    const eslintConfigDir = getEslintConfigDir(context.filename);
     if (!rootDir) {
       rootDir = eslintConfigDir;
     } else {
@@ -126,11 +130,11 @@ export function getSettings(context: GenericContext): ParsedSettings {
     }
     if (isAbsolute(file)) {
       error(
-        `Invalid entry point file "${file}". Entry point files must be relative to rootDir, not absolute`
+        `Invalid entry point file "${file}". Entry point files must be relative to the directory with your ESLint config file, not absolute`
       );
       process.exit(-1);
     }
-    file = resolve(join(rootDir, file));
+    file = resolve(join(eslintConfigDir, file));
     if (!existsSync(file)) {
       error(`Entry point file "${file}" does not exist`);
       process.exit(-1);
@@ -141,10 +145,9 @@ export function getSettings(context: GenericContext): ParsedSettings {
     });
   }
 
+  mergedSettings.mode = mergedSettings.mode ?? 'auto';
   const mode =
-    mergedSettings.mode !== 'auto' && mergedSettings.mode !== undefined
-      ? mergedSettings.mode
-      : DEFAULT_MODE;
+    mergedSettings.mode === 'auto' ? DEFAULT_MODE : mergedSettings.mode;
   debug(`Running in ${mode} mode`);
   debug(`Setting root dir to ${rootDir}`);
   if (!Object.keys(wildcardAliases).length) {

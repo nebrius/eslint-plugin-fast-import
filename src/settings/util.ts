@@ -1,14 +1,13 @@
 import { dirname, join, resolve } from 'node:path';
-import type { GenericContext } from '../types/context.js';
 import { readdirSync } from 'node:fs';
 import { error } from '../util/logging.js';
 
 let eslintConfigDir: string | undefined;
-export function getEslintConfigDir(context: GenericContext) {
+export function getEslintConfigDir(filename: string) {
   if (typeof eslintConfigDir !== 'undefined') {
     return eslintConfigDir;
   }
-  let currentDir = dirname(context.filename);
+  let currentDir = dirname(filename);
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const dirContents = readdirSync(currentDir);

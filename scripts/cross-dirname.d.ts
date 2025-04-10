@@ -1,3 +1,1 @@
-declare module 'cross-dirname' {
-  export function getDirname(): string;
-}
+../src/types/cross-dirname.d.ts

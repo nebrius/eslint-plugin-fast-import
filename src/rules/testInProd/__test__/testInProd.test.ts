@@ -49,12 +49,6 @@ console.log(bTest);
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: [
-            {
-              file: 'a.ts',
-              symbol: 'a',
-            },
-          ],
         },
       },
     },

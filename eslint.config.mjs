@@ -30,7 +30,7 @@ export default tseslint.config(
       'fast-import': {
         entryPoints: [
           {
-            file: 'plugin.ts',
+            file: 'src/plugin.ts',
             symbol: 'default',
           },
         ],
