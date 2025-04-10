@@ -83,6 +83,7 @@ export function stripNodesFromBaseInfo(info: BaseProjectInfo) {
     wildcardAliases: info.wildcardAliases,
     fixedAliases: info.fixedAliases,
     files: new Map(),
+    availableThirdPartyDependencies: new Map(),
   };
   for (const [filePath, fileDetails] of info.files) {
     if (fileDetails.fileType !== 'code') {

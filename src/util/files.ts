@@ -27,9 +27,25 @@ export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
     // Filter out any directories, so that this is only a file list
     .filter((f) => !f.stats.isDirectory());
 
+  const parentPackageJsons: string[] = [];
+  let currentDir = rootDir;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  while (true) {
+    const dirContents = readdirSync(currentDir);
+    if (dirContents.includes('package.json')) {
+      parentPackageJsons.push(join(currentDir, 'package.json'));
+    }
+    const nextDir = dirname(currentDir);
+    if (nextDir === currentDir) {
+      break;
+    }
+    currentDir = nextDir;
+  }
+
   // Return the list of files
   return buildFileList(
     rootDir,
+    parentPackageJsons,
     ignorePatterns,
     potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
   );
@@ -59,9 +75,25 @@ export async function getFiles(
     // Filter out any directories, so that this is only a file list
     .filter((f) => !f.stats.isDirectory());
 
+  const parentPackageJsons: string[] = [];
+  let currentDir = rootDir;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  while (true) {
+    const dirContents = await readdir(currentDir);
+    if (dirContents.includes('package.json')) {
+      parentPackageJsons.push(join(currentDir, 'package.json'));
+    }
+    const nextDir = dirname(currentDir);
+    if (nextDir === currentDir) {
+      break;
+    }
+    currentDir = nextDir;
+  }
+
   // Return the list of files
   return buildFileList(
     rootDir,
+    parentPackageJsons,
     ignorePatterns,
     potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
   );
@@ -88,6 +120,7 @@ export function isFileIgnored(rootDir: string, filePath: string) {
 
 function buildFileList(
   rootDir: string,
+  parentPackageJsons: string[],
   ignorePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
@@ -99,7 +132,11 @@ function buildFileList(
     filePath: string;
     latestUpdatedAt: number;
   }> = [];
+  const packageJsons: string[] = [...parentPackageJsons];
   for (const { filePath, stats } of potentialFiles) {
+    if (basename(filePath) === 'package.json') {
+      packageJsons.push(filePath);
+    }
     if (isFileIgnored(rootDir, filePath)) {
       continue;
     }
@@ -109,7 +146,7 @@ function buildFileList(
     });
   }
 
-  return files;
+  return { files, packageJsons };
 }
 
 function initializeIgnores(

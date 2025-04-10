@@ -43,5 +43,16 @@ ruleTester.run('no-missing-exports', noMissingImports, {
         },
       },
     },
+    {
+      code: `import { b } from 'unknown'`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTransientDependencies' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 });

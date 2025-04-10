@@ -285,6 +285,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
   wildcardAliases: { '@/': TEST_PROJECT_DIR },
   fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
   rootDir: TEST_PROJECT_DIR,
+  availableThirdPartyDependencies: new Map(),
 };
 
 it('Computes resolved into', () => {

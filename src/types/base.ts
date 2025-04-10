@@ -278,4 +278,29 @@ export type BaseProjectInfo = {
    * a file at `src/components/foo` can be imported anywhere with `@/components/foo`
    */
   wildcardAliases: ParsedSettings['wildcardAliases'];
+
+  /**
+   * Mapping of available third party dependencies by module specifier name
+   * scoped to the folder they're in. For example, in the case of a monorepo
+   * with the following structure:
+   *
+   * myProject
+   *   package.json
+   *   one
+   *     package.json
+   *   two
+   *     package.json
+   *
+   * we get:
+   *
+   * {
+   *   '/path/to/myProject' => ['react', 'typescript'],
+   *   '/path/to/myProject/one' => ['type-fest'],
+   *   '/path/to/myProjecttwo' => ['react-hook-form'],
+   * }
+   *
+   * Note: any sub-paths in module specifiers are not included here, e.g.
+   * `foo/dist/file`, just `foo`
+   */
+  availableThirdPartyDependencies: Map<string, string[]>;
 };

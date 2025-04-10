@@ -12,6 +12,8 @@ import { getFilesSync } from '../util/files.js';
 import type { ParsedSettings } from '../settings/settings.js';
 import { TSError } from '@typescript-eslint/typescript-estree';
 import { debug } from '../util/logging.js';
+import { readFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -37,11 +39,31 @@ export function computeBaseInfo({
     rootDir,
     fixedAliases,
     wildcardAliases,
+    availableThirdPartyDependencies: new Map(),
   };
 
-  const potentialFiles = getFilesSync(rootDir, ignorePatterns);
+  const { files, packageJsons } = getFilesSync(rootDir, ignorePatterns);
 
-  for (const { filePath } of potentialFiles) {
+  for (const packageJson of packageJsons) {
+    const packageJsonContents = readFileSync(packageJson, 'utf-8');
+    try {
+      const parsedPackageJson = JSON.parse(packageJsonContents) as {
+        dependencies: Record<string, string>;
+        devDependencies: Record<string, string>;
+        peerDependencies: Record<string, string>;
+      };
+      info.availableThirdPartyDependencies.set(dirname(packageJson), [
+        ...Object.keys(parsedPackageJson.dependencies),
+        ...Object.keys(parsedPackageJson.devDependencies),
+        ...Object.keys(parsedPackageJson.peerDependencies),
+      ]);
+    } catch {
+      // Swallow parse errors to recover and parse at least something
+      continue;
+    }
+  }
+
+  for (const { filePath } of files) {
     if (isCodeFile(filePath)) {
       try {
         info.files.set(

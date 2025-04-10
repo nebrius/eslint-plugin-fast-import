@@ -74,7 +74,10 @@ async function initializeFileWatching(settings: ParsedSettings) {
 
   async function getUpdatedAtTimes() {
     const projectInfo = getProjectInfo();
-    const files = await getFiles(projectInfo.rootDir, settings.ignorePatterns);
+    const { files } = await getFiles(
+      projectInfo.rootDir,
+      settings.ignorePatterns
+    );
     return new Map(
       files.map(({ filePath, latestUpdatedAt }) => [filePath, latestUpdatedAt])
     );

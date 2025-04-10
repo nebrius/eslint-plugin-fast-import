@@ -77,6 +77,7 @@ it('Updates cache when an unused export is added', () => {
     rootDir: TEST_PROJECT_DIR,
     wildcardAliases: {},
     fixedAliases: {},
+    availableThirdPartyDependencies: new Map(),
   };
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected1);
 
@@ -148,6 +149,7 @@ it('Updates cache when an unused export is added', () => {
     rootDir: TEST_PROJECT_DIR,
     wildcardAliases: {},
     fixedAliases: {},
+    availableThirdPartyDependencies: new Map(),
   };
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
 });

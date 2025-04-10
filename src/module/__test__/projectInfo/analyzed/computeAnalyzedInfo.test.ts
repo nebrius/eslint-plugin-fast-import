@@ -344,6 +344,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
   rootDir: TEST_PROJECT_DIR,
   wildcardAliases: {},
   fixedAliases: {},
+  availableThirdPartyDependencies: new Map(),
 };
 
 it('Computes base info', () => {

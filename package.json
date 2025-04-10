@@ -19,6 +19,7 @@
   "author": "Bryan Hughes <bryan@nebri.us>",
   "license": "MIT",
   "dependencies": {
+    "@typescript-eslint/typescript-estree": "^8.29.1",
     "@typescript-eslint/utils": "^8.19.1",
     "cross-dirname": "^0.1.0",
     "ignore": "^7.0.3",
