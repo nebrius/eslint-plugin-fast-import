@@ -47,6 +47,7 @@ function parseTsConfig(configPath: string): Settings {
 
   // I'm pretty sure this is impossible since we already checked error above,
   // and the TS types for config are just too loose, but check just in case
+  /* istanbul ignore if */
   if (!config.config) {
     warn(
       `Could not load TypeScript config, skipping settings analysis:\n  empty config`
