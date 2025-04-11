@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { GenericContext } from '../types/context.js';
-import { error, setVerbose } from '../util/logging.js';
+import { setVerbose } from '../util/logging.js';
 
 const settingsSchema = z.strictObject({
   rootDir: z.string().optional(),
@@ -44,8 +44,7 @@ export function getUserSettings(context: GenericContext): Settings {
       }
       issues.push(formattedIssue);
     }
-    error('Invalid settings:\n' + issues.join('\n'));
-    process.exit(-1);
+    throw new Error('Invalid settings:\n' + issues.join('\n'));
   }
 
   // Trim off the end `/` in case it was supplied with rootDir

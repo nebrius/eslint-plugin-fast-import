@@ -1,6 +1,5 @@
 import { dirname, join, resolve } from 'node:path';
 import { readdirSync } from 'node:fs';
-import { error } from '../util/logging.js';
 
 let eslintConfigDir: string | undefined;
 export function getEslintConfigDir(filename: string) {
@@ -32,8 +31,7 @@ export function getEslintConfigDir(filename: string) {
     currentDir = nextPath;
   }
 
-  error(
+  throw new Error(
     'Could not find flat ESLint config file. This library is only designed to work with ESLint 9+'
   );
-  process.exit(-1);
 }

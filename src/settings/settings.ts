@@ -81,10 +81,9 @@ export function getSettings(context: GenericContext): ParsedSettings {
 
   // Make sure we could find a rootDir
   if (!rootDir) {
-    error(
+    throw new Error(
       `Could not determine rootDir. Please add it to fast-import settings. See https://github.com/nebrius/fast-import for details`
     );
-    process.exit(-1);
   }
 
   // Clean up any aliases
@@ -129,15 +128,13 @@ export function getSettings(context: GenericContext): ParsedSettings {
       symbol = symbol.slice(0, -1);
     }
     if (isAbsolute(file)) {
-      error(
+      throw new Error(
         `Invalid entry point file "${file}". Entry point files must be relative to the directory with your ESLint config file, not absolute`
       );
-      process.exit(-1);
     }
     file = resolve(join(eslintConfigDir, file));
     if (!existsSync(file)) {
-      error(`Entry point file "${file}" does not exist`);
-      process.exit(-1);
+      throw new Error(`Entry point file "${file}" does not exist`);
     }
     parsedEntryPoints.push({
       file,

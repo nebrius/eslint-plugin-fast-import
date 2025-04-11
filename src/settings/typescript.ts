@@ -7,7 +7,9 @@ import type { Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 
 export function getTypeScriptSettings(context: GenericContext): Settings {
-  // Read in the file
+  // Read in the file. Note: we don't support the full breadth of tsconfigs,
+  // notably we don't support multiple nested configs and only look at the
+  // config found in the eslint config file's directory
   const configPath = ts.findConfigFile(
     getEslintConfigDir(context.filename),
     ts.sys.fileExists.bind(ts.sys),
