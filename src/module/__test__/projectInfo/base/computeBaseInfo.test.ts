@@ -9,7 +9,7 @@ import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
 import { getDirname } from 'cross-dirname';
 import { parse } from '@typescript-eslint/typescript-estree';
-import type { BaseImport } from '../../../../types/base.js';
+import type { BaseImport, BaseReexport } from '../../../../types/base.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
@@ -357,8 +357,14 @@ it('Computes base info', () => {
 });
 
 const NEW_FILE_PATH = join(TEST_PROJECT_DIR, 'newFile.ts');
-const NEW_FILE_CONTENTS_ADD = `import { a1 } from './a1'`;
-const NEW_FILE_CONTENTS_MODIFY = `import { a1 } from './a1'
+const NEW_FILE_CONTENTS_ADD = `import { a1 } from './a'`;
+const NEW_FILE_CONTENTS_MODIFY = `import { a2 } from './a';
+import { a1 } from './a';
+export { a1 } from './a';
+export const newFile1 = 10;`;
+const NEW_FILE_CONTENTS_MODIFY_2 = `import { a1 } from './a';
+import { a2 } from './a';
+export { a1 } from './a';
 export const newFile1 = 10;`;
 
 it('Adds. modifies, and deletes a new file', () => {
@@ -386,19 +392,19 @@ it('Adds. modifies, and deletes a new file', () => {
   );
   EXPECTED.files.set(NEW_FILE_PATH, {
     fileType: 'code',
-    exports: [],
     imports: [
       {
         importType: 'single',
         importAlias: 'a1',
         importName: 'a1',
         isTypeImport: false,
-        moduleSpecifier: './a1',
+        moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
       } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
     ],
     reexports: [],
+    exports: [],
   });
   expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
 
@@ -418,6 +424,38 @@ it('Adds. modifies, and deletes a new file', () => {
   );
   EXPECTED.files.set(NEW_FILE_PATH, {
     fileType: 'code',
+    imports: [
+      {
+        importType: 'single',
+        importAlias: 'a2',
+        importName: 'a2',
+        isTypeImport: false,
+        moduleSpecifier: './a',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      {
+        importType: 'single',
+        importAlias: 'a1',
+        importName: 'a1',
+        isTypeImport: false,
+        moduleSpecifier: './a',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+    ],
+    reexports: [
+      {
+        exportName: 'a1',
+        importName: 'a1',
+        isEntryPoint: false,
+        isTypeReexport: false,
+        moduleSpecifier: './a',
+        reexportType: 'single',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseReexport, 'statementNode' | 'reportNode'>,
+    ],
     exports: [
       {
         exportName: 'newFile1',
@@ -425,18 +463,63 @@ it('Adds. modifies, and deletes a new file', () => {
         isTypeExport: false,
       },
     ],
+  });
+  expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
+  updateBaseInfoForFile(
+    {
+      filePath: NEW_FILE_PATH,
+      fileContents: NEW_FILE_CONTENTS_MODIFY_2,
+      ast: parse(NEW_FILE_CONTENTS_MODIFY_2, {
+        loc: true,
+        range: true,
+        tokens: true,
+        jsx: true,
+      }),
+      isEntryPointCheck: () => false,
+    },
+    info
+  );
+  EXPECTED.files.set(NEW_FILE_PATH, {
+    fileType: 'code',
     imports: [
       {
         importType: 'single',
         importAlias: 'a1',
         importName: 'a1',
         isTypeImport: false,
-        moduleSpecifier: './a1',
+        moduleSpecifier: './a',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      {
+        importType: 'single',
+        importAlias: 'a2',
+        importName: 'a2',
+        isTypeImport: false,
+        moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
       } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
     ],
-    reexports: [],
+    reexports: [
+      {
+        exportName: 'a1',
+        importName: 'a1',
+        isEntryPoint: false,
+        isTypeReexport: false,
+        moduleSpecifier: './a',
+        reexportType: 'single',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseReexport, 'statementNode' | 'reportNode'>,
+    ],
+    exports: [
+      {
+        exportName: 'newFile1',
+        isEntryPoint: false,
+        isTypeExport: false,
+      },
+    ],
   });
   expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
 
