@@ -60,17 +60,19 @@ export const noMissingImports = createRule({
         });
         continue;
       }
+
       // Barrel/dynamic imports don't resolve to a single export, and can be
       // spread across multiple files even. The specific items being imported
-      // isn't specified either, meaning the only way to know if an import is
-      // valid is to introspect how it's used at runtime. This isn't tractable,
-      // so we just don't validate them instead
+      // isn't specified either in non-first party code, meaning the only way to
+      // know if an import is valid is to introspect how it's used at runtime.
+      // This isn't tractable, so we just don't validate them instead
       if (
         importEntry.moduleType !== 'firstPartyCode' ||
         importEntry.importType !== 'single'
       ) {
         continue;
       }
+
       if (importEntry.rootModuleType === undefined) {
         context.report({
           node: importEntry.reportNode,

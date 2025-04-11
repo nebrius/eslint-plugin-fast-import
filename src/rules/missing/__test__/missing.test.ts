@@ -20,7 +20,27 @@ const ruleTester = new RuleTester({
 ruleTester.run('no-missing-exports', noMissingImports, {
   valid: [
     {
-      code: ``,
+      code: `import * as b from './b'`,
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import * as tf from 'type-fest'`,
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `export * from 'type-fest'`,
       filename: FILE_A,
       settings: {
         'fast-import': {
@@ -33,7 +53,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
 
   invalid: [
     {
-      code: `import { b } from './b'`,
+      code: `import { unknown } from './b'`,
       filename: FILE_A,
       errors: [{ messageId: 'noMissingImports' }],
       settings: {
@@ -44,7 +64,18 @@ ruleTester.run('no-missing-exports', noMissingImports, {
       },
     },
     {
-      code: `import { b } from 'unknown'`,
+      code: `export { SourceCode } from './c';`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noMissingImports' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import { unknown } from 'unknown'`,
       filename: FILE_A,
       errors: [{ messageId: 'noTransientDependencies' }],
       settings: {
