@@ -7,11 +7,13 @@ import { 'a twelve' as stringAlias } from './a';
 import defaultExport2, { a1 as a1WithDefault } from './a';
 import defaultExport3, * as barrel2 from './a';
 import './a';
+import { e1 } from './e';
 
 console.log(defaultExport1, defaultExport2, defaultExport3);
 console.log(a1, a1Alias, a1WithDefault);
 console.log(barrel1, barrel2);
 console.log(defaultAlias, stringAlias);
+console.log(e1)
 
 void import('./a.js');
 

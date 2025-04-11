@@ -38,7 +38,7 @@ export const a2 = 10;
       code: `export const a1 = 10;
     export const a2 = 10;
     // This one is not imported, thus a lint error
-    export const a4 = 10;
+    export default 10;
     `,
       filename: FILE_A,
       errors: [{ messageId: 'noUnusedExports' }],

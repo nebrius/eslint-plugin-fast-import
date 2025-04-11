@@ -1,8 +1,15 @@
 import { join } from 'path';
-import { computeBaseInfo } from '../../../computeBaseInfo.js';
+import {
+  addBaseInfoForFile,
+  computeBaseInfo,
+  deleteBaseInfoForFile,
+  updateBaseInfoForFile,
+} from '../../../computeBaseInfo.js';
 import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
 import { getDirname } from 'cross-dirname';
+import { parse } from '@typescript-eslint/typescript-estree';
+import type { BaseImport } from '../../../../types/base.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
@@ -234,6 +241,13 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            importAlias: 'e1',
+            importName: 'e1',
+            importType: 'single',
+            isTypeImport: false,
+            moduleSpecifier: './e',
+          },
+          {
             importType: 'dynamic',
             moduleSpecifier: './a.js',
           },
@@ -339,5 +353,94 @@ it('Computes base info', () => {
     ignorePatterns: [],
     isEntryPointCheck: () => false,
   });
+  expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
+});
+
+const NEW_FILE_PATH = join(TEST_PROJECT_DIR, 'newFile.ts');
+const NEW_FILE_CONTENTS_ADD = `import { a1 } from './a1'`;
+const NEW_FILE_CONTENTS_MODIFY = `import { a1 } from './a1'
+export const newFile1 = 10;`;
+
+it('Adds. modifies, and deletes a new file', () => {
+  const info = computeBaseInfo({
+    rootDir: TEST_PROJECT_DIR,
+    wildcardAliases: {},
+    fixedAliases: {},
+    ignorePatterns: [],
+    isEntryPointCheck: () => false,
+  });
+
+  addBaseInfoForFile(
+    {
+      filePath: NEW_FILE_PATH,
+      fileContents: NEW_FILE_CONTENTS_ADD,
+      ast: parse(NEW_FILE_CONTENTS_ADD, {
+        loc: true,
+        range: true,
+        tokens: true,
+        jsx: true,
+      }),
+      isEntryPointCheck: () => false,
+    },
+    info
+  );
+  EXPECTED.files.set(NEW_FILE_PATH, {
+    fileType: 'code',
+    exports: [],
+    imports: [
+      {
+        importType: 'single',
+        importAlias: 'a1',
+        importName: 'a1',
+        isTypeImport: false,
+        moduleSpecifier: './a1',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+    ],
+    reexports: [],
+  });
+  expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
+
+  updateBaseInfoForFile(
+    {
+      filePath: NEW_FILE_PATH,
+      fileContents: NEW_FILE_CONTENTS_MODIFY,
+      ast: parse(NEW_FILE_CONTENTS_MODIFY, {
+        loc: true,
+        range: true,
+        tokens: true,
+        jsx: true,
+      }),
+      isEntryPointCheck: () => false,
+    },
+    info
+  );
+  EXPECTED.files.set(NEW_FILE_PATH, {
+    fileType: 'code',
+    exports: [
+      {
+        exportName: 'newFile1',
+        isEntryPoint: false,
+        isTypeExport: false,
+      },
+    ],
+    imports: [
+      {
+        importType: 'single',
+        importAlias: 'a1',
+        importName: 'a1',
+        isTypeImport: false,
+        moduleSpecifier: './a1',
+        // TODO: for some reason this type narrows to saying it should have only
+        // two properties, which is clearly wrong
+      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+    ],
+    reexports: [],
+  });
+  expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
+
+  deleteBaseInfoForFile(NEW_FILE_PATH, info);
+  EXPECTED.files.delete(NEW_FILE_PATH);
   expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
 });
