@@ -6,7 +6,7 @@ import { getSettings } from '../../settings.js';
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
-it('Fetchings settings from typescript', () => {
+it('Fetchings user supplied settings', () => {
   const settings = getSettings({
     filename: FILE_A,
     settings: {
@@ -38,4 +38,22 @@ it('Fetchings settings from typescript', () => {
     },
   };
   expect(settings).toEqual(expected);
+});
+
+it('Throws on invalid user supplied mode', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'fake',
+        },
+      },
+    })
+  ).toThrow(`Invalid settings:
+  Invalid enum_value for property "mode"
+    received: fake
+    options: auto,one-shot,fix,editor
+    message: Invalid enum value. Expected 'auto' | 'one-shot' | 'fix' | 'editor', received 'fake'
+`);
 });
