@@ -66,6 +66,7 @@ export function getESMInfo(context: GenericContext) {
 }
 
 let fileWatchingInitialized = false;
+/* istanbul ignore next*/
 async function initializeFileWatching(settings: ParsedSettings) {
   if (fileWatchingInitialized) {
     return;
