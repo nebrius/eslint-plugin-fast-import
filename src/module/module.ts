@@ -83,6 +83,7 @@ export function initializeProject({
 }
 
 export function getProjectInfo() {
+  /* istanbul ignore if */
   if (!analyzedProjectInfo) {
     throw new InternalError('Project info requested before initialization');
   }
@@ -109,6 +110,7 @@ export function updateCacheFromFileSystem(
   operationStart: number
 ) {
   // This shouldn't be possible and is just to make sure TypeScript is happy
+  /* istanbul ignore if */
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
     throw new InternalError('Project info not initialized');
   }
@@ -227,6 +229,7 @@ export function updateCacheForFile(
   { entryPoints, rootDir }: ParsedSettings
 ) {
   // This shouldn't be possible and is just to make sure TypeScript is happy
+  /* istanbul ignore if */
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
     throw new InternalError('Project info not initialized');
   }
@@ -277,6 +280,7 @@ export function updateCacheForFile(
       const baseFileInfo = baseProjectInfo.files.get(filePath);
       const resolvedFileInfo = resolvedProjectInfo.files.get(filePath);
       const analyzedFileInfo = analyzedProjectInfo.files.get(filePath);
+      /* istanbul ignore if */
       if (
         !baseFileInfo ||
         baseFileInfo.fileType !== 'code' ||

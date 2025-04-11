@@ -79,6 +79,7 @@ export function traverse({
     node: TSESTree.Node,
     nodeType: TSESTree.AST_NODE_TYPES
   ): asserts node is NodeType {
+    /* istanbul ignore if */
     if (node.type !== nodeType) {
       throw new InternalError(
         `simpleTraverse returned unexpected type ${node.type}`,

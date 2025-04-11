@@ -13,6 +13,7 @@ function checkFile(
   visitedFiles: string[]
 ) {
   const fileDetails = projectInfo.files.get(currentFilePath);
+  /* istanbul ignore if */
   if (!fileDetails) {
     throw new InternalError(`Could not get file info for "${currentFilePath}"`);
   }
@@ -129,6 +130,7 @@ export const noCircularImports = createRule<Options, MessageIds>({
     }
 
     const circularImports = circularImportMap.get(context.filename);
+    /* istanbul ignore if */
     if (!circularImports) {
       throw new InternalError(
         `Circular imports are undefined for ${context.filename}`

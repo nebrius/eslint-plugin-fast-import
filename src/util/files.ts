@@ -101,6 +101,7 @@ export async function getFiles(
 
 let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
 export function isFileIgnored(rootDir: string, filePath: string) {
+  /* istanbul ignore if */
   if (!ignores) {
     throw new InternalError(`isFileIgnored called before ignores initialized`);
   }

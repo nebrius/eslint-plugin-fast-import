@@ -173,16 +173,19 @@ export function updateBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo
 ): boolean {
   const previousFileDetails = baseProjectInfo.files.get(filePath);
+  /* istanbul ignore if */
   if (!isCodeFile(filePath)) {
     throw new InternalError(
       `updateBaseInfoForFile called for non-code file ${filePath}`
     );
   }
+  /* istanbul ignore if */
   if (!previousFileDetails) {
     throw new InternalError(
       `updateBaseInfoForFile called for file ${filePath} that didn't previously exist`
     );
   }
+  /* istanbul ignore if */
   if (previousFileDetails.fileType !== 'code') {
     throw new InternalError(
       `previous file type was not code for file ${filePath}`
@@ -206,6 +209,7 @@ export function deleteBaseInfoForFile(
   baseProjectInfo.files.delete(filePath);
 }
 
+/* istanbul ignore next */
 class UnknownNodeTypeError extends InternalError {
   constructor(filePath: string, fileContents: string, node: never) {
     super(
@@ -225,6 +229,7 @@ function getLocationOfDefaultToken(
   tokens: TSESTree.Token[] | undefined,
   filePath: string
 ) {
+  /* istanbul ignore if */
   if (!tokens) {
     throw new InternalError(`tokens is unexpectedly undefined`);
   }
@@ -239,6 +244,7 @@ function getLocationOfDefaultToken(
       return token;
     }
   }
+  /* istanbul ignore next */
   throw new InternalError('Could not get report nore', {
     filePath,
     node,
@@ -322,6 +328,7 @@ function walkExportDestructure(
             break;
           }
 
+          /* istanbul ignore next */
           default: {
             // We don't use UnknownNodeTypeError here because this is typed as a
             // general property definition, which includes a bunch of statements
@@ -381,6 +388,7 @@ function walkExportDestructure(
     // AFAICT this isn't actually valid, since it would imply
     // `export const { foo.bar }`, but I'm not 100% certain.
     // See: https://github.com/estree/estree/issues/162
+    /* istanbul ignore next */
     case TSESTree.AST_NODE_TYPES.MemberExpression: {
       throw new InternalError(
         `unexpected member expression in array destructure`,
@@ -457,6 +465,7 @@ function computeFileDetails({
         statementNode.source.type === TSESTree.AST_NODE_TYPES.Literal
           ? (statementNode.source.value ?? undefined)
           : undefined;
+      /* istanbul ignore if */
       if (
         typeof moduleSpecifier !== 'string' &&
         typeof moduleSpecifier !== 'undefined'
@@ -487,6 +496,7 @@ function computeFileDetails({
       // module specifier is a string. In practice this should always be a
       // string at this point, but we check to make TypeScript happy and just in
       // case there's some edge case we missed.
+      /* istanbul ignore if */
       if (typeof moduleSpecifier !== 'string') {
         throw new InternalError(
           `import source ${String(moduleSpecifier)} is not a string`,
@@ -676,6 +686,7 @@ function computeFileDetails({
             // TODO: I'm pretty certain that declaration id missing means that
             // this is a function expression, aka `export function () {}` which
             // isn't allowed in an export statement
+            /* istanbul ignore if */
             if (!statementNode.declaration.id) {
               throw new InternalError(`function id is unexpectedly missing`, {
                 filePath,
@@ -769,6 +780,7 @@ function computeFileDetails({
           // declaration, which includes a bunch of statements that actual
           // exports don't support (and would be a syntax error), such as:
           // `export import { foo } from 'bar'`
+          /* istanbul ignore next */
           throw new InternalError(
             `unsupported declaration type ${statementNode.declaration.type}`,
             {

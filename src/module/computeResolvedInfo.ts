@@ -51,10 +51,12 @@ export function addResolvedInfoForFile(
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
   const baseFileInfo = newBaseProjectInfo.files.get(filePath);
+  /* istanbul ignore if */
   if (!baseFileInfo) {
     throw new InternalError(`Could not get base file info for ${filePath}`);
   }
   if (isCodeFile(filePath)) {
+    /* istanbul ignore if */
     if (baseFileInfo.fileType !== 'code') {
       throw new InternalError(`Mismatched file types for ${filePath}`);
     }
@@ -90,11 +92,13 @@ export function updateResolvedInfoForFile(
   ];
   for (const filePathToUpdate of filePathsToUpdate) {
     const baseFileInfo = baseProjectInfo.files.get(filePathToUpdate);
+    /* istanbul ignore if */
     if (!baseFileInfo) {
       throw new InternalError(
         `Could not get base file info for ${filePathToUpdate}`
       );
     }
+    /* istanbul ignore if */
     if (baseFileInfo.fileType !== 'code') {
       throw new InternalError(`Mismatched file types for ${filePathToUpdate}`);
     }
@@ -121,9 +125,11 @@ export function deleteResolvedInfoForFile(
   previousResolvedProjectInfo: ResolvedProjectInfo
 ) {
   const baseFileInfo = newBaseProjectInfo.files.get(filePath);
+  /* istanbul ignore if */
   if (!baseFileInfo) {
     throw new InternalError(`Could not get base file info for ${filePath}`);
   }
+  /* istanbul ignore if */
   if (baseFileInfo.fileType !== 'code') {
     throw new InternalError(`Mismatched file types for ${filePath}`);
   }
@@ -163,6 +169,7 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
   for (const [file] of baseInfo.files) {
     const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
     const basefile = folders.pop();
+    /* istanbul ignore if */
     if (!basefile) {
       throw new InternalError(`Could not get basefile for path ${file}`);
     }
@@ -209,11 +216,13 @@ function getFileReferences(
   const fileReferences = [];
   const previousResolvedFileEntry =
     previousResolvedProjectInfo.files.get(filePath);
+  /* istanbul ignore if */
   if (!previousResolvedFileEntry) {
     throw new InternalError(
       `Could not get previous resolved entry for ${filePath}`
     );
   }
+  /* istanbul ignore if */
   if (previousResolvedFileEntry.fileType !== 'code') {
     throw new InternalError(`Previous file type for ${filePath} is not code`);
   }
@@ -349,6 +358,7 @@ function resolveModuleSpecifier({
     const segments = absolutishFilePath.split('/').filter((s) => s);
     let lastSegment = segments.pop();
     const folderSegments = [...segments];
+    /* istanbul ignore if */
     if (!lastSegment) {
       throw new InternalError(
         `lastSegment for ${absolutishFilePath} is undefined`

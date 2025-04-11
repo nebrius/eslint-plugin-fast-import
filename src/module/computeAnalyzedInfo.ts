@@ -176,6 +176,7 @@ function analyzeSingleImport(
     // Get the file from the project info
     const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 
+    /* istanbul ignore if */
     if (!targetFileDetails) {
       throw new InternalError(
         `File ${currentFile} is missing in project info`,
@@ -188,6 +189,7 @@ function analyzeSingleImport(
 
     // Shouldn't happen in practice, but check anyways to make TypeScript happy, plus "shouldn't happen" has a funny way
     // of coming true sometimes
+    /* istanbul ignore if */
     if (targetFileDetails.fileType !== 'code') {
       throw new InternalError(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
@@ -363,6 +365,7 @@ function analyzeBarrelImport(
     // Get the file from the project info
     const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 
+    /* istanbul ignore if */
     if (!targetFileDetails) {
       throw new InternalError(
         `File ${currentFile} is missing in project info`,
@@ -375,6 +378,7 @@ function analyzeBarrelImport(
 
     // Shouldn't happen in practice, but check anyways to make TypeScript happy, plus "shouldn't happen" has a funny way
     // of coming true sometimes
+    /* istanbul ignore if */
     if (targetFileDetails.fileType !== 'code') {
       throw new InternalError(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
