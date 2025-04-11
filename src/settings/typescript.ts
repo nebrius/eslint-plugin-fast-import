@@ -1,23 +1,31 @@
 import ts from 'typescript';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { warn } from '../util/logging.js';
-import type { GenericContext } from '../types/context.js';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import type { Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 
-export function getTypeScriptSettings(context: GenericContext): Settings {
+export function getTypeScriptSettings(filePath: string): Settings {
   // Read in the file. Note: we don't support the full breadth of tsconfigs,
   // notably we don't support multiple nested configs and only look at the
   // config found in the eslint config file's directory
   const configPath = ts.findConfigFile(
-    getEslintConfigDir(context.filename),
+    getEslintConfigDir(filePath),
     ts.sys.fileExists.bind(ts.sys),
     'tsconfig.json'
   );
   if (!configPath) {
     return {};
   }
+
+  const settings = parseTsConfig(configPath);
+  return {
+    rootDir: settings.rootDir ?? dirname(configPath),
+    alias: settings.alias,
+  };
+}
+
+function parseTsConfig(configPath: string): Settings {
   const config = ts.readConfigFile(configPath, (file) =>
     readFileSync(file, 'utf-8')
   );
@@ -47,15 +55,24 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const rootDir = config.config?.compilerOptions?.rootDir as string | undefined;
-  const absoluteRootDir = rootDir
-    ? join(dirname(configPath), rootDir)
-    : dirname(configPath);
+  const configExtends = config.config?.extends as string | undefined;
+  let baseConfig: Settings = {};
+  if (typeof configExtends === 'string') {
+    baseConfig = parseTsConfig(resolve(dirname(configPath), configExtends));
+  }
 
-  const baseUrl =
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const rootDir = config.config?.compilerOptions?.rootDir as string | undefined;
+  const absoluteRootDir = rootDir && join(dirname(configPath), rootDir);
+
+  let baseUrl =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (config.config?.compilerOptions?.baseUrl as string | undefined) ??
     dirname(configPath);
+
+  if (!isAbsolute(baseUrl)) {
+    baseUrl = resolve(dirname(configPath), baseUrl);
+  }
 
   const paths =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -71,16 +88,15 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
       );
       continue;
     }
-    const pathEntry = path[0];
-    if (!pathEntry.startsWith('./')) {
-      warn(
-        `fast-import only supports tsconfig.compilerOptions.paths that start with "./". ${symbol} will be ignored.`
+
+    const absolutePathEntry = resolve(baseUrl, path[0]);
+    if (!existsSync(absolutePathEntry.replace('/*', ''))) {
+      throw new Error(
+        `tsconfig path "${path[0]}", resolved as "${absolutePathEntry}", does not exist`
       );
     }
-
-    const absolutePathEntry = resolve(baseUrl, pathEntry);
     if (
-      !absolutePathEntry.startsWith(absoluteRootDir) ||
+      !absolutePathEntry.startsWith(absoluteRootDir ?? dirname(configPath)) ||
       absolutePathEntry.includes('node_modules')
     ) {
       continue;
@@ -91,5 +107,8 @@ export function getTypeScriptSettings(context: GenericContext): Settings {
 
   // Fallback to the directory containing tsconfig.json if rootDir isn't
   // supplied (like TypeScript itself does)
-  return { rootDir: absoluteRootDir, alias: parsedPaths };
+  return {
+    rootDir: absoluteRootDir ?? baseConfig.rootDir,
+    alias: { ...parsedPaths, ...baseConfig.alias },
+  };
 }

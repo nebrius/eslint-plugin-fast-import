@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@a": [
+        "src/a.ts"
+      ],
+      "@two": [
+        "src/a.ts",
+        "src/b.ts"
+      ]
+    }
+  }
+}

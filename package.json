@@ -25,7 +25,8 @@
     "cross-dirname": "^0.1.0",
     "ignore": "^7.0.3",
     "zod": "^3.24.2",
-    "zod-to-json-schema": "^3.24.5"
+    "zod-to-json-schema": "^3.24.5",
+    "globals": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/compat": "^1.2.7",

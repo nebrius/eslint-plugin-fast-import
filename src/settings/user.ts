@@ -21,9 +21,14 @@ const settingsSchema = z.strictObject({
 
 export type Settings = Omit<z.infer<typeof settingsSchema>, 'debugLogging'>;
 
-export function getUserSettings(context: GenericContext): Settings {
+export function getUserSettings(
+  settings: GenericContext['settings']
+): Settings {
   // Parse the raw settings, if supplied
-  const fastEsmSettings = context.settings['fast-import'];
+  const fastEsmSettings = settings['fast-import'];
+  if (!fastEsmSettings) {
+    return {};
+  }
   const parseResult = settingsSchema.safeParse(fastEsmSettings);
 
   // If there were errors, print a friendly-ish explanation of them

@@ -1,11 +1,11 @@
 import type { RequiredDeep } from 'type-fest';
 import { getTypeScriptSettings } from './typescript.js';
 import { debug, error } from '../util/logging.js';
-import type { GenericContext } from '../types/context.js';
 import { isAbsolute, join, resolve, sep } from 'node:path';
 import { getUserSettings, type Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 import { existsSync } from 'node:fs';
+import type { GenericContext } from '../types/context.js';
 
 export type IgnorePattern = {
   dir: string;
@@ -44,7 +44,9 @@ export function _resetSettings() {
   settings = null;
 }
 
-export function getSettings(context: GenericContext): ParsedSettings {
+export function getSettings(
+  context: Pick<GenericContext, 'filename' | 'settings'>
+): ParsedSettings {
   // Return the cached copy if we have it
   if (settings) {
     return settings;
@@ -53,8 +55,8 @@ export function getSettings(context: GenericContext): ParsedSettings {
   const eslintConfigDir = getEslintConfigDir(context.filename);
 
   // Get TypeScript supplied settings
-  const typeScriptSettings = getTypeScriptSettings(context);
-  const userSettings = getUserSettings(context);
+  const typeScriptSettings = getTypeScriptSettings(context.filename);
+  const userSettings = getUserSettings(context.settings);
   const mergedSettings = {
     ...typeScriptSettings,
     ...userSettings,
