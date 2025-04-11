@@ -367,7 +367,7 @@ import { a2 } from './a';
 export { a1 } from './a';
 export const newFile1 = 10;`;
 
-it('Adds. modifies, and deletes a new file', () => {
+it('Adds, modifies, and deletes a new file', () => {
   const info = computeBaseInfo({
     rootDir: TEST_PROJECT_DIR,
     wildcardAliases: {},
