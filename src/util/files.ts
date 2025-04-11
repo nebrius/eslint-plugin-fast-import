@@ -119,6 +119,11 @@ export function isFileIgnored(rootDir: string, filePath: string) {
   return false;
 }
 
+// eslint-disable-next-line fast-import/no-unused-exports
+export function _reset() {
+  ignores = null;
+}
+
 function buildFileList(
   rootDir: string,
   parentPackageJsons: string[],
