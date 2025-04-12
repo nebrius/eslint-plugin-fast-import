@@ -25,6 +25,7 @@ import { debug, formatMilliseconds } from '../util/logging.js';
 import type { TSESTree } from '@typescript-eslint/utils';
 import { parseFile } from './util.js';
 import { TSError } from '@typescript-eslint/typescript-estree';
+import { isCodeFile } from '../util/code.js';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
@@ -140,15 +141,21 @@ export function updateCacheFromFileSystem(
     // We might already have this new file in memory if it was created in editor
     // and previously linted while it was only in memory
     if (!baseProjectInfo.files.has(filePath)) {
-      numAdditions++;
       try {
-        addBaseInfoForFile(
-          {
-            ...parseFile(filePath),
-            isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
-          },
-          baseProjectInfo
-        );
+        if (isCodeFile(filePath)) {
+          addBaseInfoForFile(
+            {
+              ...parseFile(filePath),
+              isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+            },
+            baseProjectInfo
+          );
+        } else {
+          baseProjectInfo.files.set(filePath, {
+            fileType: 'other',
+          });
+        }
+        numAdditions++;
       } catch (e) {
         // If we failed to parse due to a syntax error, bail silently since this
         // is due to user-error and we don't want to clutter up the output
@@ -175,9 +182,10 @@ export function updateCacheFromFileSystem(
   for (const { filePath, latestUpdatedAt } of changes.modified) {
     const previousFileInfo = baseProjectInfo.files.get(filePath);
     if (
-      !previousFileInfo ||
-      (previousFileInfo.fileType === 'code' &&
-        previousFileInfo.lastUpdatedAt < latestUpdatedAt)
+      isCodeFile(filePath) &&
+      (!previousFileInfo ||
+        (previousFileInfo.fileType === 'code' &&
+          previousFileInfo.lastUpdatedAt < latestUpdatedAt))
     ) {
       numModified++;
       try {

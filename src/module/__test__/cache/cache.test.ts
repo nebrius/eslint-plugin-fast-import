@@ -14,7 +14,8 @@ import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
-const FILE_NEW = join(TEST_PROJECT_DIR, 'new.ts');
+const FILE_TS_NEW = join(TEST_PROJECT_DIR, 'new.ts');
+const FILE_JSON_NEW = join(TEST_PROJECT_DIR, 'new.json');
 
 const FILE_A_UPDATED_CONTENTS = `export type One = string;
 export type Two = string;
@@ -81,8 +82,11 @@ const baseExpected: StrippedAnalyzedProjectInfo = {
 };
 
 afterEach(() => {
-  if (existsSync(FILE_NEW)) {
-    unlinkSync(FILE_NEW);
+  if (existsSync(FILE_TS_NEW)) {
+    unlinkSync(FILE_TS_NEW);
+  }
+  if (existsSync(FILE_JSON_NEW)) {
+    unlinkSync(FILE_JSON_NEW);
   }
 });
 
@@ -93,7 +97,7 @@ it('Updates cache when a new file is added', () => {
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
 
   updateCacheForFile(
-    FILE_NEW,
+    FILE_TS_NEW,
     '',
     parse('', {
       loc: true,
@@ -112,7 +116,7 @@ it('Updates cache when a new file is added', () => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       [FILE_B, baseExpected.files.get(FILE_B)!],
       [
-        FILE_NEW,
+        FILE_TS_NEW,
         {
           fileType: 'code',
           imports: [],
@@ -209,19 +213,19 @@ it('Updates cache when an unused export is added to an existing file', () => {
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
 });
 
-it('Updates cache in bulk', () => {
+it('Updates cache in bulk for a code file', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
 
   // Add a new file
-  writeFileSync(FILE_NEW, '');
+  writeFileSync(FILE_TS_NEW, '');
   updateCacheFromFileSystem(
     {
       added: [
         {
-          filePath: FILE_NEW,
+          filePath: FILE_TS_NEW,
           latestUpdatedAt: Date.now(),
         },
       ],
@@ -236,7 +240,7 @@ it('Updates cache in bulk', () => {
     files: new Map([
       ...baseExpected.files,
       [
-        FILE_NEW,
+        FILE_TS_NEW,
         {
           fileType: 'code',
           imports: [],
@@ -250,13 +254,13 @@ it('Updates cache in bulk', () => {
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
 
   // Modify the new new file
-  writeFileSync(FILE_NEW, `console.log()`);
+  writeFileSync(FILE_TS_NEW, `console.log()`);
   updateCacheFromFileSystem(
     {
       added: [],
       modified: [
         {
-          filePath: FILE_NEW,
+          filePath: FILE_TS_NEW,
           latestUpdatedAt: Date.now(),
         },
       ],
@@ -270,7 +274,7 @@ it('Updates cache in bulk', () => {
     files: new Map([
       ...baseExpected.files,
       [
-        FILE_NEW,
+        FILE_TS_NEW,
         {
           fileType: 'code',
           imports: [],
@@ -284,13 +288,13 @@ it('Updates cache in bulk', () => {
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected3);
 
   // Modify the new file with invalid code (testing fallback)
-  writeFileSync(FILE_NEW, `+_)(*&^%$%)`);
+  writeFileSync(FILE_TS_NEW, `+_)(*&^%$%)`);
   updateCacheFromFileSystem(
     {
       added: [],
       modified: [
         {
-          filePath: FILE_NEW,
+          filePath: FILE_TS_NEW,
           latestUpdatedAt: Date.now(),
         },
       ],
@@ -303,12 +307,95 @@ it('Updates cache in bulk', () => {
   expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected3);
 
   // Delete the file
-  unlinkSync(FILE_NEW);
+  unlinkSync(FILE_TS_NEW);
   updateCacheFromFileSystem(
     {
       added: [],
       modified: [],
-      deleted: [FILE_NEW],
+      deleted: [FILE_TS_NEW],
+    },
+    settings,
+    Date.now()
+  );
+  projectInfo = getProjectInfo();
+  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+});
+
+it('Updates cache in bulk for a non-code file', () => {
+  initializeProject(settings);
+
+  let projectInfo = getProjectInfo();
+  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+
+  // Add a new file
+  writeFileSync(FILE_JSON_NEW, '{}');
+  updateCacheFromFileSystem(
+    {
+      added: [
+        {
+          filePath: FILE_JSON_NEW,
+          latestUpdatedAt: Date.now(),
+        },
+      ],
+      modified: [],
+      deleted: [],
+    },
+    settings,
+    Date.now()
+  );
+  const expected2: StrippedAnalyzedProjectInfo = {
+    ...baseExpected,
+    files: new Map([
+      ...baseExpected.files,
+      [
+        FILE_JSON_NEW,
+        {
+          fileType: 'other',
+        },
+      ],
+    ]),
+  };
+  projectInfo = getProjectInfo();
+  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
+
+  // Modify the new new file
+  writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
+  updateCacheFromFileSystem(
+    {
+      added: [],
+      modified: [
+        {
+          filePath: FILE_JSON_NEW,
+          latestUpdatedAt: Date.now(),
+        },
+      ],
+      deleted: [],
+    },
+    settings,
+    Date.now()
+  );
+  const expected3: StrippedAnalyzedProjectInfo = {
+    ...baseExpected,
+    files: new Map([
+      ...baseExpected.files,
+      [
+        FILE_JSON_NEW,
+        {
+          fileType: 'other',
+        },
+      ],
+    ]),
+  };
+  projectInfo = getProjectInfo();
+  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected3);
+
+  // Delete the file
+  unlinkSync(FILE_JSON_NEW);
+  updateCacheFromFileSystem(
+    {
+      added: [],
+      modified: [],
+      deleted: [FILE_JSON_NEW],
     },
     settings,
     Date.now()

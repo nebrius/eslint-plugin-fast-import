@@ -129,19 +129,36 @@ export function deleteResolvedInfoForFile(
   if (!baseFileInfo) {
     throw new InternalError(`Could not get base file info for ${filePath}`);
   }
-  /* istanbul ignore if */
-  if (baseFileInfo.fileType !== 'code') {
-    throw new InternalError(`Mismatched file types for ${filePath}`);
-  }
+
   const filePathsToUpdate = getFileReferences(
     previousResolvedProjectInfo,
     filePath
   );
-  previousResolvedProjectInfo.files.delete(filePath);
   for (const filePathToUpdate of filePathsToUpdate) {
+    const fileDetailsToUpdate =
+      previousResolvedProjectInfo.files.get(filePathToUpdate);
+
+    /* instanbul ignore if */
+    if (!fileDetailsToUpdate) {
+      throw new InternalError(
+        'filePathToUpdate missing in resolved project info'
+      );
+    }
+
+    /* istanbul ignore if */
+    if (fileDetailsToUpdate.fileType !== 'code') {
+      throw new InternalError('fileDetailsToUpdate is not a code file');
+    }
+
+    // We have to wait to delete the file info until after we're done fetching
+    // related files, since we use info about this first file in the search.
+    // However, we also have to delete this before we actually process the files
+    // needing updates so they don't think the file is still there
+    previousResolvedProjectInfo.files.delete(filePath);
+
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
-      lastUpdatedAt: baseFileInfo.lastUpdatedAt,
+      lastUpdatedAt: fileDetailsToUpdate.lastUpdatedAt,
       imports: [],
       exports: [],
       reexports: [],
@@ -153,7 +170,7 @@ export function deleteResolvedInfoForFile(
     populateFileDetails(
       newBaseProjectInfo,
       filePathToUpdate,
-      baseFileInfo,
+      fileDetailsToUpdate,
       resolvedCodeFileDetails
     );
   }
@@ -222,10 +239,6 @@ function getFileReferences(
       `Could not get previous resolved entry for ${filePath}`
     );
   }
-  /* istanbul ignore if */
-  if (previousResolvedFileEntry.fileType !== 'code') {
-    throw new InternalError(`Previous file type for ${filePath} is not code`);
-  }
 
   for (const [
     candidateFilePath,
@@ -237,20 +250,34 @@ function getFileReferences(
     ) {
       continue;
     }
-    if (
-      // Look for imports or the import side of reexports to see if they reference this file
-      [...candidateFileDetails.imports, ...candidateFileDetails.reexports].some(
-        (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
-      ) ||
-      // Look for exports or the export side of reexports to see if this file references them
-      [
-        ...previousResolvedFileEntry.imports,
-        ...previousResolvedFileEntry.reexports,
-      ].some(
-        (i) =>
-          i.moduleType === 'firstPartyCode' && i.resolvedModulePath === filePath
-      )
-    ) {
+
+    // Look for imports or the import side of reexports to see if they reference this file
+    const doesCandidateImportFile = [
+      ...candidateFileDetails.imports,
+      ...candidateFileDetails.reexports,
+    ].some(
+      (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
+    );
+
+    // If this file isn't a code file, then it can only be imported
+    if (previousResolvedFileEntry.fileType === 'other') {
+      if (doesCandidateImportFile) {
+        fileReferences.push(candidateFilePath);
+      }
+      continue;
+    }
+
+    // Look for exports or the export side of reexports to see if this file references them
+    const doesFileImportCandidate = [
+      ...previousResolvedFileEntry.imports,
+      ...previousResolvedFileEntry.reexports,
+    ].some(
+      (i) =>
+        i.moduleType === 'firstPartyCode' && i.resolvedModulePath === filePath
+    );
+
+    // If this file is a code file, we have to check both possibilities
+    if (doesCandidateImportFile || doesFileImportCandidate) {
       fileReferences.push(candidateFilePath);
     }
   }
