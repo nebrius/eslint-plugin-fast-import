@@ -14,6 +14,7 @@ const FILE_D = join(TEST_PROJECT_DIR, 'd.ts');
 const FILE_E = join(TEST_PROJECT_DIR, 'e.ts');
 const FILE_F = join(TEST_PROJECT_DIR, 'f.ts');
 const FILE_G = join(TEST_PROJECT_DIR, 'g.ts');
+const FILE_H = join(TEST_PROJECT_DIR, 'h.json');
 
 const CIRCULAR_FILE_A = join(TEST_PROJECT_DIR, 'circular-a.js');
 const CIRCULAR_FILE_B = join(TEST_PROJECT_DIR, 'circular-b.js');
@@ -91,6 +92,16 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             resolvedModulePath: FILE_G,
             isTypeImport: false,
             moduleType: 'firstPartyCode',
+            rootModuleType: undefined,
+          },
+          {
+            importAlias: 'h',
+            importName: 'default',
+            importType: 'single',
+            isTypeImport: false,
+            moduleSpecifier: './h.json',
+            moduleType: 'firstPartyOther',
+            resolvedModulePath: FILE_H,
             rootModuleType: undefined,
           },
         ],
@@ -338,6 +349,12 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             barrelImportedByFiles: [],
           },
         ],
+      },
+    ],
+    [
+      FILE_H,
+      {
+        fileType: 'other',
       },
     ],
   ]),
