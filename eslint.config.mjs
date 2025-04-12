@@ -33,6 +33,18 @@ export default tseslint.config(
             file: 'src/plugin.ts',
             symbol: 'default',
           },
+          {
+            file: 'src/plugin.ts',
+            symbol: 'getESMInfo',
+          },
+          {
+            file: 'src/plugin.ts',
+            symbol: 'registerUpdateListener',
+          },
+          {
+            file: 'src/plugin.ts',
+            symbol: 'isNonTestFile',
+          },
         ],
         debugLogging: true,
       },

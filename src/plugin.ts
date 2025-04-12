@@ -8,6 +8,14 @@ import { noMissingImports } from './rules/missing/missing.js';
 import { noExternalBarrelReexports } from './rules/externalBarrelReexports/externalBarrelReexports.js';
 import { noTestImportsInProd } from './rules/testInProd/testInProd.js';
 
+// Helper exports
+export {
+  getESMInfo,
+  registerUpdateListener,
+  isNonTestFile,
+} from './rules/util.js';
+
+// Plugin export
 const { name, version } = JSON.parse(
   readFileSync(join(getDirname(), '..', 'package.json'), 'utf8')
 ) as { name: string; version: string };
