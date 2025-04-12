@@ -18,7 +18,8 @@ export const noUnusedExports = createRule<
   name: 'no-unused-exports',
   meta: {
     docs: {
-      description: 'Ensures that all exports are imported in another file',
+      description:
+        'Ensure exports are imported elsewhere, taking into account whether files are test files or non-test files, and whether the export is a type export or value export',
     },
     schema: [zodToJsonSchema(schema) as JSONSchema4],
     fixable: undefined,
