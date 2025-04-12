@@ -31,19 +31,12 @@ export default tseslint.config(
         entryPoints: [
           {
             file: 'src/plugin.ts',
-            symbol: 'default',
-          },
-          {
-            file: 'src/plugin.ts',
-            symbol: 'getESMInfo',
-          },
-          {
-            file: 'src/plugin.ts',
-            symbol: 'registerUpdateListener',
-          },
-          {
-            file: 'src/plugin.ts',
-            symbol: 'isNonTestFile',
+            symbols: [
+              'default',
+              'getESMInfo',
+              'registerUpdateListener',
+              'isNonTestFile',
+            ],
           },
         ],
         debugLogging: true,

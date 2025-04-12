@@ -9,7 +9,7 @@ const settingsSchema = z.strictObject({
     .array(
       z.strictObject({
         file: z.string(),
-        symbol: z.string(),
+        symbols: z.array(z.string()),
       })
     )
     .optional(),

@@ -14,11 +14,12 @@ export type IgnorePattern = {
 
 export type ParsedSettings = Omit<
   RequiredDeep<Settings>,
-  'ignorePatterns' | 'alias'
+  'ignorePatterns' | 'alias' | 'entryPoints'
 > & {
   ignorePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
+  entryPoints: Array<{ file: string; symbol: string }>;
 };
 
 function argsInclude(strs: string[]) {
@@ -125,23 +126,25 @@ export function getSettings(
 
   // Clean up any entry points
   const parsedEntryPoints: ParsedSettings['entryPoints'] = [];
-  for (let { symbol, file } of entryPoints) {
-    if (symbol.endsWith('/')) {
-      symbol = symbol.slice(0, -1);
+  for (const { symbols, file } of entryPoints) {
+    for (let symbol of symbols) {
+      if (symbol.endsWith('/')) {
+        symbol = symbol.slice(0, -1);
+      }
+      if (isAbsolute(file)) {
+        throw new Error(
+          `Invalid entry point file "${file}". Entry point files must be relative to the directory with your ESLint config file, not absolute`
+        );
+      }
+      const normalizedFile = resolve(join(eslintConfigDir, file));
+      if (!existsSync(normalizedFile)) {
+        throw new Error(`Entry point file "${normalizedFile}" does not exist`);
+      }
+      parsedEntryPoints.push({
+        file: normalizedFile,
+        symbol,
+      });
     }
-    if (isAbsolute(file)) {
-      throw new Error(
-        `Invalid entry point file "${file}". Entry point files must be relative to the directory with your ESLint config file, not absolute`
-      );
-    }
-    file = resolve(join(eslintConfigDir, file));
-    if (!existsSync(file)) {
-      throw new Error(`Entry point file "${file}" does not exist`);
-    }
-    parsedEntryPoints.push({
-      file,
-      symbol,
-    });
   }
 
   mergedSettings.mode = mergedSettings.mode ?? 'auto';

@@ -18,7 +18,7 @@ it('Fetchings user supplied settings', () => {
           '@a': 'src/a.ts',
         },
         ignorePatterns: ['src/b*'],
-        entryPoints: [{ file: 'src/a.ts', symbol: 'a' }],
+        entryPoints: [{ file: 'src/a.ts', symbols: ['a'] }],
       },
     },
   });

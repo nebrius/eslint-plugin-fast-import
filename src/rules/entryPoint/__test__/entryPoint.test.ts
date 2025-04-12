@@ -53,7 +53,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
           entryPoints: [
             {
               file: FILE_A.replace(ESLINT_CONFIG_DIR_DIR + '/', ''),
-              symbol: 'a',
+              symbols: ['a'],
             },
           ],
         },
