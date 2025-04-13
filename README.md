@@ -18,6 +18,9 @@
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
   - [Phase 3: Import graph analysis](#phase-3-import-graph-analysis)
 - [Limitations](#limitations)
+  - [All first party code must live inside `rootDir`](#all-first-party-code-must-live-inside-rootdir)
+  - [Barrel exporting from third-party/built-in modules are ignored](#barrel-exporting-from-third-partybuilt-in-modules-are-ignored)
+  - [Case insensitivity inconsistency in ESLint arguments](#case-insensitivity-inconsistency-in-eslint-arguments)
 - [Comparison](#comparison)
 - [Creating new rules](#creating-new-rules)
   - [getESMInfo(context)](#getesminfocontext)
@@ -278,7 +281,27 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ## Limitations
 
-TODO
+### All first party code must live inside `rootDir`
+
+If files exist outside of `rootDir` and are imported by files inside of `rootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-missing-imports](src/rules/missing/README.md) rule.
+
+### Barrel exporting from third-party/built-in modules are ignored
+
+Fast Import disables all checks on barrel imports from third partybuiltin modules. For example, if you do this:
+
+```js
+// a.ts
+export * from 'node:path';
+
+// b.ts
+import { fake } from './a';
+```
+
+Fast Import will not flag this as an error. This level of indirection is discouraged anyways, and is why Fast Import ships with the [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) rule.
+
+### Case insensitivity inconsistency in ESLint arguments
+
+If you pass a file pattern or path to ESLint, ESLint incosistenly applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`, and will crash.
 
 ## Comparison
 
