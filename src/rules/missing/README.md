@@ -106,3 +106,5 @@ console.log(path.joins('a', 'b'));
 ```
 
 Do you see the import bug? This code will crash, because `joins` does not exist in the `path` module. Given the level of indirection however, this rule cannot find this bug.
+
+The [no-external-barrel-reexports]('../externalBarrelReexports/README.md) prevents barrel exports from third party and built-in modules, which mitigates this edge case.
