@@ -299,6 +299,8 @@ import { fake } from './a';
 
 Fast Import will not flag this as an error. This level of indirection is discouraged anyways, and is why Fast Import ships with the [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) rule.
 
+For more details, see the limitations section of the [src/rules/missing/README.md#limitations](src/rules/missing/README.md)
+
 ### Case insensitivity inconsistency in ESLint arguments
 
 If you pass a file pattern or path to ESLint, ESLint incosistenly applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`, and will crash.

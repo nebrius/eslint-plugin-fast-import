@@ -1,8 +1,12 @@
 # @fast-import/no-cycle
 
-Ensures that there are no cycles in imports/reexports
+Ensures that there are no cycles in imports/reexports.
 
 ## Rule Details
+
+A cycle can occur when file A imports file B, which imports file C, which imports file A. Sometimes this pattern works just fine, but sometimes it can cause severe yet inscrutible bugs. Sometimes though, this leads to imports being `undefined` unexpectedly, even if that export is defined as `export const foo = a * 10;` and appears as if it would be impossible to be `undefined`. I've had exactly this bug take down entire servers before.
+
+It's also very difficult to reason about the safety of a given cycle, so it's safer to just prevent all cycles.
 
 Examples of _incorrect_ code
 
