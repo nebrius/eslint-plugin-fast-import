@@ -5,10 +5,11 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Rules](#rules)
+- [Performance and Tradeoffs](#performance-and-limitations)
 - [Frequently Asked Questions](#frequently-asked-questions)
 - [License](#license)
 
-Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
+Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors. Fast Import uses a novel algorithm that is significantly more performant than other import lint rules.
 
 ## Installation
 
@@ -17,6 +18,8 @@ npm install --save-dev eslint-plugin-fast-import
 ```
 
 ## Configuration
+
+TODO
 
 ## Rules
 
@@ -30,6 +33,14 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-missing-imports](src/rules/missing/README.md)                           | 💼   |
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 💼   |
 | [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 💼   |
+
+## Performance and Tradeoffs
+
+TODO: overview of algorithm
+
+TODO: show results
+
+TODO: talk about rootDir and impacts on performance, as well as inability to import outside of rootDir
 
 ## Frequently Asked Questions
 

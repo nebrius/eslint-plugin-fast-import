@@ -2,13 +2,12 @@ import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
-import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import jest from 'eslint-plugin-jest';
 import globals from 'globals';
 import { getDirname } from 'cross-dirname';
 import { includeIgnoreFile } from '@eslint/compat';
 import { join } from 'node:path';
-import fastEsm from './dist/plugin.js';
+import { recommended } from './dist/plugin.js';
 import { globalIgnores } from 'eslint/config';
 
 const compat = new FlatCompat({
@@ -21,33 +20,26 @@ export default tseslint.config(
   includeIgnoreFile(join(getDirname(), '.gitignore')),
   globalIgnores(['src/**/__test__/**/project/*', 'jest.config.ts']),
   {
-    settings: {
-      'import/resolver-next': [
-        createTypeScriptImportResolver({
-          alwaysTryTypes: true,
-        }),
-      ],
-      'fast-import': {
-        entryPoints: [
-          {
-            file: 'src/plugin.ts',
-            symbols: [
-              'default',
-              'getESMInfo',
-              'registerUpdateListener',
-              'isNonTestFile',
-            ],
-          },
-        ],
-        debugLogging: true,
-      },
-    },
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {
       globals: globals.node,
     },
   },
-  fastEsm.configs.recommended,
+  recommended({
+    entryPoints: [
+      {
+        file: 'src/plugin.ts',
+        symbols: [
+          'default',
+          'getESMInfo',
+          'registerUpdateListener',
+          'isNonTestFile',
+          'recommended',
+        ],
+      },
+    ],
+    debugLogging: true,
+  }),
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'

@@ -19,7 +19,9 @@ const settingsSchema = z.strictObject({
   debugLogging: z.boolean().optional(),
 });
 
-export type Settings = Omit<z.infer<typeof settingsSchema>, 'debugLogging'>;
+export type UserSettings = z.infer<typeof settingsSchema>;
+
+export type Settings = Omit<UserSettings, 'debugLogging'>;
 
 export function getUserSettings(
   settings: GenericContext['settings']
