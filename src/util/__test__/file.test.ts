@@ -1,5 +1,7 @@
-import { getDirname } from 'cross-dirname';
 import { join, resolve } from 'node:path';
+
+import { getDirname } from 'cross-dirname';
+
 import { getFiles } from '../files.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');

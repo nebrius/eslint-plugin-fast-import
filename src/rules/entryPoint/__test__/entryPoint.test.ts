@@ -1,11 +1,13 @@
-import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noEntryPointImports } from '../entryPoint.js';
-import { join } from 'node:path';
-import { getDirname, getFilename } from 'cross-dirname';
 import { readFileSync } from 'node:fs';
-import { _resetSettings } from '../../../settings/settings.js';
+import { join } from 'node:path';
+
+import { RuleTester } from '@typescript-eslint/rule-tester';
+import { getDirname, getFilename } from 'cross-dirname';
+
 import { _resetProjectInfo } from '../../../module/module.js';
+import { _resetSettings } from '../../../settings/settings.js';
 import { getEslintConfigDir } from '../../../settings/util.js';
+import { noEntryPointImports } from '../entryPoint.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const ESLINT_CONFIG_DIR_DIR = getEslintConfigDir(getFilename());

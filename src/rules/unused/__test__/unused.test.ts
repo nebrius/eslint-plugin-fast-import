@@ -1,7 +1,9 @@
-import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noUnusedExports } from '../unused.js';
 import { join } from 'node:path';
+
+import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
+
+import { noUnusedExports } from '../unused.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

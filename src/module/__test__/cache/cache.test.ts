@@ -1,15 +1,17 @@
-import { getDirname } from 'cross-dirname';
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { parse } from '@typescript-eslint/typescript-estree';
+import { getDirname } from 'cross-dirname';
+
+import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util.js';
+import { stripNodesFromAnalyzedInfo } from '../../../__test__/util.js';
 import {
   getProjectInfo,
   initializeProject,
   updateCacheForFile,
   updateCacheFromFileSystem,
 } from '../../module.js';
-import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util.js';
-import { stripNodesFromAnalyzedInfo } from '../../../__test__/util.js';
-import { parse } from '@typescript-eslint/typescript-estree';
-import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

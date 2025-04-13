@@ -1,7 +1,8 @@
-import { InternalError } from '../util/error.js';
 import { TSESTree } from '@typescript-eslint/typescript-estree';
 import { parse, simpleTraverse } from '@typescript-eslint/typescript-estree';
 import { readFileSync } from 'fs';
+
+import { InternalError } from '../util/error.js';
 
 type ImportDeclaration = TSESTree.ImportDeclaration | TSESTree.ImportExpression;
 

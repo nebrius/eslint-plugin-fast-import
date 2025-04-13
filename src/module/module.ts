@@ -1,9 +1,24 @@
+import { TSError } from '@typescript-eslint/typescript-estree';
+import type { TSESTree } from '@typescript-eslint/utils';
+
+import type { ParsedSettings } from '../settings/settings.js';
 import type {
   AnalyzedImport,
   AnalyzedProjectInfo,
   AnalyzedReexport,
 } from '../types/analyzed.js';
+import type { BaseProjectInfo } from '../types/base.js';
+import type { ResolvedProjectInfo } from '../types/resolved.js';
+import { isCodeFile } from '../util/code.js';
+import { InternalError } from '../util/error.js';
+import { debug, formatMilliseconds } from '../util/logging.js';
 import { computeAnalyzedInfo } from './computeAnalyzedInfo.js';
+import {
+  addBaseInfoForFile,
+  computeBaseInfo,
+  deleteBaseInfoForFile,
+  updateBaseInfoForFile,
+} from './computeBaseInfo.js';
 import {
   addResolvedInfoForFile,
   computeFolderTree,
@@ -11,21 +26,7 @@ import {
   deleteResolvedInfoForFile,
   updateResolvedInfoForFile,
 } from './computeResolvedInfo.js';
-import {
-  addBaseInfoForFile,
-  computeBaseInfo,
-  deleteBaseInfoForFile,
-  updateBaseInfoForFile,
-} from './computeBaseInfo.js';
-import { InternalError } from '../util/error.js';
-import type { BaseProjectInfo } from '../types/base.js';
-import type { ResolvedProjectInfo } from '../types/resolved.js';
-import type { ParsedSettings } from '../settings/settings.js';
-import { debug, formatMilliseconds } from '../util/logging.js';
-import type { TSESTree } from '@typescript-eslint/utils';
 import { parseFile } from './util.js';
-import { TSError } from '@typescript-eslint/typescript-estree';
-import { isCodeFile } from '../util/code.js';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;

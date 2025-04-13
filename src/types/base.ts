@@ -1,5 +1,6 @@
-import type { ParsedSettings } from '../settings/settings.js';
 import type { TSESTree } from '@typescript-eslint/utils';
+
+import type { ParsedSettings } from '../settings/settings.js';
 
 type Base = {
   /**

@@ -1,9 +1,10 @@
-import { spawn } from 'child_process';
-import { simpleGit } from 'simple-git';
-import { getDirname } from 'cross-dirname';
-import { join, resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import readLine from 'node:readline/promises';
+
+import { spawn } from 'child_process';
+import { getDirname } from 'cross-dirname';
+import { simpleGit } from 'simple-git';
 
 const ROOT_DIR = resolve(getDirname(), '..');
 const DRY_RUN = process.argv.includes('--dry-run');

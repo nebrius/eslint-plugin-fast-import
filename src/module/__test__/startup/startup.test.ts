@@ -1,4 +1,8 @@
+import { join } from 'node:path';
+
+import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
+
 import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util.js';
 import { stripNodesFromAnalyzedInfo } from '../../../__test__/util.js';
 import {
@@ -6,8 +10,6 @@ import {
   initializeProject,
   updateCacheForFile,
 } from '../../module.js';
-import { join } from 'node:path';
-import { parse } from '@typescript-eslint/typescript-estree';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

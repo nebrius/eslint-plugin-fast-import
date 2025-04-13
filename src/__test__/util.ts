@@ -7,12 +7,12 @@ import type {
   AnalyzedReexport,
 } from '../types/analyzed.js';
 import type {
-  BaseProjectInfo,
+  BaseCodeFileDetails,
   BaseExport,
   BaseImport,
   BaseOtherFileDetails,
+  BaseProjectInfo,
   BaseReexport,
-  BaseCodeFileDetails,
 } from '../types/base.js';
 import type {
   ResolvedCodeFileDetails,

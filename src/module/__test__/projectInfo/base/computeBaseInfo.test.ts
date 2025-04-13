@@ -1,15 +1,16 @@
+import { parse } from '@typescript-eslint/typescript-estree';
+import { getDirname } from 'cross-dirname';
 import { join } from 'path';
+
+import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
+import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
+import type { BaseImport, BaseReexport } from '../../../../types/base.js';
 import {
   addBaseInfoForFile,
   computeBaseInfo,
   deleteBaseInfoForFile,
   updateBaseInfoForFile,
 } from '../../../computeBaseInfo.js';
-import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
-import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
-import { getDirname } from 'cross-dirname';
-import { parse } from '@typescript-eslint/typescript-estree';
-import type { BaseImport, BaseReexport } from '../../../../types/base.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

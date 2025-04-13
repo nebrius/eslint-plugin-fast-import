@@ -2,8 +2,10 @@ import type { Stats } from 'node:fs';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { basename, dirname, join, relative } from 'node:path';
+
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
+
 import type { IgnorePattern } from '../settings/settings.js';
 import { InternalError } from './error.js';
 

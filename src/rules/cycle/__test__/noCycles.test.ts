@@ -1,7 +1,9 @@
-import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noCycle, _resetCycleMap } from '../cycle.js';
 import { join } from 'node:path';
+
+import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
+
+import { _resetCycleMap, noCycle } from '../cycle.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

@@ -1,4 +1,3 @@
-import { InternalError } from '../util/error.js';
 import type {
   AnalyzedBarrelImport,
   AnalyzedBarrelReexport,
@@ -10,6 +9,7 @@ import type {
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
 import type { ResolvedProjectInfo } from '../types/resolved.js';
+import { InternalError } from '../util/error.js';
 
 export function computeAnalyzedInfo(
   resolvedProjectInfo: ResolvedProjectInfo

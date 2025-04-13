@@ -1,9 +1,10 @@
+import { getDirname } from 'cross-dirname';
 import { join } from 'path';
+
 import type { StrippedResolvedProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromResolvedInfo } from '../../../../__test__/util.js';
-import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
-import { getDirname } from 'cross-dirname';
+import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_INDEX = join(TEST_PROJECT_DIR, 'index.ts');

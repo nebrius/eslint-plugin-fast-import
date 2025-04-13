@@ -1,5 +1,7 @@
-import { getDirname } from 'cross-dirname';
 import { join } from 'node:path';
+
+import { getDirname } from 'cross-dirname';
+
 import type { ParsedSettings } from '../../settings.js';
 import { getSettings } from '../../settings.js';
 

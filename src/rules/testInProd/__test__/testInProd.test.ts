@@ -1,9 +1,11 @@
-import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noTestImportsInProd } from '../testInProd.js';
 import { join } from 'node:path';
+
+import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
-import { _resetSettings } from '../../../settings/settings.js';
+
 import { _resetProjectInfo } from '../../../module/module.js';
+import { _resetSettings } from '../../../settings/settings.js';
+import { noTestImportsInProd } from '../testInProd.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

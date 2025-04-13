@@ -1,6 +1,6 @@
-import { createRule, getESMInfo, registerUpdateListener } from '../util.js';
 import type { AnalyzedProjectInfo } from '../../types/analyzed.js';
 import { InternalError } from '../../util/error.js';
+import { createRule, getESMInfo, registerUpdateListener } from '../util.js';
 
 type Options = [];
 type MessageIds = 'noCycles';

@@ -1,10 +1,11 @@
+import { getDirname } from 'cross-dirname';
 import { join } from 'path';
+
 import type { StrippedAnalyzedProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromAnalyzedInfo } from '../../../../__test__/util.js';
 import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
-import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
-import { getDirname } from 'cross-dirname';
+import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

@@ -1,7 +1,9 @@
-import ts from 'typescript';
 import { existsSync, readFileSync } from 'node:fs';
-import { warn } from '../util/logging.js';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
+
+import ts from 'typescript';
+
+import { warn } from '../util/logging.js';
 import type { Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
 

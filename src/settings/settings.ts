@@ -1,11 +1,13 @@
-import type { RequiredDeep } from 'type-fest';
-import { getTypeScriptSettings } from './typescript.js';
-import { debug, error } from '../util/logging.js';
+import { existsSync } from 'node:fs';
 import { isAbsolute, join, resolve, sep } from 'node:path';
+
+import type { RequiredDeep } from 'type-fest';
+
+import type { GenericContext } from '../types/context.js';
+import { debug, error } from '../util/logging.js';
+import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
-import { existsSync } from 'node:fs';
-import type { GenericContext } from '../types/context.js';
 
 export type IgnorePattern = {
   dir: string;

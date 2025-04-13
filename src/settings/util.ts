@@ -1,5 +1,5 @@
-import { dirname, join, resolve } from 'node:path';
 import { readdirSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 
 let eslintConfigDir: string | undefined;
 export function getEslintConfigDir(filename: string) {

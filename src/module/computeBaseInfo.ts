@@ -1,19 +1,21 @@
+import { readFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+
+import { TSError } from '@typescript-eslint/typescript-estree';
+import { TSESTree } from '@typescript-eslint/utils';
+
+import type { ParsedSettings } from '../settings/settings.js';
 import type {
   BaseBarrelImport,
   BaseCodeFileDetails,
   BaseProjectInfo,
 } from '../types/base.js';
+import { isCodeFile } from '../util/code.js';
+import { InternalError } from '../util/error.js';
+import { getFilesSync } from '../util/files.js';
+import { debug } from '../util/logging.js';
 import type { ExportDeclaration } from './util.js';
 import { parseFile, traverse } from './util.js';
-import { TSESTree } from '@typescript-eslint/utils';
-import { InternalError } from '../util/error.js';
-import { isCodeFile } from '../util/code.js';
-import { getFilesSync } from '../util/files.js';
-import type { ParsedSettings } from '../settings/settings.js';
-import { TSError } from '@typescript-eslint/typescript-estree';
-import { debug } from '../util/logging.js';
-import { readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
