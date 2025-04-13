@@ -4,10 +4,25 @@
 
 - [Installation](#installation)
 - [Configuration](#configuration)
+  - [Configuration options](#configuration-options)
+    - [rootDir: string](#rootdir-string)
+    - [alias: `Record<string, string>`](#alias-recordltstring-stringgt)
+    - [entryPoints: `Array<{ file: string, symbols: string[]}>`](#entrypoints-arraylt-file-string-symbols-stringgt)
+    - [ignorePatterns: `string[]`](#ignorepatterns-string)
+    - [mode: `'auto' | 'one-shot' | 'fix' | 'editor'`](#mode-auto--one-shot--fix--editor)
+    - [editorUpdate: `number`](#editorupdate-number)
 - [Rules](#rules)
-- [Performance and Tradeoffs](#performance-and-limitations)
+- [Performance](#performance)
+  - [Phase 1: AST analysis](#phase-1-ast-analysis)
+  - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
+  - [Phase 3: Import graph analysis](#phase-3-import-graph-analysis)
+- [Comparison](#comparison)
+- [Creating new rules](#creating-new-rules)
 - [Frequently Asked Questions](#frequently-asked-questions)
+  - [Is this plugin a replacement for eslint-plugin-import or eslint-plugin-import-x?](#is-this-plugin-a-replacement-for-eslint-plugin-import-or-eslint-plugin-import-x)
+  - [Why don't you use chokidar for file watching?](#why-dont-you-use-chokidar-for-file-watching)
 - [License](#license)
+
 
 Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors. Fast Import uses a novel algorithm that is significantly more performant than other import lint rules.
 
@@ -35,13 +50,15 @@ This will apply the recommended rules along with the default configuration.
 
 Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or suppliment these options.
 
-#### rootDir: string
+#### rootDir: `string`
 
-Fast Import uses `rootDir` to scan for files. When Fast Import start up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes remaining files.
+Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes remaining files.
 
 By default, Fast Import looks for a `tsconfig.json` file in the same directory as the ESLing configuration file, and uses the `rootDir` value from the TypeScript config file. If `tsconfig.json` does not exist or it does not set `rootDir`, then `rootDir` is set to the directory containing the ESLint configuration file.
 
-Performance warning: if you set `rootDir` to a folder contianing `node_modules`, performance will suffer. Even though files inside of `node_modules` are typically ignored, it still take a small amount of time to filter them out. This especially matters in `editor` mode.
+Performance warning: if you set `rootDir` to a folder contianing `node_modules`, performance will suffer. Even when files inside of `node_modules` are ignored, it still takes some time to filter them out. This especially matters in `editor` mode, where we rescan the filesystem at regular intervals.
+
+It is strongly recommended that you put your source code in a `./src` folder and set `rootDir` to `./src`.
 
 Example:
 
@@ -51,11 +68,11 @@ recommended({
 })
 ```
 
-Note: `rootDir` is relative to the directory containing your ESLint configuration file
+Note: `rootDir` is relative to the directory containing your ESLint configuration file.
 
-#### alias: Record&lt;string, string&gt;
+#### alias: `Record<string, string>`
 
-Import alias paths. For example, if you use Next.js with default configuration, then an alias is automatically set so that `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
+`alias` defines a set of module specifier aliases. For example, if you use Next.js with its default configuration, then an alias is automatically set so that `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
 
 Fast Import defaults to the values inside of `tsconfig.json`, with a few limitations:
 - Aliases that point to files outside of `rootDir`, or point to files inside of `node_modules`, are ignored
@@ -74,7 +91,7 @@ recommended({
 
 Note: patterns with a single star after them will match any symbols/files that start with the symbol/filepath.
 
-#### entryPoints: Array&lt;{ file: string, symbols: string[]}&gt;
+#### entryPoints: `Array<{ file: string, symbols: string[]}>`
 
 Entry points define exports that are not imported by code inside of the code base, but instead by code outside of the codebase.
 
@@ -95,21 +112,25 @@ recommended({
 })
 ```
 
-#### ignorePatterns
+#### ignorePatterns: `string[]`
 
-#### mode
+A list of ignore patterns, using the format used by `.gitignore` files. Files that match these patterns are excluded from analysis.
 
-One of `auto`, `one-shot`, `fix`, `editor`. When set to `auto`, Fast Import will attempt to set this value for you by inspecting the environment.
+By default, Fast Import includes the contents of all `.gitignore` files that apply to each file, taking into account nesting, between the file in question and the closest parent folder that contains a `.git` folder. In other words, if you have a fully fleshed out `.gitignore` setup, you can likely ignore this setting.
 
-`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint from the command line without the `--fix` flag. In this mode, Fast Import first creates a map of all files
+#### mode: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
-`fix` builds on `one-shot` by introducing a caching layer. Each time a rule is called, Fast Import updates cache if any imports/exports are modified.
+When set to `auto`, Fast Import will do it's best to set this value for you by inspecting the environment.
 
-Finally, `editor` adds a file watcher to looks for changes at a regular interval defined by [`editorUpdate`](#editorupdate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
+`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint from the command line without the `--fix` flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run.
+
+`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
+
+Finally, `editor` mode builds on `fix` mode by adding a file watcher to looks for changes at a regular interval defined by [`editorUpdate`](#editorupdate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
 
 Note: currently, VS Code is the only supported editor. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor.
 
-#### editorUpdate
+#### editorUpdate: `number`
 
 Defines the rate at which Fast Import looks for file changes, and defaults to once every 5 seconds.
 
@@ -126,11 +147,55 @@ Defines the rate at which Fast Import looks for file changes, and defaults to on
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 💼   |
 | [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 💼   |
 
-## Performance and Tradeoffs
+## Performance
 
-TODO: overview of algorithm
+Fast import works by using a pipelined algorithm that is very cache friendly. At its core, Fast Import works in three phases.
 
-TODO: show results
+### Phase 1: AST analysis
+
+This phase reads in every non-ignored file with a known JavaScript extension: `.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx` and parsed the file into an AST. The AST is then parsed into an import/export specific form optimized for import/export analysis.
+
+For example, the import statement `import { foo } from './bar'` gets boiled down to:
+
+```js
+{
+  importAlias: 'foo',
+  importName: 'foo'
+  importType: 'single',
+  isTypeImport; false,
+  moduleSpecifier: './bar',
+  statementNote: <AST Node of entire import statement>
+  reportNode: <AST Node of foo>
+}
+```
+
+This phase is by far the most performance intensive of the three phases, comprising over 90% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This fact is exploited at the caching layer, because changes to any file do not result in cache invalidations to any other file.
+
+Details for the information computed in this stage can be viewed in the [types file for base information](./src/types/base.ts).
+
+### Phase 2: Module specifier resolution
+
+This phase goes through every import and reexport, and resolves the module specifier to one of three types: a Node.js built-in module, a third party module in `node_modules`, or a file within `rootDir`.
+
+This phase is the second most performance intensive of the three phases, comprising 5-6% of total execution time on a cold cache. In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward, and typically does not impact a large number of other file caches. This means we can still use caching to limit how much recomputation is needed.
+
+Details for the information computed in this stage can be viewed in the [types file for resolved information](./src/types/resolved.ts).
+
+### Phase 3: Import graph analysis
+
+This final stage traverses the import graph created in Phase 2 to determine the ultimate source of all imports/reexports. In addition, we determined every time an export is imported in another file, and saves that information for later.
+
+This phase is the least performance intensive of the three, comprising just 1-2% of total execution time on a cold cache. It is also the most entangled and difficult to cache. As a result, Fast Import does not do any caching during this phase,since it has little effect on overal performance anyways.
+
+Details for the information computed in this stage can be viewed in the [types file for resolved information](./src/types/analyzed.ts).
+
+## Comparison
+
+TODO
+
+## Creating new rules
+
+TODO
 
 ## Frequently Asked Questions
 
