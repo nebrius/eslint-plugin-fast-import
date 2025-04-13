@@ -36,6 +36,7 @@
     "eslint-config-prettier": "^10.1.0",
     "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
     "global": "^4.4.0",
     "prettier": "^3.4.2",
     "simple-git": "^3.27.0",

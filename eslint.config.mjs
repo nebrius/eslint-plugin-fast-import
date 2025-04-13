@@ -1,14 +1,17 @@
-import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import tseslint from 'typescript-eslint';
-import jest from 'eslint-plugin-jest';
-import globals from 'globals';
-import { getDirname } from 'cross-dirname';
-import { includeIgnoreFile } from '@eslint/compat';
 import { join } from 'node:path';
-import { recommended } from './dist/plugin.js';
+
+import { includeIgnoreFile } from '@eslint/compat';
+import { FlatCompat } from '@eslint/eslintrc';
+import js from '@eslint/js';
+import { getDirname } from 'cross-dirname';
 import { globalIgnores } from 'eslint/config';
+import jest from 'eslint-plugin-jest';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+
+import { recommended } from './dist/plugin.js';
 
 const compat = new FlatCompat({
   baseDirectory: getDirname(),
@@ -59,6 +62,14 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  },
+  {
+    plugins: {
+      'simple-import-sort': simpleImportSort,
+    },
+    rules: {
+      'simple-import-sort/imports': 'error',
     },
   },
   {
