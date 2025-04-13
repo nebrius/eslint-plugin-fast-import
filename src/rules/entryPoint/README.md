@@ -1,4 +1,4 @@
-# @fast-import/no-entry-point-imports
+# fast-import/no-entry-point-imports
 
 Ensures that exports in entry point exports are not imported.
 

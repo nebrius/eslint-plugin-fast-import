@@ -11,7 +11,7 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-import { recommended } from './dist/plugin.js';
+import { all } from './dist/plugin.js';
 
 const compat = new FlatCompat({
   baseDirectory: getDirname(),
@@ -28,7 +28,7 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
-  recommended({
+  all({
     entryPoints: [
       {
         file: 'src/plugin.ts',
@@ -38,6 +38,7 @@ export default tseslint.config(
           'registerUpdateListener',
           'isNonTestFile',
           'recommended',
+          'all',
         ],
       },
     ],

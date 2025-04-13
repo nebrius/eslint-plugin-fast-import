@@ -1,5 +1,6 @@
+import { join } from 'node:path';
+
 import { getDirname } from 'cross-dirname';
-import { join } from 'path';
 
 import type { StrippedAnalyzedProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromAnalyzedInfo } from '../../../../__test__/util.js';

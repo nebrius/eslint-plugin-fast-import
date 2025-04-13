@@ -42,16 +42,21 @@ npm install --save-dev eslint-plugin-fast-import
 
 ## Rules
 
-💼 = Enabled in recommended config
+💼 Configurations enabled in.
+🔧 Automatically fixable by the --fix CLI option.
+☑️ Set in the recommended configuration.
+🧰 Set in the all configuration.
 
-| Name                                                                        | 💼   |
-| --------------------------------------------------------------------------- | --- |
-| [no-unused-exports](src/rules/unused/README.md)                             | 💼   |
-| [no-cycle](src/rules/cycle/README.md)                                       | 💼   |
-| [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 💼   |
-| [no-missing-imports](src/rules/missing/README.md)                           | 💼   |
-| [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 💼   |
-| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 💼   |
+| Name                                                                        | 💼   | 🔧   |
+| --------------------------------------------------------------------------- | --- | --- |
+| [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
+| [no-cycle](src/rules/cycle/README.md)                                       | 🧰 ☑️ |     |
+| [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 🧰 ☑️ |     |
+| [no-missing-imports](src/rules/missing/README.md)                           | 🧰 ☑️ |     |
+| [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
+| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
+| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
+| [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
 
 ## Configuration
 

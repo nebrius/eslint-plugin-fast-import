@@ -1,6 +1,7 @@
+import { join } from 'node:path';
+
 import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
-import { join } from 'path';
 
 import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
