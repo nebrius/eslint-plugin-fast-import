@@ -2,6 +2,7 @@ import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
+import { getEslintConfigDir } from '../settings/util.js';
 import type {
   AnalyzedImport,
   AnalyzedProjectInfo,
@@ -32,10 +33,18 @@ let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
 let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
 
-function getEntryPointCheck(entryPoints: ParsedSettings['entryPoints']) {
+function getEntryPointCheck(
+  eslintConfigDir: string,
+  entryPoints: ParsedSettings['entryPoints']
+) {
   return (filePath: string, symbolName: string) =>
+    // TODO: rewrite this so symbols are grouped with files for faster checks
     entryPoints.some(
-      ({ file, symbol }) => file === filePath && symbol === symbolName
+      ({ file, symbol }) =>
+        // We're using the ignore library in reverse fashion: we're using it to
+        // identify when a file is _included_, not _excluded_
+        file.ignores(filePath.replace(eslintConfigDir + '/', '')) &&
+        symbol === symbolName
     );
 }
 
@@ -65,7 +74,10 @@ export function initializeProject({
     wildcardAliases,
     fixedAliases,
     ignorePatterns,
-    isEntryPointCheck: getEntryPointCheck(entryPoints),
+    isEntryPointCheck: getEntryPointCheck(
+      getEslintConfigDir(rootDir),
+      entryPoints
+    ),
   });
   const baseEnd = Date.now();
 
@@ -147,7 +159,10 @@ export function updateCacheFromFileSystem(
           addBaseInfoForFile(
             {
               ...parseFile(filePath),
-              isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+              isEntryPointCheck: getEntryPointCheck(
+                getEslintConfigDir(settings.rootDir),
+                settings.entryPoints
+              ),
             },
             baseProjectInfo
           );
@@ -193,7 +208,10 @@ export function updateCacheFromFileSystem(
         updateBaseInfoForFile(
           {
             ...parseFile(filePath),
-            isEntryPointCheck: getEntryPointCheck(settings.entryPoints),
+            isEntryPointCheck: getEntryPointCheck(
+              getEslintConfigDir(settings.rootDir),
+              settings.entryPoints
+            ),
           },
           baseProjectInfo
         );
@@ -247,10 +265,10 @@ export function updateCacheForFile(
     filePath,
     fileContents,
     ast,
-    isEntryPointCheck: (filePath: string, symbolName: string) =>
-      entryPoints.some(
-        ({ file, symbol }) => file === filePath && symbol === symbolName
-      ),
+    isEntryPointCheck: getEntryPointCheck(
+      getEslintConfigDir(rootDir),
+      entryPoints
+    ),
   };
 
   // Check if we're updating file info or adding a new file

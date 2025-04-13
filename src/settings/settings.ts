@@ -1,6 +1,7 @@
-import { existsSync } from 'node:fs';
 import { isAbsolute, join, resolve, sep } from 'node:path';
 
+import type { Ignore } from 'ignore';
+import ignore from 'ignore';
 import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
@@ -21,7 +22,7 @@ export type ParsedSettings = Omit<
   ignorePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
-  entryPoints: Array<{ file: string; symbol: string }>;
+  entryPoints: Array<{ file: Ignore; symbol: string }>;
 };
 
 function argsInclude(strs: string[]) {
@@ -138,12 +139,8 @@ export function getSettings(
           `Invalid entry point file "${file}". Entry point files must be relative to the directory with your ESLint config file, not absolute`
         );
       }
-      const normalizedFile = resolve(join(eslintConfigDir, file));
-      if (!existsSync(normalizedFile)) {
-        throw new Error(`Entry point file "${normalizedFile}" does not exist`);
-      }
       parsedEntryPoints.push({
-        file: normalizedFile,
+        file: ignore().add(file),
         symbol,
       });
     }
@@ -171,8 +168,11 @@ export function getSettings(
     }
   }
   debug(`Entry points:`);
-  for (const { file, symbol } of parsedEntryPoints) {
-    debug(`  ${file.replace(eslintConfigDir + sep, '')}: ${symbol}`);
+  for (const { file, symbols } of entryPoints) {
+    debug(`  ${file.replace(eslintConfigDir + sep, '')}:`);
+    for (const symbol of symbols) {
+      debug(`    ${symbol}`);
+    }
   }
 
   const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
