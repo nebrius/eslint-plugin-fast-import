@@ -3,7 +3,7 @@ import type { AnalyzedProjectInfo } from '../../types/analyzed.js';
 import { InternalError } from '../../util/error.js';
 
 type Options = [];
-type MessageIds = 'noCircularImports';
+type MessageIds = 'noCycles';
 
 function checkFile(
   originalFilePath: string,
@@ -62,31 +62,31 @@ function checkFile(
   return false;
 }
 
-// Map of filepaths to imports/reexports with circular dependencies
-const circularImportMap = new Map<string, string[]>();
+// Map of filepaths to imports/reexports with cycle dependencies
+const cycleMap = new Map<string, string[]>();
 
 registerUpdateListener(() => {
-  circularImportMap.clear();
+  cycleMap.clear();
 });
 
 // This is only used in tests, since update listeners aren't guaranteed to
 // be called on each run
 // eslint-disable-next-line fast-import/no-unused-exports
-export function _resetCircularMap() {
-  circularImportMap.clear();
+export function _resetCycleMap() {
+  cycleMap.clear();
 }
 
-export const noCircularImports = createRule<Options, MessageIds>({
-  name: 'no-circular-imports',
+export const noCycle = createRule<Options, MessageIds>({
+  name: 'no-cycle',
   meta: {
     docs: {
-      description: 'Ensures that there are no circular imports',
+      description: 'Ensures that there are no cycles in imports/reexports',
     },
     schema: [],
     fixable: undefined,
     type: 'problem',
     messages: {
-      noCircularImports: 'Imports cannot be circular',
+      noCycles: 'Imports/reexports cannot form a cycle',
     },
   },
   defaultOptions: [],
@@ -102,9 +102,9 @@ export const noCircularImports = createRule<Options, MessageIds>({
     }
 
     // If we recomputed on this run, then we need to recompute cycles
-    if (!circularImportMap.has(context.filename)) {
+    if (!cycleMap.has(context.filename)) {
       const importedFilesSearched = new Set<string>();
-      const circularImportNodes: string[] = [];
+      const cycleNodes: string[] = [];
       for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
         if (
           !('resolvedModulePath' in importEntry) ||
@@ -123,28 +123,28 @@ export const noCircularImports = createRule<Options, MessageIds>({
             []
           )
         ) {
-          circularImportNodes.push(importEntry.resolvedModulePath);
+          cycleNodes.push(importEntry.resolvedModulePath);
         }
       }
-      circularImportMap.set(context.filename, circularImportNodes);
+      cycleMap.set(context.filename, cycleNodes);
     }
 
-    const circularImports = circularImportMap.get(context.filename);
+    const cycleImports = cycleMap.get(context.filename);
     /* istanbul ignore if */
-    if (!circularImports) {
+    if (!cycleImports) {
       throw new InternalError(
-        `Circular imports are undefined for ${context.filename}`
+        `Cycle list is undefined for ${context.filename}`
       );
     }
 
-    for (const circularImport of circularImports) {
+    for (const cycleImport of cycleImports) {
       for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
         if (
           importEntry.moduleType === 'firstPartyCode' &&
-          importEntry.resolvedModulePath === circularImport
+          importEntry.resolvedModulePath === cycleImport
         ) {
           context.report({
-            messageId: 'noCircularImports',
+            messageId: 'noCycles',
             node: importEntry.statementNode,
           });
           continue;

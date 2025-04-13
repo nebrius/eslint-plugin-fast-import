@@ -16,9 +16,9 @@ const FILE_F = join(TEST_PROJECT_DIR, 'f.ts');
 const FILE_G = join(TEST_PROJECT_DIR, 'g.ts');
 const FILE_H = join(TEST_PROJECT_DIR, 'h.json');
 
-const CIRCULAR_FILE_A = join(TEST_PROJECT_DIR, 'circular-a.js');
-const CIRCULAR_FILE_B = join(TEST_PROJECT_DIR, 'circular-b.js');
-const CIRCULAR_FILE_C = join(TEST_PROJECT_DIR, 'circular-c.js');
+const CYCLE_FILE_A = join(TEST_PROJECT_DIR, 'cycle-a.js');
+const CYCLE_FILE_B = join(TEST_PROJECT_DIR, 'cycle-b.js');
+const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
 
 const EXPECTED: StrippedAnalyzedProjectInfo = {
   files: new Map([
@@ -174,7 +174,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
       },
     ],
     [
-      CIRCULAR_FILE_A,
+      CYCLE_FILE_A,
       {
         exports: [],
         fileType: 'code',
@@ -187,17 +187,17 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             importedByFiles: [],
             isEntryPoint: false,
             isTypeReexport: false,
-            moduleSpecifier: './circular-b',
+            moduleSpecifier: './cycle-b',
             moduleType: 'firstPartyCode',
             reexportType: 'single',
-            resolvedModulePath: CIRCULAR_FILE_B,
+            resolvedModulePath: CYCLE_FILE_B,
             rootModuleType: undefined,
           },
         ],
       },
     ],
     [
-      CIRCULAR_FILE_B,
+      CYCLE_FILE_B,
       {
         exports: [],
         fileType: 'code',
@@ -210,17 +210,17 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             importedByFiles: [],
             isEntryPoint: false,
             isTypeReexport: false,
-            moduleSpecifier: './circular-c',
+            moduleSpecifier: './cycle-c',
             moduleType: 'firstPartyCode',
             reexportType: 'single',
-            resolvedModulePath: CIRCULAR_FILE_C,
+            resolvedModulePath: CYCLE_FILE_C,
             rootModuleType: undefined,
           },
         ],
       },
     ],
     [
-      CIRCULAR_FILE_C,
+      CYCLE_FILE_C,
       {
         exports: [],
         fileType: 'code',
@@ -233,10 +233,10 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             importedByFiles: [],
             isEntryPoint: false,
             isTypeReexport: false,
-            moduleSpecifier: './circular-a',
+            moduleSpecifier: './cycle-a',
             moduleType: 'firstPartyCode',
             reexportType: 'single',
-            resolvedModulePath: CIRCULAR_FILE_A,
+            resolvedModulePath: CYCLE_FILE_A,
             rootModuleType: undefined,
           },
         ],

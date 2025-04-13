@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { noCircularImports, _resetCircularMap } from '../circular.js';
+import { noCycle, _resetCycleMap } from '../cycle.js';
 import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 
@@ -7,7 +7,7 @@ const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 
 beforeEach(() => {
-  _resetCircularMap();
+  _resetCycleMap();
 });
 
 const ruleTester = new RuleTester({
@@ -21,7 +21,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('no-circular-exports', noCircularImports, {
+ruleTester.run('no-cycle', noCycle, {
   valid: [
     {
       code: `export const a = 10;`,
@@ -44,7 +44,7 @@ export const a = 10;
 console.log(c);
 `,
       filename: FILE_A,
-      errors: [{ messageId: 'noCircularImports' }],
+      errors: [{ messageId: 'noCycles' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
@@ -60,7 +60,7 @@ export const a = 10;
 console.log(c);
 `,
       filename: FILE_A,
-      errors: [{ messageId: 'noCircularImports' }],
+      errors: [{ messageId: 'noCycles' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
