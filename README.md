@@ -12,7 +12,7 @@
     - [mode: `'auto' | 'one-shot' | 'fix' | 'editor'`](#mode-auto--one-shot--fix--editor)
     - [editorUpdate: `number`](#editorupdate-number)
 - [Rules](#rules)
-- [Performance](#performance)
+- [Algorithm](#algorithm)
   - [Phase 1: AST analysis](#phase-1-ast-analysis)
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
   - [Phase 3: Import graph analysis](#phase-3-import-graph-analysis)
@@ -147,7 +147,7 @@ Defines the rate at which Fast Import looks for file changes, and defaults to on
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 💼   |
 | [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 💼   |
 
-## Performance
+## Algorithm
 
 Fast import works by using a pipelined algorithm that is very cache friendly. At its core, Fast Import works in three phases.
 
@@ -195,7 +195,48 @@ TODO
 
 ## Creating new rules
 
-TODO
+Fast import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively common example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) for a complex example.
+
+This package exports three helper functions:
+
+### getESMInfo(context)
+
+This is the most important of the three functions. If the file represented by the ESLint context has been analyzed Fast Import, three pieces of information are returned (otherwise `undefined` is returned)
+
+- `fileInfo: AnalyzedCodeFileDetails`: The imports, reexports, and exports of the current file
+- `projectInfo: AnalyzedProjectInfo`: The imports, reexports, and exports of the entire project
+- `settings: ParsedSettings`: The computed settings, with all defaults applied, used by Fast Import
+
+Each import, export, and reexport entry includes two AST nodes: the node for the entire statement, and a "report" node that is almost always what you want to pass to `context.reportError`. The report node is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement node represents all of the code, and `reportNode` is scoped to just `foo`.
+
+When creating a rule, you shouldn't traverse the AST yourself, since the AST has been traversed. Each `context` callback should look something like this:
+
+```js
+create(context) {
+  const esmInfo = getESMInfo(context);
+  if (!esmInfo) {
+    return {};
+  }
+
+  const { fileInfo } = esmInfo;
+  // fileType indicates if this is a JS parseable file, or something else such as a JSON, PNG, etc
+  if (fileInfo.fileType !== 'code') {
+    return {};
+  }
+
+  // Do checks here
+
+  return {};
+}
+```
+
+### registerUpdateListener(listener)
+
+Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on the `registerUpdateListener` callback to be notified any time the cahce is updated.
+
+### isNonTestFile(filePath)
+
+A helper function to determine, using Fast Imports algorithm, whether or not a given file path represents a test file. Currently, a file is considered a test file if either a) the file is directly or indirectly inside a folder called `__test__` and/or b) the file includes `.test.` in it's name.
 
 ## Frequently Asked Questions
 
