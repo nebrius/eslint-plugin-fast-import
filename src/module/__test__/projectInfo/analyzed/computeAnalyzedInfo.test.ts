@@ -86,7 +86,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
           },
           {
             importType: 'single',
-            moduleSpecifier: './g',
+            moduleSpecifier: './g?raw',
             importName: 'SourceCode',
             importAlias: 'SourceCode',
             resolvedModulePath: FILE_G,

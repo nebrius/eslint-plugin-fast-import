@@ -382,6 +382,11 @@ function resolveModuleSpecifier({
   // This function takes in a bath that is "absolute" but relative to rootDir, excluding the leading /
   function resolveFirstPartyImport(absolutishFilePath: string) {
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+
+    // Check if this uses a Vite style import hints, and strip them out if so
+    if (absolutishFilePath.includes('?')) {
+      absolutishFilePath = absolutishFilePath.split('?')[0];
+    }
     const segments = absolutishFilePath.split('/').filter((s) => s);
     let lastSegment = segments.pop();
     const folderSegments = [...segments];
