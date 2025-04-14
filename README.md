@@ -290,6 +290,10 @@ Details for the information computed in this stage can be viewed in the [types f
 
 If files exist outside of `rootDir` and are imported by files inside of `rootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-missing-imports](src/rules/missing/README.md) rule.
 
+### CommonJS is not supported
+
+If your code base mixes CommonJS and ESM, then this plugin will report any imports of CommonJS exports as invalid imports. If you use mixed CommonJS/ESM or CommonJS only, then you should not use this plugin.
+
 ### Barrel exporting from third-party/built-in modules are ignored
 
 Fast Import disables all checks on barrel imports from third partybuiltin modules. For example, if you do this:

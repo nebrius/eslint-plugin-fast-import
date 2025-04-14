@@ -39,7 +39,6 @@ export default tseslint.config(
         'all',
       ],
     },
-    rootDir: '.',
     debugLogging: true,
   }),
   eslintPluginPrettierRecommended,

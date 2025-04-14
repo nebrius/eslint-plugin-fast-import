@@ -26,9 +26,8 @@ export const noUnusedExports = createRule<
     fixable: undefined,
     type: 'problem',
     messages: {
-      noUnusedExports: 'Exports must be imported in another file',
-      noTestOnlyImports:
-        'Exports in non-test files must be imported by other non-test files',
+      noUnusedExports: 'Export "{{name}}" must be imported in another file',
+      noTestOnlyImports: 'Export "{{name}}" must be imported by non-test files',
     },
   },
   defaultOptions: [
@@ -75,6 +74,9 @@ export const noUnusedExports = createRule<
         context.report({
           messageId: 'noUnusedExports',
           node: exportEntry.reportNode,
+          data: {
+            name: exportEntry.exportName || '<unnamed>',
+          },
         });
       }
 
@@ -91,6 +93,9 @@ export const noUnusedExports = createRule<
           context.report({
             messageId: 'noTestOnlyImports',
             node: exportEntry.reportNode,
+            data: {
+              name: exportEntry.exportName || '<unnamed>',
+            },
           });
         }
       }

@@ -10,7 +10,8 @@ export const noMissingImports = createRule({
     fixable: undefined,
     type: 'problem',
     messages: {
-      noMissingImports: 'Import does not point to a valid first party export',
+      noMissingImports:
+        'Import "{{name}}" does not point to a valid first party export',
       noTransientDependencies:
         'Third party module specifier "{{specifier}}" is not listed in package.json.\n\nIf this module specifier points to first party code, then you likely found a bug in fast-import. Please report it.',
     },
@@ -77,6 +78,9 @@ export const noMissingImports = createRule({
         context.report({
           node: importEntry.reportNode,
           messageId: 'noMissingImports',
+          data: {
+            name: importEntry.importName,
+          },
         });
       }
     }

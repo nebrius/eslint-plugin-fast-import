@@ -16,7 +16,8 @@ export const nodePrefix = createRule({
     fixable: 'code',
     type: 'problem',
     messages: {
-      missingNodePrefix: 'Import must use the `node:`',
+      missingNodePrefix:
+        'Import of Node.js built-in modules must use the `node:` prefix',
     },
   },
   defaultOptions: [],

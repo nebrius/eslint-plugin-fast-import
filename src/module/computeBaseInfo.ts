@@ -48,21 +48,25 @@ export function computeBaseInfo({
 
   for (const packageJson of packageJsons) {
     const packageJsonContents = readFileSync(packageJson, 'utf-8');
-    try {
-      const parsedPackageJson = JSON.parse(packageJsonContents) as {
-        dependencies: Record<string, string>;
-        devDependencies: Record<string, string>;
-        peerDependencies: Record<string, string>;
-      };
-      info.availableThirdPartyDependencies.set(dirname(packageJson), [
-        ...Object.keys(parsedPackageJson.dependencies),
-        ...Object.keys(parsedPackageJson.devDependencies),
-        ...Object.keys(parsedPackageJson.peerDependencies),
-      ]);
-    } catch {
-      // Swallow parse errors to recover and parse at least something
-      continue;
+    const parsedPackageJson = JSON.parse(packageJsonContents) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+    };
+    const dependencies: string[] = [];
+    if (parsedPackageJson.dependencies) {
+      dependencies.push(...Object.keys(parsedPackageJson.dependencies));
     }
+    if (parsedPackageJson.devDependencies) {
+      dependencies.push(...Object.keys(parsedPackageJson.devDependencies));
+    }
+    if (parsedPackageJson.peerDependencies) {
+      dependencies.push(...Object.keys(parsedPackageJson.peerDependencies));
+    }
+    info.availableThirdPartyDependencies.set(
+      dirname(packageJson),
+      dependencies
+    );
   }
 
   for (const { filePath } of files) {
