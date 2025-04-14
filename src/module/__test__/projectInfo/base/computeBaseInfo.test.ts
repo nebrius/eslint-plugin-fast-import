@@ -333,6 +333,11 @@ const EXPECTED: StrippedBaseProjectInfo = {
             isEntryPoint: false,
             isTypeExport: true,
           },
+          {
+            exportName: 'd',
+            isEntryPoint: false,
+            isTypeExport: false,
+          },
         ],
         fileType: 'code',
         imports: [],

@@ -800,6 +800,19 @@ function computeFileDetails({
           break;
         }
 
+        // export import Foo = Bar;
+        case TSESTree.AST_NODE_TYPES.TSImportEqualsDeclaration: {
+          const exportName = statementNode.declaration.id.name;
+          fileDetails.exports.push({
+            statementNode,
+            reportNode: statementNode.declaration,
+            exportName,
+            isTypeExport: statementNode.exportKind === 'type',
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
+          });
+          break;
+        }
+
         default: {
           // First we check if this is a default export, since we can still
           // process it, even if we can't select a particularly useful specifier
@@ -819,19 +832,10 @@ function computeFileDetails({
             break;
           }
 
-          // Otherwise, we can't process this node. Note: We don't use
-          // UnknownNodeTypeError here because this is typed as a general
-          // declaration, which includes a bunch of statements that actual
-          // exports don't support (and would be a syntax error), such as:
-          // `export import { foo } from 'bar'`
-          /* istanbul ignore next */
-          throw new InternalError(
-            `unsupported declaration type ${statementNode.declaration.type}`,
-            {
-              filePath,
-              fileContents,
-              node: statementNode,
-            }
+          throw new UnknownNodeTypeError(
+            filePath,
+            fileContents,
+            statementNode.declaration
           );
         }
       }
