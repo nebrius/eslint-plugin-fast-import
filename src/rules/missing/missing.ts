@@ -97,6 +97,9 @@ export const noMissingImports = createRule({
         context.report({
           node: reexportEntry.reportNode,
           messageId: 'noMissingImports',
+          data: {
+            name: reexportEntry.exportName,
+          },
         });
       }
     }
