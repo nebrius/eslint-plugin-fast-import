@@ -102,6 +102,7 @@ export async function getFiles(
 }
 
 let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
+const ignoreCache = new Map<string, boolean>();
 export function isFileIgnored(rootDir: string, filePath: string) {
   /* istanbul ignore if */
   if (!ignores) {
@@ -110,14 +111,24 @@ export function isFileIgnored(rootDir: string, filePath: string) {
   if (!filePath.startsWith(rootDir)) {
     return true;
   }
+
+  // Get the file from the cache, if it's already cached
+  const fileCacheResult = ignoreCache.get(filePath);
+  if (typeof fileCacheResult === 'boolean') {
+    return fileCacheResult;
+  }
+
+  // Otherwise compare with ignore
   for (const { dir, ig } of ignores) {
     // Ignore file paths are relative to the directory the ignore file is in,
     // and needs files passed in to check to also be relative to that same
     // directory, so we get the relative path to the ignore file directory
     if (filePath.startsWith(dir) && ig.ignores(relative(dir, filePath))) {
+      ignoreCache.set(filePath, true);
       return true;
     }
   }
+  ignoreCache.set(filePath, false);
   return false;
 }
 
@@ -171,26 +182,23 @@ function initializeIgnores(
   // folder, or even in a monorepo. In these cases, there is likely a gitignore
   // file(s) futher up the tree
   const extraIgnoreFiles: string[] = [];
-  const rootDirContents = readdirSync(rootDir);
-  if (!rootDirContents.includes('.git')) {
-    let currentDir = dirname(rootDir);
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (true) {
-      const currentDirContents = readdirSync(currentDir);
-      if (currentDirContents.includes('.gitignore')) {
-        extraIgnoreFiles.push(join(currentDir, '.gitignore'));
-      }
-      if (
-        // If we found the git folder, bail
-        currentDirContents.includes('.git') ||
-        // If we're at the root folder of the file system, bail. Note: we do the
-        // check this way to support both UNIX and Windows filesystems
-        currentDir === dirname(rootDir)
-      ) {
-        break;
-      }
-      currentDir = dirname(rootDir);
+  let currentDir = rootDir;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  while (true) {
+    const currentDirContents = readdirSync(currentDir);
+    if (currentDirContents.includes('.gitignore')) {
+      extraIgnoreFiles.push(join(currentDir, '.gitignore'));
     }
+    if (
+      // If we found the git folder, bail
+      currentDirContents.includes('.git') ||
+      // If we're at the root folder of the file system, bail. Note: we do the
+      // check this way to support both UNIX and Windows filesystems
+      currentDir === dirname(rootDir)
+    ) {
+      break;
+    }
+    currentDir = dirname(rootDir);
   }
 
   // Normalize and read in all ignore file contents

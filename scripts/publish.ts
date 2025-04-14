@@ -1,8 +1,8 @@
+import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import readLine from 'node:readline/promises';
 
-import { spawn } from 'child_process';
 import { getDirname } from 'cross-dirname';
 import { simpleGit } from 'simple-git';
 
