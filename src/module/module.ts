@@ -37,15 +37,16 @@ function getEntryPointCheck(
   eslintConfigDir: string,
   entryPoints: ParsedSettings['entryPoints']
 ) {
-  return (filePath: string, symbolName: string) =>
-    // TODO: rewrite this so symbols are grouped with files for faster checks
-    entryPoints.some(
-      ({ file, symbol }) =>
-        // We're using the ignore library in reverse fashion: we're using it to
-        // identify when a file is _included_, not _excluded_
-        file.ignores(filePath.replace(eslintConfigDir + '/', '')) &&
-        symbol === symbolName
-    );
+  return (filePath: string, symbolName: string) => {
+    for (const { file, symbols } of entryPoints) {
+      // We're using the ignore library in reverse fashion: we're using it to
+      // identify when a file is _included_, not _excluded_
+      if (file.ignores(filePath.replace(eslintConfigDir + '/', ''))) {
+        return symbols.includes(symbolName);
+      }
+    }
+    return false;
+  };
 }
 
 // We need to reset settings between runs, since some tests try different settings

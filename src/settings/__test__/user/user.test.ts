@@ -20,7 +20,7 @@ it('Fetchings user supplied settings', () => {
           '@a': 'src/a.ts',
         },
         ignorePatterns: ['src/b*'],
-        entryPoints: [{ file: 'src/a.ts', symbols: ['a'] }],
+        entryPoints: { 'src/a.ts': ['a'] },
       },
     },
   });
@@ -42,7 +42,7 @@ it('Fetchings user supplied settings', () => {
   expect(entryPoints).toHaveLength(1);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
   expect(entryPoints[0].file.ignores('src/b.ts')).toBeFalsy();
-  expect(entryPoints[0].symbol).toEqual('a');
+  expect(entryPoints[0].symbols).toEqual(['a']);
 });
 
 it('Throws on invalid user supplied mode', () => {

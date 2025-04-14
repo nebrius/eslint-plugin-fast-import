@@ -29,19 +29,16 @@ export default tseslint.config(
     },
   },
   all({
-    entryPoints: [
-      {
-        file: 'src/plugin.ts',
-        symbols: [
-          'default',
-          'getESMInfo',
-          'registerUpdateListener',
-          'isNonTestFile',
-          'recommended',
-          'all',
-        ],
-      },
-    ],
+    entryPoints: {
+      'src/plugin.ts': [
+        'default',
+        'getESMInfo',
+        'registerUpdateListener',
+        'isNonTestFile',
+        'recommended',
+        'all',
+      ],
+    },
     debugLogging: true,
   }),
   eslintPluginPrettierRecommended,

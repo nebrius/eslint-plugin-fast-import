@@ -91,4 +91,22 @@ This rule takes an options object with the following property:
 
 ## Limitations
 
+### .d.ts exports
+
 Exports listed in `.d.ts` files are not checked. This behavior is desired when `.d.ts` files declair ambient types, aka types for third party modules. However, if a `.d.ts` file is used to declare types for a neighboring `.js` file and exports types not present in the `.js` file, then these exports are not checked for usage.
+
+### Barrel imports
+
+If an export is later imported as a barrel import, then this rule will not flag if that export is unused or not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition is referenced. Take the following example:
+
+```js
+// a.ts
+export const a1 = 10;
+export const a2 = 10;
+
+// b.ts
+import * as a from './a';
+console.log(a1);
+```
+
+In this example, `a2` is not actually used, but we can't determine this concretely. While this specific example is simple, we can imagine more complicated cases where `a` might be passed to other functions and only referenced (or not) in other files.

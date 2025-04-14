@@ -1,4 +1,4 @@
-import { isAbsolute, join, resolve, sep } from 'node:path';
+import { isAbsolute, join, resolve } from 'node:path';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
@@ -22,7 +22,7 @@ export type ParsedSettings = Omit<
   ignorePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
-  entryPoints: Array<{ file: Ignore; symbol: string }>;
+  entryPoints: Array<{ file: Ignore; symbols: string[] }>;
 };
 
 function argsInclude(strs: string[]) {
@@ -129,21 +129,23 @@ export function getSettings(
 
   // Clean up any entry points
   const parsedEntryPoints: ParsedSettings['entryPoints'] = [];
-  for (const { symbols, file } of entryPoints) {
-    for (let symbol of symbols) {
+  for (const [filePattern, symbols] of Object.entries(entryPoints)) {
+    const formattedSymbols = symbols.map((symbol) => {
       if (symbol.endsWith('/')) {
-        symbol = symbol.slice(0, -1);
+        return symbol.slice(0, -1);
       }
-      if (isAbsolute(file)) {
-        throw new Error(
-          `Invalid entry point file "${file}". Entry point files must be relative to the directory with your ESLint config file, not absolute`
-        );
-      }
-      parsedEntryPoints.push({
-        file: ignore().add(file),
-        symbol,
-      });
+      return symbol;
+    });
+
+    if (isAbsolute(filePattern)) {
+      throw new Error(
+        `Invalid entry point file patter "${filePattern}". Entry point files patterns must be relative to the directory with your ESLint config file, not absolute`
+      );
     }
+    parsedEntryPoints.push({
+      file: ignore().add(filePattern),
+      symbols: formattedSymbols,
+    });
   }
 
   mergedSettings.mode = mergedSettings.mode ?? 'auto';
@@ -168,8 +170,8 @@ export function getSettings(
     }
   }
   debug(`Entry points:`);
-  for (const { file, symbols } of entryPoints) {
-    debug(`  ${file.replace(eslintConfigDir + sep, '')}:`);
+  for (const [filePattern, symbols] of Object.entries(entryPoints)) {
+    debug(`  ${filePattern}:`);
     for (const symbol of symbols) {
       debug(`    ${symbol}`);
     }

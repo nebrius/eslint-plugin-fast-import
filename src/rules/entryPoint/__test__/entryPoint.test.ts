@@ -52,12 +52,9 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: [
-            {
-              file: FILE_A.replace(ESLINT_CONFIG_DIR_DIR + '/', ''),
-              symbols: ['a'],
-            },
-          ],
+          entryPoints: {
+            [FILE_A.replace(ESLINT_CONFIG_DIR_DIR + '/', '')]: ['a'],
+          },
         },
       },
     },
