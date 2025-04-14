@@ -326,7 +326,12 @@ const EXPECTED: StrippedBaseProjectInfo = {
           {
             exportName: 'default',
             isEntryPoint: false,
-            isTypeExport: false,
+            isTypeExport: true,
+          },
+          {
+            exportName: 'MyNamespace',
+            isEntryPoint: false,
+            isTypeExport: true,
           },
         ],
         fileType: 'code',

@@ -47,18 +47,21 @@ type WalkOptions = {
    * A callback to be called for all of the various import statement nodes,
    * including dynamic import statements
    */
-  importDeclaration: (node: ImportDeclaration) => void;
+  importDeclaration: (node: ImportDeclaration, parent?: TSESTree.Node) => void;
   /**
    * A callback to be called for all of the various export statement nodes.
    *
    * Note: this does _not_ include reexport nodes, even though sometimes the
    * actual node is the same type as a reexport node.
    */
-  exportDeclaration: (node: ExportDeclaration) => void;
+  exportDeclaration: (node: ExportDeclaration, parent?: TSESTree.Node) => void;
   /**
    * A callback to be called for all of the various reexport statement nodes
    */
-  reexportDeclaration: (node: ReexportDeclaration) => void;
+  reexportDeclaration: (
+    node: ReexportDeclaration,
+    parent?: TSESTree.Node
+  ) => void;
 };
 
 /**
@@ -94,43 +97,43 @@ export function traverse({
 
   simpleTraverse(ast, {
     visitors: {
-      ImportDeclaration(node) {
+      ImportDeclaration(node, parent) {
         validateNodeType<TSESTree.ImportDeclaration>(
           node,
           TSESTree.AST_NODE_TYPES.ImportDeclaration
         );
-        importDeclaration(node);
+        importDeclaration(node, parent);
       },
-      ImportExpression(node) {
+      ImportExpression(node, parent) {
         validateNodeType<TSESTree.ImportExpression>(
           node,
           TSESTree.AST_NODE_TYPES.ImportExpression
         );
-        importDeclaration(node);
+        importDeclaration(node, parent);
       },
-      ExportDefaultDeclaration(node) {
+      ExportDefaultDeclaration(node, parent) {
         validateNodeType<TSESTree.ExportDefaultDeclaration>(
           node,
           TSESTree.AST_NODE_TYPES.ExportDefaultDeclaration
         );
-        exportDeclaration(node);
+        exportDeclaration(node, parent);
       },
-      ExportAllDeclaration(node) {
+      ExportAllDeclaration(node, parent) {
         validateNodeType<TSESTree.ExportAllDeclaration>(
           node,
           TSESTree.AST_NODE_TYPES.ExportAllDeclaration
         );
-        reexportDeclaration(node);
+        reexportDeclaration(node, parent);
       },
-      ExportNamedDeclaration(node) {
+      ExportNamedDeclaration(node, parent) {
         validateNodeType<TSESTree.ExportNamedDeclaration>(
           node,
           TSESTree.AST_NODE_TYPES.ExportNamedDeclaration
         );
         if (node.source) {
-          reexportDeclaration(node);
+          reexportDeclaration(node, parent);
         } else {
-          exportDeclaration(node);
+          exportDeclaration(node, parent);
         }
       },
     },

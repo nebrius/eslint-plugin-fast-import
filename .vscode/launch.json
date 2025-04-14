@@ -15,7 +15,7 @@
         "--runInBand"
       ],
       "args": [
-        "src"
+        "src/module/__test__/projectInfo/base/computeBaseInfo.test.ts"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"

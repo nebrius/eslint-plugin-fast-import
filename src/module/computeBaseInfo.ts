@@ -571,7 +571,17 @@ function computeFileDetails({
       }
     },
 
-    exportDeclaration(statementNode) {
+    exportDeclaration(statementNode, parentNode) {
+      // If we're inside of a module declaration, don't continue on since we
+      // don't analyze namespaces
+      if (
+        parentNode &&
+        (parentNode.type === TSESTree.AST_NODE_TYPES.TSModuleDeclaration ||
+          parentNode.type === TSESTree.AST_NODE_TYPES.TSModuleBlock)
+      ) {
+        return;
+      }
+
       // Check if this is export { foo }, which parses very different
       if ('specifiers' in statementNode && statementNode.specifiers.length) {
         for (const specifierNode of statementNode.specifiers) {
@@ -665,7 +675,7 @@ function computeFileDetails({
             statementNode,
             reportNode: statementNode.declaration.id,
             exportName,
-            isTypeExport: statementNode.exportKind === 'type',
+            isTypeExport: true,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
           });
           break;
@@ -758,6 +768,38 @@ function computeFileDetails({
           break;
         }
 
+        // export namespace {}
+        // export module {}
+        case TSESTree.AST_NODE_TYPES.TSModuleDeclaration: {
+          let exportName: string;
+          const { id } = statementNode.declaration;
+          switch (id.type) {
+            // export namespace {}
+            case TSESTree.AST_NODE_TYPES.Identifier: {
+              exportName = id.name;
+              break;
+            }
+            // export module {}
+            case TSESTree.AST_NODE_TYPES.Literal: {
+              exportName = id.value;
+              break;
+            }
+            case TSESTree.AST_NODE_TYPES.TSQualifiedName: {
+              throw new InternalError(
+                `Unsupported module declaration identifier ${id.type}`
+              );
+            }
+          }
+          fileDetails.exports.push({
+            statementNode,
+            reportNode: statementNode.declaration,
+            exportName,
+            isTypeExport: true,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
+          });
+          break;
+        }
+
         default: {
           // First we check if this is a default export, since we can still
           // process it, even if we can't select a particularly useful specifier
@@ -771,7 +813,7 @@ function computeFileDetails({
                 filePath
               ),
               exportName: 'default',
-              isTypeExport: false, // Turns out default exports can't be types
+              isTypeExport: false, // For some reason
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
             });
             break;
@@ -795,7 +837,16 @@ function computeFileDetails({
       }
     },
 
-    reexportDeclaration(statementNode) {
+    reexportDeclaration(statementNode, parentNode) {
+      // If we're inside of a module declaration, don't continue on since we
+      // don't analyze namespaces
+      if (
+        parentNode &&
+        parentNode.type === TSESTree.AST_NODE_TYPES.TSModuleDeclaration
+      ) {
+        return;
+      }
+
       const moduleSpecifier = statementNode.source.value;
 
       // Check if this is a barrel reexport
