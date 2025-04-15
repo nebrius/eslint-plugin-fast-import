@@ -41,12 +41,9 @@ npm install --save-dev eslint-plugin-fast-import
 
 ## Rules
 
-💼 Configurations enabled in.
-
-🔧 Automatically fixable by the --fix CLI option.
-
-☑️ Set in the recommended configuration.
-
+💼 Configurations enabled in.<br />
+🔧 Automatically fixable by the --fix CLI option.<br />
+☑️ Set in the recommended configuration.<br />
 🧰 Set in the all configuration.
 
 | Name                                                                        | 💼   | 🔧   |
