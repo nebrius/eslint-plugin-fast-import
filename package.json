@@ -1,12 +1,20 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "1.0.0-beta3",
+  "version": "1.0.0-rc2",
   "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
   "keywords": [
     "eslint",
     "eslintplugin",
     "eslint-plugin"
   ],
+  "homepage": "https://github.com/nebrius/eslint-plugin-fast-import",
+  "bugs": "https://github.com/nebrius/eslint-plugin-fast-import/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nebrius/eslint-plugin-fast-import.git"
+  },
+  "author": "Bryan Hughes <bryan@nebri.us>",
+  "license": "MIT",
   "main": "dist/plugin.js",
   "type": "module",
   "scripts": {
@@ -17,8 +25,6 @@
     "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "publish-package": "node --experimental-strip-types scripts/publish.ts"
   },
-  "author": "Bryan Hughes <bryan@nebri.us>",
-  "license": "MIT",
   "dependencies": {
     "@typescript-eslint/typescript-estree": "^8.29.1",
     "@typescript-eslint/utils": "^8.19.1",

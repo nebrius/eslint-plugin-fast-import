@@ -1,6 +1,6 @@
 # fast-import/no-external-barrel-reexports
 
-Ensures that code does not barrel reexport builtin or third party modules. This rule prevents a known edge case from slipping through the cracks of [the no missing imports rule](../missing#limitations).
+Ensures that code does not barrel reexport builtin or third party modules. Barrel reexporting is unecessary and can make code harder to read. In addition, this rule prevents a known edge case from slipping through the cracks of [the no missing imports rule](../missing#limitations).
 
 ## Rule Details
 

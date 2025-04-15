@@ -21,7 +21,6 @@
   - [All first party code must live inside `rootDir`](#all-first-party-code-must-live-inside-rootdir)
   - [Barrel exporting from third-party/built-in modules are ignored](#barrel-exporting-from-third-partybuilt-in-modules-are-ignored)
   - [Case insensitivity inconsistency in ESLint arguments](#case-insensitivity-inconsistency-in-eslint-arguments)
-- [Comparison](#comparison)
 - [Creating new rules](#creating-new-rules)
   - [getESMInfo(context)](#getesminfocontext)
   - [registerUpdateListener(listener)](#registerupdatelistenerlistener)
@@ -43,8 +42,11 @@ npm install --save-dev eslint-plugin-fast-import
 ## Rules
 
 💼 Configurations enabled in.
+
 🔧 Automatically fixable by the --fix CLI option.
+
 ☑️ Set in the recommended configuration.
+
 🧰 Set in the all configuration.
 
 | Name                                                                        | 💼   | 🔧   |
@@ -82,9 +84,9 @@ Type: `string`
 
 Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes remaining files.
 
-By default, Fast Import looks for a `tsconfig.json` file in the same directory as the ESLing configuration file, and uses the `rootDir` value from the TypeScript config file. If `tsconfig.json` does not exist or it does not set `rootDir`, then `rootDir` is set to the directory containing the ESLint configuration file.
+By default, Fast Import looks for a `tsconfig.json` file in the same directory as the ESLint configuration file, and uses the `rootDir` value from that TypeScript config file. If `tsconfig.json` does not exist or it does not set `rootDir`, then `rootDir` is set to the directory containing the ESLint configuration file.
 
-Performance warning: if you set `rootDir` to a folder contianing `node_modules`, performance will suffer. Even when files inside of `node_modules` are ignored, it still takes some time to filter them out. This especially matters in `editor` mode, where we rescan the filesystem at regular intervals.
+_Performance warning:_ if you set `rootDir` to a folder contianing `node_modules`, performance will suffer. Even though files inside of `node_modules` are ignored, it still takes some time to filter them out. This especially matters in `editor` mode, where we rescan the filesystem at regular intervals.
 
 It is strongly recommended that you put your source code in a `./src` folder and set `rootDir` to `./src`.
 
@@ -123,7 +125,7 @@ Note: patterns with a single star after them will match any symbols/files that s
 
 #### entryPoints
 
-Type: `Array<{ file: string, symbols: string[]}>`
+Type: `Array<{ glob: string, symbols: string[]}>`
 
 Entry points define exports that are not imported by code inside of the code base, but instead by code outside of the codebase.
 
@@ -139,6 +141,10 @@ recommended({
     {
       file: './src/index.ts',
       symbols: ['default', 'anotherExport']
+    },
+    {
+      file: './src/app/**/page.tsx',
+      symbols: ['default']
     }
   ]
 })
@@ -166,28 +172,22 @@ recommended({
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
-When set to `auto`, Fast Import will do it's best to set this value for you by inspecting the environment.
+When set to `auto`, the default, Fast Import will do it's best to determine which environment it's running in.
 
 `one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint from the command line without the `--fix` flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run.
 
 `fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
 
-Finally, `editor` mode builds on `fix` mode by adding a file watcher to looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
+Finally, `editor` mode builds on `fix` mode by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
 
 Note: currently, VS Code is the only supported editor. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the mean time, you can create a config that extends your standard config, set the mode to editor, and tell your editor to use this config file
 
 Example:
 
 ```js
-// eslint.editor.config.mjs
-import standardConfig from './esling.config.mjs';
-
-export default [
-  ...standardConfig,
-  recommended({
-    mode: 'editor'
-  })
-]
+recommended({
+  mode: 'editor'
+})
 ```
 
 #### editorUpdateRate
@@ -208,7 +208,7 @@ recommended({
 
 Type: boolean
 
-When set to `true`, enables extra logging that lets you know performance numbers, when files are updated, and more.
+When set to `true`, enables extra logging that tells you performance numbers, when files are updated, and more.
 
 Example:
 
@@ -220,11 +220,11 @@ recommended({
 
 ## Algorithm
 
-Fast import works by using a pipelined algorithm that is very cache friendly. At its core, Fast Import works in three phases. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
+Fast import works by using a three phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
 
 ### Phase 1: AST analysis
 
-This phase reads in every non-ignored file from the filesystem with a known JavaScript extension: `.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx` and parses the file into an AST. The AST is then converted into an import/export specific form optimized for import/export analysis.
+This phase reads in every non-ignored inside `rootDir` with a known JavaScript extension (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`) and parses the file into an AST. The AST is then converted into an import/export specific form optimized for import/export analysis.
 
 For example, the import statement `import { foo } from './bar'` gets boiled down to:
 
@@ -240,15 +240,15 @@ For example, the import statement `import { foo } from './bar'` gets boiled down
 }
 ```
 
-This phase is by far the most performance intensive of the three phases, comprising over 95% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This fact is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
+This phase is by far the most performance intensive of the three phases due to file reads and AST parsing, comprising over 95% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This correlation is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
 
-For example, this phase takes 77ms on a cold cache running on this codebase, out of 78ms total. Subsequent file edits only take 1ms due to the high cacheability of this phase.
+For example, this phase takes 90ms on a cold cache running on this codebase on my laptop, out of 92ms total. Subsequent file edits only take 1ms due to the high cacheability of this phase.
 
 Details for the information computed in this stage can be viewed in the [types file for base information](./src/types/base.ts).
 
 ### Phase 2: Module specifier resolution
 
-This phase goes through every import/reexport and resolves the module specifier. Fast Import uses its own high-performance resolver to improve lint speed. It achieves this performance by utilizing the file cache built up in the first phase. It then resolves module specifiers to one of three types in a very specific order:
+This phase goes through every import/reexport entry from the first phase and resolves the module specifier. Fast Import uses its own high-performance resolver to improve lint speed that uses the file cache built up in the first phase. It then resolves module specifiers to one of three types in a very specific order:
 
 1. A Node.js built-in module, as reported by `builtinModules()` in the `node:module` module
 2. A file within `rootDir`, aka first party
@@ -262,7 +262,7 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ### Phase 3: Import graph analysis
 
-This final stage traverses the import/export graph created in Phase 2 to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of everyone who imports a specific export, and linking each import statement to a specific export statement.
+This final stage traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of everyone who imports a specific export, and linking each import statement to a specific export statement.
 
 Linking imports to exports can be non-trivial, especially if there are a lot of reexports. For example:
 
@@ -314,17 +314,13 @@ For more details, see the limitations section of the [src/rules/missing/README.m
 
 If you pass a file pattern or path to ESLint, ESLint incosistenly applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`, and will crash.
 
-## Comparison
-
-TODO
-
 ## Creating new rules
 
 Fast import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) rule for a more complex example. Fast Import exports three helper functions used to write rules.
 
 ### getESMInfo(context)
 
-This is the most important of the three functions. If the file represented by the ESLint context has been analyzed by Fast Import, an objet with three properties are returned, otherwise `undefined` is returned:
+This is the most important of the three functions. If the file represented by the ESLint context has been analyzed by Fast Import, an object with the following properties are returned, otherwise `undefined` is returned:
 
 - `fileInfo`: the imports, reexports, and exports of the current file
 - `projectInfo`: the imports, reexports, and exports of the entire project
@@ -334,7 +330,7 @@ See the TypeScript types for full details, which are reasonably well commented.
 
 Each import, export, and reexport entry includes two AST nodes: the node for the entire statement, and a "report" node that is almost always what you want to pass to `context.reportError`. The report node is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement node represents all of the code, and `reportNode` is scoped to just `foo`.
 
-When creating a rule, you shouldn't traverse the AST yourself, since the AST has been traversed. Each `context` callback should look something like this:
+When creating a rule, you shouldn't traverse the AST yourself, since the AST has already been traversed for you. Each `context` callback should look something like this:
 
 ```js
 create(context) {
@@ -359,11 +355,11 @@ Note that an empty object is returned, indicating we don't want to traverse the 
 
 ### registerUpdateListener(listener)
 
-Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on the `registerUpdateListener` callback to be notified any time the cahce is updated.
+Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on the `registerUpdateListener` callback to be notified any time the cache is updated.
 
 ### isNonTestFile(filePath)
 
-A helper function to determine, using Fast Imports algorithm, whether or not a given file path represents a test file. Currently, a file is considered a test file if either of the following are true:
+A helper function to determine whether or not a given file path represents a test file. Currently, a file is considered a test file if either of the following are true:
 
 - The file is directly or indirectly inside a folder called `__test__`
 - The file includes `.test.` in it's name.

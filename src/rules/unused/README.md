@@ -4,7 +4,7 @@ Ensure exports are imported elsewhere, taking into account whether files are tes
 
 ## Rule Details
 
-`no-unused-exports` looks at all exports and analyzes who imports the export if any. An export is considered used if any of the following are true:
+`no-unused-exports` looks at all exports and analyzes who imports the export, if any. An export is considered used if any of the following are true:
 
 1. The export is [listed as an entry point](../../../README.md#entrypoints)
 2. The export is a non-test file and is imported by another non-test file
@@ -97,7 +97,7 @@ Exports listed in `.d.ts` files are not checked. This behavior is desired when `
 
 ### Barrel imports
 
-If an export is later imported as a barrel import, then this rule will not flag if that export is unused or not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition is referenced. Take the following example:
+If an export is later imported as a barrel import, then this rule will not flag if that export is unused or not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition _is_ referenced. Take the following example:
 
 ```js
 // a.ts
