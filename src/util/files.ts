@@ -1,7 +1,7 @@
 import type { Stats } from 'node:fs';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
-import { basename, dirname, join, relative } from 'node:path';
+import { basename, dirname, join, relative, sep } from 'node:path';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
@@ -29,6 +29,8 @@ export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
     // Filter out any directories, so that this is only a file list
     .filter((f) => !f.stats.isDirectory());
 
+  // Find all package.json files between rootDir and the file system root, since
+  // Node.js will always look this far for dependencies
   const parentPackageJsons: string[] = [];
   let currentDir = rootDir;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -97,7 +99,12 @@ export async function getFiles(
     rootDir,
     parentPackageJsons,
     ignorePatterns,
-    potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
+    potentialFiles.filter(
+      ({ filePath }) =>
+        !filePath.includes('node_modules') &&
+        !filePath.includes(sep + '.git' + sep) &&
+        basename(filePath) !== '.gitignore'
+    )
   );
 }
 

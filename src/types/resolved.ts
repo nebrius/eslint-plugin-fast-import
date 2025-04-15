@@ -20,8 +20,8 @@ export type Resolved =
       moduleType: 'firstPartyCode';
 
       /**
-       * The absolute path of the file that the import/reexport points to. For the statement in a file at
-       * `/Users/bryan/myProject/src/foo.ts`:
+       * The absolute path of the file that the import/reexport points to. For
+       * the statement in a file at `/Users/bryan/myProject/src/foo.ts`:
        *
        * ```
        * import { bar } from './bar';
@@ -35,8 +35,8 @@ export type Resolved =
       moduleType: 'firstPartyOther';
 
       /**
-       * The absolute path of the file that the import/reexport points to. For the statement in a file at
-       * `/Users/bryan/myProject/src/foo.ts`:
+       * The absolute path of the file that the import/reexport points to. For
+       * the statement in a file at `/Users/bryan/myProject/src/foo.ts`:
        *
        * ```
        * import { bar } from './bar';
@@ -44,9 +44,10 @@ export type Resolved =
        *
        * then `resolvedModulePath` is `/Users/bryan/myProject/src/bar/index.ts`
        *
-       * Note: value is `undefined` if the import can't be resolved, aka the module specifier isn't valid. While the
-       * developer's intentions might have been to import a code file, we can't don't know for sure. Pretending it's
-       * always a non-code file is safer
+       * Note: value is `undefined` if the import can't be resolved, aka the
+       * module specifier isn't valid. While the developer's intentions might
+       * have been to import a code file, we can't don't know for sure.
+       * Pretending it's always a non-code file is safer
        */
       resolvedModulePath: string | undefined;
     };

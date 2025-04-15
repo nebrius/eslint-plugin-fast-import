@@ -31,8 +31,9 @@ export function parseFile(filePath: string) {
     range: true,
     tokens: true,
 
-    // JSX is a proper superset of JavaScript, meaning JSX can appear in both .js and .jsx files. TSX is *not* a
-    // proper superset of TypeScript, however, and so JSX can only appear in .tsx files, not .ts files
+    // JSX is a proper superset of JavaScript, meaning JSX can appear in both
+    // .js and .jsx files. TSX is *not* a proper superset of TypeScript,
+    // however, and so JSX can only appear in .tsx files, not .ts files
     jsx: !filePath.endsWith('.ts'),
   });
   return { filePath, fileContents, ast };

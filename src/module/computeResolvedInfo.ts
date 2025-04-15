@@ -294,7 +294,8 @@ function populateFileDetails(
 ) {
   // Resolve imports
   for (const importDetails of baseCodeFileDetails.imports) {
-    // TODO: handle dynamic imports with non-static paths, represented by `moduleSpecifier` being undefined?
+    // Lack of a module specifier means this is a dynamic import with a
+    // non-static, which we can't analyze, so we skip it
     if (!importDetails.moduleSpecifier) {
       continue;
     }
@@ -330,7 +331,8 @@ function populateFileDetails(
     });
   }
 
-  // We don't need to do anything for resolved exports, but we _do_ want to deep-ish clone each export's details
+  // We don't need to do anything for resolved exports, but we _do_ want to
+  // deep-ish clone each export's details
   for (const exportDetails of baseCodeFileDetails.exports) {
     resolvedCodeFileDetails.exports.push({
       ...exportDetails,
@@ -340,7 +342,7 @@ function populateFileDetails(
 
 type FolderTreeNode = {
   folders: Record<string, FolderTreeNode>;
-  // e.g `{ 'foo.ts': 1, 'bar.tsx': 1}`, useful for quick lookups based on a complete filename
+  // e.g `{ 'foo.ts': 1 }`, useful for quick lookups based on a complete filename
   files: Record<string, 1>;
   // e.g. `{ foo: ['.ts']}`, useful for determining ambiguous file extensions
   filesAndExtensions: Record<string, string[]>;
@@ -380,7 +382,8 @@ function resolveModuleSpecifier({
     };
   }
 
-  // This function takes in a bath that is "absolute" but relative to rootDir, excluding the leading /
+  // This function takes in a bath that is "absolute" looking but relative to
+  // rootDir, excluding the leading /
   function resolveFirstPartyImport(absolutishFilePath: string) {
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
@@ -417,8 +420,8 @@ function resolveModuleSpecifier({
       return join(baseProjectInfo.rootDir, folderSegments.join('/'), file);
     }
 
-    // First we check if this directly references a file + extension, and shortcircuit, e.g.:
-    // `import { foo } from './foo.ts'` => 'foo.ts'
+    // First we check if this directly references a file + extension, and
+    // shortcircuit, e.g.: `import { foo } from './foo.ts'` => 'foo.ts'
     if (currentFolderTreeNode.files[lastSegment]) {
       return computeFilePath(lastSegment);
     }
@@ -470,7 +473,8 @@ function resolveModuleSpecifier({
       return computedFilePath;
     }
 
-    // Now we check if this references an index file, but only if a folder with this segment exists
+    // Now we check if this references an index file, but only if a folder with
+    // this segment exists
     currentFolderTreeNode = currentFolderTreeNode.folders[lastSegment];
     if (!currentFolderTreeNode) {
       return undefined;

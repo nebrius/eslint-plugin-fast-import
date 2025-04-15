@@ -19,8 +19,9 @@ export function computeAnalyzedInfo(
     files: new Map(),
   };
 
-  // First we initialize each detail with placeholder data, since we need a completely initialized `analyzedInfo` object
-  // available before we can start traversing/populating analyzed info
+  // First we initialize each detail with placeholder data, since we need a
+  // completely initialized `analyzedInfo` object available before we can start
+  // traversing/populating analyzed info
   for (const [filePath, fileDetails] of resolvedProjectInfo.files) {
     if (fileDetails.fileType !== 'code') {
       analyzedProjectInfo.files.set(filePath, {
@@ -52,9 +53,11 @@ export function computeAnalyzedInfo(
         case 'single': {
           analyzedFileInfo.reexports.push({
             ...reexportDetails,
-            // If this reexport is a builtin or thirdparty reexport, we know what the root module type is. However, if
-            // it's first party then we don't know what the type is yet. In this case, once we determine the type we'll
-            // change this value and potentially fill in other details
+            // If this reexport is a builtin or thirdparty reexport, we know
+            // what the root module type is. However, if it's first party then
+            // we don't know what the type is yet. In this case, once we
+            // determine the type we'll change this value and potentially fill
+            // in other details
             rootModuleType:
               reexportDetails.moduleType === 'builtin' ||
               reexportDetails.moduleType === 'thirdParty'
@@ -81,8 +84,9 @@ export function computeAnalyzedInfo(
         case 'single': {
           analyzedFileInfo.imports.push({
             ...importDetails,
-            // We don't know what the type is yet, but once we determine the type we'll change this value and
-            // potentially fill in other details
+            // We don't know what the type is yet, but once we determine the
+            // type we'll change this value and potentially fill in other
+            // details
             rootModuleType: undefined,
           });
           break;
@@ -98,7 +102,8 @@ export function computeAnalyzedInfo(
     }
   }
 
-  // Now that we have placeholder values for each entry, we're ready to analyze/traverse the tree
+  // Now that we have placeholder values for each entry, we're ready to
+  // analyze/traverse the tree
   for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
     // Nothing to do if this isn't a code file
     if (fileDetails.fileType !== 'code') {
@@ -124,8 +129,9 @@ export function computeAnalyzedInfo(
       }
     }
 
-    // Now, treat reexports that are also entry points as an import, so that we can mark the relevant exports they point
-    // to as being imported too (since in reality they are)
+    // Now, treat reexports that are also entry points as an import, so that we
+    // can mark the relevant exports they point to as being imported too (since
+    // in reality they are)
     for (const reexportDetails of fileDetails.reexports) {
       if (!reexportDetails.isEntryPoint) {
         continue;
@@ -187,8 +193,8 @@ function analyzeSingleImport(
       );
     }
 
-    // Shouldn't happen in practice, but check anyways to make TypeScript happy, plus "shouldn't happen" has a funny way
-    // of coming true sometimes
+    // Shouldn't happen in practice, but check anyways to make TypeScript happy,
+    // plus "shouldn't happen" has a funny way of coming true sometimes
     /* istanbul ignore if */
     if (targetFileDetails.fileType !== 'code') {
       throw new InternalError(
@@ -293,7 +299,8 @@ function analyzeSingleImport(
             rootModuleType: barrelReexportEntry.moduleType,
           };
         }
-        // This is an edge case that we just can't handle, so we pretend we didn't find it. This happens when we have:
+        // This is an edge case that we just can't handle, so we pretend we
+        // didn't find it. This happens when we have:
         //
         // // foo.ts
         // import { join } from './bar';
@@ -302,18 +309,21 @@ function analyzeSingleImport(
         // export * from 'node:path';
         // export * from 'node:url';
         //
-        // Since we don't know the names of what's exported from third party/builtin modules, we can't actually know
-        // which module `join` came from
+        // Since we don't know the names of what's exported from third
+        // party/builtin modules, we can't actually know which module `join`
+        // came from
         return undefined;
       }
     }
 
-    // Finally, check and traverse all barrel re-exports. Since we don't know what barrel exports contain yet, we have
+    // Finally, check and traverse all barrel re-exports. Since we don't know
+    // what barrel exports contain yet, we have
     // to traverse all of them in a depth-first search
     for (const reexportEntry of targetFileDetails.reexports) {
-      // Technically speaking, it's possible for the root export to exist here if, say, someone did something stupid
-      // like `import { join } from './foo'` coupled with `export * from 'node:path'`. That's really bad coding though
-      // so we're not going to support it here
+      // Technically speaking, it's possible for the root export to exist here
+      // if, say, someone did something stupid like `import { join } from
+      // './foo'` coupled with `export * from 'node:path'`. That's really bad
+      // coding though so we're not going to support it here
       if (
         reexportEntry.moduleType !== 'firstPartyCode' ||
         reexportEntry.reexportType !== 'barrel'
@@ -376,8 +386,8 @@ function analyzeBarrelImport(
       );
     }
 
-    // Shouldn't happen in practice, but check anyways to make TypeScript happy, plus "shouldn't happen" has a funny way
-    // of coming true sometimes
+    // Shouldn't happen in practice, but check anyways to make TypeScript happy,
+    // plus "shouldn't happen" has a funny way of coming true sometimes
     /* istanbul ignore if */
     if (targetFileDetails.fileType !== 'code') {
       throw new InternalError(
