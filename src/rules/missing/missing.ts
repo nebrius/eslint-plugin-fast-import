@@ -66,15 +66,29 @@ export const noMissingImports = createRule({
       // spread across multiple files even. The specific items being imported
       // isn't specified either in non-first party code, meaning the only way to
       // know if an import is valid is to introspect how it's used at runtime.
-      // This isn't tractable, so we just don't validate them instead
+      // This isn't tractable, so we only validate that the module specifier
+      // could be resolved. If the module couldn't be resolved, we mark the file
+      // type as first party other, so we first have to check for that.
       if (
-        importEntry.moduleType !== 'firstPartyCode' ||
-        importEntry.importType !== 'single'
+        importEntry.moduleType === 'firstPartyOther' &&
+        importEntry.importType === 'barrel'
       ) {
-        continue;
+        context.report({
+          node: importEntry.reportNode,
+          messageId: 'noMissingImports',
+          data: {
+            name: importEntry.importAlias,
+          },
+        });
       }
 
-      if (importEntry.rootModuleType === undefined) {
+      // Next, we check if the root export could be resolved, which is only
+      // available for single imports
+      if (
+        importEntry.moduleType === 'firstPartyCode' &&
+        importEntry.importType === 'single' &&
+        importEntry.rootModuleType === undefined
+      ) {
         context.report({
           node: importEntry.reportNode,
           messageId: 'noMissingImports',
@@ -87,13 +101,29 @@ export const noMissingImports = createRule({
 
     // Now check reexports
     for (const reexportEntry of fileInfo.reexports) {
+      // First check if we couldn't resolve the module specifier. If the module
+      // couldn't be resolved, we mark the file type as first party other, so
+      // we first have to check for that.
       if (
-        reexportEntry.moduleType !== 'firstPartyCode' ||
-        reexportEntry.reexportType !== 'single'
+        reexportEntry.moduleType === 'firstPartyOther' &&
+        reexportEntry.reexportType === 'barrel'
       ) {
-        continue;
+        context.report({
+          node: reexportEntry.reportNode,
+          messageId: 'noMissingImports',
+          data: {
+            name: reexportEntry.exportName,
+          },
+        });
       }
-      if (reexportEntry.rootModuleType === undefined) {
+
+      // Next, we check if the root export could be resolved, which is only
+      // available for single reexports
+      if (
+        reexportEntry.moduleType === 'firstPartyCode' &&
+        reexportEntry.reexportType === 'single' &&
+        reexportEntry.rootModuleType === undefined
+      ) {
         context.report({
           node: reexportEntry.reportNode,
           messageId: 'noMissingImports',

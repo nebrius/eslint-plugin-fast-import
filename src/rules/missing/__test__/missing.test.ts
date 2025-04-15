@@ -87,5 +87,27 @@ ruleTester.run('no-missing-exports', noMissingImports, {
         },
       },
     },
+    {
+      code: `import * as unknown from './unknown'`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noMissingImports' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `export * from './unknown'`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noMissingImports' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 });
