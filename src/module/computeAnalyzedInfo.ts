@@ -188,7 +188,7 @@ function analyzeSingleImport(
         `File ${currentFile} is missing in project info`,
         {
           filePath: originFilePath,
-          node: originAnalyzedImport.statementNode,
+          range: originAnalyzedImport.statementNodeRange,
         }
       );
     }
@@ -201,7 +201,7 @@ function analyzeSingleImport(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
           filePath: originFilePath,
-          node: originAnalyzedImport.statementNode,
+          range: originAnalyzedImport.statementNodeRange,
         }
       );
     }
@@ -381,7 +381,7 @@ function analyzeBarrelImport(
         `File ${currentFile} is missing in project info`,
         {
           filePath: originFilePath,
-          node: originAnalyzedImport.statementNode,
+          range: originAnalyzedImport.statementNodeRange,
         }
       );
     }
@@ -394,7 +394,7 @@ function analyzeBarrelImport(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
           filePath: originFilePath,
-          node: originAnalyzedImport.statementNode,
+          range: originAnalyzedImport.statementNodeRange,
         }
       );
     }

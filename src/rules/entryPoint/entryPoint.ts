@@ -1,4 +1,4 @@
-import { createRule, getESMInfo } from '../util.js';
+import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noEntryPointImports = createRule({
   name: 'no-entry-point-imports',
@@ -32,7 +32,7 @@ export const noEntryPointImports = createRule({
       if (exportEntry.isEntryPoint && exportEntry.importedByFiles.length) {
         context.report({
           messageId: 'noEntryPointImports',
-          node: exportEntry.reportNode,
+          loc: getLocFromRange(context, exportEntry.reportNodeRange),
         });
       }
     }

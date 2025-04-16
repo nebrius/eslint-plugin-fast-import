@@ -1,4 +1,4 @@
-import { createRule, getESMInfo } from '../util.js';
+import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noExternalBarrelReexports = createRule({
   name: 'no-external-barrel-reexports',
@@ -37,7 +37,7 @@ export const noExternalBarrelReexports = createRule({
         reexportEntry.moduleType === 'thirdParty'
       ) {
         context.report({
-          node: reexportEntry.reportNode,
+          loc: getLocFromRange(context, reexportEntry.reportNodeRange),
           messageId: 'noExternalBarrelReexports',
         });
       }

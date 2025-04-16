@@ -1,4 +1,9 @@
-import { createRule, getESMInfo, isNonTestFile } from '../util.js';
+import {
+  createRule,
+  getESMInfo,
+  getLocFromRange,
+  isNonTestFile,
+} from '../util.js';
 
 export const noTestImportsInProd = createRule({
   name: 'no-test-imports-in-prod',
@@ -43,7 +48,7 @@ export const noTestImportsInProd = createRule({
         )
       ) {
         context.report({
-          node: importEntry.reportNode,
+          loc: getLocFromRange(context, importEntry.reportNodeRange),
           messageId: 'noTestImports',
         });
       }

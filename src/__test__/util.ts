@@ -35,9 +35,11 @@ type StrippedFileDetails<
       CodeFileDetails,
       'imports' | 'exports' | 'reexports' | 'lastUpdatedAt'
     > & {
-      imports: Array<Omit<Import, 'statementNode' | 'reportNode'>>;
-      exports: Array<Omit<Export, 'statementNode' | 'reportNode'>>;
-      reexports: Array<Omit<Reexport, 'statementNode' | 'reportNode'>>;
+      imports: Array<Omit<Import, 'statementNodeRange' | 'reportNodeRange'>>;
+      exports: Array<Omit<Export, 'statementNodeRange' | 'reportNodeRange'>>;
+      reexports: Array<
+        Omit<Reexport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
     });
 
 type StrippedBaseFileDetails = StrippedFileDetails<
@@ -98,27 +100,27 @@ export function stripNodesFromBaseInfo(info: BaseProjectInfo) {
     };
     for (const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNode,
+      statementNodeRange: statementNode,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNode,
+      reportNodeRange: reportNode,
       ...strippedDetails
     } of fileDetails.imports) {
       newFileDetails.imports.push(strippedDetails);
     }
     for (const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNode,
+      statementNodeRange: statementNode,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNode,
+      reportNodeRange: reportNode,
       ...strippedDetails
     } of fileDetails.reexports) {
       newFileDetails.reexports.push(strippedDetails);
     }
     for (const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNode,
+      statementNodeRange: statementNode,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNode,
+      reportNodeRange: reportNode,
       ...strippedDetails
     } of fileDetails.exports) {
       newFileDetails.exports.push(strippedDetails);

@@ -3,7 +3,7 @@ import type {
   ReexportDeclaration,
 } from '../../module/util.js';
 import { InternalError } from '../../util/error.js';
-import { createRule, getESMInfo } from '../util.js';
+import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const nodePrefix = createRule({
   name: 'require-node-prefix',
@@ -39,14 +39,14 @@ export const nodePrefix = createRule({
         importEntry.moduleType === 'builtin' &&
         !moduleSpecifier.startsWith('node:')
       ) {
-        const { statementNode } = importEntry;
+        const { statementNodeRange } = importEntry;
         context.report({
-          node: statementNode,
+          loc: getLocFromRange(context, statementNodeRange),
           messageId: 'missingNodePrefix',
           fix(fixer) {
-            const sourceNode = statementNode as
-              | ImportDeclaration
-              | ReexportDeclaration;
+            const sourceNode = context.sourceCode.getNodeByRangeIndex(
+              statementNodeRange[0]
+            ) as ImportDeclaration | ReexportDeclaration;
             if (!('raw' in sourceNode.source)) {
               throw new InternalError(
                 `Property "raw" is missing in sourceNode.source`

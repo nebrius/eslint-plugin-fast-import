@@ -1,6 +1,11 @@
 import type { AnalyzedProjectInfo } from '../../types/analyzed.js';
 import { InternalError } from '../../util/error.js';
-import { createRule, getESMInfo, registerUpdateListener } from '../util.js';
+import {
+  createRule,
+  getESMInfo,
+  getLocFromRange,
+  registerUpdateListener,
+} from '../util.js';
 
 type Options = [];
 type MessageIds = 'noCycles';
@@ -145,7 +150,7 @@ export const noCycle = createRule<Options, MessageIds>({
         ) {
           context.report({
             messageId: 'noCycles',
-            node: importEntry.statementNode,
+            loc: getLocFromRange(context, importEntry.statementNodeRange),
           });
           continue;
         }

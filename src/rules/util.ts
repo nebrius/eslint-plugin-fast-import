@@ -1,3 +1,4 @@
+import type { TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 import {
@@ -64,6 +65,15 @@ export function getESMInfo(context: GenericContext) {
     projectInfo,
     settings,
   };
+}
+
+export function getLocFromRange(
+  context: GenericContext,
+  range: TSESTree.Node['range']
+): TSESTree.Node['loc'] {
+  const start = context.sourceCode.getLocFromIndex(range[0]);
+  const end = context.sourceCode.getLocFromIndex(range[1]);
+  return { start, end };
 }
 
 let fileWatchingInitialized = false;

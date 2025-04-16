@@ -4,16 +4,16 @@ import type { ParsedSettings } from '../settings/settings.js';
 
 type Base = {
   /**
-   * The AST node in ESTree format of the complete ESM statement for this entry
+   * The AST node range of the complete ESM statement for this entry
    */
-  statementNode: TSESTree.Node;
+  statementNodeRange: TSESTree.Node['range'];
 
   /**
-   * The AST node in ESTree format to report an error on, if one exists.
+   * The AST node range to report an error on, if one exists.
    *
    * Note: this may not be the node representing the entire ESM statement
    */
-  reportNode: TSESTree.Node | TSESTree.Token;
+  reportNodeRange: TSESTree.Node['range'];
 };
 
 /* Imports */

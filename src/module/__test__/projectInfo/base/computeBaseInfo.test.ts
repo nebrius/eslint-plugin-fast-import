@@ -413,7 +413,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
     ],
     reexports: [],
     exports: [],
@@ -445,7 +445,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
       {
         importType: 'single',
         importAlias: 'a1',
@@ -454,7 +454,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
     ],
     reexports: [
       {
@@ -466,7 +466,7 @@ it('Adds, modifies, and deletes a new file', () => {
         reexportType: 'single',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseReexport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseReexport, 'statementNodeRange' | 'reportNodeRange'>,
     ],
     exports: [
       {
@@ -502,7 +502,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
       {
         importType: 'single',
         importAlias: 'a2',
@@ -511,7 +511,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
     ],
     reexports: [
       {
@@ -523,7 +523,7 @@ it('Adds, modifies, and deletes a new file', () => {
         reexportType: 'single',
         // TODO: for some reason this type narrows to saying it should have only
         // two properties, which is clearly wrong
-      } as Omit<BaseReexport, 'statementNode' | 'reportNode'>,
+      } as Omit<BaseReexport, 'statementNodeRange' | 'reportNodeRange'>,
     ],
     exports: [
       {

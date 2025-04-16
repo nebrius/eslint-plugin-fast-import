@@ -1,4 +1,4 @@
-import { createRule, getESMInfo } from '../util.js';
+import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noMissingImports = createRule({
   name: 'no-missing-imports',
@@ -54,7 +54,7 @@ export const noMissingImports = createRule({
         // If we got here, we couldn't find a match in package.json, so error
         context.report({
           messageId: 'noTransientDependencies',
-          node: importEntry.statementNode,
+          loc: getLocFromRange(context, importEntry.statementNodeRange),
           data: {
             specifier: importEntry.moduleSpecifier,
           },
@@ -74,7 +74,7 @@ export const noMissingImports = createRule({
         importEntry.importType === 'barrel'
       ) {
         context.report({
-          node: importEntry.reportNode,
+          loc: getLocFromRange(context, importEntry.reportNodeRange),
           messageId: 'noMissingImports',
           data: {
             name: importEntry.importAlias,
@@ -90,7 +90,7 @@ export const noMissingImports = createRule({
         importEntry.rootModuleType === undefined
       ) {
         context.report({
-          node: importEntry.reportNode,
+          loc: getLocFromRange(context, importEntry.reportNodeRange),
           messageId: 'noMissingImports',
           data: {
             name: importEntry.importName,
@@ -109,7 +109,7 @@ export const noMissingImports = createRule({
         reexportEntry.reexportType === 'barrel'
       ) {
         context.report({
-          node: reexportEntry.reportNode,
+          loc: getLocFromRange(context, reexportEntry.reportNodeRange),
           messageId: 'noMissingImports',
           data: {
             name: reexportEntry.exportName,
@@ -125,7 +125,7 @@ export const noMissingImports = createRule({
         reexportEntry.rootModuleType === undefined
       ) {
         context.report({
-          node: reexportEntry.reportNode,
+          loc: getLocFromRange(context, reexportEntry.reportNodeRange),
           messageId: 'noMissingImports',
           data: {
             name: reexportEntry.exportName,

@@ -224,13 +224,13 @@ class UnknownNodeTypeError extends InternalError {
       {
         filePath,
         fileContents,
-        node,
+        range: (node as unknown as TSESTree.Node).range,
       }
     );
   }
 }
 
-function getLocationOfDefaultToken(
+function getRangeOfDefaultToken(
   node: TSESTree.Node,
   tokens: TSESTree.Token[] | undefined,
   filePath: string
@@ -247,13 +247,13 @@ function getLocationOfDefaultToken(
       token.type === TSESTree.AST_TOKEN_TYPES.Keyword &&
       token.value === 'default'
     ) {
-      return token;
+      return token.range;
     }
   }
   /* istanbul ignore next */
   throw new InternalError('Could not get report nore', {
     filePath,
-    node,
+    range: node.range,
   });
 }
 
@@ -308,8 +308,8 @@ function walkExportDestructure(
           // export const { foo } = {}
           case TSESTree.AST_NODE_TYPES.Identifier: {
             fileDetails.exports.push({
-              statementNode,
-              reportNode: propertyNode.value,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: propertyNode.value.range,
               exportName: propertyNode.value.name,
               isTypeExport: statementNode.exportKind === 'type',
               isEntryPoint: isEntryPointCheck(
@@ -345,7 +345,7 @@ function walkExportDestructure(
               {
                 filePath,
                 fileContents,
-                node: propertyNode.value,
+                range: propertyNode.value.range,
               }
             );
           }
@@ -358,8 +358,8 @@ function walkExportDestructure(
     case TSESTree.AST_NODE_TYPES.AssignmentPattern: {
       if (node.left.type === TSESTree.AST_NODE_TYPES.Identifier) {
         fileDetails.exports.push({
-          statementNode,
-          reportNode: node.left,
+          statementNodeRange: statementNode.range,
+          reportNodeRange: node.left.range,
           exportName: node.left.name,
           isTypeExport: statementNode.exportKind === 'type',
           isEntryPoint: isEntryPointCheck(filePath, node.left.name),
@@ -382,8 +382,8 @@ function walkExportDestructure(
     // export const [ foo ] = [ 10 ]
     case TSESTree.AST_NODE_TYPES.Identifier: {
       fileDetails.exports.push({
-        statementNode,
-        reportNode: node,
+        statementNodeRange: statementNode.range,
+        reportNodeRange: node.range,
         exportName: node.name,
         isTypeExport: statementNode.exportKind === 'type',
         isEntryPoint: isEntryPointCheck(filePath, node.name),
@@ -398,7 +398,7 @@ function walkExportDestructure(
     case TSESTree.AST_NODE_TYPES.MemberExpression: {
       throw new InternalError(
         `unexpected member expression in array destructure`,
-        { filePath, fileContents, node }
+        { filePath, fileContents, range: node.range }
       );
     }
 
@@ -481,7 +481,7 @@ function computeFileDetails({
           {
             filePath,
             fileContents,
-            node: statementNode.source,
+            range: statementNode.source.range,
           }
         );
       }
@@ -490,8 +490,8 @@ function computeFileDetails({
       // import that may not have a string module specifier.
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
         fileDetails.imports.push({
-          statementNode,
-          reportNode: statementNode,
+          statementNodeRange: statementNode.range,
+          reportNodeRange: statementNode.range,
           importType: 'dynamic',
           moduleSpecifier,
         });
@@ -509,7 +509,7 @@ function computeFileDetails({
           {
             filePath,
             fileContents,
-            node: statementNode.source,
+            range: statementNode.source.range,
           }
         );
       }
@@ -521,8 +521,8 @@ function computeFileDetails({
           // import * as foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier: {
             fileDetails.imports.push({
-              statementNode,
-              reportNode: specifierNode,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: specifierNode.range,
               importType: 'barrel',
               moduleSpecifier,
               isTypeImport: statementNode.importKind === 'type',
@@ -534,8 +534,8 @@ function computeFileDetails({
           // import foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier: {
             fileDetails.imports.push({
-              statementNode,
-              reportNode: specifierNode,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: specifierNode.range,
               importType: 'single',
               moduleSpecifier,
               importName: 'default',
@@ -552,8 +552,8 @@ function computeFileDetails({
             );
 
             fileDetails.imports.push({
-              statementNode,
-              reportNode: specifierNode,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: specifierNode.range,
               importType: 'single',
               moduleSpecifier,
               importName,
@@ -591,8 +591,8 @@ function computeFileDetails({
         for (const specifierNode of statementNode.specifiers) {
           const exportName = getIdentifierOrStringValue(specifierNode.exported);
           fileDetails.exports.push({
-            statementNode,
-            reportNode: specifierNode.exported,
+            statementNodeRange: statementNode.range,
+            reportNodeRange: specifierNode.exported.range,
             exportName,
             isTypeExport: statementNode.exportKind === 'type',
             isEntryPoint: isEntryPointCheck(filePath, exportName),
@@ -621,8 +621,8 @@ function computeFileDetails({
               // export const foo = 10;
               case TSESTree.AST_NODE_TYPES.Identifier: {
                 fileDetails.exports.push({
-                  statementNode,
-                  reportNode: declarationNode.id,
+                  statementNodeRange: statementNode.range,
+                  reportNodeRange: declarationNode.id.range,
                   exportName: declarationNode.id.name,
                   isTypeExport: statementNode.exportKind === 'type',
                   isEntryPoint: isEntryPointCheck(
@@ -676,8 +676,8 @@ function computeFileDetails({
             ? 'default'
             : statementNode.declaration.id.name;
           fileDetails.exports.push({
-            statementNode,
-            reportNode: statementNode.declaration.id,
+            statementNodeRange: statementNode.range,
+            reportNodeRange: statementNode.declaration.id.range,
             exportName,
             isTypeExport: true,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
@@ -690,10 +690,10 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.FunctionDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              statementNode,
-              reportNode: statementNode.declaration.id
-                ? statementNode.declaration.id
-                : statementNode,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: statementNode.declaration.id
+                ? statementNode.declaration.id.range
+                : statementNode.range,
               exportName: 'default',
               isTypeExport: false, // functions can never be types
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
@@ -707,12 +707,12 @@ function computeFileDetails({
               throw new InternalError(`function id is unexpectedly missing`, {
                 filePath,
                 fileContents,
-                node: statementNode.declaration,
+                range: statementNode.declaration.range,
               });
             }
             fileDetails.exports.push({
-              statementNode,
-              reportNode: statementNode.declaration.id,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: statementNode.declaration.id.range,
               exportName: statementNode.declaration.id.name,
               isTypeExport: statementNode.exportKind === 'type',
               isEntryPoint: isEntryPointCheck(
@@ -729,10 +729,10 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.ClassDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              statementNode,
-              reportNode: statementNode.declaration.id
-                ? statementNode.declaration.id
-                : statementNode,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: statementNode.declaration.id
+                ? statementNode.declaration.id.range
+                : statementNode.range,
               exportName: 'default',
               isTypeExport: false, // Classes can never be types
               isEntryPoint: isEntryPointCheck(filePath, 'default'),
@@ -744,8 +744,8 @@ function computeFileDetails({
               );
             }
             fileDetails.exports.push({
-              statementNode,
-              reportNode: statementNode.declaration.id,
+              statementNodeRange: statementNode.range,
+              reportNodeRange: statementNode.declaration.id.range,
               exportName: statementNode.declaration.id.name,
               isTypeExport: statementNode.exportKind === 'type',
               isEntryPoint: isEntryPointCheck(
@@ -763,8 +763,8 @@ function computeFileDetails({
           const isNodeDefault = isDefault(statementNode);
           const exportName = isNodeDefault ? 'default' : name;
           fileDetails.exports.push({
-            statementNode,
-            reportNode: statementNode.declaration,
+            statementNodeRange: statementNode.range,
+            reportNodeRange: statementNode.declaration.range,
             exportName,
             isTypeExport: statementNode.exportKind === 'type',
             isEntryPoint: isEntryPointCheck(filePath, exportName),
@@ -795,8 +795,8 @@ function computeFileDetails({
             }
           }
           fileDetails.exports.push({
-            statementNode,
-            reportNode: statementNode.declaration,
+            statementNodeRange: statementNode.range,
+            reportNodeRange: statementNode.declaration.range,
             exportName,
             isTypeExport: true,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
@@ -808,8 +808,8 @@ function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.TSImportEqualsDeclaration: {
           const exportName = statementNode.declaration.id.name;
           fileDetails.exports.push({
-            statementNode,
-            reportNode: statementNode.declaration,
+            statementNodeRange: statementNode.range,
+            reportNodeRange: statementNode.declaration.range,
             exportName,
             isTypeExport: statementNode.exportKind === 'type',
             isEntryPoint: isEntryPointCheck(filePath, exportName),
@@ -823,8 +823,8 @@ function computeFileDetails({
           // node
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              statementNode,
-              reportNode: getLocationOfDefaultToken(
+              statementNodeRange: statementNode.range,
+              reportNodeRange: getRangeOfDefaultToken(
                 statementNode,
                 ast.tokens,
                 filePath
@@ -861,8 +861,8 @@ function computeFileDetails({
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
         const exportName = statementNode.exported?.name;
         fileDetails.reexports.push({
-          statementNode,
-          reportNode: statementNode,
+          statementNodeRange: statementNode.range,
+          reportNodeRange: statementNode.range,
           reexportType: 'barrel',
           moduleSpecifier,
           exportName,
@@ -878,8 +878,8 @@ function computeFileDetails({
       for (const specifierNode of statementNode.specifiers) {
         const exportName = getIdentifierOrStringValue(specifierNode.exported);
         fileDetails.reexports.push({
-          statementNode,
-          reportNode: specifierNode,
+          statementNodeRange: statementNode.range,
+          reportNodeRange: specifierNode.range,
           reexportType: 'single',
           moduleSpecifier,
           importName: getIdentifierOrStringValue(specifierNode.local),

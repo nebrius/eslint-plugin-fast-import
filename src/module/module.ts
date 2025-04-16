@@ -90,7 +90,9 @@ export function initializeProject({
   analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
   const analyzeEnd = Date.now();
 
-  debug(`Initial computation complete:`);
+  debug(
+    `Initial computation of ${analyzedProjectInfo.files.size.toLocaleString()} files complete :`
+  );
   debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
   debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
   debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);

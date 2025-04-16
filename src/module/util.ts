@@ -91,7 +91,7 @@ export function traverse({
     if (node.type !== nodeType) {
       throw new InternalError(
         `simpleTraverse returned unexpected type ${node.type}`,
-        { filePath, fileContents, node }
+        { filePath, fileContents, range: node.range }
       );
     }
   }

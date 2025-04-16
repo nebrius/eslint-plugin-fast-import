@@ -2,7 +2,12 @@ import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
-import { createRule, getESMInfo, isNonTestFile } from '../util.js';
+import {
+  createRule,
+  getESMInfo,
+  getLocFromRange,
+  isNonTestFile,
+} from '../util.js';
 
 const schema = z
   .strictObject({
@@ -73,7 +78,7 @@ export const noUnusedExports = createRule<
       if (exportEntry.importedByFiles.length === 0) {
         context.report({
           messageId: 'noUnusedExports',
-          node: exportEntry.reportNode,
+          loc: getLocFromRange(context, exportEntry.reportNodeRange),
           data: {
             name: exportEntry.exportName || '<unnamed>',
           },
@@ -92,7 +97,7 @@ export const noUnusedExports = createRule<
         ) {
           context.report({
             messageId: 'noTestOnlyImports',
-            node: exportEntry.reportNode,
+            loc: getLocFromRange(context, exportEntry.reportNodeRange),
             data: {
               name: exportEntry.exportName || '<unnamed>',
             },
