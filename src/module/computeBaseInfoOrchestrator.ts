@@ -11,7 +11,6 @@ import { computeFileDetails } from './computeBaseFileDetails.js';
 import type { WorkerMessage } from './computeBaseInfoWorker.js';
 import {
   PROCESS_SEPARATOR,
-  type SerializableError,
   type SerializableFileEntry,
   type SerializableOptions,
 } from './computeBaseInfoWorker.js';
@@ -23,12 +22,14 @@ const ARGV_FLAG = 'computeFileDetailsInBackgroundProcess';
 const DEFAULT_NUM_THREADS = 6;
 
 if (process.argv[2] === ARGV_FLAG) {
+  const start = Date.now();
   const { eslintConfigDir, entryPoints, filePaths } = JSON.parse(
     process.argv[3]
   ) as SerializableOptions;
 
   const workerSize = Math.floor(filePaths.length / DEFAULT_NUM_THREADS);
 
+  let runningWorkers = DEFAULT_NUM_THREADS;
   for (let i = 0; i < DEFAULT_NUM_THREADS; i++) {
     const filePathsForWorker =
       i === DEFAULT_NUM_THREADS - 1
@@ -42,19 +43,27 @@ if (process.argv[2] === ARGV_FLAG) {
       },
     });
     worker.on('message', (message: WorkerMessage) => {
-      if (message.type === 'error') {
-        process.stdout.write(JSON.stringify(message.error));
-      } else {
-        process.stdout.write(JSON.stringify(message.fileEntry));
-      }
+      process.stdout.write(JSON.stringify(message));
       process.stdout.write(PROCESS_SEPARATOR);
     });
+    worker.on('exit', () => {
+      runningWorkers--;
+      if (!runningWorkers) {
+        process.stdout.write(
+          JSON.stringify({
+            type: 'log',
+            message: `Orchestrator: finished in ${(Date.now() - start).toString()}ms`,
+          })
+        );
+      }
+    });
   }
+  process.stdout.write(PROCESS_SEPARATOR);
 }
 
 export function computeBaseFileInfoForFilesInProcess(
   options: SerializableOptions
-): SerializableFileEntry[] {
+) {
   const results = spawnSync(
     'node',
     [getFilename(), ARGV_FLAG, JSON.stringify(options)],
@@ -71,32 +80,38 @@ export function computeBaseFileInfoForFilesInProcess(
     if (!resultEntry) {
       continue;
     }
-    const parsedResultEntry = JSON.parse(resultEntry) as Record<
-      string,
-      unknown
-    >;
-    if (parsedResultEntry.errorType) {
-      const error = parsedResultEntry as SerializableError;
-      switch (error.errorType) {
-        case 'TSError': {
-          debug(`Could not parse ${error.filePath}, file will be ignored`);
-          break;
-        }
-        case 'Error': {
-          const errorToThrow = new Error(error.message);
-          if (error.stack) {
-            errorToThrow.stack = error.stack;
-          }
-          throw errorToThrow;
-        }
-        case 'unknown': {
-          throw new Error(
-            `An unknown error was encountered while processing file details in background process`
-          );
-        }
+    const parsedResultEntry = JSON.parse(resultEntry) as WorkerMessage;
+    switch (parsedResultEntry.type) {
+      case 'success': {
+        fileDetails.push(parsedResultEntry.fileEntry);
+        break;
       }
-    } else {
-      fileDetails.push(parsedResultEntry as SerializableFileEntry);
+      case 'log': {
+        debug(parsedResultEntry.message);
+        break;
+      }
+      case 'error': {
+        const { error } = parsedResultEntry;
+        switch (error.errorType) {
+          case 'TSError': {
+            debug(`Could not parse ${error.filePath}, file will be ignored`);
+            break;
+          }
+          case 'Error': {
+            const errorToThrow = new Error(error.message);
+            if (error.stack) {
+              errorToThrow.stack = error.stack;
+            }
+            throw errorToThrow;
+          }
+          case 'unknown': {
+            throw new Error(
+              `An unknown error was encountered while processing file details in background process`
+            );
+          }
+        }
+        break;
+      }
     }
   }
 
