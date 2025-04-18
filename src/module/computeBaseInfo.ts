@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
+import { getEslintConfigDir } from '../settings/util.js';
 import type {
   BaseBarrelImport,
   BaseCodeFileDetails,
@@ -13,16 +14,22 @@ import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
 import { getFilesSync } from '../util/files.js';
 import { computeFileDetails } from './computeBaseFileDetails.js';
-import { computeBaseFileInfoForFilesSync } from './computeBaseInfoOrchestrator.js';
+import {
+  computeBaseFileInfoForFilesInProcess,
+  computeBaseFileInfoForFilesSync,
+} from './computeBaseInfoOrchestrator.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
 type ComputeBaseInfoOptions = Pick<
   ParsedSettings,
-  'rootDir' | 'fixedAliases' | 'wildcardAliases' | 'ignorePatterns'
-> & {
-  isEntryPointCheck?: IsEntryPointCheck;
-};
+  | 'rootDir'
+  | 'fixedAliases'
+  | 'wildcardAliases'
+  | 'ignorePatterns'
+  | 'entryPoints'
+  | 'parallelizationMode'
+>;
 
 /**
  * Computes base ESM info for all source files recursively found in basePath
@@ -32,7 +39,8 @@ export function computeBaseInfo({
   fixedAliases,
   wildcardAliases,
   ignorePatterns,
-  isEntryPointCheck = () => false,
+  entryPoints,
+  parallelizationMode,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
     files: new Map(),
@@ -78,10 +86,22 @@ export function computeBaseInfo({
     }
   }
 
-  const results = computeBaseFileInfoForFilesSync(
-    codeFilesToProcess,
-    isEntryPointCheck
-  );
+  const options = {
+    eslintConfigDir: getEslintConfigDir(codeFilesToProcess[0]),
+    entryPoints,
+    filePaths: codeFilesToProcess,
+  };
+  const mode =
+    parallelizationMode === 'auto'
+      ? codeFilesToProcess.length > 1_000
+        ? 'multiProcess'
+        : 'singleProcess'
+      : parallelizationMode;
+
+  const results =
+    mode === 'multiProcess'
+      ? computeBaseFileInfoForFilesInProcess(options)
+      : computeBaseFileInfoForFilesSync(options);
 
   for (const { filePath, fileDetails } of results) {
     info.files.set(filePath, fileDetails);

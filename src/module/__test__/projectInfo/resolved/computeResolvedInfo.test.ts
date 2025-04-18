@@ -3,7 +3,10 @@ import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 
 import type { StrippedResolvedProjectInfo } from '../../../../__test__/util.js';
-import { stripNodesFromResolvedInfo } from '../../../../__test__/util.js';
+import {
+  sortMap,
+  stripNodesFromResolvedInfo,
+} from '../../../../__test__/util.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 
@@ -298,9 +301,11 @@ it('Computes resolved into', () => {
       wildcardAliases: { '@/': TEST_PROJECT_DIR },
       fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
       ignorePatterns: [],
-      isEntryPointCheck: () => false,
+      entryPoints: [],
+      parallelizationMode: 'singleProcess',
     })
   );
+  info.files = sortMap(info.files);
 
   expect(stripNodesFromResolvedInfo(info)).toEqual(EXPECTED);
 });

@@ -4,7 +4,7 @@ import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
 import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
-import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
+import { sortMap, stripNodesFromBaseInfo } from '../../../../__test__/util.js';
 import type { BaseImport, BaseReexport } from '../../../../types/base.js';
 import {
   addBaseInfoForFile,
@@ -363,8 +363,10 @@ it('Computes base info', () => {
     wildcardAliases: {},
     fixedAliases: {},
     ignorePatterns: [],
-    isEntryPointCheck: () => false,
+    entryPoints: [],
+    parallelizationMode: 'singleProcess',
   });
+  info.files = sortMap(info.files);
   expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
 });
 
@@ -385,8 +387,11 @@ it('Adds, modifies, and deletes a new file', () => {
     wildcardAliases: {},
     fixedAliases: {},
     ignorePatterns: [],
-    isEntryPointCheck: () => false,
+    entryPoints: [],
+    parallelizationMode: 'singleProcess',
   });
+
+  info.files = sortMap(info.files);
 
   addBaseInfoForFile(
     {

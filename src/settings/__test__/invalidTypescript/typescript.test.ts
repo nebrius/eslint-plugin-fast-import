@@ -25,6 +25,7 @@ it('Recovers from an invalid tsconfig file', () => {
     ignorePatterns: [],
     wildcardAliases: {},
     fixedAliases: {},
+    parallelizationMode: 'auto',
   };
   expect(settings).toEqual(expected);
 });

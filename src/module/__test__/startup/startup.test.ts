@@ -23,6 +23,7 @@ it('Updates cache when a new file is added', () => {
     ignorePatterns: [],
     mode: 'fix' as const,
     editorUpdateRate: 5_000,
+    parallelizationMode: 'singleProcess' as const,
   };
   initializeProject(settings);
 

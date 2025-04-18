@@ -137,3 +137,7 @@ export function stripNodesFromResolvedInfo(info: ResolvedProjectInfo) {
 export function stripNodesFromAnalyzedInfo(info: AnalyzedProjectInfo) {
   return stripNodesFromBaseInfo(info) as StrippedAnalyzedProjectInfo;
 }
+
+export function sortMap<T>(map: Map<string, T>): Map<string, T> {
+  return new Map(Array.from(map.entries()).sort());
+}

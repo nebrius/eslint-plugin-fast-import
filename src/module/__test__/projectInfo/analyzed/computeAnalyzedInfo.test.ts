@@ -3,7 +3,10 @@ import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 
 import type { StrippedAnalyzedProjectInfo } from '../../../../__test__/util.js';
-import { stripNodesFromAnalyzedInfo } from '../../../../__test__/util.js';
+import {
+  sortMap,
+  stripNodesFromAnalyzedInfo,
+} from '../../../../__test__/util.js';
 import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
@@ -374,10 +377,16 @@ it('Computes base info', () => {
         wildcardAliases: {},
         fixedAliases: {},
         ignorePatterns: [],
-        isEntryPointCheck: (filePath, symbolName) =>
-          filePath === FILE_A && symbolName === 'ASourceCode',
+        entryPoints: [
+          {
+            file: 'a.ts',
+            symbols: ['ASourceCode'],
+          },
+        ],
+        parallelizationMode: 'singleProcess',
       })
     )
   );
+  info.files = sortMap(info.files);
   expect(stripNodesFromAnalyzedInfo(info)).toEqual(EXPECTED);
 });

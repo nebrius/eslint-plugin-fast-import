@@ -9,7 +9,7 @@ const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
 it('Fetchings user supplied settings', () => {
-  const { entryPoints, ...settings } = getSettings({
+  const settings = getSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -24,10 +24,11 @@ it('Fetchings user supplied settings', () => {
       },
     },
   });
-  const expected: Omit<ParsedSettings, 'entryPoints'> = {
+  const expected: ParsedSettings = {
     editorUpdateRate: 5_000,
     rootDir: join(TEST_PROJECT_DIR, 'src'),
     mode: 'one-shot',
+    parallelizationMode: 'auto',
     ignorePatterns: [
       { dir: TEST_PROJECT_DIR, contents: join(TEST_PROJECT_DIR, 'src/b*') },
     ],
@@ -37,12 +38,14 @@ it('Fetchings user supplied settings', () => {
     fixedAliases: {
       '@a': FILE_A,
     },
+    entryPoints: [
+      {
+        file: 'src/a.ts',
+        symbols: ['a'],
+      },
+    ],
   };
   expect(settings).toEqual(expected);
-  expect(entryPoints).toHaveLength(1);
-  expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
-  expect(entryPoints[0].file.ignores('src/b.ts')).toBeFalsy();
-  expect(entryPoints[0].symbols).toEqual(['a']);
 });
 
 it('Throws on invalid user supplied mode', () => {

@@ -29,6 +29,7 @@ it('Fetchings settings from typescript', () => {
     fixedAliases: {
       '@a': FILE_A,
     },
+    parallelizationMode: 'auto',
   };
   expect(settings).toEqual(expected);
 });

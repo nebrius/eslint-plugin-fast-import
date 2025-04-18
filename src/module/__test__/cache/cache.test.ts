@@ -31,6 +31,7 @@ const settings = {
   ignorePatterns: [],
   mode: 'fix' as const,
   editorUpdateRate: 5_000,
+  parallelizationMode: 'singleProcess' as const,
 };
 
 const baseExpected: StrippedAnalyzedProjectInfo = {

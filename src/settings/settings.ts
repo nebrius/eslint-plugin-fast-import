@@ -1,7 +1,5 @@
 import { isAbsolute, join, resolve } from 'node:path';
 
-import type { Ignore } from 'ignore';
-import ignore from 'ignore';
 import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
@@ -9,6 +7,8 @@ import { debug, error } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
 import { getEslintConfigDir } from './util.js';
+
+const EDITOR_EXECUTORS = ['Visual Studio Code', 'Cursor'];
 
 export type IgnorePattern = {
   dir: string;
@@ -22,7 +22,7 @@ export type ParsedSettings = Omit<
   ignorePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
-  entryPoints: Array<{ file: Ignore; symbols: string[] }>;
+  entryPoints: Array<{ file: string; symbols: string[] }>;
 };
 
 function argsInclude(strs: string[]) {
@@ -34,7 +34,9 @@ function argsInclude(strs: string[]) {
   return false;
 }
 
-const DEFAULT_MODE = process.argv[0].includes('Visual Studio Code')
+const DEFAULT_MODE = EDITOR_EXECUTORS.some((editor) =>
+  process.argv[0].includes(editor)
+)
   ? 'editor'
   : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
     ? 'fix'
@@ -143,7 +145,7 @@ export function getSettings(
       );
     }
     parsedEntryPoints.push({
-      file: ignore().add(filePattern),
+      file: filePattern,
       symbols: formattedSymbols,
     });
   }
@@ -191,6 +193,7 @@ export function getSettings(
     ignorePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode,
+    parallelizationMode: mergedSettings.parallelizationMode ?? 'auto',
   };
   return settings;
 }

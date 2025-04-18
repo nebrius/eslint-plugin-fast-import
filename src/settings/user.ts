@@ -10,6 +10,9 @@ const settingsSchema = z.strictObject({
   ignorePatterns: z.array(z.string()).optional(),
   mode: z.enum(['auto', 'one-shot', 'fix', 'editor']).optional(),
   editorUpdateRate: z.number().optional(),
+  parallelizationMode: z
+    .enum(['auto', 'multiProcess', 'singleProcess'])
+    .optional(),
   debugLogging: z.boolean().optional(),
 });
 
