@@ -40,6 +40,7 @@ export default tseslint.config(
       ],
     },
     debugLogging: true,
+    parallelizationMode: 'multiProcess',
   }),
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>

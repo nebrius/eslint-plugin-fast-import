@@ -153,7 +153,9 @@ export function getSettings(
   mergedSettings.mode = mergedSettings.mode ?? 'auto';
   const mode =
     mergedSettings.mode === 'auto' ? DEFAULT_MODE : mergedSettings.mode;
+  const parallelizationMode = mergedSettings.parallelizationMode ?? 'auto';
   debug(`Running in ${mode} mode`);
+  debug(`Using parallelization mode ${parallelizationMode}`);
   debug(`Setting root dir to ${rootDir}`);
   if (!Object.keys(wildcardAliases).length) {
     debug(`No wildcard aliases defined`);
@@ -193,7 +195,7 @@ export function getSettings(
     ignorePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode,
-    parallelizationMode: mergedSettings.parallelizationMode ?? 'auto',
+    parallelizationMode,
   };
   return settings;
 }
