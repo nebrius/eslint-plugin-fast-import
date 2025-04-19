@@ -143,7 +143,6 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'index',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',
@@ -158,7 +157,6 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'b1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',
@@ -173,12 +171,10 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'getD1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
           {
             exportName: 'D2',
             isEntryPoint: false,
-            isTypeExport: true,
           },
         ],
         fileType: 'code',
@@ -193,7 +189,6 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'getD1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',
@@ -208,7 +203,6 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'e1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',
@@ -229,7 +223,6 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'c1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',
@@ -244,12 +237,10 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'F1',
             isEntryPoint: false,
-            isTypeExport: true,
           },
           {
             exportName: 'getF1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',
@@ -264,7 +255,6 @@ const EXPECTED: StrippedResolvedProjectInfo = {
           {
             exportName: 'getF1',
             isEntryPoint: false,
-            isTypeExport: false,
           },
         ],
         fileType: 'code',

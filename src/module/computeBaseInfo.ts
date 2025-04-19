@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
@@ -6,8 +7,9 @@ import type {
   StaticExport,
   StaticExportEntry,
   StaticImport,
+  StaticImportEntry,
 } from 'oxc-parser';
-import oxc, { ExportImportNameKind } from 'oxc-parser';
+import oxc from 'oxc-parser';
 
 import type { ParsedSettings } from '../settings/settings.js';
 import type {
@@ -211,9 +213,31 @@ export function deleteBaseInfoForFile(
 }
 
 function getRange(
-  entry: StaticImport | StaticExportEntry | DynamicImport | StaticExport
-) {
-  return [entry.start, entry.end] as [number, number];
+  entry:
+    | StaticImport
+    | StaticImportEntry
+    | DynamicImport
+    | StaticExport
+    | StaticExportEntry,
+  fallBack?: [number, number]
+): [number, number] {
+  // Import entries are a little different
+  if ('localName' in entry) {
+    const start = entry.importName.start ?? entry.localName.start;
+    const end = entry.localName.start ?? entry.importName.start;
+
+    // This shouldn't happen in practice, but oxc's types are defined rather
+    // loosely, marking entries as optional instead of using unions to indicate
+    // when values are undefined.
+    if (start === undefined || end === undefined) {
+      if (fallBack) {
+        return fallBack;
+      }
+      throw new InternalError('Could not get range for import entry');
+    }
+    return [start, end];
+  }
+  return [entry.start, entry.end];
 }
 
 function computeFileDetails({
@@ -221,7 +245,9 @@ function computeFileDetails({
   fileContents,
   isEntryPointCheck,
 }: ComputeFileDetailsOptions): BaseCodeFileDetails | undefined {
-  const result = oxc.parseSync(filePath, fileContents);
+  const result = oxc.parseSync(filePath, fileContents, {
+    sourceType: 'module',
+  });
   if (result.errors.length) {
     debug(
       `${filePath} contains syntax errors and cannot be analyzed, file will be ignored`
@@ -239,61 +265,141 @@ function computeFileDetails({
 
   for (const importEntry of result.module.staticImports) {
     const statementNodeRange = getRange(importEntry);
-    const text = getTextForRange(fileContents, statementNodeRange);
-    console.log(text);
+    const moduleSpecifier = importEntry.moduleRequest.value;
+    for (const entry of importEntry.entries) {
+      const reportNodeRange = getRange(entry);
+      const importAlias = entry.localName.value;
+
+      // Check if this is a barrel import
+      if (entry.importName.kind === 'NamespaceObject') {
+        fileDetails.imports.push({
+          importType: 'barrel',
+          importAlias,
+          statementNodeRange,
+          reportNodeRange,
+          moduleSpecifier,
+          isTypeImport: entry.isType,
+        });
+      } else {
+        const importName =
+          entry.importName.kind === 'Default'
+            ? 'default'
+            : entry.importName.name;
+        if (!importName) {
+          throw new InternalError(`importName is undefined`);
+        }
+        fileDetails.imports.push({
+          importType: 'single',
+          importName,
+          importAlias,
+          statementNodeRange,
+          reportNodeRange,
+          moduleSpecifier,
+          isTypeImport: entry.isType,
+        });
+      }
+    }
   }
 
   for (const importEntry of result.module.dynamicImports) {
     const statementNodeRange = getRange(importEntry);
-    const text = getTextForRange(fileContents, statementNodeRange);
-    console.log(text);
+
+    // Unfortunately OXC only gives us the range of the specifier, but not what
+    // it is. We extract this out and reparse it to see what it contains
+    const moduleSpecifierText = getTextForRange(fileContents, [
+      importEntry.moduleRequest.start,
+      importEntry.moduleRequest.end,
+    ]);
+
+    const result = oxc.parseSync(randomUUID() + '.ts', moduleSpecifierText);
+
+    if (
+      // Make sure the program parsed and has 1 statemnt
+      !result.errors.length &&
+      result.program.body.length === 1 &&
+      // Make sure it's a string literal
+      result.program.body[0].type === 'ExpressionStatement' &&
+      result.program.body[0].expression.type === 'Literal' &&
+      typeof result.program.body[0].expression.value === 'string'
+    ) {
+      fileDetails.imports.push({
+        importType: 'dynamic',
+        statementNodeRange,
+        reportNodeRange: statementNodeRange,
+        moduleSpecifier: result.program.body[0].expression.value,
+      });
+    }
   }
 
   for (const exportEntry of result.module.staticExports) {
     const statementNodeRange = getRange(exportEntry);
-    const text = getTextForRange(fileContents, statementNodeRange);
     for (const entry of exportEntry.entries) {
-      const reportNodeRange = getRange(entry);
+      const reportNodeRange = getRange(entry, statementNodeRange);
+
+      // Check if this is a reexport
       if (entry.moduleRequest) {
         const moduleSpecifier = entry.moduleRequest.value;
         const isBarrel =
-          entry.importName.kind === ExportImportNameKind.All || // with alias
-          entry.importName.kind === ExportImportNameKind.AllButDefault; // no alias
+          // All indicates there is an alias, aka `export * as a from './a'`
+          entry.importName.kind === 'All' ||
+          // AllButDefault indicates there is not an alias, aka `export * from './a'`
+          entry.importName.kind === 'AllButDefault';
+
         if (isBarrel) {
+          const exportName = entry.exportName.name;
           fileDetails.reexports.push({
             reexportType: 'barrel',
             moduleSpecifier,
             exportName,
-            isTypeReexport,
-            isEntryPoint: isEntryPointCheck(filePath, exportName),
+            // TODO: https://github.com/oxc-project/oxc/issues/10505
+            isTypeReexport: false,
+            isEntryPoint: exportName
+              ? isEntryPointCheck(filePath, exportName)
+              : false,
             statementNodeRange,
             reportNodeRange,
           });
         } else {
+          const importName = entry.importName.name;
+          if (!importName) {
+            throw new InternalError(`importName is undefined`);
+          }
+          const exportName = entry.exportName.name;
+          if (!exportName) {
+            throw new InternalError(`exportName is undefined`);
+          }
           fileDetails.reexports.push({
             reexportType: 'single',
             moduleSpecifier,
             importName,
             exportName,
-            isTypeReexport,
+            // TODO: https://github.com/oxc-project/oxc/issues/10505
+            isTypeReexport: false,
             isEntryPoint: isEntryPointCheck(filePath, exportName),
             statementNodeRange,
             reportNodeRange,
           });
         }
-      } else {
-        //
       }
-      /*
-      
-        moduleRequest?: ValueSpan
-        ** The name under which the desired binding is exported by the module`. *
-        importName: ExportImportName
-        ** The name used to export this binding by this module. *
-        exportName: ExportExportName
-        ** The name that is used to locally access the exported value from within the importing module. *
-        localName: ExportLocalName
-      */
+
+      // Otherwise this is a standard export, not a reexport
+      else {
+        const exportName =
+          entry.exportName.kind === 'Default'
+            ? 'default'
+            : entry.exportName.name;
+        if (!exportName) {
+          throw new InternalError(`exportName is undefined`);
+        }
+        fileDetails.exports.push({
+          exportName,
+          isEntryPoint: isEntryPointCheck(filePath, exportName),
+          statementNodeRange,
+          reportNodeRange,
+        });
+      }
     }
   }
+
+  return fileDetails;
 }
