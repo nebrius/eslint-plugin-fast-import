@@ -25,7 +25,6 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": [
-        "--inspect",
         "${workspaceRoot}/node_modules/.bin/eslint"
       ],
       "args": [

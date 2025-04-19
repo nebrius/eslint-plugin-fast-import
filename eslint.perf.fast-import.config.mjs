@@ -14,7 +14,8 @@ export default tseslint.config({
     'fast-import': plugin,
   },
   rules: {
-    'fast-import/no-unused-exports': 'error',
     'fast-import/no-cycle': 'error',
+    'fast-import/no-unused-exports': 'error',
+    'fast-import/no-missing-imports': 'error',
   },
 });

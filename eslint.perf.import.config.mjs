@@ -19,7 +19,8 @@ export default tseslint.config({
     import: pluginImport,
   },
   rules: {
-    'import/no-unresolved': 'error',
     'import/no-cycle': 'error',
+    'import/no-unused-modules': 'error',
+    'import/no-unresolved': 'error',
   },
 });

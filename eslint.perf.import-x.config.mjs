@@ -25,7 +25,8 @@ export default tseslint.config({
     'import-x': pluginImportX,
   },
   rules: {
-    'import-x/no-unresolved': 'error',
     'import-x/no-cycle': 'error',
+    'import-x/no-unused-modules': 'error',
+    'import-x/no-unresolved': 'error',
   },
 });
