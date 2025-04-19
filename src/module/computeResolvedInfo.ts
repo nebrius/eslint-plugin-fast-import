@@ -456,11 +456,26 @@ function resolveModuleSpecifier({
               return computeFilePath(basename + '.jsx');
             }
           }
-          // Intentionally fall through here, since we didn't find an expected pair of files
+          // Intentionally fall through here, since we didn't find an expected
+          // pair of files
         }
 
-        // Otherwise the import is ambiguous and we can't determine which file it references
+        // Otherwise we have multiple extensions in a non-paired configuration
+        // eslint-disable-next-line no-fallthrough
         default: {
+          // If there is only one code file, then we can resolve to that file,
+          // since the only extensionless imports are for code files.
+          let numCodeFiles = 0;
+          let candidateExtension: string | undefined;
+          for (const extension of extensions) {
+            if (isCodeFile(computeFilePath(basename + extension))) {
+              numCodeFiles++;
+              candidateExtension = extension;
+            }
+          }
+          if (numCodeFiles === 1 && candidateExtension) {
+            return computeFilePath(basename + candidateExtension);
+          }
           throw new Error(
             `Module specifier ${moduleSpecifier} in file ${filePath} is ambiguous because there is more than one file with this name`
           );
