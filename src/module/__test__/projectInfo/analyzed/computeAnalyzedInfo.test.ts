@@ -166,7 +166,6 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
           {
             exportName: 'c1',
             isEntryPoint: false,
-            isTypeExport: false,
             importedByFiles: [FILE_A],
             barrelImportedByFiles: [FILE_A],
             reexportedByFiles: [FILE_B],
@@ -253,7 +252,6 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
           {
             exportName: 'd1',
             isEntryPoint: false,
-            isTypeExport: false,
             importedByFiles: [FILE_A],
             barrelImportedByFiles: [FILE_A],
             reexportedByFiles: [FILE_B, FILE_E],

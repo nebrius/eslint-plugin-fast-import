@@ -63,7 +63,6 @@ it('Updates cache when a new file is added', () => {
               exportName: 'a',
               importedByFiles: [],
               isEntryPoint: false,
-              isTypeExport: false,
               reexportedByFiles: [],
             },
           ],
