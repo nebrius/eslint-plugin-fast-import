@@ -1,7 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import type { TSESTree } from '@typescript-eslint/utils';
+import type {
+  DynamicImport,
+  StaticExport,
+  StaticExportEntry,
+  StaticImport,
+} from 'oxc-parser';
+import oxc, { ExportImportNameKind } from 'oxc-parser';
 
 import type { ParsedSettings } from '../settings/settings.js';
 import type {
@@ -9,11 +15,10 @@ import type {
   BaseCodeFileDetails,
   BaseProjectInfo,
 } from '../types/base.js';
-import { isCodeFile } from '../util/code.js';
+import { getTextForRange, isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
 import { getFilesSync } from '../util/files.js';
-import { computeFileDetails } from './computeBaseFileDetails.js';
-import { computeBaseFileInfoForFilesSync } from './computeBaseInfoOrchestrator.js';
+import { debug } from '../util/logging.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -67,24 +72,22 @@ export function computeBaseInfo({
     );
   }
 
-  const codeFilesToProcess: string[] = [];
   for (const { filePath } of files) {
     if (isCodeFile(filePath)) {
-      codeFilesToProcess.push(filePath);
+      const fileContents = readFileSync(filePath, 'utf-8');
+      const fileDetails = computeFileDetails({
+        filePath,
+        fileContents,
+        isEntryPointCheck,
+      });
+      if (fileDetails) {
+        info.files.set(filePath, fileDetails);
+      }
     } else {
       info.files.set(filePath, {
         fileType: 'other',
       });
     }
-  }
-
-  const results = computeBaseFileInfoForFilesSync(
-    codeFilesToProcess,
-    isEntryPointCheck
-  );
-
-  for (const { filePath, fileDetails } of results) {
-    info.files.set(filePath, fileDetails);
   }
 
   return info;
@@ -93,24 +96,22 @@ export function computeBaseInfo({
 type ComputeFileDetailsOptions = {
   filePath: string;
   fileContents: string;
-  ast: TSESTree.Program;
   isEntryPointCheck: IsEntryPointCheck;
 };
 
 export function addBaseInfoForFile(
-  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions,
+  { filePath, fileContents, isEntryPointCheck }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
 ) {
   if (isCodeFile(filePath)) {
-    baseProjectInfo.files.set(
+    const fileDetails = computeFileDetails({
       filePath,
-      computeFileDetails({
-        filePath,
-        fileContents,
-        ast,
-        isEntryPointCheck,
-      })
-    );
+      fileContents,
+      isEntryPointCheck,
+    });
+    if (fileDetails) {
+      baseProjectInfo.files.set(filePath, fileDetails);
+    }
   } else {
     baseProjectInfo.files.set(filePath, { fileType: 'other' });
   }
@@ -167,7 +168,7 @@ function hasFileChanged(
 }
 
 export function updateBaseInfoForFile(
-  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions,
+  { filePath, fileContents, isEntryPointCheck }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
 ): boolean {
   const previousFileDetails = baseProjectInfo.files.get(filePath);
@@ -192,12 +193,14 @@ export function updateBaseInfoForFile(
   const updatedFileDetails = computeFileDetails({
     filePath,
     fileContents,
-    ast,
     isEntryPointCheck,
   });
 
-  baseProjectInfo.files.set(filePath, updatedFileDetails);
-  return hasFileChanged(previousFileDetails, updatedFileDetails);
+  if (updatedFileDetails) {
+    baseProjectInfo.files.set(filePath, updatedFileDetails);
+    return hasFileChanged(previousFileDetails, updatedFileDetails);
+  }
+  return false;
 }
 
 export function deleteBaseInfoForFile(
@@ -205,4 +208,92 @@ export function deleteBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo
 ) {
   baseProjectInfo.files.delete(filePath);
+}
+
+function getRange(
+  entry: StaticImport | StaticExportEntry | DynamicImport | StaticExport
+) {
+  return [entry.start, entry.end] as [number, number];
+}
+
+function computeFileDetails({
+  filePath,
+  fileContents,
+  isEntryPointCheck,
+}: ComputeFileDetailsOptions): BaseCodeFileDetails | undefined {
+  const result = oxc.parseSync(filePath, fileContents);
+  if (result.errors.length) {
+    debug(
+      `${filePath} contains syntax errors and cannot be analyzed, file will be ignored`
+    );
+    return;
+  }
+
+  const fileDetails: BaseCodeFileDetails = {
+    fileType: 'code',
+    lastUpdatedAt: Date.now(),
+    imports: [],
+    exports: [],
+    reexports: [],
+  };
+
+  for (const importEntry of result.module.staticImports) {
+    const statementNodeRange = getRange(importEntry);
+    const text = getTextForRange(fileContents, statementNodeRange);
+    console.log(text);
+  }
+
+  for (const importEntry of result.module.dynamicImports) {
+    const statementNodeRange = getRange(importEntry);
+    const text = getTextForRange(fileContents, statementNodeRange);
+    console.log(text);
+  }
+
+  for (const exportEntry of result.module.staticExports) {
+    const statementNodeRange = getRange(exportEntry);
+    const text = getTextForRange(fileContents, statementNodeRange);
+    for (const entry of exportEntry.entries) {
+      const reportNodeRange = getRange(entry);
+      if (entry.moduleRequest) {
+        const moduleSpecifier = entry.moduleRequest.value;
+        const isBarrel =
+          entry.importName.kind === ExportImportNameKind.All || // with alias
+          entry.importName.kind === ExportImportNameKind.AllButDefault; // no alias
+        if (isBarrel) {
+          fileDetails.reexports.push({
+            reexportType: 'barrel',
+            moduleSpecifier,
+            exportName,
+            isTypeReexport,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
+            statementNodeRange,
+            reportNodeRange,
+          });
+        } else {
+          fileDetails.reexports.push({
+            reexportType: 'single',
+            moduleSpecifier,
+            importName,
+            exportName,
+            isTypeReexport,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
+            statementNodeRange,
+            reportNodeRange,
+          });
+        }
+      } else {
+        //
+      }
+      /*
+      
+        moduleRequest?: ValueSpan
+        ** The name under which the desired binding is exported by the module`. *
+        importName: ExportImportName
+        ** The name used to export this binding by this module. *
+        exportName: ExportExportName
+        ** The name that is used to locally access the exported value from within the importing module. *
+        localName: ExportLocalName
+      */
+    }
+  }
 }

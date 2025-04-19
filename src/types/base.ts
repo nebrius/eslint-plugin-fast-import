@@ -1,19 +1,17 @@
-import type { TSESTree } from '@typescript-eslint/utils';
-
 import type { ParsedSettings } from '../settings/settings.js';
 
 type Base = {
   /**
    * The AST node range of the complete ESM statement for this entry
    */
-  statementNodeRange: TSESTree.Node['range'];
+  statementNodeRange: [number, number];
 
   /**
    * The AST node range to report an error on, if one exists.
    *
    * Note: this may not be the node representing the entire ESM statement
    */
-  reportNodeRange: TSESTree.Node['range'];
+  reportNodeRange: [number, number];
 };
 
 /* Imports */
@@ -134,15 +132,6 @@ export type BaseExport = Base & {
    * export since we'll never see the import itself
    */
   isEntryPoint: boolean;
-
-  /**
-   * If true, then this is a TypeScript type import, e.g.
-   *
-   * ```
-   * export type Foo = 10;
-   * ```
-   */
-  isTypeExport: boolean;
 };
 
 /* Reexports */

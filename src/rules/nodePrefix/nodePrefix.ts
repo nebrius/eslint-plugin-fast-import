@@ -1,7 +1,3 @@
-import type {
-  ImportDeclaration,
-  ReexportDeclaration,
-} from '../../module/util.js';
 import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 

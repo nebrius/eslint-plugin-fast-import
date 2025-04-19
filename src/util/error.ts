@@ -1,9 +1,9 @@
-import type { TSESTree } from '@typescript-eslint/utils';
+import { getTextForRange } from './code.js';
 
 type SourceDetails = {
   filePath: string;
   fileContents?: string;
-  range: TSESTree.Node['range'];
+  range: [number, number];
 };
 
 /**
@@ -16,7 +16,7 @@ export class InternalError extends Error {
     let formattedMessage = `Internal error: ${message}. This is a bug, please report the message and the stack trace to the maintainer at https://github.com/nebrius/fast-import/issues`;
     if (sourceDetails) {
       if (sourceDetails.fileContents) {
-        formattedMessage += `\n\nIn ${sourceDetails.filePath}:\n\n${sourceDetails.fileContents.substring(sourceDetails.range[0], sourceDetails.range[1])}\n`;
+        formattedMessage += `\n\nIn ${sourceDetails.filePath}:\n\n${getTextForRange(sourceDetails.fileContents, sourceDetails.range)}\n`;
       } else {
         formattedMessage += `\n\nIn ${sourceDetails.filePath}\n`;
       }
