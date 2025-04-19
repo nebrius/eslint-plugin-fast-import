@@ -69,7 +69,7 @@ export function initializeProject({
     return;
   }
 
-  const baseStart = Date.now();
+  const baseStart = performance.now();
   baseProjectInfo = computeBaseInfo({
     rootDir,
     wildcardAliases,
@@ -80,15 +80,15 @@ export function initializeProject({
       entryPoints
     ),
   });
-  const baseEnd = Date.now();
+  const baseEnd = performance.now();
 
-  const resolveStart = Date.now();
+  const resolveStart = performance.now();
   resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
-  const resolveEnd = Date.now();
+  const resolveEnd = performance.now();
 
-  const analyzestart = Date.now();
+  const analyzestart = performance.now();
   analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-  const analyzeEnd = Date.now();
+  const analyzeEnd = performance.now();
 
   debug(
     `Initial computation of ${analyzedProjectInfo.files.size.toLocaleString()} files complete :`
@@ -141,7 +141,7 @@ export function updateCacheFromFileSystem(
   let numModified = 0;
 
   // First, process any file deletes
-  const baseStart = Date.now();
+  const baseStart = performance.now();
   for (const filePath of changes.deleted) {
     if (baseProjectInfo.files.has(filePath)) {
       numDeletes++;
@@ -149,10 +149,10 @@ export function updateCacheFromFileSystem(
       deleteBaseInfoForFile(filePath, baseProjectInfo);
     }
   }
-  const baseEnd = Date.now();
+  const baseEnd = performance.now();
 
   // Next, process any file adds
-  const resolveStart = Date.now();
+  const resolveStart = performance.now();
   for (const { filePath } of changes.added) {
     // We might already have this new file in memory if it was created in editor
     // and previously linted while it was only in memory
@@ -195,7 +195,7 @@ export function updateCacheFromFileSystem(
   if (numDeletes || numAdditions) {
     resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
   }
-  const resolveEnd = Date.now();
+  const resolveEnd = performance.now();
 
   // Next, process any modified files
   for (const { filePath, latestUpdatedAt } of changes.modified) {
@@ -233,9 +233,9 @@ export function updateCacheFromFileSystem(
 
   // Finally, recompute analyzed info
   if (numDeletes || numAdditions | numModified) {
-    const analyzestart = Date.now();
+    const analyzestart = performance.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-    const analyzeEnd = Date.now();
+    const analyzeEnd = performance.now();
 
     debug(
       `Synchronized changes from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
@@ -276,22 +276,22 @@ export function updateCacheForFile(
 
   // Check if we're updating file info or adding a new file
   if (analyzedProjectInfo.files.has(filePath)) {
-    const baseStart = Date.now();
+    const baseStart = performance.now();
     const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
       baseOptions,
       baseProjectInfo
     );
-    const baseEnd = Date.now();
+    const baseEnd = performance.now();
 
     // If we don't need to update
     if (shouldUpdateDerivedProjectInfo) {
-      const resolveStart = Date.now();
+      const resolveStart = performance.now();
       updateResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
-      const resolveEnd = Date.now();
+      const resolveEnd = performance.now();
 
-      const analyzeStart = Date.now();
+      const analyzeStart = performance.now();
       analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-      const analyzeEnd = Date.now();
+      const analyzeEnd = performance.now();
 
       debug(`Update for ${filePath.replace(rootDir, '')} complete:`);
       debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
@@ -356,18 +356,18 @@ export function updateCacheForFile(
       return false;
     }
   } else {
-    const baseStart = Date.now();
+    const baseStart = performance.now();
     addBaseInfoForFile(baseOptions, baseProjectInfo);
-    const baseEnd = Date.now();
+    const baseEnd = performance.now();
 
-    const resolveStart = Date.now();
+    const resolveStart = performance.now();
     computeFolderTree(baseProjectInfo);
     addResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
-    const resolveEnd = Date.now();
+    const resolveEnd = performance.now();
 
-    const anazlyzeStart = Date.now();
+    const anazlyzeStart = performance.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-    const analyzeEnd = Date.now();
+    const analyzeEnd = performance.now();
 
     debug(`${filePath.replace(rootDir, '')} add complete:`);
     debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);

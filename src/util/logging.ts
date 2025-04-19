@@ -18,5 +18,6 @@ export function debug(msg: string) {
 }
 
 export function formatMilliseconds(duration: number) {
-  return duration.toLocaleString() + 'ms';
+  const roundedDuration = Math.round(duration * 10) / 10;
+  return `${roundedDuration.toLocaleString()}ms`;
 }
