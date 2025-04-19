@@ -14,13 +14,38 @@ type PotentialFile = {
   stats: Stats;
 };
 
+// Get a potential list of files, automatically filtering out a few directories
+// known to contain lots of files we always want to ignore early on for perf
+// reasons. Waiting to check against ignores incurs a big perf hit due to the
+// more complex and Regex based logic of ignores.
+function getPotentialFilesList(rootDir: string): string[] {
+  const potentialFilesList: string[] = [];
+
+  const dirContents = readdirSync(rootDir, {
+    withFileTypes: true,
+  });
+
+  for (const content of dirContents) {
+    if (!content.isDirectory()) {
+      potentialFilesList.push(join(rootDir, content.name));
+    } else if (
+      content.name !== 'node_modules' &&
+      content.name !== 'dist' &&
+      content.name !== 'build' &&
+      content.name !== '.git'
+    ) {
+      potentialFilesList.push(
+        ...getPotentialFilesList(join(rootDir, content.name))
+      );
+    }
+  }
+
+  return potentialFilesList;
+}
+
 export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
   // Read in the files and their stats, and filter out directories
-  const potentialFiles = readdirSync(rootDir, {
-    recursive: true,
-    encoding: 'utf-8',
-  })
-    .map((f) => join(rootDir, f))
+  const potentialFiles = getPotentialFilesList(rootDir)
     // Stats will be used for multiple checks later, so we want to cache it now.
     // Unfortunately we need more than what {withFileTypes: true} provides, so
     // we still need to call statSync separately

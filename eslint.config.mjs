@@ -38,8 +38,10 @@ export default tseslint.config(
         'recommended',
         'all',
       ],
+      '*.config.*': ['default'],
     },
     debugLogging: true,
+    rootDir: getDirname(),
   }),
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>

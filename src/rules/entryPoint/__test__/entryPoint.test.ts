@@ -2,15 +2,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname, getFilename } from 'cross-dirname';
+import { getDirname } from 'cross-dirname';
 
 import { _resetProjectInfo } from '../../../module/module.js';
 import { _resetSettings } from '../../../settings/settings.js';
-import { getEslintConfigDir } from '../../../settings/util.js';
 import { noEntryPointImports } from '../entryPoint.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const ESLINT_CONFIG_DIR_DIR = getEslintConfigDir(getFilename());
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_A_CONTENTS = readFileSync(FILE_A, 'utf-8');
 
@@ -53,7 +51,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPoints: {
-            [FILE_A.replace(ESLINT_CONFIG_DIR_DIR + '/', '')]: ['a'],
+            [FILE_A.replace(TEST_PROJECT_DIR + '/', '')]: ['a'],
           },
         },
       },

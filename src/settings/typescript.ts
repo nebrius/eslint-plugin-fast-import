@@ -5,14 +5,15 @@ import ts from 'typescript';
 
 import { warn } from '../util/logging.js';
 import type { Settings } from './user.js';
-import { getEslintConfigDir } from './util.js';
 
-export function getTypeScriptSettings(filePath: string): Settings {
+type TypeScriptSettings = Pick<Settings, 'alias'>;
+
+export function getTypeScriptSettings(rootDir: string): TypeScriptSettings {
   // Read in the file. Note: we don't support the full breadth of tsconfigs,
   // notably we don't support multiple nested configs and only look at the
   // config found in the eslint config file's directory
   const configPath = ts.findConfigFile(
-    getEslintConfigDir(filePath),
+    rootDir,
     ts.sys.fileExists.bind(ts.sys),
     'tsconfig.json'
   );
@@ -20,14 +21,10 @@ export function getTypeScriptSettings(filePath: string): Settings {
     return {};
   }
 
-  const settings = parseTsConfig(configPath);
-  return {
-    rootDir: settings.rootDir ?? dirname(configPath),
-    alias: settings.alias,
-  };
+  return parseTsConfig(configPath);
 }
 
-function parseTsConfig(configPath: string): Settings {
+function parseTsConfig(configPath: string): TypeScriptSettings {
   const config = ts.readConfigFile(configPath, (file) =>
     readFileSync(file, 'utf-8')
   );
@@ -59,7 +56,7 @@ function parseTsConfig(configPath: string): Settings {
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const configExtends = config.config?.extends as string | undefined;
-  let baseConfig: Settings = {};
+  let baseConfig: TypeScriptSettings = {};
   if (typeof configExtends === 'string') {
     baseConfig = parseTsConfig(resolve(dirname(configPath), configExtends));
   }
@@ -108,10 +105,7 @@ function parseTsConfig(configPath: string): Settings {
     parsedPaths[symbol] = absolutePathEntry;
   }
 
-  // Fallback to the directory containing tsconfig.json if rootDir isn't
-  // supplied (like TypeScript itself does)
   return {
-    rootDir: absoluteRootDir ?? baseConfig.rootDir,
     alias: { ...parsedPaths, ...baseConfig.alias },
   };
 }

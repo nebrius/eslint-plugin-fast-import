@@ -14,6 +14,7 @@ it('Recovers from an invalid tsconfig file', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
+        rootDir: TEST_PROJECT_DIR,
       },
     },
   });

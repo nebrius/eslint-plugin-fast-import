@@ -1,4 +1,4 @@
-import { isAbsolute, join, resolve } from 'node:path';
+import { isAbsolute, resolve } from 'node:path';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
@@ -8,7 +8,6 @@ import type { GenericContext } from '../types/context.js';
 import { debug, error } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
-import { getEslintConfigDir } from './util.js';
 
 export type IgnorePattern = {
   dir: string;
@@ -56,41 +55,23 @@ export function getSettings(
     return settings;
   }
 
-  const eslintConfigDir = getEslintConfigDir(context.filename);
+  // Get user supplied settings first, since we need rootDir from it to proceed
+  const userSettings = getUserSettings(context.settings);
+  const { rootDir } = userSettings;
 
   // Get TypeScript supplied settings
-  const typeScriptSettings = getTypeScriptSettings(context.filename);
-  const userSettings = getUserSettings(context.settings);
-  const mergedSettings = {
-    ...typeScriptSettings,
-    ...userSettings,
-  };
+  const typeScriptSettings = getTypeScriptSettings(userSettings.rootDir);
 
   // We can't call debug until after parsing user settings, so we log this here,
   // even if we could do it sooner.
   debug(`Launched via "${process.argv[0]}"`);
 
-  let { rootDir } = mergedSettings;
+  // Merge TypeScript and user settings, with user settings taking precedence
+  const mergedSettings = {
+    ...typeScriptSettings,
+    ...userSettings,
+  };
   const { alias = {}, entryPoints = [] } = mergedSettings;
-
-  // If we don't have rootDir yet, default to setting it to the ESLint config
-  // file directory. If we do have it but it's a relative path, make it absolute
-  // by joining+resolving with the ESLint config file directory.
-  if (!rootDir || !isAbsolute(rootDir)) {
-    const eslintConfigDir = getEslintConfigDir(context.filename);
-    if (!rootDir) {
-      rootDir = eslintConfigDir;
-    } else {
-      rootDir = resolve(join(eslintConfigDir, rootDir));
-    }
-  }
-
-  // Make sure we could find a rootDir
-  if (!rootDir) {
-    throw new Error(
-      `Could not determine rootDir. Please add it to fast-import settings. See https://github.com/nebrius/fast-import for details`
-    );
-  }
 
   // Clean up any aliases
   const wildcardAliases: ParsedSettings['wildcardAliases'] = {};
@@ -99,7 +80,7 @@ export function getSettings(
     // Compute the absolute version of the path if needed (TypeScript does this
     // already since it has different resolution rules)
     if (!isAbsolute(path)) {
-      path = resolve(eslintConfigDir, path);
+      path = resolve(rootDir, path);
     }
     if (symbol.endsWith('/')) {
       symbol = symbol.slice(0, -1);
@@ -178,8 +159,8 @@ export function getSettings(
   }
 
   const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
-    dir: eslintConfigDir,
-    contents: `${eslintConfigDir}/${p}`,
+    dir: rootDir,
+    contents: `${rootDir}/${p}`,
   }));
 
   // Apply defaults and save to the settings cache

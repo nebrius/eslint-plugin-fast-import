@@ -2,7 +2,6 @@ import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
-import { getEslintConfigDir } from '../settings/util.js';
 import type {
   AnalyzedImport,
   AnalyzedProjectInfo,
@@ -34,14 +33,14 @@ let resolvedProjectInfo: ResolvedProjectInfo | null = null;
 let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
 
 function getEntryPointCheck(
-  eslintConfigDir: string,
+  rootDir: string,
   entryPoints: ParsedSettings['entryPoints']
 ) {
   return (filePath: string, symbolName: string) => {
     for (const { file, symbols } of entryPoints) {
       // We're using the ignore library in reverse fashion: we're using it to
       // identify when a file is _included_, not _excluded_
-      if (file.ignores(filePath.replace(eslintConfigDir + '/', ''))) {
+      if (file.ignores(filePath.replace(rootDir + '/', ''))) {
         return symbols.includes(symbolName);
       }
     }
@@ -75,10 +74,7 @@ export function initializeProject({
     wildcardAliases,
     fixedAliases,
     ignorePatterns,
-    isEntryPointCheck: getEntryPointCheck(
-      getEslintConfigDir(rootDir),
-      entryPoints
-    ),
+    isEntryPointCheck: getEntryPointCheck(rootDir, entryPoints),
   });
   const baseEnd = performance.now();
 
@@ -163,7 +159,7 @@ export function updateCacheFromFileSystem(
             {
               ...parseFile(filePath),
               isEntryPointCheck: getEntryPointCheck(
-                getEslintConfigDir(settings.rootDir),
+                settings.rootDir,
                 settings.entryPoints
               ),
             },
@@ -212,7 +208,7 @@ export function updateCacheFromFileSystem(
           {
             ...parseFile(filePath),
             isEntryPointCheck: getEntryPointCheck(
-              getEslintConfigDir(settings.rootDir),
+              settings.rootDir,
               settings.entryPoints
             ),
           },
@@ -268,10 +264,7 @@ export function updateCacheForFile(
     filePath,
     fileContents,
     ast,
-    isEntryPointCheck: getEntryPointCheck(
-      getEslintConfigDir(rootDir),
-      entryPoints
-    ),
+    isEntryPointCheck: getEntryPointCheck(rootDir, entryPoints),
   };
 
   // Check if we're updating file info or adding a new file

@@ -13,7 +13,7 @@ export const noMissingImports = createRule({
       noMissingImports:
         'Import "{{name}}" does not point to a valid first party export',
       noTransientDependencies:
-        'Third party module specifier "{{specifier}}" is not listed in package.json.\n\nIf this module specifier points to first party code, then you likely found a bug in fast-import. Please report it.',
+        'Third party module specifier "{{specifier}}" is not listed in package.json.',
     },
   },
   defaultOptions: [],

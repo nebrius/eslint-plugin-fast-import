@@ -4,7 +4,7 @@ import type { GenericContext } from '../types/context.js';
 import { setVerbose } from '../util/logging.js';
 
 const settingsSchema = z.strictObject({
-  rootDir: z.string().optional(),
+  rootDir: z.string(),
   alias: z.record(z.string(), z.string()).optional(),
   entryPoints: z.record(z.string(), z.array(z.string())).optional(),
   ignorePatterns: z.array(z.string()).optional(),
@@ -18,12 +18,14 @@ export type UserSettings = z.infer<typeof settingsSchema>;
 export type Settings = Omit<UserSettings, 'debugLogging'>;
 
 export function getUserSettings(
-  settings: GenericContext['settings']
+  settings: GenericContext['settings'] | undefined
 ): Settings {
   // Parse the raw settings, if supplied
-  const fastEsmSettings = settings['fast-import'];
+  const fastEsmSettings = settings?.['fast-import'];
   if (!fastEsmSettings) {
-    return {};
+    throw new Error(
+      `eslint-plugin-fast-import settings are required in your ESLint config file`
+    );
   }
   const parseResult = settingsSchema.safeParse(fastEsmSettings);
 
@@ -49,7 +51,7 @@ export function getUserSettings(
   }
 
   // Trim off the end `/` in case it was supplied with rootDir
-  if (parseResult.data.rootDir?.endsWith('/')) {
+  if (parseResult.data.rootDir.endsWith('/')) {
     parseResult.data.rootDir = parseResult.data.rootDir.substring(
       0,
       parseResult.data.rootDir.length - 1

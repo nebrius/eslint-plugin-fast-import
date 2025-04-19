@@ -14,7 +14,7 @@ it('Fetchings user supplied settings', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        rootDir: join(TEST_PROJECT_DIR, 'src'),
+        rootDir: TEST_PROJECT_DIR,
         alias: {
           '@/*': 'src/*',
           '@a': 'src/a.ts',
@@ -26,7 +26,7 @@ it('Fetchings user supplied settings', () => {
   });
   const expected: Omit<ParsedSettings, 'entryPoints'> = {
     editorUpdateRate: 5_000,
-    rootDir: join(TEST_PROJECT_DIR, 'src'),
+    rootDir: TEST_PROJECT_DIR,
     mode: 'one-shot',
     ignorePatterns: [
       { dir: TEST_PROJECT_DIR, contents: join(TEST_PROJECT_DIR, 'src/b*') },
@@ -45,6 +45,33 @@ it('Fetchings user supplied settings', () => {
   expect(entryPoints[0].symbols).toEqual(['a']);
 });
 
+it('Throws on missing settings', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {},
+    })
+  ).toThrow(
+    `eslint-plugin-fast-import settings are required in your ESLint config file`
+  );
+});
+
+it('Throws on missing rootDir in settings', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {},
+      },
+    })
+  ).toThrow(`Invalid settings:
+  Invalid type for property "rootDir"
+    expected: string
+    received: undefined
+    message: Required
+`);
+});
+
 it('Throws on invalid user supplied mode', () => {
   expect(() =>
     getSettings({
@@ -52,6 +79,7 @@ it('Throws on invalid user supplied mode', () => {
       settings: {
         'fast-import': {
           mode: 'fake',
+          rootDir: TEST_PROJECT_DIR,
         },
       },
     })

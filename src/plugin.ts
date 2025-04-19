@@ -97,7 +97,7 @@ Object.assign(plugin.configs, {
 export default plugin;
 
 export function recommended(
-  settings: UserSettings = {}
+  settings: UserSettings
 ): TSESLint.FlatConfig.Config {
   return {
     ...recommendedConfig,
@@ -107,7 +107,7 @@ export function recommended(
   };
 }
 
-export function all(settings: UserSettings = {}): TSESLint.FlatConfig.Config {
+export function all(settings: UserSettings): TSESLint.FlatConfig.Config {
   return {
     ...allConfig,
     settings: {

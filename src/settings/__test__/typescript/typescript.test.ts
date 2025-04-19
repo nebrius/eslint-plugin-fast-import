@@ -14,12 +14,13 @@ it('Fetchings settings from typescript', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
+        rootDir: TEST_PROJECT_DIR,
       },
     },
   });
   const expected: ParsedSettings = {
     editorUpdateRate: 5_000,
-    rootDir: join(TEST_PROJECT_DIR, 'src'),
+    rootDir: TEST_PROJECT_DIR,
     entryPoints: [],
     mode: 'one-shot',
     ignorePatterns: [],
