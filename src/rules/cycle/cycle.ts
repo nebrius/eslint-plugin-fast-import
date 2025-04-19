@@ -10,12 +10,15 @@ import {
 type Options = [];
 type MessageIds = 'noCycles';
 
+// Map of filepaths to imports/reexports with cycle dependencies
+const cycleMap = new Map<string, string[]>();
+const visitedFiles = new Set<string>();
+
 function checkFile(
   originalFilePath: string,
   currentFilePath: string,
   projectInfo: AnalyzedProjectInfo,
-  importStack: string[],
-  visitedFiles: string[]
+  importStack: string[]
 ) {
   const fileDetails = projectInfo.files.get(currentFilePath);
   /* istanbul ignore if */
@@ -29,7 +32,7 @@ function checkFile(
   }
 
   // Mark this file as visited
-  visitedFiles.push(currentFilePath);
+  visitedFiles.add(currentFilePath);
 
   // Now check if this file is part of a cycle
   const firstInstanceIndex = importStack.indexOf(currentFilePath);
@@ -47,18 +50,15 @@ function checkFile(
       ('isTypeImport' in importEntry && importEntry.isTypeImport) ||
       ('isTypeReexport' in importEntry && importEntry.isTypeReexport) ||
       importEntry.moduleType !== 'firstPartyCode' ||
-      visitedFiles.includes(importEntry.resolvedModulePath)
+      visitedFiles.has(importEntry.resolvedModulePath)
     ) {
       continue;
     }
     if (
-      checkFile(
-        originalFilePath,
-        importEntry.resolvedModulePath,
-        projectInfo,
-        [...importStack, currentFilePath],
-        visitedFiles
-      )
+      checkFile(originalFilePath, importEntry.resolvedModulePath, projectInfo, [
+        ...importStack,
+        currentFilePath,
+      ])
     ) {
       return true;
     }
@@ -67,11 +67,9 @@ function checkFile(
   return false;
 }
 
-// Map of filepaths to imports/reexports with cycle dependencies
-const cycleMap = new Map<string, string[]>();
-
 registerUpdateListener(() => {
   cycleMap.clear();
+  visitedFiles.clear();
 });
 
 // This is only used in tests, since update listeners aren't guaranteed to
@@ -124,8 +122,7 @@ export const noCycle = createRule<Options, MessageIds>({
             context.filename,
             importEntry.resolvedModulePath,
             projectInfo,
-            [context.filename],
-            []
+            [context.filename]
           )
         ) {
           cycleNodes.push(importEntry.resolvedModulePath);
