@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
@@ -27,7 +29,6 @@ import {
   deleteResolvedInfoForFile,
   updateResolvedInfoForFile,
 } from './computeResolvedInfo.js';
-import { parseFile } from './util.js';
 
 let baseProjectInfo: BaseProjectInfo | null = null;
 let resolvedProjectInfo: ResolvedProjectInfo | null = null;
@@ -159,9 +160,11 @@ export function updateCacheFromFileSystem(
     if (!baseProjectInfo.files.has(filePath)) {
       try {
         if (isCodeFile(filePath)) {
+          const fileContents = readFileSync(filePath, 'utf-8');
           addBaseInfoForFile(
             {
-              ...parseFile(filePath),
+              filePath,
+              fileContents,
               isEntryPointCheck: getEntryPointCheck(
                 getEslintConfigDir(settings.rootDir),
                 settings.entryPoints
@@ -208,9 +211,11 @@ export function updateCacheFromFileSystem(
     ) {
       numModified++;
       try {
+        const fileContents = readFileSync(filePath, 'utf-8');
         updateBaseInfoForFile(
           {
-            ...parseFile(filePath),
+            filePath,
+            fileContents,
             isEntryPointCheck: getEntryPointCheck(
               getEslintConfigDir(settings.rootDir),
               settings.entryPoints

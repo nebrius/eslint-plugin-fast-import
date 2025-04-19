@@ -14,3 +14,7 @@ const VALID_EXTENSIONS = [
 export function isCodeFile(filePath: string) {
   return VALID_EXTENSIONS.includes(extname(filePath));
 }
+
+export function getTextForRange(fileContents: string, range: [number, number]) {
+  return fileContents.substring(range[0], range[1]);
+}
