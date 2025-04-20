@@ -337,7 +337,9 @@ This is the most important of the three functions. If the file represented by th
 
 See the TypeScript types for full details, which are reasonably well commented.
 
-Each import, export, and reexport entry includes two AST nodes: the node for the entire statement, and a "report" node that is almost always what you want to pass to `context.reportError`. The report node is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement node represents all of the code, and `reportNode` is scoped to just `foo`.
+Each import, export, and reexport entry includes two AST node ranges. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
+
+See [getLocFromRange](#getlocfromrange) for more information on using ranges to report errors
 
 When creating a rule, you shouldn't traverse the AST yourself, since the AST has already been traversed for you. Each `context` callback should look something like this:
 
@@ -361,6 +363,17 @@ create(context) {
 ```
 
 Note that an empty object is returned, indicating we don't want to traverse the AST.
+
+### getLocFromRange(context, range)
+
+As we read in the previous section, Fast Import provides AST ranges for reporting errors. `context.report` however doesn't accept ranges directly, so we need to convert it first. `getLocFromRange` is a small wrapper around ESLint's built-in utilities for converting ranges to locations, which `context.report` _can_ accept. Reporting an error using this function looks like this:
+
+```js
+context.report({
+  messageId: 'someMessageId',
+  loc: getLocFromRange(context, someImportEntry.reportNodeRange)
+})
+```
 
 ### registerUpdateListener(listener)
 
