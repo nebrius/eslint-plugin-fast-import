@@ -23,8 +23,7 @@
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage src",
     "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
-    "publish-package": "node --experimental-strip-types scripts/publish.ts",
-    "compare": "node --experimental-strip-types scripts/compare.ts"
+    "publish-package": "node --experimental-strip-types scripts/publish.ts"
   },
   "dependencies": {
     "@typescript-eslint/typescript-estree": "^8.29.1",
