@@ -86,13 +86,19 @@ async function initializeFileWatching(settings: ParsedSettings) {
 
   async function getUpdatedAtTimes() {
     const projectInfo = getProjectInfo();
-    const { files } = await getFiles(
+    const { files, packageJsons } = await getFiles(
       projectInfo.rootDir,
       settings.ignorePatterns
     );
-    return new Map(
-      files.map(({ filePath, latestUpdatedAt }) => [filePath, latestUpdatedAt])
-    );
+    return {
+      files: new Map(
+        files.map(({ filePath, latestUpdatedAt }) => [
+          filePath,
+          latestUpdatedAt,
+        ])
+      ),
+      packageJsons,
+    };
   }
 
   let updatedAtTimes = await getUpdatedAtTimes();
@@ -105,8 +111,8 @@ async function initializeFileWatching(settings: ParsedSettings) {
       // First, find files that were deleted, represented by entries that are in
       // the previous list of modified times but are not in the new list
       const deleted: string[] = [];
-      for (const [filePath] of updatedAtTimes) {
-        if (!latestUpdatedTimes.has(filePath)) {
+      for (const [filePath] of updatedAtTimes.files) {
+        if (!latestUpdatedTimes.files.has(filePath)) {
           deleted.push(filePath);
         }
       }
@@ -117,8 +123,8 @@ async function initializeFileWatching(settings: ParsedSettings) {
         filePath: string;
         latestUpdatedAt: number;
       }> = [];
-      for (const [filePath, latestUpdatedAt] of latestUpdatedTimes) {
-        if (!updatedAtTimes.has(filePath)) {
+      for (const [filePath, latestUpdatedAt] of latestUpdatedTimes.files) {
+        if (!updatedAtTimes.files.has(filePath)) {
           added.push({ filePath, latestUpdatedAt });
         }
       }
@@ -130,10 +136,10 @@ async function initializeFileWatching(settings: ParsedSettings) {
         filePath: string;
         latestUpdatedAt: number;
       }> = [];
-      for (const [filePath, latestUpdatedAt] of latestUpdatedTimes) {
+      for (const [filePath, latestUpdatedAt] of latestUpdatedTimes.files) {
         if (
-          updatedAtTimes.has(filePath) &&
-          updatedAtTimes.get(filePath) !== latestUpdatedAt
+          updatedAtTimes.files.has(filePath) &&
+          updatedAtTimes.files.get(filePath) !== latestUpdatedAt
         ) {
           modified.push({ filePath, latestUpdatedAt });
         }
@@ -141,7 +147,16 @@ async function initializeFileWatching(settings: ParsedSettings) {
 
       // Update the cache
       if (
-        updateCacheFromFileSystem({ added, deleted, modified }, settings, start)
+        updateCacheFromFileSystem(
+          {
+            added,
+            deleted,
+            modified,
+          },
+          latestUpdatedTimes.packageJsons,
+          settings,
+          start
+        )
       ) {
         for (const updateListener of updateListeners) {
           updateListener();

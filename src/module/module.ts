@@ -1,3 +1,5 @@
+import { dirname } from 'node:path';
+
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
@@ -11,6 +13,7 @@ import type { BaseProjectInfo } from '../types/base.js';
 import type { ResolvedProjectInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
+import { getDependenciesFromPackageJson } from '../util/files.js';
 import { debug, formatMilliseconds } from '../util/logging.js';
 import { computeAnalyzedInfo } from './computeAnalyzedInfo.js';
 import {
@@ -119,6 +122,7 @@ type Changes = {
 // add, then modified) is critical
 export function updateCacheFromFileSystem(
   changes: Changes,
+  packageJsons: string[],
   settings: ParsedSettings,
   operationStart: number
 ) {
@@ -126,6 +130,14 @@ export function updateCacheFromFileSystem(
   /* istanbul ignore if */
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
     throw new InternalError('Project info not initialized');
+  }
+
+  // First update the dependencies list
+  for (const packageJson of packageJsons) {
+    analyzedProjectInfo.availableThirdPartyDependencies.set(
+      dirname(packageJson),
+      getDependenciesFromPackageJson(packageJson)
+    );
   }
 
   // We may have a list of added/deleted/modified files from the file system,

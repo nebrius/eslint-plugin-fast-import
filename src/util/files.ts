@@ -14,35 +14,6 @@ type PotentialFile = {
   stats: Stats;
 };
 
-// Get a potential list of files, automatically filtering out a few directories
-// known to contain lots of files we always want to ignore early on for perf
-// reasons. Waiting to check against ignores incurs a big perf hit due to the
-// more complex and Regex based logic of ignores.
-function getPotentialFilesList(rootDir: string): string[] {
-  const potentialFilesList: string[] = [];
-
-  const dirContents = readdirSync(rootDir, {
-    withFileTypes: true,
-  });
-
-  for (const content of dirContents) {
-    if (!content.isDirectory()) {
-      potentialFilesList.push(join(rootDir, content.name));
-    } else if (
-      content.name !== 'node_modules' &&
-      content.name !== 'dist' &&
-      content.name !== 'build' &&
-      content.name !== '.git'
-    ) {
-      potentialFilesList.push(
-        ...getPotentialFilesList(join(rootDir, content.name))
-      );
-    }
-  }
-
-  return potentialFilesList;
-}
-
 export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
   // Read in the files and their stats, and filter out directories
   const potentialFiles = getPotentialFilesList(rootDir)
@@ -85,12 +56,7 @@ export async function getFiles(
   ignorePatterns: IgnorePattern[]
 ) {
   // First, read in the files and convert the results to absolute path
-  const potentialFilePaths = (
-    await readdir(rootDir, {
-      recursive: true,
-      encoding: 'utf-8',
-    })
-  ).map((f) => join(rootDir, f));
+  const potentialFilePaths = getPotentialFilesList(rootDir);
 
   // Now add the stats to each file
   const potentialFiles = (
@@ -167,6 +133,55 @@ export function isFileIgnored(rootDir: string, filePath: string) {
 // eslint-disable-next-line fast-import/no-unused-exports
 export function _reset() {
   ignores = null;
+}
+
+export function getDependenciesFromPackageJson(packageJsonPath: string) {
+  const packageJsonContents = readFileSync(packageJsonPath, 'utf-8');
+  const parsedPackageJson = JSON.parse(packageJsonContents) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
+  };
+  const dependencies: string[] = [];
+  if (parsedPackageJson.dependencies) {
+    dependencies.push(...Object.keys(parsedPackageJson.dependencies));
+  }
+  if (parsedPackageJson.devDependencies) {
+    dependencies.push(...Object.keys(parsedPackageJson.devDependencies));
+  }
+  if (parsedPackageJson.peerDependencies) {
+    dependencies.push(...Object.keys(parsedPackageJson.peerDependencies));
+  }
+  return dependencies;
+}
+
+// Get a potential list of files, automatically filtering out a few directories
+// known to contain lots of files we always want to ignore early on for perf
+// reasons. Waiting to check against ignores incurs a big perf hit due to the
+// more complex and Regex based logic of ignores.
+function getPotentialFilesList(rootDir: string): string[] {
+  const potentialFilesList: string[] = [];
+
+  const dirContents = readdirSync(rootDir, {
+    withFileTypes: true,
+  });
+
+  for (const content of dirContents) {
+    if (!content.isDirectory()) {
+      potentialFilesList.push(join(rootDir, content.name));
+    } else if (
+      content.name !== 'node_modules' &&
+      content.name !== 'dist' &&
+      content.name !== 'build' &&
+      content.name !== '.git'
+    ) {
+      potentialFilesList.push(
+        ...getPotentialFilesList(join(rootDir, content.name))
+      );
+    }
+  }
+
+  return potentialFilesList;
 }
 
 function buildFileList(

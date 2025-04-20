@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 import type { TSESTree } from '@typescript-eslint/utils';
@@ -11,7 +10,7 @@ import type {
 } from '../types/base.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
-import { getFilesSync } from '../util/files.js';
+import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
 import { computeFileDetails } from './computeBaseFileDetails.js';
 import { computeBaseFileInfoForFilesSync } from './computeBaseInfoOrchestrator.js';
 
@@ -45,25 +44,9 @@ export function computeBaseInfo({
   const { files, packageJsons } = getFilesSync(rootDir, ignorePatterns);
 
   for (const packageJson of packageJsons) {
-    const packageJsonContents = readFileSync(packageJson, 'utf-8');
-    const parsedPackageJson = JSON.parse(packageJsonContents) as {
-      dependencies?: Record<string, string>;
-      devDependencies?: Record<string, string>;
-      peerDependencies?: Record<string, string>;
-    };
-    const dependencies: string[] = [];
-    if (parsedPackageJson.dependencies) {
-      dependencies.push(...Object.keys(parsedPackageJson.dependencies));
-    }
-    if (parsedPackageJson.devDependencies) {
-      dependencies.push(...Object.keys(parsedPackageJson.devDependencies));
-    }
-    if (parsedPackageJson.peerDependencies) {
-      dependencies.push(...Object.keys(parsedPackageJson.peerDependencies));
-    }
     info.availableThirdPartyDependencies.set(
       dirname(packageJson),
-      dependencies
+      getDependenciesFromPackageJson(packageJson)
     );
   }
 
