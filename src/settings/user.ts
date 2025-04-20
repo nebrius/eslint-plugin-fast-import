@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { isAbsolute } from 'node:path';
+
 import { z } from 'zod';
 
 import type { GenericContext } from '../types/context.js';
@@ -48,6 +51,13 @@ export function getUserSettings(
       issues.push(formattedIssue);
     }
     throw new Error('Invalid settings:\n' + issues.join('\n'));
+  }
+
+  // Validate rootDir exists
+  if (!isAbsolute(parseResult.data.rootDir)) {
+    throw new Error(`rootDir "${parseResult.data.rootDir}" must be absolute`);
+  } else if (!existsSync(parseResult.data.rootDir)) {
+    throw new Error(`rootDir "${parseResult.data.rootDir}" does not exist`);
   }
 
   // Trim off the end `/` in case it was supplied with rootDir

@@ -72,6 +72,32 @@ it('Throws on missing rootDir in settings', () => {
 `);
 });
 
+it('Throws on relative rootDir in settings', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: './foo',
+        },
+      },
+    })
+  ).toThrow(`rootDir "./foo" must be absolute`);
+});
+
+it("Throws on rootDir that doesn't exist in settings", () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: join(TEST_PROJECT_DIR, 'fake'),
+        },
+      },
+    })
+  ).toThrow(`rootDir "${join(TEST_PROJECT_DIR, 'fake')}" does not exist`);
+});
+
 it('Throws on invalid user supplied mode', () => {
   expect(() =>
     getSettings({

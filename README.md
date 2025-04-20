@@ -12,7 +12,7 @@
     - [ignorePatterns](#ignorepatterns)
     - [mode](#mode)
     - [editorUpdateRate](#editorupdaterate)
-  - [debugLogging](#debuglogging)
+    - [debugLogging](#debuglogging)
 - [Algorithm](#algorithm)
   - [Phase 1: AST analysis](#phase-1-ast-analysis)
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
@@ -65,7 +65,9 @@ Fast Import only supports ESLint 9+ and flat configs. For most simple TypeScript
 import { recommended } from 'eslint-plugin-fast-import';
 
 export default [
-  recommended()
+  recommended({
+    rootDir: __dirname
+  })
 ];
 ```
 
@@ -75,27 +77,31 @@ This will apply the recommended rules along with the default configuration.
 
 Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or suppliment these options.
 
-#### rootDir
+#### rootDir (required)
 
 Type: `string`
 
-Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes remaining files.
+Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzing remaining files.
 
-By default, Fast Import looks for a `tsconfig.json` file in the same directory as the ESLint configuration file, and uses the `rootDir` value from that TypeScript config file. If `tsconfig.json` does not exist or it does not set `rootDir`, then `rootDir` is set to the directory containing the ESLint configuration file.
+Note: Fast Import automatically filters out folders named `node_modules`, `.git`, `build`, and `dist` regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze one of these folders, file an issue and we'll find a way to support your use case.
 
-_Performance warning:_ if you set `rootDir` to a folder contianing `node_modules`, performance will suffer. Even though files inside of `node_modules` are ignored, it still takes some time to filter them out. This especially matters in `editor` mode, where we rescan the filesystem at regular intervals.
+`rootDir` _must_ be an absolute path!
 
-It is strongly recommended that you put your source code in a `./src` folder and set `rootDir` to `./src`.
-
-Example:
+CommonJS Example:
 
 ```js
 recommended({
-  rootDir: './src'
+  rootDir: __dirname
 })
 ```
 
-Note: `rootDir` is relative to the directory containing your ESLint configuration file.
+ESM Example using `dirname` from `node:path` and `fileURLToPath` from `node:url`:
+
+```js
+recommended({
+  rootDir: dirname(fileURLToPath(import.meta.url))
+})
+```
 
 #### alias
 
@@ -111,6 +117,7 @@ Example:
 
 ```js
 recommended({
+  rootDir: __dirname
   alias: {
     '@/*': 'src/*'
     'foo': 'src/foo.ts'
@@ -134,6 +141,7 @@ Example:
 
 ```js
 recommended({
+  rootDir: __dirname
   entryPoints: [
     {
       file: './src/index.ts',
@@ -159,6 +167,7 @@ Example:
 
 ```js
 recommended({
+  rootDir: __dirname
   ignorePatterns: [
     'src/**/__test__/**/snapshot/**/*',
     '*.pid'
@@ -183,6 +192,7 @@ Example:
 
 ```js
 recommended({
+  rootDir: __dirname
   mode: 'editor'
 })
 ```
@@ -197,11 +207,12 @@ Example:
 
 ```js
 recommended({
+  rootDir: __dirname
   editorUpdateRate: 2_000
 })
 ```
 
-### debugLogging
+#### debugLogging
 
 Type: boolean
 
@@ -211,6 +222,7 @@ Example:
 
 ```js
 recommended({
+  rootDir: __dirname
   debugLogging: true
 })
 ```

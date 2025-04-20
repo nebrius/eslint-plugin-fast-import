@@ -1,3 +1,4 @@
+import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noMissingImports = createRule({
@@ -49,6 +50,13 @@ export const noMissingImports = createRule({
           ) {
             continue outer;
           }
+        }
+
+        // Quick sanity check to see if there was a bug
+        if (importEntry.moduleSpecifier?.startsWith('.')) {
+          throw new InternalError(
+            `Module specifier ${importEntry.moduleSpecifier} was misclassified as a third party import`
+          );
         }
 
         // If we got here, we couldn't find a match in package.json, so error
