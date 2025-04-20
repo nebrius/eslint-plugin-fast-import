@@ -9,7 +9,7 @@ import type {
   StaticImport,
   StaticImportEntry,
 } from 'oxc-parser';
-import oxc from 'oxc-parser';
+import { parseSync } from 'oxc-parser';
 
 import type { ParsedSettings } from '../settings/settings.js';
 import type {
@@ -245,7 +245,7 @@ function computeFileDetails({
   fileContents,
   isEntryPointCheck,
 }: ComputeFileDetailsOptions): BaseCodeFileDetails | undefined {
-  const result = oxc.parseSync(filePath, fileContents, {
+  const result = parseSync(filePath, fileContents, {
     sourceType: 'module',
   });
   if (result.errors.length) {
@@ -311,7 +311,7 @@ function computeFileDetails({
       importEntry.moduleRequest.end,
     ]);
 
-    const result = oxc.parseSync(randomUUID() + '.ts', moduleSpecifierText);
+    const result = parseSync(randomUUID() + '.ts', moduleSpecifierText);
 
     if (
       // Make sure the program parsed and has 1 statemnt

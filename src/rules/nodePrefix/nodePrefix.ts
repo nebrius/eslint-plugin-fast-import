@@ -1,5 +1,13 @@
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
+
 import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
+
+type ImportDeclaration =
+  | TSESTree.ImportDeclaration
+  | TSESTree.ImportExpression
+  | TSESTree.ExportNamedDeclarationWithSource
+  | TSESTree.ExportAllDeclaration;
 
 export const nodePrefix = createRule({
   name: 'require-node-prefix',
@@ -42,7 +50,7 @@ export const nodePrefix = createRule({
           fix(fixer) {
             const sourceNode = context.sourceCode.getNodeByRangeIndex(
               statementNodeRange[0]
-            ) as ImportDeclaration | ReexportDeclaration;
+            ) as ImportDeclaration;
             if (!('raw' in sourceNode.source)) {
               throw new InternalError(
                 `Property "raw" is missing in sourceNode.source`
