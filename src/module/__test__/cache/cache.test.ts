@@ -44,6 +44,7 @@ const baseExpected: StrippedAnalyzedProjectInfo = {
         dynamicImports: [],
         exports: [
           {
+            id: 0,
             type: 'export',
             barrelImportedByFiles: [],
             exportName: 'One',
@@ -62,6 +63,7 @@ const baseExpected: StrippedAnalyzedProjectInfo = {
         fileType: 'code',
         singleImports: [
           {
+            id: 1,
             type: 'singleImport',
             importAlias: 'One',
             importName: 'One',
@@ -175,6 +177,7 @@ it('Updates cache when an unused export is added to an existing file', () => {
           dynamicImports: [],
           exports: [
             {
+              id: 2,
               type: 'export',
               barrelImportedByFiles: [],
               exportName: 'One',
@@ -183,6 +186,7 @@ it('Updates cache when an unused export is added to an existing file', () => {
               isEntryPoint: false,
             },
             {
+              id: 3,
               type: 'export',
               barrelImportedByFiles: [],
               exportName: 'Two',
@@ -201,6 +205,7 @@ it('Updates cache when an unused export is added to an existing file', () => {
           fileType: 'code',
           singleImports: [
             {
+              id: 1,
               type: 'singleImport',
               importAlias: 'One',
               importName: 'One',

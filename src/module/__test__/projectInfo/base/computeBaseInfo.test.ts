@@ -22,160 +22,192 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 const EXPECTED: StrippedBaseProjectInfo = {
   files: new Map([
     [
+      FILE_E,
+      {
+        fileType: 'other',
+      },
+    ],
+    [
       FILE_A,
       {
         exports: [
           {
+            id: 0,
             type: 'export',
             exportName: 'Foo',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            id: 1,
             type: 'export',
             exportName: 'Bar',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            id: 2,
             type: 'export',
             exportName: 'a1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 3,
             type: 'export',
             exportName: 'a2',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 4,
             type: 'export',
             exportName: 'a3',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 5,
             type: 'export',
             exportName: 'a4',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 6,
             type: 'export',
             exportName: 'a5',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 7,
             type: 'export',
             exportName: 'a6',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 8,
             type: 'export',
             exportName: 'A7',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 9,
             type: 'export',
             exportName: 'a8',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 10,
             type: 'export',
             exportName: 'a9',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 11,
             type: 'export',
             exportName: 'a10_1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 12,
             type: 'export',
             exportName: 'a10_2alias',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 13,
             type: 'export',
             exportName: 'a10_rest',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 14,
             type: 'export',
             exportName: 'a11_1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 15,
             type: 'export',
             exportName: 'a11_2',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 16,
             type: 'export',
             exportName: 'a11_rest',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 17,
             type: 'export',
             exportName: 'a twelve',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 18,
             type: 'export',
             exportName: 'a13',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 19,
             type: 'export',
             exportName: 'a14',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 20,
             type: 'export',
             exportName: 'a15alias',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 21,
             type: 'export',
             exportName: 'a16alias',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 22,
             type: 'export',
             exportName: 'default',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 23,
             type: 'export',
             exportName: 'a18_1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 24,
             type: 'export',
             exportName: 'a18_2',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 25,
             type: 'export',
             exportName: 'a18_3',
             isEntryPoint: false,
@@ -195,6 +227,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
       {
         exports: [
           {
+            id: 38,
             type: 'export',
             exportName: 'default',
             isEntryPoint: false,
@@ -204,6 +237,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
         fileType: 'code',
         singleImports: [
           {
+            id: 26,
             type: 'singleImport',
             importAlias: 'defaultExport1',
             importName: 'default',
@@ -211,6 +245,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 28,
             type: 'singleImport',
             importAlias: 'a1',
             importName: 'a1',
@@ -218,6 +253,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 29,
             type: 'singleImport',
             importAlias: 'a1Alias',
             importName: 'a1',
@@ -225,6 +261,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 30,
             type: 'singleImport',
             importAlias: 'defaultAlias',
             importName: 'default',
@@ -232,6 +269,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 31,
             type: 'singleImport',
             importAlias: 'stringAlias',
             importName: 'a twelve',
@@ -239,6 +277,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 32,
             type: 'singleImport',
             importAlias: 'defaultExport2',
             importName: 'default',
@@ -246,6 +285,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 33,
             type: 'singleImport',
             importAlias: 'a1WithDefault',
             importName: 'a1',
@@ -253,6 +293,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 34,
             type: 'singleImport',
             importAlias: 'defaultExport3',
             importName: 'default',
@@ -260,6 +301,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             moduleSpecifier: './a',
           },
           {
+            id: 36,
             type: 'singleImport',
             importAlias: 'e1',
             importName: 'e1',
@@ -269,17 +311,25 @@ const EXPECTED: StrippedBaseProjectInfo = {
         ],
         barrelImports: [
           {
+            id: 27,
             type: 'barrelImport',
             importAlias: 'barrel1',
             moduleSpecifier: './a',
           },
           {
+            id: 35,
             type: 'barrelImport',
             importAlias: 'barrel2',
             moduleSpecifier: './a',
           },
         ],
-        dynamicImports: [{ type: 'dynamicImport', moduleSpecifier: './a.js' }],
+        dynamicImports: [
+          {
+            id: 37,
+            type: 'dynamicImport',
+            moduleSpecifier: './a.js',
+          },
+        ],
         singleReexports: [],
         barrelReexports: [],
       },
@@ -290,6 +340,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
         fileType: 'code',
         exports: [
           {
+            id: 45,
             type: 'export',
             exportName: 'default',
             isEntryPoint: false,
@@ -301,6 +352,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
         dynamicImports: [],
         singleReexports: [
           {
+            id: 39,
             type: 'singleReexport',
             exportName: 'a1',
             importName: 'a1',
@@ -309,6 +361,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             isEntryPoint: false,
           },
           {
+            id: 42,
             type: 'singleReexport',
             exportName: 'c1',
             importName: 'default',
@@ -317,6 +370,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             isEntryPoint: false,
           },
           {
+            id: 43,
             type: 'singleReexport',
             exportName: 'c2',
             importName: 'a1',
@@ -325,6 +379,7 @@ const EXPECTED: StrippedBaseProjectInfo = {
             isEntryPoint: false,
           },
           {
+            id: 44,
             type: 'singleReexport',
             exportName: 'Foo',
             importName: 'Foo',
@@ -335,12 +390,14 @@ const EXPECTED: StrippedBaseProjectInfo = {
         ],
         barrelReexports: [
           {
+            id: 40,
             type: 'barrelReexport',
             exportName: undefined,
             moduleSpecifier: './a',
             isEntryPoint: false,
           },
           {
+            id: 41,
             type: 'barrelReexport',
             exportName: 'c',
             moduleSpecifier: './a',
@@ -354,18 +411,21 @@ const EXPECTED: StrippedBaseProjectInfo = {
       {
         exports: [
           {
+            id: 46,
             type: 'export',
             exportName: 'default',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            id: 47,
             type: 'export',
             exportName: 'MyNamespace',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            id: 48,
             type: 'export',
             exportName: 'd',
             isEntryPoint: false,
@@ -378,12 +438,6 @@ const EXPECTED: StrippedBaseProjectInfo = {
         dynamicImports: [],
         singleReexports: [],
         barrelReexports: [],
-      },
-    ],
-    [
-      FILE_E,
-      {
-        fileType: 'other',
       },
     ],
   ]),
@@ -442,6 +496,7 @@ it('Adds, modifies, and deletes a new file', () => {
     fileType: 'code',
     singleImports: [
       {
+        id: 49,
         type: 'singleImport',
         importAlias: 'a1',
         importName: 'a1',
@@ -475,6 +530,7 @@ it('Adds, modifies, and deletes a new file', () => {
     fileType: 'code',
     singleImports: [
       {
+        id: 50,
         type: 'singleImport',
         importAlias: 'a2',
         importName: 'a2',
@@ -482,6 +538,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
       },
       {
+        id: 51,
         type: 'singleImport',
         importAlias: 'a1',
         importName: 'a1',
@@ -493,6 +550,7 @@ it('Adds, modifies, and deletes a new file', () => {
     dynamicImports: [],
     singleReexports: [
       {
+        id: 52,
         type: 'singleReexport',
         exportName: 'a1',
         importName: 'a1',
@@ -504,6 +562,7 @@ it('Adds, modifies, and deletes a new file', () => {
     barrelReexports: [],
     exports: [
       {
+        id: 53,
         type: 'export',
         exportName: 'newFile1',
         isEntryPoint: false,
@@ -530,6 +589,7 @@ it('Adds, modifies, and deletes a new file', () => {
     fileType: 'code',
     singleImports: [
       {
+        id: 54,
         type: 'singleImport',
         importAlias: 'a1',
         importName: 'a1',
@@ -537,6 +597,7 @@ it('Adds, modifies, and deletes a new file', () => {
         moduleSpecifier: './a',
       },
       {
+        id: 55,
         type: 'singleImport',
         importAlias: 'a2',
         importName: 'a2',
@@ -548,6 +609,7 @@ it('Adds, modifies, and deletes a new file', () => {
     dynamicImports: [],
     singleReexports: [
       {
+        id: 56,
         type: 'singleReexport',
         exportName: 'a1',
         importName: 'a1',
@@ -559,6 +621,7 @@ it('Adds, modifies, and deletes a new file', () => {
     barrelReexports: [],
     exports: [
       {
+        id: 57,
         type: 'export',
         exportName: 'newFile1',
         isEntryPoint: false,

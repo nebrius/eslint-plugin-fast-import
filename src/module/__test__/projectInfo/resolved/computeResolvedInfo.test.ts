@@ -22,12 +22,19 @@ const FILE_F_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'f', 'index.d.ts');
 const EXPECTED: StrippedResolvedProjectInfo = {
   files: new Map([
     [
+      FILE_C_DATA,
+      {
+        fileType: 'other',
+      },
+    ],
+    [
       FILE_A,
       {
         exports: [],
         fileType: 'code',
         singleImports: [
           {
+            id: 0,
             type: 'singleImport',
             importAlias: 'b1',
             importName: 'b1',
@@ -37,6 +44,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_B,
           },
           {
+            id: 1,
             type: 'singleImport',
             importAlias: 'data',
             importName: 'default',
@@ -46,6 +54,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_C_DATA,
           },
           {
+            id: 2,
             type: 'singleImport',
             importAlias: 'D2',
             importName: 'D2',
@@ -55,6 +64,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_D_DECLARATION,
           },
           {
+            id: 3,
             type: 'singleImport',
             importAlias: 'getD1',
             importName: 'getD1',
@@ -64,6 +74,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_D,
           },
           {
+            id: 4,
             type: 'singleImport',
             importAlias: 'e1',
             importName: 'e1',
@@ -73,6 +84,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_E,
           },
           {
+            id: 5,
             type: 'singleImport',
             importAlias: 'F1',
             importName: 'F1',
@@ -82,6 +94,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_F_DECLARATION,
           },
           {
+            id: 6,
             type: 'singleImport',
             importAlias: 'getF1',
             importName: 'getF1',
@@ -91,6 +104,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_F,
           },
           {
+            id: 7,
             type: 'singleImport',
             importAlias: 'join',
             importName: 'join',
@@ -99,6 +113,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModuleType: 'builtin',
           },
           {
+            id: 8,
             type: 'singleImport',
             importAlias: 'resolve',
             importName: 'resolve',
@@ -107,6 +122,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModuleType: 'builtin',
           },
           {
+            id: 9,
             type: 'singleImport',
             importAlias: 'parser',
             importName: 'parser',
@@ -115,6 +131,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModuleType: 'thirdParty',
           },
           {
+            id: 10,
             type: 'singleImport',
             importAlias: 'index',
             importName: 'index',
@@ -124,6 +141,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
             resolvedModulePath: FILE_INDEX,
           },
           {
+            id: 11,
             type: 'singleImport',
             importAlias: 'b1',
             importName: 'b1',
@@ -144,6 +162,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
       {
         exports: [
           {
+            id: 12,
             type: 'export',
             exportName: 'index',
             isEntryPoint: false,
@@ -163,6 +182,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
       {
         exports: [
           {
+            id: 13,
             type: 'export',
             exportName: 'b1',
             isEntryPoint: false,
@@ -178,16 +198,38 @@ const EXPECTED: StrippedResolvedProjectInfo = {
       },
     ],
     [
+      FILE_C,
+      {
+        fileType: 'code',
+        exports: [
+          {
+            id: 14,
+            type: 'export',
+            exportName: 'c1',
+            isEntryPoint: false,
+            isTypeExport: false,
+          },
+        ],
+        singleImports: [],
+        barrelImports: [],
+        dynamicImports: [],
+        singleReexports: [],
+        barrelReexports: [],
+      },
+    ],
+    [
       FILE_D_DECLARATION,
       {
         exports: [
           {
+            id: 15,
             type: 'export',
             exportName: 'getD1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            id: 16,
             type: 'export',
             exportName: 'D2',
             isEntryPoint: false,
@@ -207,6 +249,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
       {
         exports: [
           {
+            id: 17,
             type: 'export',
             exportName: 'getD1',
             isEntryPoint: false,
@@ -227,33 +270,9 @@ const EXPECTED: StrippedResolvedProjectInfo = {
         fileType: 'code',
         exports: [
           {
+            id: 18,
             type: 'export',
             exportName: 'e1',
-            isEntryPoint: false,
-            isTypeExport: false,
-          },
-        ],
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        singleReexports: [],
-        barrelReexports: [],
-      },
-    ],
-    [
-      FILE_C_DATA,
-      {
-        fileType: 'other',
-      },
-    ],
-    [
-      FILE_C,
-      {
-        fileType: 'code',
-        exports: [
-          {
-            type: 'export',
-            exportName: 'c1',
             isEntryPoint: false,
             isTypeExport: false,
           },
@@ -270,12 +289,14 @@ const EXPECTED: StrippedResolvedProjectInfo = {
       {
         exports: [
           {
+            id: 19,
             type: 'export',
             exportName: 'F1',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            id: 20,
             type: 'export',
             exportName: 'getF1',
             isEntryPoint: false,
@@ -296,6 +317,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
         fileType: 'code',
         exports: [
           {
+            id: 22,
             type: 'export',
             exportName: 'getF1',
             isEntryPoint: false,
@@ -304,6 +326,7 @@ const EXPECTED: StrippedResolvedProjectInfo = {
         ],
         singleImports: [
           {
+            id: 21,
             type: 'singleImport',
             importAlias: 'fake',
             importName: 'fake',

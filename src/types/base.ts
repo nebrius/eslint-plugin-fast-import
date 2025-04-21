@@ -4,6 +4,12 @@ import type { ParsedSettings } from '../settings/settings.js';
 
 export type ESMStatement = {
   /**
+   * A unique identifier for the ESM statement. We use these to link imports
+   * and exports together without directly creating a circular data structure.
+   */
+  id: number;
+
+  /**
    * The AST node range of the complete ESM statement for this entry
    */
   statementNodeRange: TSESTree.Node['range'];

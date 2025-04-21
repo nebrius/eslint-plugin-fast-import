@@ -62,6 +62,7 @@ it('Updates cache when a new file is added', () => {
           barrelReexports: [],
           exports: [
             {
+              id: 0,
               type: 'export',
               barrelImportedByFiles: [],
               exportName: 'a',

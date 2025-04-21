@@ -36,6 +36,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         fileType: 'code',
         singleImports: [
           {
+            id: 0,
             type: 'singleImport',
             moduleSpecifier: './b',
             importName: 'c1',
@@ -49,6 +50,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             rootExportType: 'export',
           },
           {
+            id: 2,
             type: 'singleImport',
             moduleSpecifier: './e',
             importName: 'd1',
@@ -62,6 +64,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             rootExportType: 'export',
           },
           {
+            id: 3,
             type: 'singleImport',
             moduleSpecifier: './e',
             importName: 'f',
@@ -75,6 +78,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             rootExportType: 'namedBarrelReexport',
           },
           {
+            id: 4,
             type: 'singleImport',
             moduleSpecifier: './f',
             importName: 'join',
@@ -85,6 +89,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             rootModuleType: 'builtin',
           },
           {
+            id: 5,
             type: 'singleImport',
             moduleSpecifier: './g?raw',
             importName: 'SourceCode',
@@ -95,6 +100,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             rootModuleType: undefined,
           },
           {
+            id: 6,
             type: 'singleImport',
             importAlias: 'h',
             importName: 'default',
@@ -107,6 +113,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         ],
         barrelImports: [
           {
+            id: 1,
             type: 'barrelImport',
             importAlias: 'b',
             moduleSpecifier: './b',
@@ -118,6 +125,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         exports: [],
         singleReexports: [
           {
+            id: 7,
             type: 'singleReexport',
             barrelImportedByFiles: [],
             exportName: 'ASourceCode',
@@ -145,6 +153,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         singleReexports: [],
         barrelReexports: [
           {
+            id: 8,
             type: 'barrelReexport',
             moduleSpecifier: './c',
             exportName: undefined,
@@ -155,6 +164,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             barrelImportedByFiles: [FILE_A],
           },
           {
+            id: 9,
             type: 'barrelReexport',
             moduleSpecifier: './d',
             exportName: undefined,
@@ -176,6 +186,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         dynamicImports: [],
         exports: [
           {
+            id: 10,
             type: 'export',
             exportName: 'c1',
             isEntryPoint: false,
@@ -198,6 +209,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         dynamicImports: [],
         singleReexports: [
           {
+            id: 11,
             type: 'singleReexport',
             barrelImportedByFiles: [],
             exportName: 'a',
@@ -224,6 +236,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         dynamicImports: [],
         singleReexports: [
           {
+            id: 12,
             type: 'singleReexport',
             barrelImportedByFiles: [],
             exportName: 'a',
@@ -250,6 +263,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         dynamicImports: [],
         singleReexports: [
           {
+            id: 13,
             type: 'singleReexport',
             barrelImportedByFiles: [],
             exportName: 'a',
@@ -275,6 +289,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         dynamicImports: [],
         exports: [
           {
+            id: 14,
             type: 'export',
             exportName: 'd1',
             isEntryPoint: false,
@@ -297,6 +312,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         exports: [],
         singleReexports: [
           {
+            id: 15,
             type: 'singleReexport',
             moduleSpecifier: './d',
             importName: 'd1',
@@ -315,6 +331,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         ],
         barrelReexports: [
           {
+            id: 16,
             type: 'barrelReexport',
             moduleSpecifier: './f',
             exportName: 'f',
@@ -337,6 +354,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         exports: [],
         singleReexports: [
           {
+            id: 17,
             type: 'singleReexport',
             moduleSpecifier: 'path',
             importName: 'join',
@@ -349,6 +367,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             rootModuleType: 'builtin',
           },
           {
+            id: 18,
             type: 'singleReexport',
             barrelImportedByFiles: [],
             exportName: 'SourceCode',
@@ -375,6 +394,7 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
         singleReexports: [],
         barrelReexports: [
           {
+            id: 19,
             type: 'barrelReexport',
             moduleSpecifier: 'eslint',
             exportName: undefined,
