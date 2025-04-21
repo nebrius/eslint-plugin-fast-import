@@ -28,7 +28,11 @@ export const noEntryPointImports = createRule({
       return {};
     }
 
-    for (const exportEntry of [...fileInfo.exports, ...fileInfo.reexports]) {
+    for (const exportEntry of [
+      ...fileInfo.exports,
+      ...fileInfo.singleReexports,
+      ...fileInfo.barrelReexports,
+    ]) {
       if (exportEntry.isEntryPoint && exportEntry.importedByFiles.length) {
         context.report({
           messageId: 'noEntryPointImports',

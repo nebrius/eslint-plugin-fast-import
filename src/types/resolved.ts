@@ -11,13 +11,13 @@ import type {
 
 export type Resolved =
   | {
-      moduleType: 'builtin';
+      resolvedModuleType: 'builtin';
     }
   | {
-      moduleType: 'thirdParty';
+      resolvedModuleType: 'thirdParty';
     }
   | {
-      moduleType: 'firstPartyCode';
+      resolvedModuleType: 'firstPartyCode';
 
       /**
        * The absolute path of the file that the import/reexport points to. For
@@ -32,7 +32,7 @@ export type Resolved =
       resolvedModulePath: string;
     }
   | {
-      moduleType: 'firstPartyOther';
+      resolvedModuleType: 'firstPartyOther';
 
       /**
        * The absolute path of the file that the import/reexport points to. For
@@ -57,10 +57,6 @@ export type Resolved =
 export type ResolvedSingleImport = BaseSingleImport & Resolved;
 export type ResolvedBarrelImport = BaseBarrelImport & Resolved;
 export type ResolvedDynamicImport = BaseDynamicImport & Resolved;
-export type ResolvedImport =
-  | ResolvedSingleImport
-  | ResolvedBarrelImport
-  | ResolvedDynamicImport;
 
 /* Exports */
 
@@ -70,7 +66,6 @@ export type ResolvedExport = BaseExport;
 
 export type ResolvedSingleReexport = BaseSingleReexport & Resolved;
 export type ResolvedBarrelReexport = BaseBarrelReexport & Resolved;
-export type ResolvedReexport = ResolvedSingleReexport | ResolvedBarrelReexport;
 
 /* File Details */
 
@@ -79,9 +74,12 @@ export type ResolvedOtherFileDetails = BaseOtherFileDetails;
 export type ResolvedCodeFileDetails = {
   fileType: 'code';
   lastUpdatedAt: number;
-  imports: ResolvedImport[];
   exports: ResolvedExport[];
-  reexports: ResolvedReexport[];
+  singleImports: ResolvedSingleImport[];
+  barrelImports: ResolvedBarrelImport[];
+  dynamicImports: ResolvedDynamicImport[];
+  singleReexports: ResolvedSingleReexport[];
+  barrelReexports: ResolvedBarrelReexport[];
 };
 
 type ResolvedFileDetails = ResolvedOtherFileDetails | ResolvedCodeFileDetails;

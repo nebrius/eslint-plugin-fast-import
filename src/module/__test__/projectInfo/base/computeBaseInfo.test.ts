@@ -5,7 +5,6 @@ import { getDirname } from 'cross-dirname';
 
 import type { StrippedBaseProjectInfo } from '../../../../__test__/util.js';
 import { stripNodesFromBaseInfo } from '../../../../__test__/util.js';
-import type { BaseImport, BaseReexport } from '../../../../types/base.js';
 import {
   addBaseInfoForFile,
   computeBaseInfo,
@@ -27,139 +26,168 @@ const EXPECTED: StrippedBaseProjectInfo = {
       {
         exports: [
           {
+            type: 'export',
             exportName: 'Foo',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            type: 'export',
             exportName: 'Bar',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            type: 'export',
             exportName: 'a1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a2',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a3',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a4',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a5',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a6',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'A7',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a8',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a9',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a10_1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a10_2alias',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a10_rest',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a11_1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a11_2',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a11_rest',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a twelve',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a13',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a14',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a15alias',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a16alias',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'default',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a18_1',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a18_2',
             isEntryPoint: false,
             isTypeExport: false,
           },
           {
+            type: 'export',
             exportName: 'a18_3',
             isEntryPoint: false,
             isTypeExport: false,
           },
         ],
         fileType: 'code',
-        imports: [],
-        reexports: [],
+        singleImports: [],
+        barrelImports: [],
+        dynamicImports: [],
+        singleReexports: [],
+        barrelReexports: [],
       },
     ],
     [
@@ -167,153 +195,155 @@ const EXPECTED: StrippedBaseProjectInfo = {
       {
         exports: [
           {
+            type: 'export',
             exportName: 'default',
             isEntryPoint: false,
             isTypeExport: false,
           },
         ],
         fileType: 'code',
-        imports: [
+        singleImports: [
           {
+            type: 'singleImport',
             importAlias: 'defaultExport1',
             importName: 'default',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
-            importAlias: 'barrel1',
-            importType: 'barrel',
-            isTypeImport: false,
-            moduleSpecifier: './a',
-          },
-          {
+            type: 'singleImport',
             importAlias: 'a1',
             importName: 'a1',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
+            type: 'singleImport',
             importAlias: 'a1Alias',
             importName: 'a1',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
+            type: 'singleImport',
             importAlias: 'defaultAlias',
             importName: 'default',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
+            type: 'singleImport',
             importAlias: 'stringAlias',
             importName: 'a twelve',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
+            type: 'singleImport',
             importAlias: 'defaultExport2',
             importName: 'default',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
+            type: 'singleImport',
             importAlias: 'a1WithDefault',
             importName: 'a1',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
+            type: 'singleImport',
             importAlias: 'defaultExport3',
             importName: 'default',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './a',
           },
           {
-            importAlias: 'barrel2',
-            importType: 'barrel',
-            isTypeImport: false,
-            moduleSpecifier: './a',
-          },
-          {
+            type: 'singleImport',
             importAlias: 'e1',
             importName: 'e1',
-            importType: 'single',
             isTypeImport: false,
             moduleSpecifier: './e',
           },
+        ],
+        barrelImports: [
           {
-            importType: 'dynamic',
-            moduleSpecifier: './a.js',
+            type: 'barrelImport',
+            importAlias: 'barrel1',
+            moduleSpecifier: './a',
+          },
+          {
+            type: 'barrelImport',
+            importAlias: 'barrel2',
+            moduleSpecifier: './a',
           },
         ],
-        reexports: [],
+        dynamicImports: [{ type: 'dynamicImport', moduleSpecifier: './a.js' }],
+        singleReexports: [],
+        barrelReexports: [],
       },
     ],
     [
       FILE_C,
       {
+        fileType: 'code',
         exports: [
           {
+            type: 'export',
             exportName: 'default',
             isEntryPoint: false,
             isTypeExport: false,
           },
         ],
-        fileType: 'code',
-        imports: [],
-        reexports: [
+        singleImports: [],
+        barrelImports: [],
+        dynamicImports: [],
+        singleReexports: [
           {
+            type: 'singleReexport',
             exportName: 'a1',
             importName: 'a1',
             isTypeReexport: false,
             moduleSpecifier: './a',
-            reexportType: 'single',
             isEntryPoint: false,
           },
           {
-            exportName: undefined,
-            isTypeReexport: false,
-            moduleSpecifier: './a',
-            reexportType: 'barrel',
-            isEntryPoint: false,
-          },
-          {
-            exportName: 'c',
-            isTypeReexport: false,
-            moduleSpecifier: './a',
-            reexportType: 'barrel',
-            isEntryPoint: false,
-          },
-          {
+            type: 'singleReexport',
             exportName: 'c1',
             importName: 'default',
             isTypeReexport: false,
             moduleSpecifier: './a',
-            reexportType: 'single',
             isEntryPoint: false,
           },
           {
+            type: 'singleReexport',
             exportName: 'c2',
             importName: 'a1',
             isTypeReexport: false,
             moduleSpecifier: './a',
-            reexportType: 'single',
             isEntryPoint: false,
           },
           {
+            type: 'singleReexport',
             exportName: 'Foo',
             importName: 'Foo',
             isTypeReexport: true,
             moduleSpecifier: './a',
-            reexportType: 'single',
+            isEntryPoint: false,
+          },
+        ],
+        barrelReexports: [
+          {
+            type: 'barrelReexport',
+            exportName: undefined,
+            moduleSpecifier: './a',
+            isEntryPoint: false,
+          },
+          {
+            type: 'barrelReexport',
+            exportName: 'c',
+            moduleSpecifier: './a',
             isEntryPoint: false,
           },
         ],
@@ -324,24 +354,30 @@ const EXPECTED: StrippedBaseProjectInfo = {
       {
         exports: [
           {
+            type: 'export',
             exportName: 'default',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            type: 'export',
             exportName: 'MyNamespace',
             isEntryPoint: false,
             isTypeExport: true,
           },
           {
+            type: 'export',
             exportName: 'd',
             isEntryPoint: false,
             isTypeExport: false,
           },
         ],
         fileType: 'code',
-        imports: [],
-        reexports: [],
+        singleImports: [],
+        barrelImports: [],
+        dynamicImports: [],
+        singleReexports: [],
+        barrelReexports: [],
       },
     ],
     [
@@ -404,18 +440,19 @@ it('Adds, modifies, and deletes a new file', () => {
   );
   EXPECTED.files.set(NEW_FILE_PATH, {
     fileType: 'code',
-    imports: [
+    singleImports: [
       {
-        importType: 'single',
+        type: 'singleImport',
         importAlias: 'a1',
         importName: 'a1',
         isTypeImport: false,
         moduleSpecifier: './a',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
+      },
     ],
-    reexports: [],
+    barrelImports: [],
+    dynamicImports: [],
+    singleReexports: [],
+    barrelReexports: [],
     exports: [],
   });
   expect(stripNodesFromBaseInfo(info)).toEqual(EXPECTED);
@@ -436,40 +473,38 @@ it('Adds, modifies, and deletes a new file', () => {
   );
   EXPECTED.files.set(NEW_FILE_PATH, {
     fileType: 'code',
-    imports: [
+    singleImports: [
       {
-        importType: 'single',
+        type: 'singleImport',
         importAlias: 'a2',
         importName: 'a2',
         isTypeImport: false,
         moduleSpecifier: './a',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
+      },
       {
-        importType: 'single',
+        type: 'singleImport',
         importAlias: 'a1',
         importName: 'a1',
         isTypeImport: false,
         moduleSpecifier: './a',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
+      },
     ],
-    reexports: [
+    barrelImports: [],
+    dynamicImports: [],
+    singleReexports: [
       {
+        type: 'singleReexport',
         exportName: 'a1',
         importName: 'a1',
-        isEntryPoint: false,
         isTypeReexport: false,
         moduleSpecifier: './a',
-        reexportType: 'single',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseReexport, 'statementNodeRange' | 'reportNodeRange'>,
+        isEntryPoint: false,
+      },
     ],
+    barrelReexports: [],
     exports: [
       {
+        type: 'export',
         exportName: 'newFile1',
         isEntryPoint: false,
         isTypeExport: false,
@@ -493,40 +528,38 @@ it('Adds, modifies, and deletes a new file', () => {
   );
   EXPECTED.files.set(NEW_FILE_PATH, {
     fileType: 'code',
-    imports: [
+    singleImports: [
       {
-        importType: 'single',
+        type: 'singleImport',
         importAlias: 'a1',
         importName: 'a1',
         isTypeImport: false,
         moduleSpecifier: './a',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
+      },
       {
-        importType: 'single',
+        type: 'singleImport',
         importAlias: 'a2',
         importName: 'a2',
         isTypeImport: false,
         moduleSpecifier: './a',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseImport, 'statementNodeRange' | 'reportNodeRange'>,
+      },
     ],
-    reexports: [
+    barrelImports: [],
+    dynamicImports: [],
+    singleReexports: [
       {
+        type: 'singleReexport',
         exportName: 'a1',
         importName: 'a1',
         isEntryPoint: false,
         isTypeReexport: false,
         moduleSpecifier: './a',
-        reexportType: 'single',
-        // TODO: for some reason this type narrows to saying it should have only
-        // two properties, which is clearly wrong
-      } as Omit<BaseReexport, 'statementNodeRange' | 'reportNodeRange'>,
+      },
     ],
+    barrelReexports: [],
     exports: [
       {
+        type: 'export',
         exportName: 'newFile1',
         isEntryPoint: false,
         isTypeExport: false,

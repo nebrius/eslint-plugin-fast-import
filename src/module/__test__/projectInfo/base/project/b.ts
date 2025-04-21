@@ -13,7 +13,7 @@ console.log(defaultExport1, defaultExport2, defaultExport3);
 console.log(a1, a1Alias, a1WithDefault);
 console.log(barrel1, barrel2);
 console.log(defaultAlias, stringAlias);
-console.log(e1)
+console.log(e1);
 
 void import('./a.js');
 

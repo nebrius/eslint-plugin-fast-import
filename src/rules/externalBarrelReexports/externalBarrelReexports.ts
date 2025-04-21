@@ -28,13 +28,10 @@ export const noExternalBarrelReexports = createRule({
     }
 
     // Now check reexports
-    for (const reexportEntry of fileInfo.reexports) {
-      if (reexportEntry.reexportType === 'single') {
-        continue;
-      }
+    for (const reexportEntry of fileInfo.barrelReexports) {
       if (
-        reexportEntry.moduleType === 'builtin' ||
-        reexportEntry.moduleType === 'thirdParty'
+        reexportEntry.resolvedModuleType === 'builtin' ||
+        reexportEntry.resolvedModuleType === 'thirdParty'
       ) {
         context.report({
           loc: getLocFromRange(context, reexportEntry.reportNodeRange),

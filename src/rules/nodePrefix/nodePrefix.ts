@@ -32,11 +32,17 @@ export const nodePrefix = createRule({
       return {};
     }
 
-    for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
+    for (const importEntry of [
+      ...fileInfo.singleImports,
+      ...fileInfo.barrelImports,
+      ...fileInfo.dynamicImports,
+      ...fileInfo.singleReexports,
+      ...fileInfo.barrelReexports,
+    ]) {
       const { moduleSpecifier } = importEntry;
       if (
         moduleSpecifier &&
-        importEntry.moduleType === 'builtin' &&
+        importEntry.resolvedModuleType === 'builtin' &&
         !moduleSpecifier.startsWith('node:')
       ) {
         const { statementNodeRange } = importEntry;

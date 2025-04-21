@@ -30,10 +30,14 @@ export const noMissingImports = createRule({
     }
 
     // First check imports
-    outer: for (const importEntry of fileInfo.imports) {
+    outer: for (const importEntry of [
+      ...fileInfo.singleImports,
+      ...fileInfo.barrelImports,
+      ...fileInfo.dynamicImports,
+    ]) {
       // First, check if this is a third party dependency, and ensure that the dependency is listed
       // in a package.json
-      if (importEntry.moduleType === 'thirdParty') {
+      if (importEntry.resolvedModuleType === 'thirdParty') {
         for (const [
           path,
           deps,
@@ -78,8 +82,8 @@ export const noMissingImports = createRule({
       // could be resolved. If the module couldn't be resolved, we mark the file
       // type as first party other, so we first have to check for that.
       if (
-        importEntry.moduleType === 'firstPartyOther' &&
-        importEntry.importType === 'barrel'
+        importEntry.resolvedModuleType === 'firstPartyOther' &&
+        importEntry.type === 'barrelImport'
       ) {
         context.report({
           loc: getLocFromRange(context, importEntry.reportNodeRange),
@@ -93,8 +97,8 @@ export const noMissingImports = createRule({
       // Next, we check if the root export could be resolved, which is only
       // available for single imports
       if (
-        importEntry.moduleType === 'firstPartyCode' &&
-        importEntry.importType === 'single' &&
+        importEntry.resolvedModuleType === 'firstPartyCode' &&
+        importEntry.type === 'singleImport' &&
         importEntry.rootModuleType === undefined
       ) {
         context.report({
@@ -108,13 +112,16 @@ export const noMissingImports = createRule({
     }
 
     // Now check reexports
-    for (const reexportEntry of fileInfo.reexports) {
+    for (const reexportEntry of [
+      ...fileInfo.singleReexports,
+      ...fileInfo.barrelReexports,
+    ]) {
       // First check if we couldn't resolve the module specifier. If the module
       // couldn't be resolved, we mark the file type as first party other, so
       // we first have to check for that.
       if (
-        reexportEntry.moduleType === 'firstPartyOther' &&
-        reexportEntry.reexportType === 'barrel'
+        reexportEntry.resolvedModuleType === 'firstPartyOther' &&
+        reexportEntry.type === 'barrelReexport'
       ) {
         context.report({
           loc: getLocFromRange(context, reexportEntry.reportNodeRange),
@@ -128,8 +135,8 @@ export const noMissingImports = createRule({
       // Next, we check if the root export could be resolved, which is only
       // available for single reexports
       if (
-        reexportEntry.moduleType === 'firstPartyCode' &&
-        reexportEntry.reexportType === 'single' &&
+        reexportEntry.resolvedModuleType === 'firstPartyCode' &&
+        reexportEntry.type === 'singleReexport' &&
         reexportEntry.rootModuleType === undefined
       ) {
         context.report({

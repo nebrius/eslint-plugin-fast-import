@@ -102,12 +102,6 @@ type AnalyzedExportBase = {
    * import is actually used
    */
   barrelImportedByFiles: string[];
-
-  /**
-   * A list of files that reexport this export, including indirect reexports
-   * that themselves reexport a reexport
-   */
-  reexportedByFiles: string[];
 };
 
 type AnalyzedReexportBase = {
@@ -134,10 +128,6 @@ type AnalyzedReexportBase = {
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
 export type AnalyzedBarrelImport = ResolvedBarrelImport;
 export type AnalyzedDynamicImport = ResolvedDynamicImport;
-export type AnalyzedImport =
-  | AnalyzedSingleImport
-  | AnalyzedBarrelImport
-  | AnalyzedDynamicImport;
 
 /* Exports */
 
@@ -150,7 +140,6 @@ export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedReexportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
   AnalyzedReexportBase;
-export type AnalyzedReexport = AnalyzedSingleReexport | AnalyzedBarrelReexport;
 
 /* File Details */
 
@@ -159,9 +148,12 @@ export type AnalyzedOtherFileDetails = ResolvedOtherFileDetails;
 export type AnalyzedCodeFileDetails = {
   fileType: 'code';
   lastUpdatedAt: number;
-  imports: AnalyzedImport[];
   exports: AnalyzedExport[];
-  reexports: AnalyzedReexport[];
+  singleImports: AnalyzedSingleImport[];
+  barrelImports: AnalyzedBarrelImport[];
+  dynamicImports: AnalyzedDynamicImport[];
+  singleReexports: AnalyzedSingleReexport[];
+  barrelReexports: AnalyzedBarrelReexport[];
 };
 
 type AnalyzedFileDetails = AnalyzedOtherFileDetails | AnalyzedCodeFileDetails;

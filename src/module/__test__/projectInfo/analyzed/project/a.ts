@@ -4,7 +4,7 @@ import { d1, f } from './e';
 import { join } from './f';
 // @ts-expect-error
 import { SourceCode } from './g?raw';
-import h from './h.json'
+import h from './h.json';
 
 // entry point reexport
 export type { SourceCode as ASourceCode } from './f';

@@ -43,13 +43,16 @@ function checkFile(
 
   // If this wasn't a cycle, then keep exploring
   for (const importEntry of [
-    ...fileDetails.imports,
-    ...fileDetails.reexports,
+    ...fileDetails.singleImports,
+    ...fileDetails.singleReexports,
+    ...fileDetails.barrelImports,
+    ...fileDetails.singleReexports,
+    ...fileDetails.barrelReexports,
   ]) {
     if (
       ('isTypeImport' in importEntry && importEntry.isTypeImport) ||
       ('isTypeReexport' in importEntry && importEntry.isTypeReexport) ||
-      importEntry.moduleType !== 'firstPartyCode' ||
+      importEntry.resolvedModuleType !== 'firstPartyCode' ||
       visitedFiles.has(importEntry.resolvedModulePath)
     ) {
       continue;
@@ -108,7 +111,13 @@ export const noCycle = createRule<Options, MessageIds>({
     if (!cycleMap.has(context.filename)) {
       const importedFilesSearched = new Set<string>();
       const cycleNodes: string[] = [];
-      for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
+      for (const importEntry of [
+        ...fileInfo.singleImports,
+        ...fileInfo.singleReexports,
+        ...fileInfo.barrelImports,
+        ...fileInfo.singleReexports,
+        ...fileInfo.barrelReexports,
+      ]) {
         if (
           !('resolvedModulePath' in importEntry) ||
           !importEntry.resolvedModulePath ||
@@ -140,9 +149,15 @@ export const noCycle = createRule<Options, MessageIds>({
     }
 
     for (const cycleImport of cycleImports) {
-      for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
+      for (const importEntry of [
+        ...fileInfo.singleImports,
+        ...fileInfo.singleReexports,
+        ...fileInfo.barrelImports,
+        ...fileInfo.singleReexports,
+        ...fileInfo.barrelReexports,
+      ]) {
         if (
-          importEntry.moduleType === 'firstPartyCode' &&
+          importEntry.resolvedModuleType === 'firstPartyCode' &&
           importEntry.resolvedModulePath === cycleImport
         ) {
           context.report({

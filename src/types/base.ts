@@ -2,7 +2,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
 
-type Base = {
+export type ESMStatement = {
   /**
    * The AST node range of the complete ESM statement for this entry
    */
@@ -18,8 +18,12 @@ type Base = {
 
 /* Imports */
 
-export type BaseSingleImport = Base & {
-  importType: 'single';
+export type BaseSingleImport = ESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'singleImport';
 
   /**
    * Where we're importing from, e.g. `'./bar'` in:
@@ -61,8 +65,12 @@ export type BaseSingleImport = Base & {
   isTypeImport: boolean;
 };
 
-export type BaseBarrelImport = Base & {
-  importType: 'barrel';
+export type BaseBarrelImport = ESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'barrelImport';
 
   /**
    * Where we're importing from, e.g. `'./bar'` in:
@@ -84,19 +92,14 @@ export type BaseBarrelImport = Base & {
    * then `importAlias` equals `foo`
    */
   importAlias: string;
-
-  /**
-   * If true, then this is a TypeScript type import, e.g.
-   *
-   * ```
-   * import type * as Foo from './bar'
-   * ```
-   */
-  isTypeImport: boolean;
 };
 
-export type BaseDynamicImport = Base & {
-  importType: 'dynamic';
+export type BaseDynamicImport = ESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'dynamicImport';
 
   /**
    * Where we're importing from, e.g. `'./bar'` in:
@@ -110,14 +113,15 @@ export type BaseDynamicImport = Base & {
   moduleSpecifier: string | undefined;
 };
 
-export type BaseImport =
-  | BaseSingleImport
-  | BaseBarrelImport
-  | BaseDynamicImport;
-
 /* Exports */
 
-export type BaseExport = Base & {
+export type BaseExport = ESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'export';
+
   /**
    * What we're export, e.g. `foo` in:
    *
@@ -147,8 +151,12 @@ export type BaseExport = Base & {
 
 /* Reexports */
 
-export type BaseSingleReexport = Base & {
-  reexportType: 'single';
+export type BaseSingleReexport = ESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'singleReexport';
 
   /**
    * Where we're reexporting from, e.g. `'./bar'` in:
@@ -198,8 +206,12 @@ export type BaseSingleReexport = Base & {
   isEntryPoint: boolean;
 };
 
-export type BaseBarrelReexport = Base & {
-  reexportType: 'barrel';
+export type BaseBarrelReexport = ESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'barrelReexport';
 
   /**
    * Where we're reexporting from, e.g. `'./bar'` in:
@@ -220,15 +232,6 @@ export type BaseBarrelReexport = Base & {
   exportName: string | undefined;
 
   /**
-   * If true, then this is a TypeScript type reexport, e.g.
-   *
-   * ```
-   * export type * from './bar'
-   * ```
-   */
-  isTypeReexport: boolean;
-
-  /**
    * Indicates whether or not this reexport is an entry point for the app. For
    * example, if we're running a Next.js app and this reexport is
    * `getServerSideProps` in a page file, the we consider this an an entry point
@@ -236,8 +239,6 @@ export type BaseBarrelReexport = Base & {
    */
   isEntryPoint: boolean;
 };
-
-export type BaseReexport = BaseSingleReexport | BaseBarrelReexport;
 
 /* File Details */
 
@@ -256,9 +257,12 @@ export type BaseOtherFileDetails = {
 export type BaseCodeFileDetails = {
   fileType: 'code';
   lastUpdatedAt: number;
-  imports: BaseImport[];
   exports: BaseExport[];
-  reexports: BaseReexport[];
+  singleImports: BaseSingleImport[];
+  barrelImports: BaseBarrelImport[];
+  dynamicImports: BaseDynamicImport[];
+  singleReexports: BaseSingleReexport[];
+  barrelReexports: BaseBarrelReexport[];
 };
 
 type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;

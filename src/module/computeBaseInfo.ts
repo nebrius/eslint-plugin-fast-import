@@ -4,9 +4,9 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
 import type {
-  BaseBarrelImport,
   BaseCodeFileDetails,
   BaseProjectInfo,
+  ESMStatement,
 } from '../types/base.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
@@ -99,53 +99,85 @@ export function addBaseInfoForFile(
   }
 }
 
+function hasEsmEntryChanged<T extends ESMStatement>(previous: T, updated: T) {
+  for (const key of Object.keys(previous)) {
+    if (key === 'statementNodeRange' || key === 'reportNodeRange') {
+      continue;
+    }
+    if (
+      (previous as Record<string, unknown>)[key] !==
+      (updated as Record<string, unknown>)[key]
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function hasFileChanged(
   previousFileDetails: BaseCodeFileDetails,
   updatedFileDetails: BaseCodeFileDetails
 ) {
-  // First, check if the number of exports, reexports, or imports has changed
+  // First, check if the number of esm statements have changed
   if (
     updatedFileDetails.exports.length !== previousFileDetails.exports.length ||
-    updatedFileDetails.reexports.length !==
-      previousFileDetails.reexports.length ||
-    updatedFileDetails.imports.length !== previousFileDetails.imports.length
+    updatedFileDetails.singleImports.length !==
+      previousFileDetails.singleImports.length ||
+    updatedFileDetails.barrelImports.length !==
+      previousFileDetails.barrelImports.length ||
+    updatedFileDetails.dynamicImports.length !==
+      previousFileDetails.dynamicImports.length ||
+    updatedFileDetails.singleReexports.length !==
+      previousFileDetails.singleReexports.length ||
+    updatedFileDetails.barrelReexports.length !==
+      previousFileDetails.barrelReexports.length
   ) {
     return true;
   }
 
-  // Now, compare each import and export to see if any of their details changed
+  // Now, compare each ESM statement to see if any of their details changed
   for (let i = 0; i < previousFileDetails.exports.length; i++) {
     const previousExport = previousFileDetails.exports[i];
     const updatedExport = updatedFileDetails.exports[i];
-    if (previousExport.exportName !== updatedExport.exportName) {
+    if (hasEsmEntryChanged(previousExport, updatedExport)) {
       return true;
     }
   }
-  for (let i = 0; i < previousFileDetails.reexports.length; i++) {
-    const previousReexport = previousFileDetails.reexports[i];
-    const updatedReexport = updatedFileDetails.reexports[i];
-    if (
-      previousReexport.reexportType !== updatedReexport.reexportType ||
-      previousReexport.exportName !== updatedReexport.exportName ||
-      previousReexport.moduleSpecifier !== previousReexport.moduleSpecifier
-    ) {
+  for (let i = 0; i < previousFileDetails.singleReexports.length; i++) {
+    const previousReexport = previousFileDetails.singleReexports[i];
+    const updatedReexport = updatedFileDetails.singleReexports[i];
+    if (hasEsmEntryChanged(previousReexport, updatedReexport)) {
       return true;
     }
   }
-  for (let i = 0; i < previousFileDetails.imports.length; i++) {
-    const previousImport = previousFileDetails.imports[i];
-    const updatedImport = updatedFileDetails.imports[i];
-    if (
-      previousImport.moduleSpecifier !== updatedImport.moduleSpecifier ||
-      previousImport.importType !== updatedImport.importType ||
-      ('importAlias' in previousImport &&
-        previousImport.importAlias !==
-          (updatedImport as BaseBarrelImport).importAlias)
-    ) {
+  for (let i = 0; i < previousFileDetails.barrelReexports.length; i++) {
+    const previousReexport = previousFileDetails.barrelReexports[i];
+    const updatedReexport = updatedFileDetails.barrelReexports[i];
+    if (hasEsmEntryChanged(previousReexport, updatedReexport)) {
       return true;
     }
   }
-
+  for (let i = 0; i < previousFileDetails.singleImports.length; i++) {
+    const previousImport = previousFileDetails.singleImports[i];
+    const updatedImport = updatedFileDetails.singleImports[i];
+    if (hasEsmEntryChanged(previousImport, updatedImport)) {
+      return true;
+    }
+  }
+  for (let i = 0; i < previousFileDetails.barrelImports.length; i++) {
+    const previousImport = previousFileDetails.barrelImports[i];
+    const updatedImport = updatedFileDetails.barrelImports[i];
+    if (hasEsmEntryChanged(previousImport, updatedImport)) {
+      return true;
+    }
+  }
+  for (let i = 0; i < previousFileDetails.dynamicImports.length; i++) {
+    const previousImport = previousFileDetails.dynamicImports[i];
+    const updatedImport = updatedFileDetails.dynamicImports[i];
+    if (hasEsmEntryChanged(previousImport, updatedImport)) {
+      return true;
+    }
+  }
   return false;
 }
 

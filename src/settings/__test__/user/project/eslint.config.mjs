@@ -16,4 +16,4 @@ export default [
   },
   globalIgnores(['./eslint.config.mjs']),
   fastEsm.configs.recommended,
-]
+];

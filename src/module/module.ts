@@ -4,11 +4,7 @@ import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
-import type {
-  AnalyzedImport,
-  AnalyzedProjectInfo,
-  AnalyzedReexport,
-} from '../types/analyzed.js';
+import type { AnalyzedProjectInfo } from '../types/analyzed.js';
 import type { BaseProjectInfo } from '../types/base.js';
 import type { ResolvedProjectInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
@@ -336,28 +332,62 @@ export function updateCacheForFile(
           ...resolvedFileInfo.exports[i],
         };
       }
-      for (let i = 0; i < baseFileInfo.reexports.length; i++) {
-        resolvedFileInfo.reexports[i] = {
-          ...resolvedFileInfo.reexports[i],
-          ...baseFileInfo.reexports[i],
+
+      for (let i = 0; i < baseFileInfo.singleImports.length; i++) {
+        resolvedFileInfo.singleImports[i] = {
+          ...resolvedFileInfo.singleImports[i],
+          ...baseFileInfo.singleImports[i],
         };
-        analyzedFileInfo.reexports[i] = {
-          ...analyzedFileInfo.reexports[i],
-          ...resolvedFileInfo.reexports[i],
-          // TODO: figure out why this doesn't work without the cast
-        } as AnalyzedReexport;
-      }
-      for (let i = 0; i < baseFileInfo.imports.length; i++) {
-        resolvedFileInfo.imports[i] = {
-          ...resolvedFileInfo.imports[i],
-          ...baseFileInfo.imports[i],
+        analyzedFileInfo.singleImports[i] = {
+          ...analyzedFileInfo.singleImports[i],
+          ...resolvedFileInfo.singleImports[i],
         };
-        analyzedFileInfo.imports[i] = {
-          ...analyzedFileInfo.imports[i],
-          ...resolvedFileInfo.imports[i],
-          // TODO: figure out why this doesn't work without the cast
-        } as AnalyzedImport;
       }
+
+      for (let i = 0; i < baseFileInfo.barrelImports.length; i++) {
+        resolvedFileInfo.barrelImports[i] = {
+          ...resolvedFileInfo.barrelImports[i],
+          ...baseFileInfo.barrelImports[i],
+        };
+        analyzedFileInfo.barrelImports[i] = {
+          ...analyzedFileInfo.barrelImports[i],
+          ...resolvedFileInfo.barrelImports[i],
+        };
+      }
+
+      for (let i = 0; i < baseFileInfo.singleImports.length; i++) {
+        resolvedFileInfo.singleImports[i] = {
+          ...resolvedFileInfo.singleImports[i],
+          ...baseFileInfo.singleImports[i],
+        };
+        analyzedFileInfo.singleImports[i] = {
+          ...analyzedFileInfo.singleImports[i],
+          ...resolvedFileInfo.singleImports[i],
+        };
+      }
+
+      for (let i = 0; i < baseFileInfo.singleReexports.length; i++) {
+        resolvedFileInfo.singleReexports[i] = {
+          ...resolvedFileInfo.singleReexports[i],
+          ...baseFileInfo.singleReexports[i],
+        };
+        analyzedFileInfo.singleReexports[i] = {
+          ...analyzedFileInfo.singleReexports[i],
+          ...resolvedFileInfo.singleReexports[i],
+        };
+      }
+
+      for (let i = 0; i < baseFileInfo.barrelReexports.length; i++) {
+        resolvedFileInfo.barrelReexports[i] = {
+          ...resolvedFileInfo.barrelReexports[i],
+          ...baseFileInfo.barrelReexports[i],
+        };
+        analyzedFileInfo.barrelReexports[i] = {
+          ...analyzedFileInfo.barrelReexports[i],
+          ...resolvedFileInfo.barrelReexports[i],
+        };
+      }
+
       return false;
     }
   } else {

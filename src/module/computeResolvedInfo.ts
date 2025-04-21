@@ -31,9 +31,12 @@ export function computeResolvedInfo(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       lastUpdatedAt: baseFileDetails.lastUpdatedAt,
-      imports: [],
       exports: [],
-      reexports: [],
+      singleImports: [],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
     };
     resolvedProjectInfo.files.set(filePath, resolvedCodeFileDetails);
     populateFileDetails(
@@ -64,9 +67,12 @@ export function addResolvedInfoForFile(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       lastUpdatedAt: baseFileInfo.lastUpdatedAt,
-      imports: [],
       exports: [],
-      reexports: [],
+      singleImports: [],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
     };
     previousResolvedProjectInfo.files.set(filePath, resolvedCodeFileDetails);
     populateFileDetails(
@@ -106,9 +112,12 @@ export function updateResolvedInfoForFile(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       lastUpdatedAt: baseFileInfo.lastUpdatedAt,
-      imports: [],
       exports: [],
-      reexports: [],
+      singleImports: [],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
     };
     populateFileDetails(
       baseProjectInfo,
@@ -160,9 +169,12 @@ export function deleteResolvedInfoForFile(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       lastUpdatedAt: fileDetailsToUpdate.lastUpdatedAt,
-      imports: [],
       exports: [],
-      reexports: [],
+      singleImports: [],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
     };
     previousResolvedProjectInfo.files.set(
       filePathToUpdate,
@@ -254,8 +266,11 @@ function getFileReferences(
 
     // Look for imports or the import side of reexports to see if they reference this file
     const doesCandidateImportFile = [
-      ...candidateFileDetails.imports,
-      ...candidateFileDetails.reexports,
+      ...candidateFileDetails.singleImports,
+      ...candidateFileDetails.barrelImports,
+      ...candidateFileDetails.dynamicImports,
+      ...candidateFileDetails.singleReexports,
+      ...candidateFileDetails.barrelReexports,
     ].some(
       (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
     );
@@ -270,11 +285,15 @@ function getFileReferences(
 
     // Look for exports or the export side of reexports to see if this file references them
     const doesFileImportCandidate = [
-      ...previousResolvedFileEntry.imports,
-      ...previousResolvedFileEntry.reexports,
+      ...previousResolvedFileEntry.singleImports,
+      ...previousResolvedFileEntry.barrelImports,
+      ...previousResolvedFileEntry.dynamicImports,
+      ...previousResolvedFileEntry.singleReexports,
+      ...previousResolvedFileEntry.barrelReexports,
     ].some(
       (i) =>
-        i.moduleType === 'firstPartyCode' && i.resolvedModulePath === filePath
+        i.resolvedModuleType === 'firstPartyCode' &&
+        i.resolvedModulePath === filePath
     );
 
     // If this file is a code file, we have to check both possibilities
@@ -292,8 +311,8 @@ function populateFileDetails(
   baseCodeFileDetails: BaseCodeFileDetails,
   resolvedCodeFileDetails: ResolvedCodeFileDetails
 ) {
-  // Resolve imports
-  for (const importDetails of baseCodeFileDetails.imports) {
+  // Resolve single imports
+  for (const importDetails of baseCodeFileDetails.singleImports) {
     // Lack of a module specifier means this is a dynamic import with a
     // non-static, which we can't analyze, so we skip it
     if (!importDetails.moduleSpecifier) {
@@ -303,29 +322,75 @@ function populateFileDetails(
       baseProjectInfo,
       filePath,
       moduleSpecifier: importDetails.moduleSpecifier,
-      isTypeImport:
-        importDetails.importType === 'single'
-          ? importDetails.isTypeImport
-          : false,
+      isTypeImport: importDetails.isTypeImport,
     });
-    resolvedCodeFileDetails.imports.push({
+    resolvedCodeFileDetails.singleImports.push({
       ...importDetails,
       ...resolvedModuleSpecifier,
     });
   }
 
-  // Resolve re-exports
-  for (const reexportDetails of baseCodeFileDetails.reexports) {
+  // Resolve barrel imports
+  for (const importDetails of baseCodeFileDetails.barrelImports) {
+    // Lack of a module specifier means this is a dynamic import with a
+    // non-static, which we can't analyze, so we skip it
+    if (!importDetails.moduleSpecifier) {
+      continue;
+    }
+    const resolvedModuleSpecifier = resolveModuleSpecifier({
+      baseProjectInfo,
+      filePath,
+      moduleSpecifier: importDetails.moduleSpecifier,
+      isTypeImport: false,
+    });
+    resolvedCodeFileDetails.barrelImports.push({
+      ...importDetails,
+      ...resolvedModuleSpecifier,
+    });
+  }
+
+  // Resolve dynamic imports
+  for (const importDetails of baseCodeFileDetails.dynamicImports) {
+    // Lack of a module specifier means this is a dynamic import with a
+    // non-static, which we can't analyze, so we skip it
+    if (!importDetails.moduleSpecifier) {
+      continue;
+    }
+    const resolvedModuleSpecifier = resolveModuleSpecifier({
+      baseProjectInfo,
+      filePath,
+      moduleSpecifier: importDetails.moduleSpecifier,
+      isTypeImport: false,
+    });
+    resolvedCodeFileDetails.dynamicImports.push({
+      ...importDetails,
+      ...resolvedModuleSpecifier,
+    });
+  }
+
+  // Resolve single re-exports
+  for (const reexportDetails of baseCodeFileDetails.singleReexports) {
     const resolvedModuleSpecifier = resolveModuleSpecifier({
       baseProjectInfo,
       filePath,
       moduleSpecifier: reexportDetails.moduleSpecifier,
-      isTypeImport:
-        reexportDetails.reexportType === 'single'
-          ? reexportDetails.isTypeReexport
-          : false,
+      isTypeImport: reexportDetails.isTypeReexport,
     });
-    resolvedCodeFileDetails.reexports.push({
+    resolvedCodeFileDetails.singleReexports.push({
+      ...reexportDetails,
+      ...resolvedModuleSpecifier,
+    });
+  }
+
+  // Resolve barrel re-exports
+  for (const reexportDetails of baseCodeFileDetails.barrelReexports) {
+    const resolvedModuleSpecifier = resolveModuleSpecifier({
+      baseProjectInfo,
+      filePath,
+      moduleSpecifier: reexportDetails.moduleSpecifier,
+      isTypeImport: false,
+    });
+    resolvedCodeFileDetails.barrelReexports.push({
       ...reexportDetails,
       ...resolvedModuleSpecifier,
     });
@@ -378,7 +443,7 @@ function resolveModuleSpecifier({
   // First, check if this is a built-in module
   if (formattedBuiltinModules.includes(moduleSpecifier)) {
     return {
-      moduleType: 'builtin',
+      resolvedModuleType: 'builtin',
     };
   }
 
@@ -511,12 +576,12 @@ function resolveModuleSpecifier({
   ): Resolved {
     if (!resolvedModulePath) {
       return {
-        moduleType: 'firstPartyOther',
+        resolvedModuleType: 'firstPartyOther',
         resolvedModulePath: undefined,
       };
     }
     return {
-      moduleType: isCodeFile(resolvedModulePath)
+      resolvedModuleType: isCodeFile(resolvedModulePath)
         ? 'firstPartyCode'
         : 'firstPartyOther',
       resolvedModulePath,
@@ -565,6 +630,6 @@ function resolveModuleSpecifier({
 
   // If we got here, then this is a third party import
   return {
-    moduleType: 'thirdParty',
+    resolvedModuleType: 'thirdParty',
   };
 }

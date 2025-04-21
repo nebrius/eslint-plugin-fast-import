@@ -33,10 +33,16 @@ export const noTestImportsInProd = createRule({
       return {};
     }
 
-    for (const importEntry of [...fileInfo.imports, ...fileInfo.reexports]) {
+    for (const importEntry of [
+      ...fileInfo.singleImports,
+      ...fileInfo.barrelImports,
+      ...fileInfo.dynamicImports,
+      ...fileInfo.singleReexports,
+      ...fileInfo.barrelReexports,
+    ]) {
       if (
-        importEntry.moduleType !== 'firstPartyCode' &&
-        importEntry.moduleType !== 'firstPartyOther'
+        importEntry.resolvedModuleType !== 'firstPartyCode' &&
+        importEntry.resolvedModuleType !== 'firstPartyOther'
       ) {
         continue;
       }

@@ -68,7 +68,11 @@ export const noUnusedExports = createRule<
     }
 
     // Check each export and reexport to make sure it's being used
-    for (const exportEntry of [...fileInfo.exports, ...fileInfo.reexports]) {
+    for (const exportEntry of [
+      ...fileInfo.exports,
+      ...fileInfo.singleReexports,
+      ...fileInfo.barrelReexports,
+    ]) {
       // If this is an entry point, then it's being imported externally
       if (exportEntry.isEntryPoint) {
         continue;

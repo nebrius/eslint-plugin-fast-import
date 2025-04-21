@@ -39,32 +39,35 @@ const baseExpected: StrippedAnalyzedProjectInfo = {
       FILE_A,
       {
         fileType: 'code',
-        imports: [],
+        singleImports: [],
+        barrelImports: [],
+        dynamicImports: [],
         exports: [
           {
+            type: 'export',
             barrelImportedByFiles: [],
             exportName: 'One',
             isTypeExport: true,
             importedByFiles: [FILE_B],
             isEntryPoint: false,
-            reexportedByFiles: [],
           },
         ],
-        reexports: [],
+        singleReexports: [],
+        barrelReexports: [],
       },
     ],
     [
       FILE_B,
       {
         fileType: 'code',
-        imports: [
+        singleImports: [
           {
+            type: 'singleImport',
             importAlias: 'One',
             importName: 'One',
-            importType: 'single',
             isTypeImport: true,
             moduleSpecifier: './a',
-            moduleType: 'firstPartyCode',
+            resolvedModuleType: 'firstPartyCode',
             resolvedModulePath: FILE_A,
             rootExportName: 'One',
             rootExportType: 'export',
@@ -72,8 +75,11 @@ const baseExpected: StrippedAnalyzedProjectInfo = {
             rootModuleType: 'firstPartyCode',
           },
         ],
+        barrelImports: [],
+        dynamicImports: [],
         exports: [],
-        reexports: [],
+        singleReexports: [],
+        barrelReexports: [],
       },
     ],
   ]),
@@ -121,9 +127,12 @@ it('Updates cache when a new file is added', () => {
         FILE_TS_NEW,
         {
           fileType: 'code',
-          imports: [],
+          singleImports: [],
+          barrelImports: [],
+          dynamicImports: [],
           exports: [],
-          reexports: [],
+          singleReexports: [],
+          barrelReexports: [],
         },
       ],
     ]),
@@ -161,40 +170,43 @@ it('Updates cache when an unused export is added to an existing file', () => {
         FILE_A,
         {
           fileType: 'code',
-          imports: [],
+          singleImports: [],
+          barrelImports: [],
+          dynamicImports: [],
           exports: [
             {
+              type: 'export',
               barrelImportedByFiles: [],
               exportName: 'One',
               isTypeExport: true,
               importedByFiles: [FILE_B],
               isEntryPoint: false,
-              reexportedByFiles: [],
             },
             {
+              type: 'export',
               barrelImportedByFiles: [],
               exportName: 'Two',
               isTypeExport: true,
               importedByFiles: [],
               isEntryPoint: false,
-              reexportedByFiles: [],
             },
           ],
-          reexports: [],
+          singleReexports: [],
+          barrelReexports: [],
         },
       ],
       [
         FILE_B,
         {
           fileType: 'code',
-          imports: [
+          singleImports: [
             {
+              type: 'singleImport',
               importAlias: 'One',
               importName: 'One',
-              importType: 'single',
               isTypeImport: true,
               moduleSpecifier: './a',
-              moduleType: 'firstPartyCode',
+              resolvedModuleType: 'firstPartyCode',
               resolvedModulePath: FILE_A,
               rootExportName: 'One',
               rootExportType: 'export',
@@ -202,8 +214,11 @@ it('Updates cache when an unused export is added to an existing file', () => {
               rootModuleType: 'firstPartyCode',
             },
           ],
+          barrelImports: [],
+          dynamicImports: [],
           exports: [],
-          reexports: [],
+          singleReexports: [],
+          barrelReexports: [],
         },
       ],
     ]),
@@ -234,6 +249,7 @@ it('Updates cache in bulk for a code file', () => {
       modified: [],
       deleted: [],
     },
+    [],
     settings,
     Date.now()
   );
@@ -245,9 +261,12 @@ it('Updates cache in bulk for a code file', () => {
         FILE_TS_NEW,
         {
           fileType: 'code',
-          imports: [],
+          singleImports: [],
+          barrelImports: [],
+          dynamicImports: [],
           exports: [],
-          reexports: [],
+          singleReexports: [],
+          barrelReexports: [],
         },
       ],
     ]),
@@ -268,6 +287,7 @@ it('Updates cache in bulk for a code file', () => {
       ],
       deleted: [],
     },
+    [],
     settings,
     Date.now()
   );
@@ -279,9 +299,12 @@ it('Updates cache in bulk for a code file', () => {
         FILE_TS_NEW,
         {
           fileType: 'code',
-          imports: [],
+          singleImports: [],
+          barrelImports: [],
+          dynamicImports: [],
           exports: [],
-          reexports: [],
+          singleReexports: [],
+          barrelReexports: [],
         },
       ],
     ]),
@@ -302,6 +325,7 @@ it('Updates cache in bulk for a code file', () => {
       ],
       deleted: [],
     },
+    [],
     settings,
     Date.now()
   );
@@ -316,6 +340,7 @@ it('Updates cache in bulk for a code file', () => {
       modified: [],
       deleted: [FILE_TS_NEW],
     },
+    [],
     settings,
     Date.now()
   );
@@ -342,6 +367,7 @@ it('Updates cache in bulk for a non-code file', () => {
       modified: [],
       deleted: [],
     },
+    [],
     settings,
     Date.now()
   );
@@ -373,6 +399,7 @@ it('Updates cache in bulk for a non-code file', () => {
       ],
       deleted: [],
     },
+    [],
     settings,
     Date.now()
   );
@@ -399,6 +426,7 @@ it('Updates cache in bulk for a non-code file', () => {
       modified: [],
       deleted: [FILE_JSON_NEW],
     },
+    [],
     settings,
     Date.now()
   );

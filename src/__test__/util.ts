@@ -1,69 +1,107 @@
 import type {
+  AnalyzedBarrelImport,
+  AnalyzedBarrelReexport,
   AnalyzedCodeFileDetails,
+  AnalyzedDynamicImport,
   AnalyzedExport,
-  AnalyzedImport,
   AnalyzedOtherFileDetails,
   AnalyzedProjectInfo,
-  AnalyzedReexport,
+  AnalyzedSingleImport,
+  AnalyzedSingleReexport,
 } from '../types/analyzed.js';
 import type {
+  BaseBarrelImport,
+  BaseBarrelReexport,
   BaseCodeFileDetails,
+  BaseDynamicImport,
   BaseExport,
-  BaseImport,
   BaseOtherFileDetails,
   BaseProjectInfo,
-  BaseReexport,
+  BaseSingleImport,
+  BaseSingleReexport,
 } from '../types/base.js';
 import type {
+  ResolvedBarrelImport,
+  ResolvedBarrelReexport,
   ResolvedCodeFileDetails,
+  ResolvedDynamicImport,
   ResolvedExport,
-  ResolvedImport,
   ResolvedOtherFileDetails,
   ResolvedProjectInfo,
-  ResolvedReexport,
+  ResolvedSingleImport,
+  ResolvedSingleReexport,
 } from '../types/resolved.js';
 
 type StrippedFileDetails<
   OtherFileDetails extends BaseOtherFileDetails,
   CodeFileDetails extends BaseCodeFileDetails,
-  Import extends BaseImport,
+  SingleImport extends BaseSingleImport,
+  BarrelImport extends BaseBarrelImport,
+  DynamicImport extends BaseDynamicImport,
   Export extends BaseExport,
-  Reexport extends BaseReexport,
+  SingleReexport extends BaseSingleReexport,
+  BarrelReexport extends BaseBarrelReexport,
 > =
   | OtherFileDetails
   | (Omit<
       CodeFileDetails,
-      'imports' | 'exports' | 'reexports' | 'lastUpdatedAt'
+      | 'singleImports'
+      | 'barrelImports'
+      | 'dynamicImports'
+      | 'exports'
+      | 'singleReexports'
+      | 'barrelReexports'
+      | 'lastUpdatedAt'
     > & {
-      imports: Array<Omit<Import, 'statementNodeRange' | 'reportNodeRange'>>;
+      singleImports: Array<
+        Omit<SingleImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      barrelImports: Array<
+        Omit<BarrelImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      dynamicImports: Array<
+        Omit<DynamicImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
       exports: Array<Omit<Export, 'statementNodeRange' | 'reportNodeRange'>>;
-      reexports: Array<
-        Omit<Reexport, 'statementNodeRange' | 'reportNodeRange'>
+      singleReexports: Array<
+        Omit<SingleReexport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      barrelReexports: Array<
+        Omit<BarrelReexport, 'statementNodeRange' | 'reportNodeRange'>
       >;
     });
 
 type StrippedBaseFileDetails = StrippedFileDetails<
   BaseOtherFileDetails,
   BaseCodeFileDetails,
-  BaseImport,
+  BaseSingleImport,
+  BaseBarrelImport,
+  BaseDynamicImport,
   BaseExport,
-  BaseReexport
+  BaseSingleReexport,
+  BaseBarrelReexport
 >;
 
 type StrippedResolvedFileDetails = StrippedFileDetails<
   ResolvedOtherFileDetails,
   ResolvedCodeFileDetails,
-  ResolvedImport,
+  ResolvedSingleImport,
+  ResolvedBarrelImport,
+  ResolvedDynamicImport,
   ResolvedExport,
-  ResolvedReexport
+  ResolvedSingleReexport,
+  ResolvedBarrelReexport
 >;
 
 type StrippedAnalyzedFileDetails = StrippedFileDetails<
   AnalyzedOtherFileDetails,
   AnalyzedCodeFileDetails,
-  AnalyzedImport,
+  AnalyzedSingleImport,
+  AnalyzedBarrelImport,
+  AnalyzedDynamicImport,
   AnalyzedExport,
-  AnalyzedReexport
+  AnalyzedSingleReexport,
+  AnalyzedBarrelReexport
 >;
 
 export type StrippedBaseProjectInfo = Omit<BaseProjectInfo, 'files'> & {
@@ -94,37 +132,73 @@ export function stripNodesFromBaseInfo(info: BaseProjectInfo) {
     }
     const newFileDetails: StrippedBaseFileDetails = {
       fileType: fileDetails.fileType,
-      imports: [],
+      singleImports: [],
+      barrelImports: [],
+      dynamicImports: [],
       exports: [],
-      reexports: [],
+      singleReexports: [],
+      barrelReexports: [],
     };
     for (const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange: statementNode,
+      statementNodeRange,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange: reportNode,
+      reportNodeRange,
       ...strippedDetails
-    } of fileDetails.imports) {
-      newFileDetails.imports.push(strippedDetails);
+    } of fileDetails.singleImports) {
+      newFileDetails.singleImports.push(strippedDetails);
     }
+
     for (const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange: statementNode,
+      statementNodeRange,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange: reportNode,
+      reportNodeRange,
       ...strippedDetails
-    } of fileDetails.reexports) {
-      newFileDetails.reexports.push(strippedDetails);
+    } of fileDetails.barrelImports) {
+      newFileDetails.barrelImports.push(strippedDetails);
     }
+
     for (const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange: statementNode,
+      statementNodeRange,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange: reportNode,
+      reportNodeRange,
+      ...strippedDetails
+    } of fileDetails.dynamicImports) {
+      newFileDetails.dynamicImports.push(strippedDetails);
+    }
+
+    for (const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      statementNodeRange,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reportNodeRange,
       ...strippedDetails
     } of fileDetails.exports) {
       newFileDetails.exports.push(strippedDetails);
     }
+
+    for (const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      statementNodeRange,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reportNodeRange,
+      ...strippedDetails
+    } of fileDetails.singleReexports) {
+      newFileDetails.singleReexports.push(strippedDetails);
+    }
+
+    for (const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      statementNodeRange,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      reportNodeRange,
+      ...strippedDetails
+    } of fileDetails.barrelReexports) {
+      newFileDetails.barrelReexports.push(strippedDetails);
+    }
+
     clonedInfo.files.set(filePath, newFileDetails);
   }
   return clonedInfo;

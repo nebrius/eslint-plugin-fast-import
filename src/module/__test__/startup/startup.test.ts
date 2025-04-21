@@ -55,16 +55,19 @@ it('Updates cache when a new file is added', () => {
         FILE_A,
         {
           fileType: 'code',
-          imports: [],
-          reexports: [],
+          singleImports: [],
+          barrelImports: [],
+          dynamicImports: [],
+          singleReexports: [],
+          barrelReexports: [],
           exports: [
             {
+              type: 'export',
               barrelImportedByFiles: [],
               exportName: 'a',
               importedByFiles: [],
               isEntryPoint: false,
               isTypeExport: false,
-              reexportedByFiles: [],
             },
           ],
         },
