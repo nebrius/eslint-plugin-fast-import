@@ -33,11 +33,13 @@ function argsInclude(strs: string[]) {
   return false;
 }
 
-const DEFAULT_MODE = process.argv[0].includes('Visual Studio Code')
-  ? 'editor'
-  : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
-    ? 'fix'
-    : 'one-shot';
+const DEFAULT_MODE =
+  process.argv[0].includes('Visual Studio Code') ||
+  process.argv[0].includes('Cursor')
+    ? 'editor'
+    : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
+      ? 'fix'
+      : 'one-shot';
 
 let settings: ParsedSettings | null = null;
 
