@@ -255,6 +255,7 @@ export function computeFileDetails({
   const fileDetails: BaseCodeFileDetails = {
     fileType: 'code',
     lastUpdatedAt: Date.now(),
+    hasEntryPoints: false,
     exports: [],
     singleImports: [],
     barrelImports: [],
@@ -703,5 +704,10 @@ export function computeFileDetails({
       }
     },
   });
+
+  fileDetails.hasEntryPoints = fileDetails.exports.some(
+    (exportEntry) => exportEntry.isEntryPoint
+  );
+
   return fileDetails;
 }

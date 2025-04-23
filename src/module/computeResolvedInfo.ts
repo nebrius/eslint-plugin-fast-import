@@ -30,6 +30,7 @@ export function computeResolvedInfo(
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      hasEntryPoints: baseFileDetails.hasEntryPoints,
       lastUpdatedAt: baseFileDetails.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -66,6 +67,7 @@ export function addResolvedInfoForFile(
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      hasEntryPoints: baseFileInfo.hasEntryPoints,
       lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -111,6 +113,7 @@ export function updateResolvedInfoForFile(
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      hasEntryPoints: baseFileInfo.hasEntryPoints,
       lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -168,6 +171,7 @@ export function deleteResolvedInfoForFile(
 
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
+      hasEntryPoints: fileDetailsToUpdate.hasEntryPoints,
       lastUpdatedAt: fileDetailsToUpdate.lastUpdatedAt,
       exports: [],
       singleImports: [],

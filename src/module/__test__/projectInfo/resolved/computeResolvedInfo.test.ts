@@ -19,6 +19,7 @@ const FILE_F = join(TEST_PROJECT_DIR, 'two', 'f', 'index.js');
 const FILE_F_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'f', 'index.d.ts');
 
 const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   exports: [],
   fileType: 'code',
   singleImports: [
@@ -135,6 +136,7 @@ const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -152,6 +154,7 @@ const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -169,6 +172,7 @@ const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_C: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   exports: [
     {
@@ -190,6 +194,7 @@ const EXPECTED_FILE_C_DATA: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -213,6 +218,7 @@ const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -230,6 +236,7 @@ const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   exports: [
     {
@@ -247,6 +254,7 @@ const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -270,6 +278,7 @@ const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_F: StrippedResolvedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   exports: [
     {

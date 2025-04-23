@@ -43,6 +43,7 @@ it('Updates cache when a new file is added', () => {
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: {
       fileType: 'code',
+      hasEntryPoints: false,
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],

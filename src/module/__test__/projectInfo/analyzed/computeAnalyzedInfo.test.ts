@@ -23,6 +23,7 @@ const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
 
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
+  hasEntryPoints: false,
   singleImports: [
     {
       type: 'singleImport',
@@ -139,6 +140,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
+  hasEntryPoints: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -170,6 +172,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   fileType: 'code',
+  hasEntryPoints: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -214,6 +217,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   exports: [],
   fileType: 'code',
   singleImports: [],
@@ -238,6 +242,7 @@ const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   exports: [],
   fileType: 'code',
   singleImports: [],
@@ -262,6 +267,7 @@ const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   exports: [],
   fileType: 'code',
   singleImports: [],
@@ -286,6 +292,7 @@ const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -331,6 +338,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -381,6 +389,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -416,6 +425,7 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
+  hasEntryPoints: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],

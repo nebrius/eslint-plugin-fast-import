@@ -20,6 +20,7 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 
 const EXPECTED_FILE_A: StrippedBaseFileDetails = {
   fileType: 'code',
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -186,6 +187,7 @@ const EXPECTED_FILE_A: StrippedBaseFileDetails = {
 };
 
 const EXPECTED_FILE_B: StrippedBaseFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -284,6 +286,7 @@ const EXPECTED_FILE_B: StrippedBaseFileDetails = {
 
 const EXPECTED_FILE_C: StrippedBaseFileDetails = {
   fileType: 'code',
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -346,6 +349,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
 };
 
 const EXPECTED_FILE_D: StrippedBaseFileDetails = {
+  hasEntryPoints: false,
   exports: [
     {
       type: 'export',
@@ -434,6 +438,7 @@ it('Adds, modifies, and deletes a new file', () => {
   expect(info).toMatchBaseSpec({
     ...EXPECTED,
     [NEW_FILE_PATH]: {
+      hasEntryPoints: false,
       fileType: 'code',
       singleImports: [
         {
@@ -469,6 +474,7 @@ it('Adds, modifies, and deletes a new file', () => {
   expect(info).toMatchBaseSpec({
     ...EXPECTED,
     [NEW_FILE_PATH]: {
+      hasEntryPoints: false,
       fileType: 'code',
       singleImports: [
         {
@@ -526,6 +532,7 @@ it('Adds, modifies, and deletes a new file', () => {
   expect(info).toMatchBaseSpec({
     ...EXPECTED,
     [NEW_FILE_PATH]: {
+      hasEntryPoints: false,
       fileType: 'code',
       singleImports: [
         {

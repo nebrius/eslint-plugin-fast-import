@@ -85,15 +85,13 @@ export function addBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo
 ) {
   if (isCodeFile(filePath)) {
-    baseProjectInfo.files.set(
+    const fileDetails = computeFileDetails({
       filePath,
-      computeFileDetails({
-        filePath,
-        fileContents,
-        ast,
-        isEntryPointCheck,
-      })
-    );
+      fileContents,
+      ast,
+      isEntryPointCheck,
+    });
+    baseProjectInfo.files.set(filePath, fileDetails);
   } else {
     baseProjectInfo.files.set(filePath, { fileType: 'other' });
   }

@@ -23,20 +23,35 @@ export const noEntryPointImports = createRule({
       return {};
     }
 
-    const { fileInfo } = esmInfo;
+    const { fileInfo, projectInfo } = esmInfo;
     if (fileInfo.fileType !== 'code') {
       return {};
     }
 
-    for (const exportEntry of [
-      ...fileInfo.exports,
-      ...fileInfo.singleReexports,
-      ...fileInfo.barrelReexports,
-    ]) {
-      if (exportEntry.isEntryPoint && exportEntry.importedBy.length) {
+    for (const importEntry of fileInfo.singleImports) {
+      if (
+        importEntry.rootModuleType === 'firstPartyCode' &&
+        importEntry.rootExportEntry.isEntryPoint
+      ) {
         context.report({
           messageId: 'noEntryPointImports',
-          loc: getLocFromRange(context, exportEntry.reportNodeRange),
+          loc: getLocFromRange(context, importEntry.reportNodeRange),
+        });
+      }
+    }
+
+    for (const importEntry of fileInfo.barrelImports) {
+      if (!importEntry.resolvedModulePath) {
+        continue;
+      }
+      const fileDetails = projectInfo.files.get(importEntry.resolvedModulePath);
+      if (fileDetails?.fileType !== 'code') {
+        continue;
+      }
+      if (fileDetails.hasEntryPoints) {
+        context.report({
+          messageId: 'noEntryPointImports',
+          loc: getLocFromRange(context, importEntry.reportNodeRange),
         });
       }
     }

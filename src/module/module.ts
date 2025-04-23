@@ -4,7 +4,14 @@ import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
-import type { AnalyzedProjectInfo } from '../types/analyzed.js';
+import type {
+  AnalyzedBarrelImport,
+  AnalyzedBarrelReexport,
+  AnalyzedDynamicImport,
+  AnalyzedProjectInfo,
+  AnalyzedSingleImport,
+  AnalyzedSingleReexport,
+} from '../types/analyzed.js';
 import type { BaseProjectInfo } from '../types/base.js';
 import type { ResolvedProjectInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
@@ -341,7 +348,7 @@ export function updateCacheForFile(
         analyzedFileInfo.singleImports[i] = {
           ...analyzedFileInfo.singleImports[i],
           ...resolvedFileInfo.singleImports[i],
-        };
+        } as AnalyzedSingleImport;
       }
 
       for (let i = 0; i < baseFileInfo.barrelImports.length; i++) {
@@ -352,18 +359,18 @@ export function updateCacheForFile(
         analyzedFileInfo.barrelImports[i] = {
           ...analyzedFileInfo.barrelImports[i],
           ...resolvedFileInfo.barrelImports[i],
-        };
+        } as AnalyzedBarrelImport;
       }
 
-      for (let i = 0; i < baseFileInfo.singleImports.length; i++) {
-        resolvedFileInfo.singleImports[i] = {
-          ...resolvedFileInfo.singleImports[i],
-          ...baseFileInfo.singleImports[i],
+      for (let i = 0; i < baseFileInfo.dynamicImports.length; i++) {
+        resolvedFileInfo.dynamicImports[i] = {
+          ...resolvedFileInfo.dynamicImports[i],
+          ...baseFileInfo.dynamicImports[i],
         };
-        analyzedFileInfo.singleImports[i] = {
-          ...analyzedFileInfo.singleImports[i],
-          ...resolvedFileInfo.singleImports[i],
-        };
+        analyzedFileInfo.dynamicImports[i] = {
+          ...analyzedFileInfo.dynamicImports[i],
+          ...resolvedFileInfo.dynamicImports[i],
+        } as AnalyzedDynamicImport;
       }
 
       for (let i = 0; i < baseFileInfo.singleReexports.length; i++) {
@@ -374,7 +381,7 @@ export function updateCacheForFile(
         analyzedFileInfo.singleReexports[i] = {
           ...analyzedFileInfo.singleReexports[i],
           ...resolvedFileInfo.singleReexports[i],
-        };
+        } as AnalyzedSingleReexport;
       }
 
       for (let i = 0; i < baseFileInfo.barrelReexports.length; i++) {
@@ -385,7 +392,7 @@ export function updateCacheForFile(
         analyzedFileInfo.barrelReexports[i] = {
           ...analyzedFileInfo.barrelReexports[i],
           ...resolvedFileInfo.barrelReexports[i],
-        };
+        } as AnalyzedBarrelReexport;
       }
 
       return false;

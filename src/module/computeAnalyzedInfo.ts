@@ -32,6 +32,7 @@ export function computeAnalyzedInfo(
 
     const analyzedFileInfo: AnalyzedCodeFileDetails = {
       fileType: 'code',
+      hasEntryPoints: fileDetails.hasEntryPoints,
       lastUpdatedAt: fileDetails.lastUpdatedAt,
       exports: [],
       singleImports: [],

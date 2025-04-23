@@ -256,7 +256,18 @@ export type BaseOtherFileDetails = {
  */
 export type BaseCodeFileDetails = {
   fileType: 'code';
+
+  /**
+   * Timestamp of when the file was last updated, or start time of the plugin,
+   * whichever is later.
+   */
   lastUpdatedAt: number;
+
+  /**
+   * Indicates whether or not any of this file's exports are entry points
+   */
+  hasEntryPoints: boolean;
+
   exports: BaseExport[];
   singleImports: BaseSingleImport[];
   barrelImports: BaseBarrelImport[];

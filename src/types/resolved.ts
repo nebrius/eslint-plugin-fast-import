@@ -1,6 +1,7 @@
 import type {
   BaseBarrelImport,
   BaseBarrelReexport,
+  BaseCodeFileDetails,
   BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
@@ -81,9 +82,15 @@ export type ResolvedBarrelReexport = BaseBarrelReexport & Resolved;
 
 export type ResolvedOtherFileDetails = BaseOtherFileDetails;
 
-export type ResolvedCodeFileDetails = {
-  fileType: 'code';
-  lastUpdatedAt: number;
+export type ResolvedCodeFileDetails = Omit<
+  BaseCodeFileDetails,
+  | 'exports'
+  | 'singleImports'
+  | 'barrelImports'
+  | 'dynamicImports'
+  | 'singleReexports'
+  | 'barrelReexports'
+> & {
   exports: ResolvedExport[];
   singleImports: ResolvedSingleImport[];
   barrelImports: ResolvedBarrelImport[];
