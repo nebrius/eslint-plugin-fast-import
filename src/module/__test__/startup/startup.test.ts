@@ -3,8 +3,6 @@ import { join } from 'node:path';
 import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
-import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util.js';
-import { stripNodesFromAnalyzedInfo } from '../../../__test__/util.js';
 import {
   getProjectInfo,
   initializeProject,
@@ -27,14 +25,7 @@ it('Updates cache when a new file is added', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
-  let expected: StrippedAnalyzedProjectInfo = {
-    files: new Map(),
-    rootDir: TEST_PROJECT_DIR,
-    wildcardAliases: {},
-    fixedAliases: {},
-    availableThirdPartyDependencies: new Map(),
-  };
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected);
+  expect(projectInfo).toMatchAnalyzedSpec({});
 
   updateCacheForFile(
     FILE_A,
@@ -49,35 +40,24 @@ it('Updates cache when a new file is added', () => {
   );
 
   projectInfo = getProjectInfo();
-  expected = {
-    files: new Map([
-      [
-        FILE_A,
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: {
+      fileType: 'code',
+      singleImports: [],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
+      exports: [
         {
-          fileType: 'code',
-          singleImports: [],
-          barrelImports: [],
-          dynamicImports: [],
-          singleReexports: [],
-          barrelReexports: [],
-          exports: [
-            {
-              id: 0,
-              type: 'export',
-              barrelImportedByFiles: [],
-              exportName: 'a',
-              importedByFiles: [],
-              isEntryPoint: false,
-              isTypeExport: false,
-            },
-          ],
+          type: 'export',
+          barrelImportedBy: [],
+          exportName: 'a',
+          importedBy: [],
+          isEntryPoint: false,
+          isTypeExport: false,
         },
       ],
-    ]),
-    rootDir: TEST_PROJECT_DIR,
-    wildcardAliases: {},
-    fixedAliases: {},
-    availableThirdPartyDependencies: new Map(),
-  };
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected);
+    },
+  });
 });

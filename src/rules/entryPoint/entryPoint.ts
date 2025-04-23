@@ -33,7 +33,7 @@ export const noEntryPointImports = createRule({
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {
-      if (exportEntry.isEntryPoint && exportEntry.importedByFiles.length) {
+      if (exportEntry.isEntryPoint && exportEntry.importedBy.length) {
         context.report({
           messageId: 'noEntryPointImports',
           loc: getLocFromRange(context, exportEntry.reportNodeRange),

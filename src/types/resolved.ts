@@ -12,9 +12,19 @@ import type {
 export type Resolved =
   | {
       resolvedModuleType: 'builtin';
+
+      // For some reason, passing `Resolved` when intersected with Base through
+      // an Omit (aka what we do in tests) causes `resolvedModulePath` to never
+      // be an allowed property. So we set this as optional+undefined to help.
+      resolvedModulePath?: undefined;
     }
   | {
       resolvedModuleType: 'thirdParty';
+
+      // For some reason, passing `Resolved` when intersected with Base through
+      // an Omit (aka what we do in tests) causes `resolvedModulePath` to never
+      // be an allowed property. So we set this as optional+undefined to help.
+      resolvedModulePath?: undefined;
     }
   | {
       resolvedModuleType: 'firstPartyCode';

@@ -3,7 +3,7 @@ import type {
   AnalyzedBarrelReexport,
   AnalyzedCodeFileDetails,
   AnalyzedDynamicImport,
-  AnalyzedImportBase,
+  AnalyzedExport,
   AnalyzedProjectInfo,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
@@ -45,8 +45,8 @@ export function computeAnalyzedInfo(
     for (const exportDetails of fileDetails.exports) {
       analyzedFileInfo.exports.push({
         ...exportDetails,
-        importedByFiles: [],
-        barrelImportedByFiles: [],
+        importedBy: [],
+        barrelImportedBy: [],
       });
     }
 
@@ -63,16 +63,16 @@ export function computeAnalyzedInfo(
           reexportDetails.resolvedModuleType === 'thirdParty'
             ? reexportDetails.resolvedModuleType
             : undefined,
-        importedByFiles: [],
-        barrelImportedByFiles: [],
+        importedBy: [],
+        barrelImportedBy: [],
       });
     }
 
     for (const reexportDetails of fileDetails.barrelReexports) {
       analyzedFileInfo.barrelReexports.push({
         ...reexportDetails,
-        importedByFiles: [],
-        barrelImportedByFiles: [],
+        importedBy: [],
+        barrelImportedBy: [],
       });
     }
 
@@ -109,23 +109,28 @@ export function computeAnalyzedInfo(
 
     // First, analyze all imports
     for (const importDetails of fileDetails.singleImports) {
-      analyzeSingleImport(
-        filePath,
-        importDetails,
+      analyzeSingleImport({
+        originAnalyzedImport: {
+          type: 'single',
+          filePath,
+          importEntry: importDetails,
+        },
         analyzedProjectInfo,
-        'single'
-      );
+      });
     }
     for (const importDetails of [
       ...fileDetails.barrelImports,
       ...fileDetails.dynamicImports,
     ]) {
-      analyzeBarrelImport(
-        filePath,
-        importDetails,
+      analyzeBarrelImport({
+        originAnalyzedImport: {
+          type: 'barrel',
+          filePath,
+          importEntry: importDetails,
+        },
+        pivotAnalyzedImport: importDetails,
         analyzedProjectInfo,
-        'barrel'
-      );
+      });
     }
 
     // Now, treat reexports that are also entry points as an import, so that we
@@ -135,46 +140,89 @@ export function computeAnalyzedInfo(
       if (!reexportDetails.isEntryPoint) {
         continue;
       }
-      analyzeSingleImport(
-        filePath,
-        reexportDetails,
+      analyzeSingleImport({
+        originAnalyzedImport: {
+          type: 'single',
+          filePath,
+          importEntry: reexportDetails,
+        },
         analyzedProjectInfo,
-        'single'
-      );
+      });
     }
     for (const reexportDetails of fileDetails.barrelReexports) {
       if (!reexportDetails.isEntryPoint) {
         continue;
       }
-      analyzeBarrelImport(
-        filePath,
-        reexportDetails,
+      analyzeBarrelImport({
+        originAnalyzedImport: {
+          type: 'barrel',
+          filePath,
+          importEntry: reexportDetails,
+        },
+        pivotAnalyzedImport: reexportDetails,
         analyzedProjectInfo,
-        'barrel'
-      );
+      });
     }
   }
 
   return analyzedProjectInfo;
 }
 
-type InitialImportType = 'single' | 'barrel';
-
-function analyzeSingleImport(
-  originFilePath: string,
-  originAnalyzedImport: AnalyzedSingleImport | AnalyzedSingleReexport,
-  analyzedProjectInfo: AnalyzedProjectInfo,
-  initialImportType: InitialImportType
+function linkImportToExport(
+  importFilePath: string,
+  importEntry: AnalyzedSingleImport | AnalyzedSingleReexport,
+  exportFilePath: string,
+  exportEntry: AnalyzedExport | AnalyzedBarrelReexport
 ) {
-  if (originAnalyzedImport.resolvedModuleType !== 'firstPartyCode') {
+  /* istanbul ignore if */
+  if (importEntry.resolvedModuleType !== 'firstPartyCode') {
+    throw new InternalError(
+      `Attempted to link export that is first party to import not marked as first party`
+    );
+  }
+
+  /* istanbul ignore if */
+  if (importEntry.type === 'singleReexport' && !importEntry.isEntryPoint) {
+    throw new InternalError(
+      `Attempted to link reexport that is not an entry point`
+    );
+  }
+
+  // Update the export to include the import that imports it
+  exportEntry.importedBy.push({
+    filePath: importFilePath,
+    importEntry,
+  });
+
+  // Update the import to include the export it points to
+  Object.assign(importEntry, {
+    rootModuleType: 'firstPartyCode',
+    rootModulePath: exportFilePath,
+    rootExportEntry: exportEntry,
+  } satisfies Partial<AnalyzedSingleImport | AnalyzedSingleReexport>);
+}
+
+type AnalyzeSingleImportProps = {
+  originAnalyzedImport: {
+    type: 'single';
+    filePath: string;
+    importEntry: AnalyzedSingleImport | AnalyzedSingleReexport;
+  };
+  analyzedProjectInfo: AnalyzedProjectInfo;
+};
+
+function analyzeSingleImport({
+  originAnalyzedImport,
+  analyzedProjectInfo,
+}: AnalyzeSingleImportProps) {
+  if (
+    originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode'
+  ) {
     return;
   }
 
   // Return value indicates if we've found the root export yet or not
-  function traverse(
-    currentFile: string,
-    currentImportName: string
-  ): AnalyzedImportBase | undefined {
+  function traverse(currentFile: string, currentImportName: string): boolean {
     // Get the file from the project info
     const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 
@@ -183,8 +231,8 @@ function analyzeSingleImport(
       throw new InternalError(
         `File ${currentFile} is missing in project info`,
         {
-          filePath: originFilePath,
-          range: originAnalyzedImport.statementNodeRange,
+          filePath: originAnalyzedImport.filePath,
+          range: originAnalyzedImport.importEntry.statementNodeRange,
         }
       );
     }
@@ -196,8 +244,8 @@ function analyzeSingleImport(
       throw new InternalError(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
-          filePath: originFilePath,
-          range: originAnalyzedImport.statementNodeRange,
+          filePath: originAnalyzedImport.filePath,
+          range: originAnalyzedImport.importEntry.statementNodeRange,
         }
       );
     }
@@ -207,17 +255,13 @@ function analyzeSingleImport(
       (e) => currentImportName === e.exportName
     );
     if (exportEntry?.exportName === currentImportName) {
-      // Set the consumers of the export
-      exportEntry.importedByFiles.push(originFilePath);
-
-      // Set the root info
-      const rootModuleInfo: AnalyzedImportBase = {
-        rootModuleType: 'firstPartyCode',
-        rootModulePath: currentFile,
-        rootExportName: exportEntry.exportName,
-        rootExportType: 'export',
-      };
-      return rootModuleInfo;
+      linkImportToExport(
+        originAnalyzedImport.filePath,
+        originAnalyzedImport.importEntry,
+        currentFile,
+        exportEntry
+      );
+      return true;
     }
 
     // Next, check if there is a single re-export that matches
@@ -228,88 +272,80 @@ function analyzeSingleImport(
       switch (singleReexportEntry.resolvedModuleType) {
         case 'builtin':
         case 'thirdParty': {
-          return {
-            rootModuleType: singleReexportEntry.resolvedModuleType,
-          };
+          originAnalyzedImport.importEntry.rootModuleType =
+            singleReexportEntry.resolvedModuleType;
+          return true;
         }
         case 'firstPartyOther': {
-          const rootModuleInfo: AnalyzedImportBase = {
+          Object.assign(singleReexportEntry, {
             rootModuleType: 'firstPartyOther',
             rootModulePath: currentFile,
-          };
-          Object.assign(singleReexportEntry, rootModuleInfo);
-          return rootModuleInfo;
+          } satisfies Partial<AnalyzedSingleReexport>);
+          return true;
         }
         case 'firstPartyCode': {
-          singleReexportEntry.importedByFiles.push(originFilePath);
-          const rootModuleInfo = traverse(
-            singleReexportEntry.resolvedModulePath,
-            singleReexportEntry.importName
-          );
-          if (rootModuleInfo) {
-            Object.assign(singleReexportEntry, rootModuleInfo);
+          if (
+            traverse(
+              singleReexportEntry.resolvedModulePath,
+              singleReexportEntry.importName
+            )
+          ) {
+            return true;
           }
-          return rootModuleInfo;
+          break;
         }
       }
     }
 
-    // Now check if there's a named barrel export that matches
+    // Now check if there's a named barrel export that matches the name of the
+    // import we're looking for. In such a case, it markes the end of discovery,
+    // since the named import points to multiple sources
     const barrelReexportEntry = targetFileDetails.barrelReexports.find(
       (r) => r.exportName === currentImportName
     );
     if (barrelReexportEntry) {
       if (barrelReexportEntry.resolvedModuleType === 'firstPartyCode') {
-        if (initialImportType === 'single' && barrelReexportEntry.exportName) {
-          return {
-            rootModuleType: 'firstPartyCode',
-            rootModulePath: currentFile,
-            rootExportName: barrelReexportEntry.exportName,
-            rootExportType: 'namedBarrelReexport',
-          };
-        }
-
-        analyzeBarrelImport(
-          originFilePath,
-          barrelReexportEntry,
-          analyzedProjectInfo,
-          initialImportType
+        linkImportToExport(
+          originAnalyzedImport.filePath,
+          originAnalyzedImport.importEntry,
+          currentFile,
+          barrelReexportEntry
         );
+
+        // Even though we found what the import points to, we need to traverse
+        // the barrel re-export to ensure we mark all exports bundled together
+        // are marked as being imported by this import
+        analyzeBarrelImport({
+          originAnalyzedImport,
+          pivotAnalyzedImport: barrelReexportEntry,
+          analyzedProjectInfo,
+        });
+
+        // Regardless of what happened when further traversing the barrel
+        // re-export, we know we found what the import points too.
+        return true;
       } else {
-        if (initialImportType === 'single') {
-          if (barrelReexportEntry.resolvedModuleType === 'firstPartyOther') {
-            if (!barrelReexportEntry.resolvedModulePath) {
-              return undefined;
-            }
-            return {
-              rootModuleType: 'firstPartyOther',
-              rootModulePath: barrelReexportEntry.resolvedModulePath,
-            };
+        // TODO: document me
+        if (barrelReexportEntry.resolvedModuleType === 'firstPartyOther') {
+          if (!barrelReexportEntry.resolvedModulePath) {
+            return false;
           }
-          return {
-            rootModuleType: barrelReexportEntry.resolvedModuleType,
-          };
+          Object.assign(originAnalyzedImport.importEntry, {
+            rootModuleType: 'firstPartyOther',
+            rootModulePath: barrelReexportEntry.resolvedModulePath,
+          } satisfies Partial<AnalyzedSingleImport | AnalyzedSingleReexport>);
+          return true;
         }
-        // This is an edge case that we just can't handle, so we pretend we
-        // didn't find it. This happens when we have:
-        //
-        // // foo.ts
-        // import { join } from './bar';
-        //
-        // // bar.ts
-        // export * from 'node:path';
-        // export * from 'node:url';
-        //
-        // Since we don't know the names of what's exported from third
-        // party/builtin modules, we can't actually know which module `join`
-        // came from
-        return undefined;
+        Object.assign(originAnalyzedImport.importEntry, {
+          rootModuleType: barrelReexportEntry.resolvedModuleType,
+        } satisfies Partial<AnalyzedSingleImport | AnalyzedSingleReexport>);
+        return true;
       }
     }
 
     // Finally, check and traverse all barrel re-exports. Since we don't know
-    // what barrel exports contain yet, we have
-    // to traverse all of them in a depth-first search
+    // what barrel exports contain, we have to traverse all of them in a
+    // depth-first search
     for (const reexportEntry of targetFileDetails.barrelReexports) {
       // Technically speaking, it's possible for the root export to exist here
       // if, say, someone did something stupid like `import { join } from
@@ -319,40 +355,52 @@ function analyzeSingleImport(
         continue;
       }
 
-      // If we found the root export, bail early
-      const rootModuleInfo = traverse(
-        reexportEntry.resolvedModulePath,
-        currentImportName
-      );
-      if (rootModuleInfo) {
-        reexportEntry.importedByFiles.push(originFilePath);
-        return rootModuleInfo;
+      if (traverse(reexportEntry.resolvedModulePath, currentImportName)) {
+        // If we found the root export, bail early
+        return true;
       }
     }
 
     // Finally, if we got here, we couldn't resolve the root export
-    return undefined;
+    return false;
   }
 
-  const rootModuleInfo = traverse(
-    originAnalyzedImport.resolvedModulePath,
-    originAnalyzedImport.importName
+  traverse(
+    originAnalyzedImport.importEntry.resolvedModulePath,
+    originAnalyzedImport.importEntry.importName
   );
-  if (rootModuleInfo) {
-    Object.assign(originAnalyzedImport, rootModuleInfo);
-  }
 }
 
-function analyzeBarrelImport(
-  originFilePath: string,
+type AnalyzeBarrelImportProps = {
   originAnalyzedImport:
+    | {
+        type: 'single';
+        filePath: string;
+        importEntry: AnalyzedSingleImport | AnalyzedSingleReexport;
+      }
+    | {
+        type: 'barrel';
+        filePath: string;
+        importEntry:
+          | AnalyzedBarrelImport
+          | AnalyzedDynamicImport
+          | AnalyzedBarrelReexport;
+      };
+  pivotAnalyzedImport:
     | AnalyzedBarrelImport
-    | AnalyzedBarrelReexport
-    | AnalyzedDynamicImport,
-  analyzedProjectInfo: AnalyzedProjectInfo,
-  initialImportType: InitialImportType
-) {
-  if (originAnalyzedImport.resolvedModuleType !== 'firstPartyCode') {
+    | AnalyzedDynamicImport
+    | AnalyzedBarrelReexport;
+  analyzedProjectInfo: AnalyzedProjectInfo;
+};
+
+function analyzeBarrelImport({
+  originAnalyzedImport,
+  pivotAnalyzedImport,
+  analyzedProjectInfo,
+}: AnalyzeBarrelImportProps) {
+  if (
+    originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode'
+  ) {
     return;
   }
 
@@ -365,8 +413,8 @@ function analyzeBarrelImport(
       throw new InternalError(
         `File ${currentFile} is missing in project info`,
         {
-          filePath: originFilePath,
-          range: originAnalyzedImport.statementNodeRange,
+          filePath: originAnalyzedImport.filePath,
+          range: originAnalyzedImport.importEntry.statementNodeRange,
         }
       );
     }
@@ -378,42 +426,42 @@ function analyzeBarrelImport(
       throw new InternalError(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
-          filePath: originFilePath,
-          range: originAnalyzedImport.statementNodeRange,
+          filePath: originAnalyzedImport.filePath,
+          range: originAnalyzedImport.importEntry.statementNodeRange,
         }
       );
     }
 
     // First, mark each export as being barrel imported
     for (const exportEntry of targetFileDetails.exports) {
-      exportEntry.barrelImportedByFiles.push(originFilePath);
+      exportEntry.barrelImportedBy.push({
+        filePath: originAnalyzedImport.filePath,
+        importEntry: originAnalyzedImport.importEntry,
+      });
     }
 
-    // Now go through reexports and traverse single reexports further
-    for (const reexportEntry of targetFileDetails.singleReexports) {
+    // Now go through reexports and traverse further
+    for (const reexportEntry of [
+      ...targetFileDetails.singleReexports,
+      ...targetFileDetails.barrelReexports,
+    ]) {
       // Nothing to do in non-first party code
       if (reexportEntry.resolvedModuleType !== 'firstPartyCode') {
         continue;
       }
-      reexportEntry.barrelImportedByFiles.push(originFilePath);
-      analyzeSingleImport(
-        originFilePath,
-        reexportEntry,
-        analyzedProjectInfo,
-        initialImportType
-      );
-    }
-
-    // And go through reexports and traverse barrel reexports further
-    for (const reexportEntry of targetFileDetails.barrelReexports) {
-      // Nothing to do in non-first party code
-      if (reexportEntry.resolvedModuleType !== 'firstPartyCode') {
-        continue;
-      }
-      reexportEntry.barrelImportedByFiles.push(originFilePath);
       traverse(reexportEntry.resolvedModulePath);
     }
   }
 
-  traverse(originAnalyzedImport.resolvedModulePath);
+  /* istanbul ignore if */
+  if (pivotAnalyzedImport.resolvedModuleType !== 'firstPartyCode') {
+    throw new InternalError(
+      `Attempted to traverse barrel import that is not first party code`,
+      {
+        filePath: originAnalyzedImport.filePath,
+        range: originAnalyzedImport.importEntry.statementNodeRange,
+      }
+    );
+  }
+  traverse(pivotAnalyzedImport.resolvedModulePath);
 }

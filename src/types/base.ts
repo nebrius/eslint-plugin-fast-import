@@ -2,13 +2,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
 
-export type ESMStatement = {
-  /**
-   * A unique identifier for the ESM statement. We use these to link imports
-   * and exports together without directly creating a circular data structure.
-   */
-  id: number;
-
+export type BaseESMStatement = {
   /**
    * The AST node range of the complete ESM statement for this entry
    */
@@ -24,7 +18,7 @@ export type ESMStatement = {
 
 /* Imports */
 
-export type BaseSingleImport = ESMStatement & {
+export type BaseSingleImport = BaseESMStatement & {
   /**
    * A top-level type that can be used at runtime to see what type of ESM
    * statement this is
@@ -71,7 +65,7 @@ export type BaseSingleImport = ESMStatement & {
   isTypeImport: boolean;
 };
 
-export type BaseBarrelImport = ESMStatement & {
+export type BaseBarrelImport = BaseESMStatement & {
   /**
    * A top-level type that can be used at runtime to see what type of ESM
    * statement this is
@@ -100,7 +94,7 @@ export type BaseBarrelImport = ESMStatement & {
   importAlias: string;
 };
 
-export type BaseDynamicImport = ESMStatement & {
+export type BaseDynamicImport = BaseESMStatement & {
   /**
    * A top-level type that can be used at runtime to see what type of ESM
    * statement this is
@@ -121,7 +115,7 @@ export type BaseDynamicImport = ESMStatement & {
 
 /* Exports */
 
-export type BaseExport = ESMStatement & {
+export type BaseExport = BaseESMStatement & {
   /**
    * A top-level type that can be used at runtime to see what type of ESM
    * statement this is
@@ -157,7 +151,7 @@ export type BaseExport = ESMStatement & {
 
 /* Reexports */
 
-export type BaseSingleReexport = ESMStatement & {
+export type BaseSingleReexport = BaseESMStatement & {
   /**
    * A top-level type that can be used at runtime to see what type of ESM
    * statement this is
@@ -212,7 +206,7 @@ export type BaseSingleReexport = ESMStatement & {
   isEntryPoint: boolean;
 };
 
-export type BaseBarrelReexport = ESMStatement & {
+export type BaseBarrelReexport = BaseESMStatement & {
   /**
    * A top-level type that can be used at runtime to see what type of ESM
    * statement this is

@@ -2,8 +2,7 @@ import { join } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import type { StrippedAnalyzedProjectInfo } from '../../../../__test__/util.js';
-import { stripNodesFromAnalyzedInfo } from '../../../../__test__/util.js';
+import type { StrippedAnalyzedFileDetails } from '../../../../__test__/util.js';
 import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
@@ -22,21 +21,168 @@ const CYCLE_FILE_A = join(TEST_PROJECT_DIR, 'cycle-a.js');
 const CYCLE_FILE_B = join(TEST_PROJECT_DIR, 'cycle-b.js');
 const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
 
-const EXPECTED: StrippedAnalyzedProjectInfo = {
-  files: new Map([
-    [
-      FILE_H,
-      {
-        fileType: 'other',
+const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [
+    {
+      type: 'singleImport',
+      moduleSpecifier: './b',
+      importName: 'c1',
+      importAlias: 'c1',
+      isTypeImport: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_B,
+      rootModuleType: 'firstPartyCode',
+      rootModulePath: FILE_C,
+      rootExportEntry: {
+        type: 'export',
+        exportName: 'c1',
+        isEntryPoint: false,
+        isTypeExport: false,
       },
-    ],
-    [
-      FILE_A,
-      {
-        fileType: 'code',
-        singleImports: [
-          {
-            id: 0,
+    },
+    {
+      type: 'singleImport',
+      moduleSpecifier: './e',
+      importName: 'd1',
+      importAlias: 'd1',
+      isTypeImport: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_E,
+      rootModuleType: 'firstPartyCode',
+      rootModulePath: FILE_D,
+      rootExportEntry: {
+        type: 'export',
+        exportName: 'd1',
+        isEntryPoint: false,
+        isTypeExport: false,
+      },
+    },
+    {
+      type: 'singleImport',
+      moduleSpecifier: './e',
+      importName: 'f',
+      importAlias: 'f',
+      isTypeImport: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_E,
+      rootModuleType: 'firstPartyCode',
+      rootModulePath: FILE_E,
+      rootExportEntry: {
+        type: 'barrelReexport',
+        exportName: 'f',
+        isEntryPoint: false,
+        moduleSpecifier: './f',
+        resolvedModulePath: FILE_F,
+        resolvedModuleType: 'firstPartyCode',
+      },
+    },
+    {
+      type: 'singleImport',
+      moduleSpecifier: './f',
+      importName: 'join',
+      importAlias: 'join',
+      isTypeImport: false,
+      resolvedModulePath: FILE_F,
+      resolvedModuleType: 'firstPartyCode',
+      rootModuleType: 'builtin',
+    },
+    {
+      type: 'singleImport',
+      moduleSpecifier: './g?raw',
+      importName: 'SourceCode',
+      importAlias: 'SourceCode',
+      isTypeImport: false,
+      resolvedModulePath: FILE_G,
+      resolvedModuleType: 'firstPartyCode',
+      rootModuleType: undefined,
+    },
+    {
+      type: 'singleImport',
+      importAlias: 'h',
+      importName: 'default',
+      isTypeImport: false,
+      moduleSpecifier: './h.json',
+      resolvedModuleType: 'firstPartyOther',
+      resolvedModulePath: FILE_H,
+      rootModuleType: undefined,
+    },
+  ],
+  barrelImports: [
+    {
+      type: 'barrelImport',
+      importAlias: 'b',
+      moduleSpecifier: './b',
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_B,
+    },
+  ],
+  dynamicImports: [],
+  exports: [],
+  singleReexports: [
+    {
+      type: 'singleReexport',
+      barrelImportedBy: [],
+      exportName: 'ASourceCode',
+      importName: 'SourceCode',
+      importedBy: [],
+      isEntryPoint: true,
+      isTypeReexport: true,
+      moduleSpecifier: './f',
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_F,
+      rootModuleType: 'thirdParty',
+    },
+  ],
+  barrelReexports: [],
+};
+
+const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [],
+  singleReexports: [],
+  barrelReexports: [
+    {
+      type: 'barrelReexport',
+      moduleSpecifier: './c',
+      exportName: undefined,
+      isEntryPoint: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_C,
+      importedBy: [],
+      barrelImportedBy: [],
+    },
+    {
+      type: 'barrelReexport',
+      moduleSpecifier: './d',
+      exportName: undefined,
+      isEntryPoint: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_D,
+      importedBy: [],
+      barrelImportedBy: [],
+    },
+  ],
+};
+
+const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [
+    {
+      type: 'export',
+      exportName: 'c1',
+      isEntryPoint: false,
+      isTypeExport: false,
+      importedBy: [
+        {
+          filePath: FILE_A,
+          importEntry: {
             type: 'singleImport',
             moduleSpecifier: './b',
             importName: 'c1',
@@ -46,11 +192,114 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             resolvedModulePath: FILE_B,
             rootModuleType: 'firstPartyCode',
             rootModulePath: FILE_C,
-            rootExportName: 'c1',
-            rootExportType: 'export',
           },
-          {
-            id: 2,
+        },
+      ],
+      barrelImportedBy: [
+        {
+          filePath: FILE_A,
+          importEntry: {
+            type: 'barrelImport',
+            moduleSpecifier: './b',
+            importAlias: 'b',
+            resolvedModuleType: 'firstPartyCode',
+            resolvedModulePath: FILE_B,
+          },
+        },
+      ],
+    },
+  ],
+  singleReexports: [],
+  barrelReexports: [],
+};
+
+const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
+  exports: [],
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  singleReexports: [
+    {
+      type: 'singleReexport',
+      barrelImportedBy: [],
+      exportName: 'a',
+      importName: 'a',
+      importedBy: [],
+      isEntryPoint: false,
+      isTypeReexport: false,
+      moduleSpecifier: './cycle-b',
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: CYCLE_FILE_B,
+      rootModuleType: undefined,
+    },
+  ],
+  barrelReexports: [],
+};
+
+const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
+  exports: [],
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  singleReexports: [
+    {
+      type: 'singleReexport',
+      barrelImportedBy: [],
+      exportName: 'a',
+      importName: 'a',
+      importedBy: [],
+      isEntryPoint: false,
+      isTypeReexport: false,
+      moduleSpecifier: './cycle-c',
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: CYCLE_FILE_C,
+      rootModuleType: undefined,
+    },
+  ],
+  barrelReexports: [],
+};
+
+const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
+  exports: [],
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  singleReexports: [
+    {
+      type: 'singleReexport',
+      barrelImportedBy: [],
+      exportName: 'a',
+      importName: 'a',
+      importedBy: [],
+      isEntryPoint: false,
+      isTypeReexport: false,
+      moduleSpecifier: './cycle-a',
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: CYCLE_FILE_A,
+      rootModuleType: undefined,
+    },
+  ],
+  barrelReexports: [],
+};
+
+const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [
+    {
+      type: 'export',
+      exportName: 'd1',
+      isEntryPoint: false,
+      isTypeExport: false,
+      importedBy: [
+        {
+          filePath: FILE_A,
+          importEntry: {
             type: 'singleImport',
             moduleSpecifier: './e',
             importName: 'd1',
@@ -60,11 +309,60 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             resolvedModulePath: FILE_E,
             rootModuleType: 'firstPartyCode',
             rootModulePath: FILE_D,
-            rootExportName: 'd1',
-            rootExportType: 'export',
           },
-          {
-            id: 3,
+        },
+      ],
+      barrelImportedBy: [
+        {
+          filePath: FILE_A,
+          importEntry: {
+            type: 'barrelImport',
+            moduleSpecifier: './b',
+            importAlias: 'b',
+            resolvedModuleType: 'firstPartyCode',
+            resolvedModulePath: FILE_B,
+          },
+        },
+      ],
+    },
+  ],
+  singleReexports: [],
+  barrelReexports: [],
+};
+
+const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [],
+  singleReexports: [
+    {
+      type: 'singleReexport',
+      moduleSpecifier: './d',
+      importName: 'd1',
+      exportName: 'd1',
+      isTypeReexport: false,
+      isEntryPoint: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_D,
+      importedBy: [],
+      barrelImportedBy: [],
+      rootModuleType: undefined,
+    },
+  ],
+  barrelReexports: [
+    {
+      type: 'barrelReexport',
+      moduleSpecifier: './f',
+      exportName: 'f',
+      isEntryPoint: false,
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_F,
+      importedBy: [
+        {
+          filePath: FILE_A,
+          importEntry: {
             type: 'singleImport',
             moduleSpecifier: './e',
             importName: 'f',
@@ -74,346 +372,88 @@ const EXPECTED: StrippedAnalyzedProjectInfo = {
             resolvedModulePath: FILE_E,
             rootModuleType: 'firstPartyCode',
             rootModulePath: FILE_E,
-            rootExportName: 'f',
-            rootExportType: 'namedBarrelReexport',
           },
-          {
-            id: 4,
-            type: 'singleImport',
-            moduleSpecifier: './f',
-            importName: 'join',
-            importAlias: 'join',
-            resolvedModulePath: FILE_F,
-            isTypeImport: false,
-            resolvedModuleType: 'firstPartyCode',
-            rootModuleType: 'builtin',
-          },
-          {
-            id: 5,
-            type: 'singleImport',
-            moduleSpecifier: './g?raw',
-            importName: 'SourceCode',
-            importAlias: 'SourceCode',
-            resolvedModulePath: FILE_G,
-            isTypeImport: false,
-            resolvedModuleType: 'firstPartyCode',
-            rootModuleType: undefined,
-          },
-          {
-            id: 6,
-            type: 'singleImport',
-            importAlias: 'h',
-            importName: 'default',
-            isTypeImport: false,
-            moduleSpecifier: './h.json',
-            resolvedModuleType: 'firstPartyOther',
-            resolvedModulePath: FILE_H,
-            rootModuleType: undefined,
-          },
-        ],
-        barrelImports: [
-          {
-            id: 1,
-            type: 'barrelImport',
-            importAlias: 'b',
-            moduleSpecifier: './b',
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: FILE_B,
-          },
-        ],
-        dynamicImports: [],
-        exports: [],
-        singleReexports: [
-          {
-            id: 7,
-            type: 'singleReexport',
-            barrelImportedByFiles: [],
-            exportName: 'ASourceCode',
-            importName: 'SourceCode',
-            importedByFiles: [],
-            isEntryPoint: true,
-            isTypeReexport: true,
-            moduleSpecifier: './f',
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: FILE_F,
-            rootModuleType: 'thirdParty',
-          },
-        ],
-        barrelReexports: [],
-      },
-    ],
-    [
-      FILE_B,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [],
-        singleReexports: [],
-        barrelReexports: [
-          {
-            id: 8,
-            type: 'barrelReexport',
-            moduleSpecifier: './c',
-            exportName: undefined,
-            isEntryPoint: false,
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: FILE_C,
-            importedByFiles: [FILE_A],
-            barrelImportedByFiles: [FILE_A],
-          },
-          {
-            id: 9,
-            type: 'barrelReexport',
-            moduleSpecifier: './d',
-            exportName: undefined,
-            isEntryPoint: false,
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: FILE_D,
-            importedByFiles: [],
-            barrelImportedByFiles: [FILE_A],
-          },
-        ],
-      },
-    ],
-    [
-      FILE_C,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [
-          {
-            id: 10,
-            type: 'export',
-            exportName: 'c1',
-            isEntryPoint: false,
-            isTypeExport: false,
-            importedByFiles: [FILE_A],
-            barrelImportedByFiles: [FILE_A],
-          },
-        ],
-        singleReexports: [],
-        barrelReexports: [],
-      },
-    ],
-    [
-      CYCLE_FILE_A,
-      {
-        exports: [],
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        singleReexports: [
-          {
-            id: 11,
-            type: 'singleReexport',
-            barrelImportedByFiles: [],
-            exportName: 'a',
-            importName: 'a',
-            importedByFiles: [],
-            isEntryPoint: false,
-            isTypeReexport: false,
-            moduleSpecifier: './cycle-b',
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: CYCLE_FILE_B,
-            rootModuleType: undefined,
-          },
-        ],
-        barrelReexports: [],
-      },
-    ],
-    [
-      CYCLE_FILE_B,
-      {
-        exports: [],
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        singleReexports: [
-          {
-            id: 12,
-            type: 'singleReexport',
-            barrelImportedByFiles: [],
-            exportName: 'a',
-            importName: 'a',
-            importedByFiles: [],
-            isEntryPoint: false,
-            isTypeReexport: false,
-            moduleSpecifier: './cycle-c',
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: CYCLE_FILE_C,
-            rootModuleType: undefined,
-          },
-        ],
-        barrelReexports: [],
-      },
-    ],
-    [
-      CYCLE_FILE_C,
-      {
-        exports: [],
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        singleReexports: [
-          {
-            id: 13,
-            type: 'singleReexport',
-            barrelImportedByFiles: [],
-            exportName: 'a',
-            importName: 'a',
-            importedByFiles: [],
-            isEntryPoint: false,
-            isTypeReexport: false,
-            moduleSpecifier: './cycle-a',
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: CYCLE_FILE_A,
-            rootModuleType: undefined,
-          },
-        ],
-        barrelReexports: [],
-      },
-    ],
-    [
-      FILE_D,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [
-          {
-            id: 14,
-            type: 'export',
-            exportName: 'd1',
-            isEntryPoint: false,
-            isTypeExport: false,
-            importedByFiles: [FILE_A],
-            barrelImportedByFiles: [FILE_A],
-          },
-        ],
-        singleReexports: [],
-        barrelReexports: [],
-      },
-    ],
-    [
-      FILE_E,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [],
-        singleReexports: [
-          {
-            id: 15,
-            type: 'singleReexport',
-            moduleSpecifier: './d',
-            importName: 'd1',
-            exportName: 'd1',
-            isTypeReexport: false,
-            isEntryPoint: false,
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: FILE_D,
-            importedByFiles: [FILE_A],
-            barrelImportedByFiles: [],
-            rootModuleType: 'firstPartyCode',
-            rootModulePath: FILE_D,
-            rootExportName: 'd1',
-            rootExportType: 'export',
-          },
-        ],
-        barrelReexports: [
-          {
-            id: 16,
-            type: 'barrelReexport',
-            moduleSpecifier: './f',
-            exportName: 'f',
-            isEntryPoint: false,
-            resolvedModuleType: 'firstPartyCode',
-            resolvedModulePath: FILE_F,
-            importedByFiles: [],
-            barrelImportedByFiles: [],
-          },
-        ],
-      },
-    ],
-    [
-      FILE_F,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [],
-        singleReexports: [
-          {
-            id: 17,
-            type: 'singleReexport',
-            moduleSpecifier: 'path',
-            importName: 'join',
-            exportName: 'join',
-            isTypeReexport: false,
-            isEntryPoint: false,
-            resolvedModuleType: 'builtin',
-            importedByFiles: [],
-            barrelImportedByFiles: [],
-            rootModuleType: 'builtin',
-          },
-          {
-            id: 18,
-            type: 'singleReexport',
-            barrelImportedByFiles: [],
-            exportName: 'SourceCode',
-            importName: 'SourceCode',
-            importedByFiles: [],
-            isEntryPoint: false,
-            isTypeReexport: true,
-            moduleSpecifier: 'eslint',
-            resolvedModuleType: 'thirdParty',
-            rootModuleType: 'thirdParty',
-          },
-        ],
-        barrelReexports: [],
-      },
-    ],
-    [
-      FILE_G,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [],
-        singleReexports: [],
-        barrelReexports: [
-          {
-            id: 19,
-            type: 'barrelReexport',
-            moduleSpecifier: 'eslint',
-            exportName: undefined,
-            isEntryPoint: false,
-            resolvedModuleType: 'thirdParty',
-            importedByFiles: [],
-            barrelImportedByFiles: [],
-          },
-        ],
-      },
-    ],
-  ]),
-  rootDir: TEST_PROJECT_DIR,
-  wildcardAliases: {},
-  fixedAliases: {},
-  availableThirdPartyDependencies: new Map(),
+        },
+      ],
+      barrelImportedBy: [],
+    },
+  ],
 };
 
-it('Computes base info', () => {
+const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [],
+  singleReexports: [
+    {
+      type: 'singleReexport',
+      moduleSpecifier: 'path',
+      importName: 'join',
+      exportName: 'join',
+      isTypeReexport: false,
+      isEntryPoint: false,
+      resolvedModuleType: 'builtin',
+      importedBy: [],
+      barrelImportedBy: [],
+      rootModuleType: 'builtin',
+    },
+    {
+      type: 'singleReexport',
+      barrelImportedBy: [],
+      exportName: 'SourceCode',
+      importName: 'SourceCode',
+      importedBy: [],
+      isEntryPoint: false,
+      isTypeReexport: true,
+      moduleSpecifier: 'eslint',
+      resolvedModuleType: 'thirdParty',
+      rootModuleType: 'thirdParty',
+    },
+  ],
+  barrelReexports: [],
+};
+
+const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [],
+  singleReexports: [],
+  barrelReexports: [
+    {
+      type: 'barrelReexport',
+      moduleSpecifier: 'eslint',
+      exportName: undefined,
+      isEntryPoint: false,
+      resolvedModuleType: 'thirdParty',
+      importedBy: [],
+      barrelImportedBy: [],
+    },
+  ],
+};
+
+const EXPECTED_FILE_H: StrippedAnalyzedFileDetails = {
+  fileType: 'other',
+};
+
+const EXPECTED = {
+  [FILE_A]: EXPECTED_FILE_A,
+  [FILE_B]: EXPECTED_FILE_B,
+  [FILE_C]: EXPECTED_FILE_C,
+  [FILE_D]: EXPECTED_FILE_D,
+  [FILE_E]: EXPECTED_FILE_E,
+  [FILE_F]: EXPECTED_FILE_F,
+  [FILE_G]: EXPECTED_FILE_G,
+  [FILE_H]: EXPECTED_FILE_H,
+  [CYCLE_FILE_A]: EXPECTED_CYCLE_FILE_A,
+  [CYCLE_FILE_B]: EXPECTED_CYCLE_FILE_B,
+  [CYCLE_FILE_C]: EXPECTED_CYCLE_FILE_C,
+};
+
+it('Computes analyzed info', () => {
   const info = computeAnalyzedInfo(
     computeResolvedInfo(
       computeBaseInfo({
@@ -426,5 +466,5 @@ it('Computes base info', () => {
       })
     )
   );
-  expect(stripNodesFromAnalyzedInfo(info)).toEqual(EXPECTED);
+  expect(info).toMatchAnalyzedSpec(EXPECTED);
 });

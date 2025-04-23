@@ -2,7 +2,7 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
 
 import type { BaseCodeFileDetails } from '../types/base.js';
 import { InternalError } from '../util/error.js';
-import { type ExportDeclaration, getStatementId, traverse } from './util.js';
+import { type ExportDeclaration, traverse } from './util.js';
 
 // Exports are almost always identifiers, but on rare occasions they can
 // actually be strings, such as in:
@@ -121,7 +121,6 @@ function walkExportDestructure(
           // export const { foo } = {}
           case TSESTree.AST_NODE_TYPES.Identifier: {
             fileDetails.exports.push({
-              id: getStatementId(),
               type: 'export',
               statementNodeRange: statementNode.range,
               reportNodeRange: propertyNode.value.range,
@@ -173,7 +172,6 @@ function walkExportDestructure(
     case TSESTree.AST_NODE_TYPES.AssignmentPattern: {
       if (node.left.type === TSESTree.AST_NODE_TYPES.Identifier) {
         fileDetails.exports.push({
-          id: getStatementId(),
           type: 'export',
           statementNodeRange: statementNode.range,
           reportNodeRange: node.left.range,
@@ -199,7 +197,6 @@ function walkExportDestructure(
     // export const [ foo ] = [ 10 ]
     case TSESTree.AST_NODE_TYPES.Identifier: {
       fileDetails.exports.push({
-        id: getStatementId(),
         type: 'export',
         statementNodeRange: statementNode.range,
         reportNodeRange: node.range,
@@ -297,7 +294,6 @@ export function computeFileDetails({
       // import that may not have a string module specifier.
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ImportExpression) {
         fileDetails.dynamicImports.push({
-          id: getStatementId(),
           type: 'dynamicImport',
           statementNodeRange: statementNode.range,
           reportNodeRange: statementNode.range,
@@ -329,7 +325,6 @@ export function computeFileDetails({
           // import * as foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier: {
             fileDetails.barrelImports.push({
-              id: getStatementId(),
               type: 'barrelImport',
               statementNodeRange: statementNode.range,
               reportNodeRange: specifierNode.range,
@@ -342,7 +337,6 @@ export function computeFileDetails({
           // import foo from 'bar';
           case TSESTree.AST_NODE_TYPES.ImportDefaultSpecifier: {
             fileDetails.singleImports.push({
-              id: getStatementId(),
               type: 'singleImport',
               statementNodeRange: statementNode.range,
               reportNodeRange: specifierNode.range,
@@ -361,7 +355,6 @@ export function computeFileDetails({
             );
 
             fileDetails.singleImports.push({
-              id: getStatementId(),
               type: 'singleImport',
               statementNodeRange: statementNode.range,
               reportNodeRange: specifierNode.range,
@@ -401,7 +394,6 @@ export function computeFileDetails({
         for (const specifierNode of statementNode.specifiers) {
           const exportName = getIdentifierOrStringValue(specifierNode.exported);
           fileDetails.exports.push({
-            id: getStatementId(),
             type: 'export',
             statementNodeRange: statementNode.range,
             reportNodeRange: specifierNode.exported.range,
@@ -433,7 +425,6 @@ export function computeFileDetails({
               // export const foo = 10;
               case TSESTree.AST_NODE_TYPES.Identifier: {
                 fileDetails.exports.push({
-                  id: getStatementId(),
                   type: 'export',
                   statementNodeRange: statementNode.range,
                   reportNodeRange: declarationNode.id.range,
@@ -490,7 +481,6 @@ export function computeFileDetails({
             ? 'default'
             : statementNode.declaration.id.name;
           fileDetails.exports.push({
-            id: getStatementId(),
             type: 'export',
             statementNodeRange: statementNode.range,
             reportNodeRange: statementNode.declaration.id.range,
@@ -506,7 +496,6 @@ export function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.FunctionDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              id: getStatementId(),
               type: 'export',
               statementNodeRange: statementNode.range,
               reportNodeRange: statementNode.declaration.id
@@ -529,7 +518,6 @@ export function computeFileDetails({
               });
             }
             fileDetails.exports.push({
-              id: getStatementId(),
               type: 'export',
               statementNodeRange: statementNode.range,
               reportNodeRange: statementNode.declaration.id.range,
@@ -549,7 +537,6 @@ export function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.ClassDeclaration: {
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              id: getStatementId(),
               type: 'export',
               statementNodeRange: statementNode.range,
               reportNodeRange: statementNode.declaration.id
@@ -566,7 +553,6 @@ export function computeFileDetails({
               );
             }
             fileDetails.exports.push({
-              id: getStatementId(),
               type: 'export',
               statementNodeRange: statementNode.range,
               reportNodeRange: statementNode.declaration.id.range,
@@ -587,7 +573,6 @@ export function computeFileDetails({
           const isNodeDefault = isDefault(statementNode);
           const exportName = isNodeDefault ? 'default' : name;
           fileDetails.exports.push({
-            id: getStatementId(),
             type: 'export',
             statementNodeRange: statementNode.range,
             reportNodeRange: statementNode.declaration.range,
@@ -621,7 +606,6 @@ export function computeFileDetails({
             }
           }
           fileDetails.exports.push({
-            id: getStatementId(),
             type: 'export',
             statementNodeRange: statementNode.range,
             reportNodeRange: statementNode.declaration.range,
@@ -636,7 +620,6 @@ export function computeFileDetails({
         case TSESTree.AST_NODE_TYPES.TSImportEqualsDeclaration: {
           const exportName = statementNode.declaration.id.name;
           fileDetails.exports.push({
-            id: getStatementId(),
             type: 'export',
             statementNodeRange: statementNode.range,
             reportNodeRange: statementNode.declaration.range,
@@ -653,7 +636,6 @@ export function computeFileDetails({
           // node
           if (isDefault(statementNode)) {
             fileDetails.exports.push({
-              id: getStatementId(),
               type: 'export',
               statementNodeRange: statementNode.range,
               reportNodeRange: getRangeOfDefaultToken(
@@ -693,7 +675,6 @@ export function computeFileDetails({
       if (statementNode.type === TSESTree.AST_NODE_TYPES.ExportAllDeclaration) {
         const exportName = statementNode.exported?.name;
         fileDetails.barrelReexports.push({
-          id: getStatementId(),
           type: 'barrelReexport',
           statementNodeRange: statementNode.range,
           reportNodeRange: statementNode.range,
@@ -710,7 +691,6 @@ export function computeFileDetails({
       for (const specifierNode of statementNode.specifiers) {
         const exportName = getIdentifierOrStringValue(specifierNode.exported);
         fileDetails.singleReexports.push({
-          id: getStatementId(),
           type: 'singleReexport',
           statementNodeRange: statementNode.range,
           reportNodeRange: specifierNode.range,

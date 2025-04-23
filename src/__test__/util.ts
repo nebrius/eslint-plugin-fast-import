@@ -5,7 +5,6 @@ import type {
   AnalyzedDynamicImport,
   AnalyzedExport,
   AnalyzedOtherFileDetails,
-  AnalyzedProjectInfo,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
@@ -16,7 +15,6 @@ import type {
   BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
-  BaseProjectInfo,
   BaseSingleImport,
   BaseSingleReexport,
 } from '../types/base.js';
@@ -27,7 +25,6 @@ import type {
   ResolvedDynamicImport,
   ResolvedExport,
   ResolvedOtherFileDetails,
-  ResolvedProjectInfo,
   ResolvedSingleImport,
   ResolvedSingleReexport,
 } from '../types/resolved.js';
@@ -71,7 +68,7 @@ type StrippedFileDetails<
       >;
     });
 
-type StrippedBaseFileDetails = StrippedFileDetails<
+export type StrippedBaseFileDetails = StrippedFileDetails<
   BaseOtherFileDetails,
   BaseCodeFileDetails,
   BaseSingleImport,
@@ -82,7 +79,7 @@ type StrippedBaseFileDetails = StrippedFileDetails<
   BaseBarrelReexport
 >;
 
-type StrippedResolvedFileDetails = StrippedFileDetails<
+export type StrippedResolvedFileDetails = StrippedFileDetails<
   ResolvedOtherFileDetails,
   ResolvedCodeFileDetails,
   ResolvedSingleImport,
@@ -93,121 +90,93 @@ type StrippedResolvedFileDetails = StrippedFileDetails<
   ResolvedBarrelReexport
 >;
 
-type StrippedAnalyzedFileDetails = StrippedFileDetails<
+export type StrippedAnalyzedFileDetails = StrippedFileDetails<
   AnalyzedOtherFileDetails,
   AnalyzedCodeFileDetails,
-  AnalyzedSingleImport,
+  Omit<AnalyzedSingleImport, 'rootExportEntry'> & {
+    rootExportEntry?:
+      | Omit<
+          AnalyzedExport,
+          | 'statementNodeRange'
+          | 'reportNodeRange'
+          | 'importedBy'
+          | 'barrelImportedBy'
+        >
+      | Omit<
+          AnalyzedBarrelReexport,
+          | 'statementNodeRange'
+          | 'reportNodeRange'
+          | 'importedBy'
+          | 'barrelImportedBy'
+        >;
+  },
   AnalyzedBarrelImport,
   AnalyzedDynamicImport,
-  AnalyzedExport,
-  AnalyzedSingleReexport,
-  AnalyzedBarrelReexport
->;
-
-export type StrippedBaseProjectInfo = Omit<BaseProjectInfo, 'files'> & {
-  files: Map<string, StrippedBaseFileDetails>;
-};
-
-export type StrippedResolvedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
-  files: Map<string, StrippedResolvedFileDetails>;
-};
-
-export type StrippedAnalyzedProjectInfo = Omit<AnalyzedProjectInfo, 'files'> & {
-  files: Map<string, StrippedAnalyzedFileDetails>;
-};
-
-// Strip info from
-export function stripNodesFromBaseInfo(info: BaseProjectInfo) {
-  const clonedInfo: StrippedBaseProjectInfo = {
-    rootDir: info.rootDir,
-    wildcardAliases: info.wildcardAliases,
-    fixedAliases: info.fixedAliases,
-    files: new Map(),
-    availableThirdPartyDependencies: new Map(),
-  };
-  for (const [filePath, fileDetails] of info.files) {
-    if (fileDetails.fileType !== 'code') {
-      clonedInfo.files.set(filePath, fileDetails);
-      continue;
-    }
-    const newFileDetails: StrippedBaseFileDetails = {
-      fileType: fileDetails.fileType,
-      singleImports: [],
-      barrelImports: [],
-      dynamicImports: [],
-      exports: [],
-      singleReexports: [],
-      barrelReexports: [],
-    };
-    for (const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange,
-      ...strippedDetails
-    } of fileDetails.singleImports) {
-      newFileDetails.singleImports.push(strippedDetails);
-    }
-
-    for (const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange,
-      ...strippedDetails
-    } of fileDetails.barrelImports) {
-      newFileDetails.barrelImports.push(strippedDetails);
-    }
-
-    for (const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange,
-      ...strippedDetails
-    } of fileDetails.dynamicImports) {
-      newFileDetails.dynamicImports.push(strippedDetails);
-    }
-
-    for (const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange,
-      ...strippedDetails
-    } of fileDetails.exports) {
-      newFileDetails.exports.push(strippedDetails);
-    }
-
-    for (const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange,
-      ...strippedDetails
-    } of fileDetails.singleReexports) {
-      newFileDetails.singleReexports.push(strippedDetails);
-    }
-
-    for (const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      statementNodeRange,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      reportNodeRange,
-      ...strippedDetails
-    } of fileDetails.barrelReexports) {
-      newFileDetails.barrelReexports.push(strippedDetails);
-    }
-
-    clonedInfo.files.set(filePath, newFileDetails);
+  Omit<AnalyzedExport, 'importedBy' | 'barrelImportedBy'> & {
+    importedBy?: Array<{
+      filePath: string;
+      importEntry: Omit<
+        AnalyzedSingleImport,
+        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+      >;
+    }>;
+    barrelImportedBy?: Array<{
+      filePath: string;
+      importEntry: Omit<
+        AnalyzedBarrelImport,
+        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+      >;
+    }>;
+  },
+  Omit<AnalyzedSingleReexport, 'rootExportEntry'> & {
+    rootExportEntry?:
+      | Omit<
+          AnalyzedExport,
+          | 'statementNodeRange'
+          | 'reportNodeRange'
+          | 'importedBy'
+          | 'barrelImportedBy'
+        >
+      | Omit<
+          AnalyzedBarrelReexport,
+          | 'statementNodeRange'
+          | 'reportNodeRange'
+          | 'importedBy'
+          | 'barrelImportedBy'
+        >;
+  },
+  Omit<
+    AnalyzedBarrelReexport,
+    'rootExportEntry' | 'importedBy' | 'barrelImportedBy'
+  > & {
+    rootExportEntry?:
+      | Omit<
+          AnalyzedExport,
+          | 'statementNodeRange'
+          | 'reportNodeRange'
+          | 'importedBy'
+          | 'barrelImportedBy'
+        >
+      | Omit<
+          AnalyzedBarrelReexport,
+          | 'statementNodeRange'
+          | 'reportNodeRange'
+          | 'importedBy'
+          | 'barrelImportedBy'
+        >;
+    importedBy?: Array<{
+      filePath: string;
+      importEntry: Omit<
+        AnalyzedSingleImport,
+        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+      >;
+    }>;
+    barrelImportedBy?: Array<{
+      filePath: string;
+      importEntry: Omit<
+        AnalyzedBarrelImport,
+        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+      >;
+    }>;
   }
-  return clonedInfo;
-}
-
-export function stripNodesFromResolvedInfo(info: ResolvedProjectInfo) {
-  return stripNodesFromBaseInfo(info) as StrippedResolvedProjectInfo;
-}
-
-export function stripNodesFromAnalyzedInfo(info: AnalyzedProjectInfo) {
-  return stripNodesFromBaseInfo(info) as StrippedAnalyzedProjectInfo;
-}
+>;

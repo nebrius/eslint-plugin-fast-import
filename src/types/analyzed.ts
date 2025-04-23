@@ -9,18 +9,35 @@ import type {
   ResolvedSingleReexport,
 } from './resolved.js';
 
-export type AnalyzedImportBase =
+type AnalyzedImportBase =
   | {
       /**
-       * A rootModuleType of `undefined` indicates we couldn't resolve the root export
+       * A rootModuleType of `undefined` indicates that either:
+       * 1. The statement is a reexport statement that is not an entry point,
+       * 2. The root export could not be resolved
        */
       rootModuleType: undefined;
+
+      // Similar to the resolved equivalent, we have to add this to narrow down
+      // types properly in test code
+      rootModulePath?: undefined;
+      rootExportEntry?: undefined;
     }
   | {
       rootModuleType: 'builtin';
+
+      // Similar to the resolved equivalent, we have to add this to narrow down
+      // types properly in test code
+      rootModulePath?: undefined;
+      rootExportEntry?: undefined;
     }
   | {
       rootModuleType: 'thirdParty';
+
+      // Similar to the resolved equivalent, we have to add this to narrow down
+      // types properly in test code
+      rootModulePath?: undefined;
+      rootExportEntry?: undefined;
     }
   | {
       rootModuleType: 'firstPartyOther';
@@ -45,6 +62,10 @@ export type AnalyzedImportBase =
        * with `resolvedModulePath` which equals `/path/to/bar.ts`.
        */
       rootModulePath: string;
+
+      // Similar to the resolved equivalent, we have to add this to narrow down
+      // types properly in test code
+      rootExportEntry?: undefined;
     }
   | {
       rootModuleType: 'firstPartyCode';
@@ -71,54 +92,60 @@ export type AnalyzedImportBase =
       rootModulePath: string;
 
       /**
-       * The name of the original export
-       */
-      rootExportName: string;
-
-      /**
-       * What is the actual root export type. Sometimes a named import can trace
-       * to a named barrel export, in which case we can't actually resolve this
-       * to an export since it resolves to potentially many exports across
-       * files.
+       * The root export entry that this import/reexport statement ultimately
+       * resolves to.
        *
-       * When this happens, we set this value to `namedBarrelReexport`, and
-       * `rootModulePath` and `rootName` point to the named reexport
+       * Most of the time this is an export statement, but on occasion it can
+       * be a named barrel reexportin the middle of the reexport chain.
+       *
+       * Consider this code:
+       *
+       * ```
+       * // foo.ts
+       * import { baz } from './bar'
+       *
+       * // bar.ts
+       * export * as baz from './baz'
+       * ```
+       *
+       * In this case, there is a named export we found, but we can't go any
+       * further because there is nothing named, or singular, past this point
        */
-      rootExportType: 'export' | 'namedBarrelReexport';
+      rootExportEntry: AnalyzedExport | AnalyzedBarrelReexport;
     };
 
 type AnalyzedExportBase = {
   /**
-   * A list of files that imports this export, including indirect imports that
-   * are funneled through reexport statements
+   * A list of files and import entries that imports this export, including
+   * indirect imports that are funneled through reexport statements.
+   *
+   * This also includes reexports that are entry points, since they are acting
+   * like an import for the purposes of this plugin
    */
-  importedByFiles: string[];
+  importedBy: Array<{
+    filePath: string;
+    importEntry: AnalyzedSingleImport | AnalyzedSingleReexport;
+  }>;
 
   /**
    * A list of files that barrel imports this export, including indirect imports
    * that are funneled through reexport statements.
    *
-   * Note: unlike `importedByFiles`, entries here do not actually guarantee this
-   * import is actually used
-   */
-  barrelImportedByFiles: string[];
-};
-
-type AnalyzedReexportBase = {
-  /**
-   * A list of files that imports this reexport, including indirect imports that
-   * are funneled through other reexport statements
-   */
-  importedByFiles: string[];
-
-  /**
-   * A list of files that barrel imports this export, including indirect imports
-   * that are funneled through reexport statements.
+   * This also includes reexports that are entry points, since they are acting
+   * like an import for the purposes of this plugin
    *
-   * Note: unlike `importedByFiles`, entries here do not actually guarantee this
+   * Note: unlike `importedBy`, entries here do not actually guarantee this
    * import is actually used
    */
-  barrelImportedByFiles: string[];
+  barrelImportedBy: Array<{
+    filePath: string;
+    importEntry:
+      | AnalyzedBarrelReexport
+      | AnalyzedSingleImport
+      | AnalyzedSingleReexport
+      | ResolvedBarrelImport
+      | ResolvedDynamicImport;
+  }>;
 };
 
 /* Imports */
@@ -137,9 +164,9 @@ export type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
 
 export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedImportBase &
-  AnalyzedReexportBase;
+  AnalyzedExportBase;
 export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
-  AnalyzedReexportBase;
+  AnalyzedExportBase;
 
 /* File Details */
 

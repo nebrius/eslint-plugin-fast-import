@@ -4,8 +4,7 @@ import { join } from 'node:path';
 import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
-import type { StrippedAnalyzedProjectInfo } from '../../../__test__/util.js';
-import { stripNodesFromAnalyzedInfo } from '../../../__test__/util.js';
+import type { StrippedAnalyzedFileDetails } from '../../../__test__/util.js';
 import {
   getProjectInfo,
   initializeProject,
@@ -19,10 +18,6 @@ const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_TS_NEW = join(TEST_PROJECT_DIR, 'new.ts');
 const FILE_JSON_NEW = join(TEST_PROJECT_DIR, 'new.json');
 
-const FILE_A_UPDATED_CONTENTS = `export type One = string;
-export type Two = string;
-`;
-
 const settings = {
   rootDir: TEST_PROJECT_DIR,
   wildcardAliases: {},
@@ -33,37 +28,20 @@ const settings = {
   editorUpdateRate: 5_000,
 };
 
-const baseExpected: StrippedAnalyzedProjectInfo = {
-  files: new Map([
-    [
-      FILE_A,
-      {
-        fileType: 'code',
-        singleImports: [],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [
-          {
-            id: 0,
-            type: 'export',
-            barrelImportedByFiles: [],
-            exportName: 'One',
-            isTypeExport: true,
-            importedByFiles: [FILE_B],
-            isEntryPoint: false,
-          },
-        ],
-        singleReexports: [],
-        barrelReexports: [],
-      },
-    ],
-    [
-      FILE_B,
-      {
-        fileType: 'code',
-        singleImports: [
-          {
-            id: 1,
+const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [
+    {
+      type: 'export',
+      exportName: 'One',
+      isTypeExport: true,
+      importedBy: [
+        {
+          filePath: FILE_B,
+          importEntry: {
             type: 'singleImport',
             importAlias: 'One',
             importName: 'One',
@@ -71,24 +49,50 @@ const baseExpected: StrippedAnalyzedProjectInfo = {
             moduleSpecifier: './a',
             resolvedModuleType: 'firstPartyCode',
             resolvedModulePath: FILE_A,
-            rootExportName: 'One',
-            rootExportType: 'export',
-            rootModulePath: FILE_A,
             rootModuleType: 'firstPartyCode',
+            rootModulePath: FILE_A,
           },
-        ],
-        barrelImports: [],
-        dynamicImports: [],
-        exports: [],
-        singleReexports: [],
-        barrelReexports: [],
+        },
+      ],
+      barrelImportedBy: [],
+      isEntryPoint: false,
+    },
+  ],
+  singleReexports: [],
+  barrelReexports: [],
+};
+
+const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
+  fileType: 'code',
+  singleImports: [
+    {
+      type: 'singleImport',
+      importAlias: 'One',
+      importName: 'One',
+      isTypeImport: true,
+      moduleSpecifier: './a',
+      resolvedModuleType: 'firstPartyCode',
+      resolvedModulePath: FILE_A,
+      rootModuleType: 'firstPartyCode',
+      rootModulePath: FILE_A,
+      rootExportEntry: {
+        type: 'export',
+        exportName: 'One',
+        isTypeExport: true,
+        isEntryPoint: false,
       },
-    ],
-  ]),
-  rootDir: TEST_PROJECT_DIR,
-  wildcardAliases: {},
-  fixedAliases: {},
-  availableThirdPartyDependencies: new Map(),
+    },
+  ],
+  barrelImports: [],
+  dynamicImports: [],
+  exports: [],
+  singleReexports: [],
+  barrelReexports: [],
+};
+
+const EXPECTED = {
+  [FILE_A]: EXPECTED_FILE_A,
+  [FILE_B]: EXPECTED_FILE_B,
 };
 
 afterEach(() => {
@@ -104,7 +108,7 @@ it('Updates cache when a new file is added', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   updateCacheForFile(
     FILE_TS_NEW,
@@ -118,40 +122,33 @@ it('Updates cache when a new file is added', () => {
     settings
   );
 
-  const expected2: StrippedAnalyzedProjectInfo = {
-    files: new Map([
-      // Will always be true, and even if not will cause the test to fail anyways
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      [FILE_A, baseExpected.files.get(FILE_A)!],
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      [FILE_B, baseExpected.files.get(FILE_B)!],
-      [
-        FILE_TS_NEW,
-        {
-          fileType: 'code',
-          singleImports: [],
-          barrelImports: [],
-          dynamicImports: [],
-          exports: [],
-          singleReexports: [],
-          barrelReexports: [],
-        },
-      ],
-    ]),
-    rootDir: TEST_PROJECT_DIR,
-    wildcardAliases: {},
-    fixedAliases: {},
-    availableThirdPartyDependencies: new Map(),
+  const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
+    fileType: 'code',
+    singleImports: [],
+    barrelImports: [],
+    dynamicImports: [],
+    exports: [],
+    singleReexports: [],
+    barrelReexports: [],
   };
+
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A,
+    [FILE_B]: EXPECTED_FILE_B,
+    [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW,
+  });
 });
 
 it('Updates cache when an unused export is added to an existing file', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+
+  const FILE_A_UPDATED_CONTENTS = `export type One = string;
+export type Two = string;
+`;
 
   updateCacheForFile(
     FILE_A,
@@ -166,46 +163,22 @@ it('Updates cache when an unused export is added to an existing file', () => {
   );
 
   projectInfo = getProjectInfo();
-  const expected2: StrippedAnalyzedProjectInfo = {
-    files: new Map([
-      [
-        FILE_A,
-        {
-          fileType: 'code',
-          singleImports: [],
-          barrelImports: [],
-          dynamicImports: [],
-          exports: [
-            {
-              id: 2,
-              type: 'export',
-              barrelImportedByFiles: [],
-              exportName: 'One',
-              isTypeExport: true,
-              importedByFiles: [FILE_B],
-              isEntryPoint: false,
-            },
-            {
-              id: 3,
-              type: 'export',
-              barrelImportedByFiles: [],
-              exportName: 'Two',
-              isTypeExport: true,
-              importedByFiles: [],
-              isEntryPoint: false,
-            },
-          ],
-          singleReexports: [],
-          barrelReexports: [],
-        },
-      ],
-      [
-        FILE_B,
-        {
-          fileType: 'code',
-          singleImports: [
-            {
-              id: 1,
+
+  const EXPECTED_FILE_A_UPDATED: StrippedAnalyzedFileDetails = {
+    fileType: 'code',
+    singleImports: [],
+    barrelImports: [],
+    dynamicImports: [],
+    exports: [
+      {
+        type: 'export',
+        barrelImportedBy: [],
+        exportName: 'One',
+        isTypeExport: true,
+        importedBy: [
+          {
+            filePath: FILE_B,
+            importEntry: {
               type: 'singleImport',
               importAlias: 'One',
               importName: 'One',
@@ -213,33 +186,63 @@ it('Updates cache when an unused export is added to an existing file', () => {
               moduleSpecifier: './a',
               resolvedModuleType: 'firstPartyCode',
               resolvedModulePath: FILE_A,
-              rootExportName: 'One',
-              rootExportType: 'export',
-              rootModulePath: FILE_A,
               rootModuleType: 'firstPartyCode',
+              rootModulePath: FILE_A,
             },
-          ],
-          barrelImports: [],
-          dynamicImports: [],
-          exports: [],
-          singleReexports: [],
-          barrelReexports: [],
-        },
-      ],
-    ]),
-    rootDir: TEST_PROJECT_DIR,
-    wildcardAliases: {},
-    fixedAliases: {},
-    availableThirdPartyDependencies: new Map(),
+          },
+        ],
+        isEntryPoint: false,
+      },
+      {
+        type: 'export',
+        barrelImportedBy: [],
+        exportName: 'Two',
+        isTypeExport: true,
+        importedBy: [],
+        isEntryPoint: false,
+      },
+    ],
+    singleReexports: [],
+    barrelReexports: [],
   };
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
+  const EXPECTED_FILE_B_UPDATED: StrippedAnalyzedFileDetails = {
+    fileType: 'code',
+    singleImports: [
+      {
+        type: 'singleImport',
+        importAlias: 'One',
+        importName: 'One',
+        isTypeImport: true,
+        moduleSpecifier: './a',
+        resolvedModuleType: 'firstPartyCode',
+        resolvedModulePath: FILE_A,
+        rootModulePath: FILE_A,
+        rootModuleType: 'firstPartyCode',
+        rootExportEntry: {
+          type: 'export',
+          exportName: 'One',
+          isTypeExport: true,
+          isEntryPoint: false,
+        },
+      },
+    ],
+    barrelImports: [],
+    dynamicImports: [],
+    exports: [],
+    singleReexports: [],
+    barrelReexports: [],
+  };
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A_UPDATED,
+    [FILE_B]: EXPECTED_FILE_B_UPDATED,
+  });
 });
 
 it('Updates cache in bulk for a code file', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   // Add a new file
   writeFileSync(FILE_TS_NEW, '');
@@ -258,26 +261,21 @@ it('Updates cache in bulk for a code file', () => {
     settings,
     Date.now()
   );
-  const expected2: StrippedAnalyzedProjectInfo = {
-    ...baseExpected,
-    files: new Map([
-      ...baseExpected.files,
-      [
-        FILE_TS_NEW,
-        {
-          fileType: 'code',
-          singleImports: [],
-          barrelImports: [],
-          dynamicImports: [],
-          exports: [],
-          singleReexports: [],
-          barrelReexports: [],
-        },
-      ],
-    ]),
+  const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
+    fileType: 'code',
+    singleImports: [],
+    barrelImports: [],
+    dynamicImports: [],
+    exports: [],
+    singleReexports: [],
+    barrelReexports: [],
   };
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A,
+    [FILE_B]: EXPECTED_FILE_B,
+    [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW,
+  });
 
   // Modify the new new file
   writeFileSync(FILE_TS_NEW, `console.log()`);
@@ -296,28 +294,24 @@ it('Updates cache in bulk for a code file', () => {
     settings,
     Date.now()
   );
-  const expected3: StrippedAnalyzedProjectInfo = {
-    ...baseExpected,
-    files: new Map([
-      ...baseExpected.files,
-      [
-        FILE_TS_NEW,
-        {
-          fileType: 'code',
-          singleImports: [],
-          barrelImports: [],
-          dynamicImports: [],
-          exports: [],
-          singleReexports: [],
-          barrelReexports: [],
-        },
-      ],
-    ]),
+  const EXPECTED_FILE_TS_NEW_UPDATED: StrippedAnalyzedFileDetails = {
+    fileType: 'code',
+    singleImports: [],
+    barrelImports: [],
+    dynamicImports: [],
+    exports: [],
+    singleReexports: [],
+    barrelReexports: [],
   };
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected3);
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A,
+    [FILE_B]: EXPECTED_FILE_B,
+    [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW_UPDATED,
+  });
 
-  // Modify the new file with invalid code (testing fallback)
+  // Modify the new file with invalid code (testing fallback to ensure project
+  // info isn't changed in any way)
   writeFileSync(FILE_TS_NEW, `+_)(*&^%$%)`);
   updateCacheFromFileSystem(
     {
@@ -335,7 +329,11 @@ it('Updates cache in bulk for a code file', () => {
     Date.now()
   );
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected3);
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A,
+    [FILE_B]: EXPECTED_FILE_B,
+    [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW_UPDATED,
+  });
 
   // Delete the file
   unlinkSync(FILE_TS_NEW);
@@ -350,14 +348,14 @@ it('Updates cache in bulk for a code file', () => {
     Date.now()
   );
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 });
 
 it('Updates cache in bulk for a non-code file', () => {
   initializeProject(settings);
 
   let projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   // Add a new file
   writeFileSync(FILE_JSON_NEW, '{}');
@@ -376,20 +374,15 @@ it('Updates cache in bulk for a non-code file', () => {
     settings,
     Date.now()
   );
-  const expected2: StrippedAnalyzedProjectInfo = {
-    ...baseExpected,
-    files: new Map([
-      ...baseExpected.files,
-      [
-        FILE_JSON_NEW,
-        {
-          fileType: 'other',
-        },
-      ],
-    ]),
+  const EXPECTED_FILE_JSON_NEW: StrippedAnalyzedFileDetails = {
+    fileType: 'other',
   };
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected2);
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A,
+    [FILE_B]: EXPECTED_FILE_B,
+    [FILE_JSON_NEW]: EXPECTED_FILE_JSON_NEW,
+  });
 
   // Modify the new new file
   writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
@@ -408,20 +401,15 @@ it('Updates cache in bulk for a non-code file', () => {
     settings,
     Date.now()
   );
-  const expected3: StrippedAnalyzedProjectInfo = {
-    ...baseExpected,
-    files: new Map([
-      ...baseExpected.files,
-      [
-        FILE_JSON_NEW,
-        {
-          fileType: 'other',
-        },
-      ],
-    ]),
+  const EXPECTED_FILE_JSON_NEW_UPDATED: StrippedAnalyzedFileDetails = {
+    fileType: 'other',
   };
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(expected3);
+  expect(projectInfo).toMatchAnalyzedSpec({
+    [FILE_A]: EXPECTED_FILE_A,
+    [FILE_B]: EXPECTED_FILE_B,
+    [FILE_JSON_NEW]: EXPECTED_FILE_JSON_NEW_UPDATED,
+  });
 
   // Delete the file
   unlinkSync(FILE_JSON_NEW);
@@ -436,5 +424,5 @@ it('Updates cache in bulk for a non-code file', () => {
     Date.now()
   );
   projectInfo = getProjectInfo();
-  expect(stripNodesFromAnalyzedInfo(projectInfo)).toEqual(baseExpected);
+  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 });

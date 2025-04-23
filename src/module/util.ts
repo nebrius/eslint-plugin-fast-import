@@ -140,13 +140,3 @@ export function traverse({
     },
   });
 }
-
-let nextId = 0;
-export function getStatementId() {
-  return nextId++;
-}
-
-// eslint-disable-next-line fast-import/no-unused-exports
-export function _resetStatementId() {
-  nextId = 0;
-}

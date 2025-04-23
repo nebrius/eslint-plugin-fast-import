@@ -5,8 +5,8 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import type { ParsedSettings } from '../settings/settings.js';
 import type {
   BaseCodeFileDetails,
+  BaseESMStatement,
   BaseProjectInfo,
-  ESMStatement,
 } from '../types/base.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
@@ -99,7 +99,10 @@ export function addBaseInfoForFile(
   }
 }
 
-function hasEsmEntryChanged<T extends ESMStatement>(previous: T, updated: T) {
+function hasEsmEntryChanged<T extends BaseESMStatement>(
+  previous: T,
+  updated: T
+) {
   for (const key of Object.keys(previous)) {
     if (key === 'statementNodeRange' || key === 'reportNodeRange') {
       continue;
