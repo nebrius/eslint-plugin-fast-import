@@ -1,6 +1,5 @@
 import { join } from 'node:path';
 
-import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
 import type { StrippedBaseFileDetails } from '../../../../__test__/util.js';
@@ -425,12 +424,6 @@ it('Adds, modifies, and deletes a new file', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_ADD,
-      ast: parse(NEW_FILE_CONTENTS_ADD, {
-        loc: true,
-        range: true,
-        tokens: true,
-        jsx: true,
-      }),
       isEntryPointCheck: () => false,
     },
     info
@@ -461,12 +454,6 @@ it('Adds, modifies, and deletes a new file', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_MODIFY,
-      ast: parse(NEW_FILE_CONTENTS_MODIFY, {
-        loc: true,
-        range: true,
-        tokens: true,
-        jsx: true,
-      }),
       isEntryPointCheck: () => false,
     },
     info
@@ -519,12 +506,6 @@ it('Adds, modifies, and deletes a new file', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_MODIFY_2,
-      ast: parse(NEW_FILE_CONTENTS_MODIFY_2, {
-        loc: true,
-        range: true,
-        tokens: true,
-        jsx: true,
-      }),
       isEntryPointCheck: () => false,
     },
     info
