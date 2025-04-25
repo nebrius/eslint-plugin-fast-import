@@ -1,5 +1,6 @@
 import { dirname } from 'node:path';
 
+import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
 import type { ParsedSettings } from '../settings/settings.js';
@@ -11,8 +12,9 @@ import type {
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
 import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
+import { debug } from '../util/logging.js';
 import { computeFileDetails } from './computeBaseFileDetails.js';
-import { computeBaseFileInfoForFilesSync } from './computeBaseInfoOrchestrator.js';
+import { parseFile } from './util.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -61,7 +63,7 @@ export function computeBaseInfo({
     }
   }
 
-  const results = computeBaseFileInfoForFilesSync(
+  const results = computeBaseFileInfoForFiles(
     codeFilesToProcess,
     isEntryPointCheck
   );
@@ -221,4 +223,37 @@ export function deleteBaseInfoForFile(
   baseProjectInfo: BaseProjectInfo
 ) {
   baseProjectInfo.files.delete(filePath);
+}
+
+function computeBaseFileInfoForFiles(
+  filePaths: string[],
+  isEntryPointCheck: (filePath: string, symbolName: string) => boolean
+) {
+  const fileDetails: Array<{
+    filePath: string;
+    fileDetails: BaseCodeFileDetails;
+  }> = [];
+  for (const filePath of filePaths) {
+    try {
+      const { fileContents, ast } = parseFile(filePath);
+      fileDetails.push({
+        filePath,
+        fileDetails: computeFileDetails({
+          filePath,
+          fileContents,
+          ast,
+          isEntryPointCheck,
+        }),
+      });
+    } catch (e) {
+      // If we failed to parse due to a syntax error, fail silently so we can
+      // continue parsing and not fail linting on all files
+      if (e instanceof TSError) {
+        debug(`Could not parse ${filePath}, file will be ignored`);
+        continue;
+      }
+      throw e;
+    }
+  }
+  return fileDetails;
 }

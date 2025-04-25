@@ -170,9 +170,12 @@ export function updateCacheFromFileSystem(
     if (!baseProjectInfo.files.has(filePath)) {
       try {
         if (isCodeFile(filePath)) {
+          const { fileContents, ast } = parseFile(filePath);
           addBaseInfoForFile(
             {
-              ...parseFile(filePath),
+              filePath,
+              fileContents,
+              ast,
               isEntryPointCheck: getEntryPointCheck(
                 settings.rootDir,
                 settings.entryPoints
@@ -219,9 +222,12 @@ export function updateCacheFromFileSystem(
     ) {
       numModified++;
       try {
+        const { fileContents, ast } = parseFile(filePath);
         updateBaseInfoForFile(
           {
-            ...parseFile(filePath),
+            filePath,
+            fileContents,
+            ast,
             isEntryPointCheck: getEntryPointCheck(
               settings.rootDir,
               settings.entryPoints
