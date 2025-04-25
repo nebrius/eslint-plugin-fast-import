@@ -1,9 +1,12 @@
-import type {
-  ImportDeclaration,
-  ReexportDeclaration,
-} from '../../module/util.js';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
+
 import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
+
+type ImportDeclaration = TSESTree.ImportDeclaration | TSESTree.ImportExpression;
+type ReexportDeclaration =
+  | TSESTree.ExportNamedDeclarationWithSource
+  | TSESTree.ExportAllDeclaration;
 
 export const nodePrefix = createRule({
   name: 'require-node-prefix',

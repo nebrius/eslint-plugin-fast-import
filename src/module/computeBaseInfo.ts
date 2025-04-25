@@ -1,7 +1,15 @@
+import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import { TSError } from '@typescript-eslint/typescript-estree';
-import type { TSESTree } from '@typescript-eslint/utils';
+import type {
+  DynamicImport,
+  StaticExport,
+  StaticExportEntry,
+  StaticImport,
+  StaticImportEntry,
+} from 'oxc-parser';
+import { parseSync } from 'oxc-parser';
 
 import type { ParsedSettings } from '../settings/settings.js';
 import type {
@@ -9,12 +17,10 @@ import type {
   BaseESMStatement,
   BaseProjectInfo,
 } from '../types/base.js';
-import { isCodeFile } from '../util/code.js';
+import { getTextForRange, isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
 import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
 import { debug } from '../util/logging.js';
-import { computeFileDetails } from './computeBaseFileDetails.js';
-import { parseFile } from './util.js';
 
 type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
@@ -52,24 +58,22 @@ export function computeBaseInfo({
     );
   }
 
-  const codeFilesToProcess: string[] = [];
   for (const { filePath } of files) {
     if (isCodeFile(filePath)) {
-      codeFilesToProcess.push(filePath);
+      const fileContents = readFileSync(filePath, 'utf-8');
+      const fileDetails = computeFileDetails({
+        filePath,
+        fileContents,
+        isEntryPointCheck,
+      });
+      if (fileDetails) {
+        info.files.set(filePath, fileDetails);
+      }
     } else {
       info.files.set(filePath, {
         fileType: 'other',
       });
     }
-  }
-
-  const results = computeBaseFileInfoForFiles(
-    codeFilesToProcess,
-    isEntryPointCheck
-  );
-
-  for (const { filePath, fileDetails } of results) {
-    info.files.set(filePath, fileDetails);
   }
 
   return info;
@@ -78,22 +82,22 @@ export function computeBaseInfo({
 type ComputeFileDetailsOptions = {
   filePath: string;
   fileContents: string;
-  ast: TSESTree.Program;
   isEntryPointCheck: IsEntryPointCheck;
 };
 
 export function addBaseInfoForFile(
-  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions,
+  { filePath, fileContents, isEntryPointCheck }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
 ) {
   if (isCodeFile(filePath)) {
     const fileDetails = computeFileDetails({
       filePath,
       fileContents,
-      ast,
       isEntryPointCheck,
     });
-    baseProjectInfo.files.set(filePath, fileDetails);
+    if (fileDetails) {
+      baseProjectInfo.files.set(filePath, fileDetails);
+    }
   } else {
     baseProjectInfo.files.set(filePath, { fileType: 'other' });
   }
@@ -185,7 +189,7 @@ function hasFileChanged(
 }
 
 export function updateBaseInfoForFile(
-  { filePath, fileContents, ast, isEntryPointCheck }: ComputeFileDetailsOptions,
+  { filePath, fileContents, isEntryPointCheck }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
 ): boolean {
   const previousFileDetails = baseProjectInfo.files.get(filePath);
@@ -210,12 +214,16 @@ export function updateBaseInfoForFile(
   const updatedFileDetails = computeFileDetails({
     filePath,
     fileContents,
-    ast,
     isEntryPointCheck,
   });
 
-  baseProjectInfo.files.set(filePath, updatedFileDetails);
-  return hasFileChanged(previousFileDetails, updatedFileDetails);
+  if (updatedFileDetails) {
+    baseProjectInfo.files.set(filePath, updatedFileDetails);
+  }
+  return (
+    !!updatedFileDetails &&
+    hasFileChanged(previousFileDetails, updatedFileDetails)
+  );
 }
 
 export function deleteBaseInfoForFile(
@@ -225,35 +233,196 @@ export function deleteBaseInfoForFile(
   baseProjectInfo.files.delete(filePath);
 }
 
-function computeBaseFileInfoForFiles(
-  filePaths: string[],
-  isEntryPointCheck: (filePath: string, symbolName: string) => boolean
-) {
-  const fileDetails: Array<{
-    filePath: string;
-    fileDetails: BaseCodeFileDetails;
-  }> = [];
-  for (const filePath of filePaths) {
-    try {
-      const { fileContents, ast } = parseFile(filePath);
-      fileDetails.push({
-        filePath,
-        fileDetails: computeFileDetails({
-          filePath,
-          fileContents,
-          ast,
-          isEntryPointCheck,
-        }),
-      });
-    } catch (e) {
-      // If we failed to parse due to a syntax error, fail silently so we can
-      // continue parsing and not fail linting on all files
-      if (e instanceof TSError) {
-        debug(`Could not parse ${filePath}, file will be ignored`);
-        continue;
+function getRange(
+  entry:
+    | StaticImport
+    | StaticImportEntry
+    | DynamicImport
+    | StaticExport
+    | StaticExportEntry,
+  fallBack?: [number, number]
+): [number, number] {
+  // Import entries are a little different
+  if ('localName' in entry) {
+    const start = entry.importName.start ?? entry.localName.start;
+    const end = entry.localName.start ?? entry.importName.start;
+
+    // This shouldn't happen in practice, but oxc's types are defined rather
+    // loosely, marking entries as optional instead of using unions to indicate
+    // when values are undefined.
+    if (start === undefined || end === undefined) {
+      if (fallBack) {
+        return fallBack;
       }
-      throw e;
+      throw new InternalError('Could not get range for import entry');
+    }
+    return [start, end];
+  }
+  return [entry.start, entry.end];
+}
+
+function computeFileDetails({
+  filePath,
+  fileContents,
+  isEntryPointCheck,
+}: ComputeFileDetailsOptions): BaseCodeFileDetails | undefined {
+  const result = parseSync(filePath, fileContents, {
+    sourceType: 'module',
+  });
+  if (result.errors.length) {
+    debug(
+      `${filePath} contains syntax errors and cannot be analyzed, file will be ignored`
+    );
+    return;
+  }
+
+  const fileDetails: BaseCodeFileDetails = {
+    fileType: 'code',
+    lastUpdatedAt: Date.now(),
+    singleImports: [],
+    barrelImports: [],
+    dynamicImports: [],
+    singleReexports: [],
+    barrelReexports: [],
+    exports: [],
+    hasEntryPoints: false,
+  };
+
+  for (const importEntry of result.module.staticImports) {
+    const statementNodeRange = getRange(importEntry);
+    const moduleSpecifier = importEntry.moduleRequest.value;
+    for (const entry of importEntry.entries) {
+      const reportNodeRange = getRange(entry);
+      const importAlias = entry.localName.value;
+
+      // Check if this is a barrel import
+      if (entry.importName.kind === 'NamespaceObject') {
+        fileDetails.barrelImports.push({
+          type: 'barrelImport',
+          importAlias,
+          statementNodeRange,
+          reportNodeRange,
+          moduleSpecifier,
+        });
+      } else {
+        const importName =
+          entry.importName.kind === 'Default'
+            ? 'default'
+            : entry.importName.name;
+        if (!importName) {
+          throw new InternalError(`importName is undefined`);
+        }
+        fileDetails.singleImports.push({
+          type: 'singleImport',
+          importName,
+          importAlias,
+          statementNodeRange,
+          reportNodeRange,
+          moduleSpecifier,
+          isTypeImport: entry.isType,
+        });
+      }
     }
   }
+
+  for (const importEntry of result.module.dynamicImports) {
+    const statementNodeRange = getRange(importEntry);
+
+    // Unfortunately OXC only gives us the range of the specifier, but not what
+    // it is. We extract this out and reparse it to see what it contains
+    const moduleSpecifierText = getTextForRange(fileContents, [
+      importEntry.moduleRequest.start,
+      importEntry.moduleRequest.end,
+    ]);
+
+    const result = parseSync(randomUUID() + '.ts', moduleSpecifierText);
+
+    if (
+      // Make sure the program parsed and has 1 statemnt
+      !result.errors.length &&
+      result.program.body.length === 1 &&
+      // Make sure it's a string literal
+      result.program.body[0].type === 'ExpressionStatement' &&
+      result.program.body[0].expression.type === 'Literal' &&
+      typeof result.program.body[0].expression.value === 'string'
+    ) {
+      fileDetails.dynamicImports.push({
+        type: 'dynamicImport',
+        statementNodeRange,
+        reportNodeRange: statementNodeRange,
+        moduleSpecifier: result.program.body[0].expression.value,
+      });
+    }
+  }
+
+  for (const exportEntry of result.module.staticExports) {
+    const statementNodeRange = getRange(exportEntry);
+    for (const entry of exportEntry.entries) {
+      const reportNodeRange = getRange(entry, statementNodeRange);
+
+      // Check if this is a reexport
+      if (entry.moduleRequest) {
+        const moduleSpecifier = entry.moduleRequest.value;
+        const isBarrel =
+          // All indicates there is an alias, aka `export * as a from './a'`
+          entry.importName.kind === 'All' ||
+          // AllButDefault indicates there is not an alias, aka `export * from './a'`
+          entry.importName.kind === 'AllButDefault';
+
+        if (isBarrel) {
+          const exportName = entry.exportName.name;
+          fileDetails.barrelReexports.push({
+            type: 'barrelReexport',
+            moduleSpecifier,
+            exportName,
+            isEntryPoint: exportName
+              ? isEntryPointCheck(filePath, exportName)
+              : false,
+            statementNodeRange,
+            reportNodeRange,
+          });
+        } else {
+          const importName = entry.importName.name;
+          if (!importName) {
+            throw new InternalError(`importName is undefined`);
+          }
+          const exportName = entry.exportName.name;
+          if (!exportName) {
+            throw new InternalError(`exportName is undefined`);
+          }
+          fileDetails.singleReexports.push({
+            type: 'singleReexport',
+            moduleSpecifier,
+            importName,
+            exportName,
+            isTypeReexport: entry.isType,
+            isEntryPoint: isEntryPointCheck(filePath, exportName),
+            statementNodeRange,
+            reportNodeRange,
+          });
+        }
+      }
+
+      // Otherwise this is a standard export, not a reexport
+      else {
+        const exportName =
+          entry.exportName.kind === 'Default'
+            ? 'default'
+            : entry.exportName.name;
+        if (!exportName) {
+          throw new InternalError(`exportName is undefined`);
+        }
+        fileDetails.exports.push({
+          type: 'export',
+          exportName,
+          isEntryPoint: isEntryPointCheck(filePath, exportName),
+          isTypeExport: entry.isType,
+          statementNodeRange,
+          reportNodeRange,
+        });
+      }
+    }
+  }
+
   return fileDetails;
 }
