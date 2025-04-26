@@ -6,13 +6,14 @@
 - [Rules](#rules)
 - [Configuration](#configuration)
   - [Configuration options](#configuration-options)
-    - [rootDir](#rootdir)
+    - [rootDir (required)](#rootdir)
     - [alias](#alias)
     - [entryPoints](#entrypoints)
     - [ignorePatterns](#ignorepatterns)
     - [mode](#mode)
     - [editorUpdateRate](#editorupdaterate)
     - [debugLogging](#debuglogging)
+- [Performance comparison](#performance-comparison)
 - [Algorithm](#algorithm)
   - [Phase 1: AST analysis](#phase-1-ast-analysis)
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
@@ -31,7 +32,9 @@
 - [License](#license)
 
 
-Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors. Fast Import uses a novel algorithm that is significantly more performant than other import lint rules.
+Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
+
+Fast Import uses a novel algorithm combined with the [OXC Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
 
 ## Installation
 
@@ -59,7 +62,7 @@ npm install --save-dev eslint-plugin-fast-import
 
 ## Configuration
 
-Fast Import only supports ESLint 9+ and flat configs. For most simple TypeScript applications, you can config Fast Import with:
+Fast Import only supports ESLint 9+ and flat configs. For most simple TypeScript applications, you can add Fast Import with:
 
 ```js
 import { recommended } from 'eslint-plugin-fast-import';
@@ -226,6 +229,32 @@ recommended({
   debugLogging: true
 })
 ```
+
+## Performance comparison
+
+To compare performance of this plugin vs other plugins, I forked the VS Code codebase. VS Code is a large codebase with the following stats as of this writing:
+
+- 5,299 files
+- 1,255,760 lines of code, excluding blank lines and comments (according to [cloc](https://github.com/AlDanial/cloc))
+- 88,623 imports
+- 17,477 exports
+- 184 reexports
+
+Here are the results of [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import), [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x), and Fast Import for three commonly expensive rules:
+
+<img src="./perf.png" alt="Performance comparison of three import plugins" width="700"/>
+
+And here's the raw data:
+
+|             | No Unused  | No Cycle   | No Unresolved | Total      |
+| ----------- | ---------- | ---------- | ------------- | ---------- |
+| Fast Import | 55.6ms     | 1,880.6ms  | 15.2ms        | 1,936.2ms  |
+| Import      | 25,903.8ms | 42,710.7ms | 399.1ms       | 68,614.5ms |
+| Import X    | 36,200.9ms | 16,931.7ms | 821.6ms       | 53,132.5ms |
+
+If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/fast-import-perf/compare.ts).
+
+Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of OXC, which you can see [here](https://github.com/nebrius/eslint-plugin-fast-import/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of the Fast Import took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvements between this plugin and others is split almost exactly 50/50 between the Rust parser and the algorithm described below.
 
 ## Algorithm
 
