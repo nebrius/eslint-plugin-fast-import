@@ -11,8 +11,7 @@ type Options = [];
 type MessageIds = 'noCycles';
 
 // Map of filepaths to imports/reexports with cycle dependencies
-const cycleMap = new Map<string, string[]>();
-const visitedFiles = new Set<string>();
+const cycleMap = new Map<string, Set<string>>();
 
 function checkFile(
   originalFilePath: string,
@@ -28,18 +27,38 @@ function checkFile(
 
   // Non-JS files by definition can't be circilar, since they can't import JS
   if (fileDetails.fileType !== 'code') {
-    return false;
+    return;
   }
-
-  // Mark this file as visited
-  visitedFiles.add(currentFilePath);
 
   // Now check if this file is part of a cycle
   const firstInstanceIndex = importStack.indexOf(currentFilePath);
   if (firstInstanceIndex !== -1) {
     const filesInCycle = importStack.slice(firstInstanceIndex);
-    return filesInCycle.includes(originalFilePath);
+    for (let i = 0; i < filesInCycle.length; i++) {
+      const currentFile = filesInCycle[i];
+      const nextFile =
+        i === filesInCycle.length - 1 ? filesInCycle[0] : filesInCycle[i + 1];
+
+      const currentCycleMapEntry = cycleMap.get(currentFile);
+      if (!currentCycleMapEntry) {
+        throw new InternalError(
+          `Cycle map entry is undefined for ${currentFile}`
+        );
+      }
+      currentCycleMapEntry.add(nextFile);
+    }
+
+    // Stop traversing since we'd otherwise traverse forever
+    return;
   }
+
+  // Otherwise, check if we've already analyzed this file
+  if (cycleMap.has(currentFilePath)) {
+    return;
+  }
+
+  // Initialize this file
+  cycleMap.set(currentFilePath, new Set());
 
   // If this wasn't a cycle, then keep exploring
   for (const importEntry of [
@@ -50,29 +69,24 @@ function checkFile(
     ...fileDetails.barrelReexports,
   ]) {
     if (
+      // We allow type imports to be cyclicle since they are compiled out
       ('isTypeImport' in importEntry && importEntry.isTypeImport) ||
       ('isTypeReexport' in importEntry && importEntry.isTypeReexport) ||
-      importEntry.resolvedModuleType !== 'firstPartyCode' ||
-      visitedFiles.has(importEntry.resolvedModulePath)
+      importEntry.resolvedModuleType !== 'firstPartyCode'
     ) {
       continue;
     }
-    if (
-      checkFile(originalFilePath, importEntry.resolvedModulePath, projectInfo, [
-        ...importStack,
-        currentFilePath,
-      ])
-    ) {
-      return true;
-    }
+    checkFile(originalFilePath, importEntry.resolvedModulePath, projectInfo, [
+      ...importStack,
+      currentFilePath,
+    ]);
   }
 
-  return false;
+  return;
 }
 
 registerUpdateListener(() => {
   cycleMap.clear();
-  visitedFiles.clear();
 });
 
 // This is only used in tests, since update listeners aren't guaranteed to
@@ -107,40 +121,12 @@ export const noCycle = createRule<Options, MessageIds>({
       return {};
     }
 
-    // If we recomputed on this run, then we need to recompute cycles
-    if (!cycleMap.has(context.filename)) {
-      const importedFilesSearched = new Set<string>();
-      const cycleNodes: string[] = [];
-      for (const importEntry of [
-        ...fileInfo.singleImports,
-        ...fileInfo.singleReexports,
-        ...fileInfo.barrelImports,
-        ...fileInfo.singleReexports,
-        ...fileInfo.barrelReexports,
-      ]) {
-        if (
-          !('resolvedModulePath' in importEntry) ||
-          !importEntry.resolvedModulePath ||
-          importedFilesSearched.has(importEntry.resolvedModulePath)
-        ) {
-          continue;
-        }
-        importedFilesSearched.add(importEntry.resolvedModulePath);
-        if (
-          checkFile(
-            context.filename,
-            importEntry.resolvedModulePath,
-            projectInfo,
-            [context.filename]
-          )
-        ) {
-          cycleNodes.push(importEntry.resolvedModulePath);
-        }
-      }
-      cycleMap.set(context.filename, cycleNodes);
+    let cycleImports = cycleMap.get(context.filename);
+    if (!cycleImports) {
+      checkFile(context.filename, context.filename, projectInfo, []);
+      cycleImports = cycleMap.get(context.filename);
     }
 
-    const cycleImports = cycleMap.get(context.filename);
     /* istanbul ignore if */
     if (!cycleImports) {
       throw new InternalError(
@@ -148,6 +134,9 @@ export const noCycle = createRule<Options, MessageIds>({
       );
     }
 
+    // Dedupe imports, since we mark cycle imports on a per-file basis, not on a
+    // per-import basis
+    const visitedImports = new Set<string>();
     for (const cycleImport of cycleImports) {
       for (const importEntry of [
         ...fileInfo.singleImports,
@@ -158,8 +147,10 @@ export const noCycle = createRule<Options, MessageIds>({
       ]) {
         if (
           importEntry.resolvedModuleType === 'firstPartyCode' &&
-          importEntry.resolvedModulePath === cycleImport
+          importEntry.resolvedModulePath === cycleImport &&
+          !visitedImports.has(importEntry.resolvedModulePath)
         ) {
+          visitedImports.add(importEntry.resolvedModulePath);
           context.report({
             messageId: 'noCycles',
             loc: getLocFromRange(context, importEntry.statementNodeRange),
