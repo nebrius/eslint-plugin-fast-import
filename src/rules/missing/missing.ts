@@ -57,6 +57,7 @@ export const noMissingImports = createRule({
         }
 
         // Quick sanity check to see if there was a bug
+        /* istanbul ignore if */
         if (importEntry.moduleSpecifier?.startsWith('.')) {
           throw new InternalError(
             `Module specifier ${importEntry.moduleSpecifier} was misclassified as a third party import`

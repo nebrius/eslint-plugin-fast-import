@@ -77,6 +77,7 @@ export function getLocFromRange(
 }
 
 let fileWatchingInitialized = false;
+// This code is too dynamic w.r.t. the filesystem to effectively test
 /* istanbul ignore next*/
 async function initializeFileWatching(settings: ParsedSettings) {
   if (fileWatchingInitialized) {

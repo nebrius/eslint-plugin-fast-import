@@ -103,6 +103,7 @@ function toMatchSpec<
       );
       if (!deepEqual(expected, actualStripped)) {
         const formattedDiff = diff(expected, actualStripped);
+        /* istanbul ignore if */
         if (!formattedDiff) {
           throw new InternalError('formattedDiff is undefined');
         }
