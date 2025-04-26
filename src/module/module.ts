@@ -92,13 +92,33 @@ export function initializeProject({
   analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
   const analyzeEnd = performance.now();
 
-  debug(
-    `Initial computation of ${analyzedProjectInfo.files.size.toLocaleString()} files complete :`
-  );
+  debug(`Initial computation files complete :`);
   debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
   debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
   debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
   debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
+
+  let numImports = 0;
+  let numExports = 0;
+  let numReexports = 0;
+  for (const [, fileDetails] of analyzedProjectInfo.files) {
+    if (fileDetails.fileType !== 'code') {
+      continue;
+    }
+    numImports += fileDetails.singleImports.length;
+    numImports += fileDetails.barrelImports.length;
+    numImports += fileDetails.dynamicImports.length;
+    numExports += fileDetails.exports.length;
+    numReexports += fileDetails.singleReexports.length;
+    numReexports += fileDetails.barrelReexports.length;
+  }
+
+  debug(
+    `Project contains ${analyzedProjectInfo.files.size.toLocaleString()} files with:`
+  );
+  debug(`  ${numImports.toLocaleString()} imports`);
+  debug(`  ${numExports.toLocaleString()} exports`);
+  debug(`  ${numReexports.toLocaleString()} reexports`);
 }
 
 export function getProjectInfo() {
