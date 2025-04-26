@@ -254,6 +254,7 @@ function getRange(
       if (fallBack) {
         return fallBack;
       }
+      /* istanbul ignore next */
       throw new InternalError('Could not get range for import entry');
     }
     return [start, end];
@@ -271,7 +272,7 @@ function computeFileDetails({
   });
   if (result.errors.length) {
     debug(
-      `${filePath} contains syntax errors and cannot be analyzed, file will be ignored`
+      `${filePath} contains syntax errors and cannot be analyzed. File will be ignored`
     );
     return;
   }
@@ -309,6 +310,7 @@ function computeFileDetails({
           entry.importName.kind === 'Default'
             ? 'default'
             : entry.importName.name;
+        /* istanbul ignore if */
         if (!importName) {
           throw new InternalError(`importName is undefined`);
         }
@@ -337,11 +339,17 @@ function computeFileDetails({
 
     const result = parseSync(randomUUID() + '.ts', moduleSpecifierText);
 
+    // Make sure we parsed the text correctly
+    /* istanbul ignore if */
+    if (result.errors.length || result.program.body.length !== 1) {
+      throw new InternalError(`Error reparsing "${moduleSpecifierText}"`, {
+        filePath,
+        range: [importEntry.moduleRequest.start, importEntry.moduleRequest.end],
+      });
+    }
+
+    // Check if it's a string literal. If not, we don't analyze
     if (
-      // Make sure the program parsed and has 1 statemnt
-      !result.errors.length &&
-      result.program.body.length === 1 &&
-      // Make sure it's a string literal
       result.program.body[0].type === 'ExpressionStatement' &&
       result.program.body[0].expression.type === 'Literal' &&
       typeof result.program.body[0].expression.value === 'string'
@@ -352,6 +360,10 @@ function computeFileDetails({
         reportNodeRange: statementNodeRange,
         moduleSpecifier: result.program.body[0].expression.value,
       });
+    } else {
+      debug(
+        `dynamic import ${moduleSpecifierText} in ${filePath} cannot be analyzed statically and will be ignored`
+      );
     }
   }
 
@@ -383,10 +395,12 @@ function computeFileDetails({
           });
         } else {
           const importName = entry.importName.name;
+          /* istanbul ignore if */
           if (!importName) {
             throw new InternalError(`importName is undefined`);
           }
           const exportName = entry.exportName.name;
+          /* istanbul ignore if */
           if (!exportName) {
             throw new InternalError(`exportName is undefined`);
           }
@@ -409,6 +423,7 @@ function computeFileDetails({
           entry.exportName.kind === 'Default'
             ? 'default'
             : entry.exportName.name;
+        /* istanbul ignore if */
         if (!exportName) {
           throw new InternalError(`exportName is undefined`);
         }

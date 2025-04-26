@@ -61,6 +61,7 @@ export const nodePrefix = createRule({
             const sourceNode = context.sourceCode.getNodeByRangeIndex(
               statementNodeRange[0]
             ) as ImportDeclaration | ReexportDeclaration;
+            /* istanbul ignore if */
             if (!('raw' in sourceNode.source)) {
               throw new InternalError(
                 `Property "raw" is missing in sourceNode.source`
