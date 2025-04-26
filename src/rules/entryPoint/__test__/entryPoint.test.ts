@@ -6,6 +6,7 @@ import { getDirname } from 'cross-dirname';
 
 import { _resetProjectInfo } from '../../../module/module.js';
 import { _resetSettings } from '../../../settings/settings.js';
+import { getRelativePathFromRoot } from '../../../util/files.js';
 import { noEntryPointImports } from '../entryPoint.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
@@ -15,7 +16,7 @@ const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
 const FILE_B_CONTENTS = readFileSync(FILE_B, 'utf-8');
 const FILE_C_CONTENTS = readFileSync(FILE_C, 'utf-8');
 
-const FILE_A_ENTRY_POINT = FILE_A.replace(TEST_PROJECT_DIR + '/', '');
+const FILE_A_ENTRY_POINT = getRelativePathFromRoot(TEST_PROJECT_DIR, FILE_A);
 
 const ruleTester = new RuleTester({
   languageOptions: {

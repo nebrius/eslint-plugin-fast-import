@@ -4,6 +4,7 @@ import { isAbsolute } from 'node:path';
 import { z } from 'zod';
 
 import type { GenericContext } from '../types/context.js';
+import { trimTrailingPathSeparator } from '../util/files.js';
 import { setVerbose } from '../util/logging.js';
 
 const settingsSchema = z.strictObject({
@@ -61,12 +62,9 @@ export function getUserSettings(
   }
 
   // Trim off the end `/` in case it was supplied with rootDir
-  if (parseResult.data.rootDir.endsWith('/')) {
-    parseResult.data.rootDir = parseResult.data.rootDir.substring(
-      0,
-      parseResult.data.rootDir.length - 1
-    );
-  }
+  parseResult.data.rootDir = trimTrailingPathSeparator(
+    parseResult.data.rootDir
+  );
 
   // Set verbose logging, if enabled
   setVerbose(!!parseResult.data.debugLogging);

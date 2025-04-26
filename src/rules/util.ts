@@ -10,7 +10,11 @@ import {
 import type { ParsedSettings } from '../settings/settings.js';
 import { getSettings } from '../settings/settings.js';
 import type { GenericContext } from '../types/context.js';
-import { getFiles, isFileIgnored } from '../util/files.js';
+import {
+  getFiles,
+  getRelativePathFromRoot,
+  isFileIgnored,
+} from '../util/files.js';
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -176,7 +180,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
 export function isNonTestFile(filePath: string, rootDir: string) {
   // We want to ignore folders named __test__ outside of this project, in case
   // the entire project is itself a test (e.g. the unit tests for fast-import)
-  const relativeFilePath = filePath.replace(`${rootDir}/`, '');
+  const relativeFilePath = getRelativePathFromRoot(rootDir, filePath);
   return (
     !relativeFilePath.includes('.test.') &&
     !relativeFilePath.includes('__test__') &&

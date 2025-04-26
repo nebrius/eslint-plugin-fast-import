@@ -99,6 +99,43 @@ export async function getFiles(
   );
 }
 
+const WINDOWS_ABSOLUTE_PATH_REGEX = /^[A-Z]:\\/;
+export function convertToUnixishPath(path: string) {
+  if (path.includes('/') && path.includes('\\')) {
+    throw new InternalError(`Path ${path} contains both / and \\`);
+  }
+  if (WINDOWS_ABSOLUTE_PATH_REGEX.test(path)) {
+    path = path.substring(2);
+  }
+  if (path.includes('\\')) {
+    return path.replaceAll('\\', '/');
+  }
+  return path;
+}
+
+export function trimTrailingPathSeparator(path: string) {
+  if (path.endsWith('/')) {
+    return path.slice(0, -1);
+  } else if (path.endsWith('\\')) {
+    return path.slice(0, -1);
+  }
+  return path;
+}
+
+export function splitPathIntoSegments(path: string) {
+  return convertToUnixishPath(path)
+    .split('/')
+    .filter((s) => s);
+}
+
+export function getRelativePathFromRoot(rootDir: string, filePath: string) {
+  const relativePath = filePath.replace(rootDir, '');
+  if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
+    return relativePath.substring(1);
+  }
+  return relativePath;
+}
+
 let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
 const ignoreCache = new Map<string, boolean>();
 export function isFileIgnored(rootDir: string, filePath: string) {

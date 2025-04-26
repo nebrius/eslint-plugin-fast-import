@@ -9,6 +9,10 @@ import type {
 } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
+import {
+  getRelativePathFromRoot,
+  splitPathIntoSegments,
+} from '../util/files.js';
 
 export function computeResolvedInfo(
   baseProjectInfo: BaseProjectInfo
@@ -201,7 +205,9 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
     filesAndExtensions: {},
   };
   for (const [file] of baseInfo.files) {
-    const folders = file.replace(baseInfo.rootDir + '/', '').split('/');
+    const folders = splitPathIntoSegments(
+      getRelativePathFromRoot(baseInfo.rootDir, file)
+    );
     const basefile = folders.pop();
     /* istanbul ignore if */
     if (!basefile) {
@@ -460,7 +466,7 @@ function resolveModuleSpecifier({
     if (absolutishFilePath.includes('?')) {
       absolutishFilePath = absolutishFilePath.split('?')[0];
     }
-    const segments = absolutishFilePath.split('/').filter((s) => s);
+    const segments = splitPathIntoSegments(absolutishFilePath);
     let lastSegment = segments.pop();
     const folderSegments = [...segments];
     /* istanbul ignore if */
@@ -486,7 +492,7 @@ function resolveModuleSpecifier({
     }
 
     function computeFilePath(file: string) {
-      return join(baseProjectInfo.rootDir, folderSegments.join('/'), file);
+      return join(baseProjectInfo.rootDir, ...folderSegments, file);
     }
 
     // First we check if this directly references a file + extension, and
@@ -606,7 +612,7 @@ function resolveModuleSpecifier({
     const absolutish =
       resolvedPath === baseProjectInfo.rootDir
         ? 'index'
-        : resolvedPath.replace(baseProjectInfo.rootDir + '/', '');
+        : getRelativePathFromRoot(baseProjectInfo.rootDir, resolvedPath);
     const resolvedModulePath = resolveFirstPartyImport(absolutish);
     return formatResolvedEntry(resolvedModulePath);
   }
@@ -614,10 +620,10 @@ function resolveModuleSpecifier({
   // Check if this path starts with the a wildcard alias, which means its first party
   for (const [alias, path] of Object.entries(baseProjectInfo.wildcardAliases)) {
     if (moduleSpecifier.startsWith(alias)) {
-      let absolutishPath = path.replace(baseProjectInfo.rootDir, '');
-      if (absolutishPath.startsWith('/')) {
-        absolutishPath = absolutishPath.substring(1);
-      }
+      const absolutishPath = getRelativePathFromRoot(
+        baseProjectInfo.rootDir,
+        path
+      );
       const resolvedModulePath = resolveFirstPartyImport(
         join(moduleSpecifier.replace(alias, absolutishPath))
       );

@@ -90,7 +90,7 @@ function parseTsConfig(configPath: string): TypeScriptSettings {
     }
 
     const absolutePathEntry = resolve(baseUrl, path[0]);
-    if (!existsSync(absolutePathEntry.replace('/*', ''))) {
+    if (!existsSync(absolutePathEntry.replace('*', ''))) {
       throw new Error(
         `tsconfig path "${path[0]}", resolved as "${absolutePathEntry}", does not exist`
       );

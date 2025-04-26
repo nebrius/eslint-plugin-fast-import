@@ -16,7 +16,11 @@ import type { BaseProjectInfo } from '../types/base.js';
 import type { ResolvedProjectInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
-import { getDependenciesFromPackageJson } from '../util/files.js';
+import {
+  convertToUnixishPath,
+  getDependenciesFromPackageJson,
+  getRelativePathFromRoot,
+} from '../util/files.js';
 import { debug, formatMilliseconds } from '../util/logging.js';
 import { computeAnalyzedInfo } from './computeAnalyzedInfo.js';
 import {
@@ -45,8 +49,14 @@ function getEntryPointCheck(
   return (filePath: string, symbolName: string) => {
     for (const { file, symbols } of entryPoints) {
       // We're using the ignore library in reverse fashion: we're using it to
-      // identify when a file is _included_, not _excluded_
-      if (file.ignores(filePath.replace(rootDir + '/', ''))) {
+      // identify when a file is _included_, not _excluded_. We also have to
+      // be careful with Windows styled paths, since gitignores use unix paths
+      // even on Windows.
+      if (
+        file.ignores(
+          convertToUnixishPath(getRelativePathFromRoot(rootDir, filePath))
+        )
+      ) {
         return symbols.includes(symbolName);
       }
     }

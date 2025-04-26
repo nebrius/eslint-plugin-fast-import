@@ -5,6 +5,7 @@ import ignore from 'ignore';
 import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
+import { trimTrailingPathSeparator } from '../util/files.js';
 import { debug, error } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
@@ -84,9 +85,7 @@ export function getSettings(
     if (!isAbsolute(path)) {
       path = resolve(rootDir, path);
     }
-    if (symbol.endsWith('/')) {
-      symbol = symbol.slice(0, -1);
-    }
+    symbol = trimTrailingPathSeparator(symbol);
 
     // Filter out paths that don't resolve to files inside rootDir, since they're
     // either third party or doing something not supported
@@ -95,15 +94,17 @@ export function getSettings(
     }
 
     // Determine if this is a wildcard or fixed alias, and validate consistency
-    if (symbol.endsWith('/*')) {
-      if (!path.endsWith('/*')) {
-        error(`Alias path ${path} must end with "/*" when ${symbol} does`);
+    if (symbol.endsWith('*')) {
+      if (!path.endsWith('*')) {
+        error(
+          `Alias path ${path} must end with "*" when ${symbol} ends with "*"`
+        );
       }
       wildcardAliases[symbol.replace(/\*$/, '')] = path.replace(/\*$/, '');
     } else {
-      if (path.endsWith('/*')) {
+      if (path.endsWith('*')) {
         error(
-          `Alias path ${path} must not end with "/*" when ${symbol} does not`
+          `Alias path ${path} must not end with "*" when ${symbol} does not end with "*"`
         );
       }
       fixedAliases[symbol] = path;
@@ -113,12 +114,9 @@ export function getSettings(
   // Clean up any entry points
   const parsedEntryPoints: ParsedSettings['entryPoints'] = [];
   for (const [filePattern, symbols] of Object.entries(entryPoints)) {
-    const formattedSymbols = symbols.map((symbol) => {
-      if (symbol.endsWith('/')) {
-        return symbol.slice(0, -1);
-      }
-      return symbol;
-    });
+    const formattedSymbols = symbols.map((symbol) =>
+      trimTrailingPathSeparator(symbol)
+    );
 
     if (isAbsolute(filePattern)) {
       throw new Error(
@@ -162,7 +160,7 @@ export function getSettings(
 
   const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
     dir: rootDir,
-    contents: `${rootDir}/${p}`,
+    contents: p,
   }));
 
   // Apply defaults and save to the settings cache

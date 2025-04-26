@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
@@ -28,11 +28,9 @@ it('Fetchings user supplied settings', () => {
     editorUpdateRate: 5_000,
     rootDir: TEST_PROJECT_DIR,
     mode: 'one-shot',
-    ignorePatterns: [
-      { dir: TEST_PROJECT_DIR, contents: join(TEST_PROJECT_DIR, 'src/b*') },
-    ],
+    ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
     wildcardAliases: {
-      '@/': join(TEST_PROJECT_DIR, 'src/'),
+      '@/': join(TEST_PROJECT_DIR, 'src' + sep),
     },
     fixedAliases: {
       '@a': FILE_A,

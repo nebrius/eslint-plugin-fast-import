@@ -2,7 +2,13 @@ import { join, resolve } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import { getFiles } from '../files.js';
+import {
+  convertToUnixishPath,
+  getFiles,
+  getRelativePathFromRoot,
+  splitPathIntoSegments,
+  trimTrailingPathSeparator,
+} from '../files.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const ROOT_DIR = resolve(join(getDirname(), '..', '..', '..'));
@@ -22,7 +28,38 @@ it('Fetchings files asynchronously', async () => {
   ]);
 
   expect(files.packageJsons).toEqual([
-    join(TEST_PROJECT_DIR, '/package.json'),
+    join(TEST_PROJECT_DIR, 'package.json'),
     join(ROOT_DIR, 'package.json'),
   ]);
+});
+
+it('Can split paths into segments', () => {
+  expect(splitPathIntoSegments('a/b/c')).toEqual(['a', 'b', 'c']);
+  expect(splitPathIntoSegments('C:\\a\\b\\c')).toEqual(['a', 'b', 'c']);
+  expect(() => {
+    splitPathIntoSegments('a/b\\c');
+  }).toThrow();
+});
+
+it('Can convert to unixish path', () => {
+  expect(convertToUnixishPath('a/b/c')).toEqual('a/b/c');
+  expect(convertToUnixishPath('/a/b/c')).toEqual('/a/b/c');
+  expect(convertToUnixishPath('a\\b\\c')).toEqual('a/b/c');
+  expect(convertToUnixishPath('C:\\a\\b\\c')).toEqual('/a/b/c');
+});
+
+it('Can trim trailing path separators', () => {
+  expect(trimTrailingPathSeparator('a/b/c')).toEqual('a/b/c');
+  expect(trimTrailingPathSeparator('a/b/c/')).toEqual('a/b/c');
+  expect(trimTrailingPathSeparator('C:\\a\\b\\c')).toEqual('C:\\a\\b\\c');
+  expect(trimTrailingPathSeparator('C:\\a\\b\\c\\')).toEqual('C:\\a\\b\\c');
+});
+
+it('Can get relative path to root', () => {
+  expect(getRelativePathFromRoot(`/base`, '/base/src/a.ts')).toEqual(
+    'src/a.ts'
+  );
+  expect(getRelativePathFromRoot(`/base`, '/base')).toEqual('');
+  expect(getRelativePathFromRoot(`/base`, '/src/a.ts')).toEqual('src/a.ts');
+  expect(getRelativePathFromRoot(`/base`, 'src/a.ts')).toEqual('src/a.ts');
 });
