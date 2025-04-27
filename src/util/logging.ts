@@ -2,10 +2,6 @@ export function warn(msg: string) {
   console.warn(`[Warn] fast-import: ${msg}`);
 }
 
-export function error(msg: string) {
-  console.error(`[Error] fast-import: ${msg}`);
-}
-
 let verboseEnabled = false;
 export function setVerbose(verbose: boolean) {
   verboseEnabled = verbose;

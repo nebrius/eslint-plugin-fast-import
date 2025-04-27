@@ -114,3 +114,98 @@ it('Throws on invalid user supplied mode', () => {
     message: Invalid enum value. Expected 'auto' | 'one-shot' | 'fix' | 'editor', received 'fake'
 `);
 });
+
+it('Throws on mismatched wildcard aliases', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          alias: {
+            '@/*': 'src/a.ts',
+          },
+        },
+      },
+    })
+  ).toThrow(
+    `Alias path ${join(TEST_PROJECT_DIR, 'src', 'a.ts')} must end with "*" when @/* ends with "*"`
+  );
+});
+
+it('Throws on mismatched fixed aliases', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          alias: {
+            '@a': 'src/a.ts*',
+          },
+        },
+      },
+    })
+  ).toThrow(
+    `Alias path ${join(TEST_PROJECT_DIR, 'src', 'a.ts*')} must not end with "*" when @a does not end with "*"`
+  );
+});
+
+it('Can set mode to editor', () => {
+  const editorSettings = getSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'editor',
+        rootDir: TEST_PROJECT_DIR,
+      },
+    },
+  });
+  expect(editorSettings.mode).toBe('editor');
+});
+
+it('Can set mode to fix', () => {
+  const fixSettings = getSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'fix',
+        rootDir: TEST_PROJECT_DIR,
+      },
+    },
+  });
+  expect(fixSettings.mode).toBe('fix');
+});
+
+it('Ignores aliases that point outside of rootDir', () => {
+  const settings = getSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        rootDir: TEST_PROJECT_DIR,
+        alias: {
+          '@foo': '../foo',
+          '@bar/*': '../bar/*',
+        },
+      },
+    },
+  });
+  expect(settings.fixedAliases).toEqual({});
+  expect(settings.wildcardAliases).toEqual({});
+});
+
+it('Throws when an entry point is absolute', () => {
+  expect(() =>
+    getSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          entryPoints: { '/foo/a.ts': ['a'] },
+        },
+      },
+    })
+  ).toThrow(
+    `Invalid entry point file patter "/foo/a.ts". Entry point files patterns must be relative to the directory with your ESLint config file, not absolute`
+  );
+});

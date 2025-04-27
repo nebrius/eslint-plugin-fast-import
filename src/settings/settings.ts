@@ -6,7 +6,7 @@ import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
 import { trimTrailingPathSeparator } from '../util/files.js';
-import { debug, error } from '../util/logging.js';
+import { debug } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
 
@@ -38,7 +38,10 @@ const DEFAULT_MODE =
   process.argv[0].includes('Visual Studio Code') ||
   process.argv[0].includes('Cursor')
     ? 'editor'
-    : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
+    : // Honestly this one isn't worth testing, given that we'd have to mode
+      // process.argv itself
+      /* instanbul ignore next */
+      argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
       ? 'fix'
       : 'one-shot';
 
@@ -96,14 +99,14 @@ export function getSettings(
     // Determine if this is a wildcard or fixed alias, and validate consistency
     if (symbol.endsWith('*')) {
       if (!path.endsWith('*')) {
-        error(
+        throw new Error(
           `Alias path ${path} must end with "*" when ${symbol} ends with "*"`
         );
       }
       wildcardAliases[symbol.replace(/\*$/, '')] = path.replace(/\*$/, '');
     } else {
       if (path.endsWith('*')) {
-        error(
+        throw new Error(
           `Alias path ${path} must not end with "*" when ${symbol} does not end with "*"`
         );
       }
