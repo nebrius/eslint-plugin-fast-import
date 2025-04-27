@@ -17,6 +17,9 @@ export function getTypeScriptSettings(rootDir: string): TypeScriptSettings {
     ts.sys.fileExists.bind(ts.sys),
     'tsconfig.json'
   );
+  // Since we've got a tsconfig.json file for this repo, it's not actually
+  // possible to test this code path
+  /* istanbul ignore if */
   if (!configPath) {
     return {};
   }

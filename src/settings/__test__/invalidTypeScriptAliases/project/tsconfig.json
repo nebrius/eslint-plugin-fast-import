@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": [
+        "some/fake/path/*"
+      ]
+    }
+  }
+}

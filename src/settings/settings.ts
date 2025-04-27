@@ -25,6 +25,9 @@ export type ParsedSettings = Omit<
   entryPoints: Array<{ file: Ignore; symbols: string[] }>;
 };
 
+// Honestly the process.argv stuff isn't worth the effort to test, since it
+// involves mocking process.argv, which is a pain.
+/* instanbul ignore next */
 function argsInclude(strs: string[]) {
   for (const str of strs) {
     if (process.argv.some((arg) => arg.includes(str))) {
@@ -33,15 +36,12 @@ function argsInclude(strs: string[]) {
   }
   return false;
 }
-
+/* instanbul ignore next */
 const DEFAULT_MODE =
   process.argv[0].includes('Visual Studio Code') ||
   process.argv[0].includes('Cursor')
     ? 'editor'
-    : // Honestly this one isn't worth testing, given that we'd have to mode
-      // process.argv itself
-      /* instanbul ignore next */
-      argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
+    : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
       ? 'fix'
       : 'one-shot';
 
