@@ -326,8 +326,15 @@ function analyzeSingleImport({
         // re-export, we know we found what the import points too.
         return true;
       } else {
-        // TODO: document me
+        // Otherwise, we're doing a barrel reexport of, say, a CSS module.
+        // I'm pretty certain that this syntax is the same as doing a non-barrel
+        // reexport, since these files can only have a single default export
+        // (think the difference between `* as React` vs `React`). Nonetheless,
+        // we can still analyze it.
         if (barrelReexportEntry.resolvedModuleType === 'firstPartyOther') {
+          // If we couldn't resolve the file, then we might as well keep looking
+          // for this export elsewhere, even though it likely indicates a
+          // pathing bug on the user's part.
           if (!barrelReexportEntry.resolvedModulePath) {
             return false;
           }
@@ -337,6 +344,9 @@ function analyzeSingleImport({
           } satisfies Partial<AnalyzedSingleImport | AnalyzedSingleReexport>);
           return true;
         }
+
+        // This means we're import third party non-code items, such as CSS
+        // styles from something like Tailwind
         Object.assign(originAnalyzedImport.importEntry, {
           rootModuleType: barrelReexportEntry.resolvedModuleType,
         } satisfies Partial<AnalyzedSingleImport | AnalyzedSingleReexport>);

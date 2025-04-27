@@ -62,6 +62,10 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
+
+      // This rules doesn't make sense given that no erasable types is enabled
+      // that prevents us from using enums
+      '@typescript-eslint/no-unsafe-enum-comparison': 'off',
     },
   },
   {

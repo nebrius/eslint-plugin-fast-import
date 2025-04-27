@@ -350,17 +350,21 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
 const EXPECTED_FILE_D: StrippedBaseFileDetails = {
   hasEntryPoints: false,
   exports: [
-    {
-      type: 'export',
-      exportName: 'default',
-      isEntryPoint: false,
-      isTypeExport: true,
-    },
+    // TODO: uncomment this once a bug in OXC is fixed:
+    // https://github.com/oxc-project/oxc/issues/10644
+    // {
+    //   type: 'export',
+    //   exportName: 'default',
+    //   isEntryPoint: false,
+    //   isTypeExport: true,
+    // },
     {
       type: 'export',
       exportName: 'MyNamespace',
       isEntryPoint: false,
-      isTypeExport: true,
+
+      // Namespaces are like enums, and so are actually runtime things
+      isTypeExport: false,
     },
     {
       type: 'export',

@@ -289,6 +289,8 @@ function computeFileDetails({
     hasEntryPoints: false,
   };
 
+  let hasEntryPoints = false;
+
   for (const importEntry of result.module.staticImports) {
     const statementNodeRange = getRange(importEntry);
     const moduleSpecifier = importEntry.moduleRequest.value;
@@ -383,13 +385,17 @@ function computeFileDetails({
 
         if (isBarrel) {
           const exportName = entry.exportName.name;
+          const isEntryPoint = exportName
+            ? isEntryPointCheck(filePath, exportName)
+            : false;
+          if (isEntryPoint) {
+            hasEntryPoints = true;
+          }
           fileDetails.barrelReexports.push({
             type: 'barrelReexport',
             moduleSpecifier,
             exportName,
-            isEntryPoint: exportName
-              ? isEntryPointCheck(filePath, exportName)
-              : false,
+            isEntryPoint,
             statementNodeRange,
             reportNodeRange,
           });
@@ -404,13 +410,17 @@ function computeFileDetails({
           if (!exportName) {
             throw new InternalError(`exportName is undefined`);
           }
+          const isEntryPoint = isEntryPointCheck(filePath, exportName);
+          if (isEntryPoint) {
+            hasEntryPoints = true;
+          }
           fileDetails.singleReexports.push({
             type: 'singleReexport',
             moduleSpecifier,
             importName,
             exportName,
             isTypeReexport: entry.isType,
-            isEntryPoint: isEntryPointCheck(filePath, exportName),
+            isEntryPoint,
             statementNodeRange,
             reportNodeRange,
           });
@@ -427,16 +437,24 @@ function computeFileDetails({
         if (!exportName) {
           throw new InternalError(`exportName is undefined`);
         }
+        const isEntryPoint = isEntryPointCheck(filePath, exportName);
+        if (isEntryPoint) {
+          hasEntryPoints = true;
+        }
         fileDetails.exports.push({
           type: 'export',
           exportName,
-          isEntryPoint: isEntryPointCheck(filePath, exportName),
+          isEntryPoint,
           isTypeExport: entry.isType,
           statementNodeRange,
           reportNodeRange,
         });
       }
     }
+  }
+
+  if (hasEntryPoints) {
+    fileDetails.hasEntryPoints = true;
   }
 
   return fileDetails;
