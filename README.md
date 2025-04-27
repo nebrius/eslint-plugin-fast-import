@@ -359,7 +359,7 @@ If your code base mixes CommonJS and ESM, then this plugin will report any impor
 
 ### Barrel exporting from third-party/built-in modules are ignored
 
-Fast Import disables all checks on barrel imports from third partybuiltin modules. For example, if you do this:
+Fast Import disables all checks on barrel imports from third party/builtin modules. For example, if you do this:
 
 ```js
 // a.ts
@@ -375,23 +375,23 @@ For more details, see the limitations section of the [src/rules/unresolved/READM
 
 ### Case insensitivity inconsistency in ESLint arguments
 
-If you pass a file pattern or path to ESLint, ESLint incosistenly applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`, and will crash.
+If you pass a file pattern or path to ESLint, ESLint inconsistenly applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`.
 
 ## Creating new rules
 
-Fast import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) rule for a more complex example. Fast Import exports three helper functions used to write rules.
+Fast import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) rule for a more complex example. Fast Import exports a few helper functions used to write rules.
 
 ### getESMInfo(context)
 
 This is the most important of the three functions. If the file represented by the ESLint context has been analyzed by Fast Import, an object with the following properties are returned, otherwise `undefined` is returned:
 
-- `fileInfo`: the imports, reexports, and exports of the current file
-- `projectInfo`: the imports, reexports, and exports of the entire project
+- `fileInfo`: the ESM info of the current file
+- `projectInfo`: the ESM info of the entire project
 - `settings`: the computed settings, with all defaults applied, used by Fast Import
 
 See the TypeScript types for full details, which are reasonably well commented.
 
-Each import, export, and reexport entry includes two AST node ranges. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
+Each ESM entry includes two AST node ranges. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
 
 See [getLocFromRange](#getlocfromrange) for more information on using ranges to report errors
 
@@ -412,6 +412,7 @@ create(context) {
 
   // Do checks here
 
+  // Always return an empty object
   return {};
 }
 ```
@@ -444,7 +445,7 @@ A helper function to determine whether or not a given file path represents a tes
 
 ### Is this plugin a replacement for [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import)/[eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x)?
 
-No, for the most part. Fast Import replaces a few select rules from import and import x that are known to be slow, such as `no-cycle`, but otherwise strives to coexist with these packages. It is recommended that you continue to use these other rules for more comprehensive import analysis.
+No, not for the most part. Fast Import replaces a few select rules from import and import x that are known to be slow, such as `no-cycle`, but otherwise strives to coexist with these packages. It is recommended that you continue to use these other rules for more comprehensive import analysis.
 
 ### Do you support user-supplied resolvers like eslint-plugin-import does?
 
