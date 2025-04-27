@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { noMissingImports } from '../missing.js';
+import { noUnresolvedImports } from '../unresolved.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project', 'packages', 'one');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
@@ -19,7 +19,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('no-missing-exports', noMissingImports, {
+ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
   valid: [
     {
       code: `import * as b from './b'`,
@@ -67,7 +67,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
     {
       code: `import { unknown } from './b'`,
       filename: FILE_A,
-      errors: [{ messageId: 'noMissingImports' }],
+      errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
@@ -78,7 +78,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
     {
       code: `export { SourceCode } from './c';`,
       filename: FILE_A,
-      errors: [{ messageId: 'noMissingImports' }],
+      errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
@@ -100,7 +100,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
     {
       code: `import * as unknown from './unknown'`,
       filename: FILE_A,
-      errors: [{ messageId: 'noMissingImports' }],
+      errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
@@ -111,7 +111,7 @@ ruleTester.run('no-missing-exports', noMissingImports, {
     {
       code: `export * from './unknown'`,
       filename: FILE_A,
-      errors: [{ messageId: 'noMissingImports' }],
+      errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,

@@ -1,8 +1,8 @@
 import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
-export const noMissingImports = createRule({
-  name: 'no-missing-imports',
+export const noUnresolvedImports = createRule({
+  name: 'no-unresolved-imports',
   meta: {
     docs: {
       description: 'Ensures that imports point to valid exports',
@@ -11,7 +11,7 @@ export const noMissingImports = createRule({
     fixable: undefined,
     type: 'problem',
     messages: {
-      noMissingImports:
+      noUnresolvedImports:
         'Import "{{name}}" does not point to a valid first party export',
       noTransientDependencies:
         'Third party module specifier "{{specifier}}" is not listed in package.json.',
@@ -93,7 +93,7 @@ export const noMissingImports = createRule({
       ) {
         context.report({
           loc: getLocFromRange(context, importEntry.reportNodeRange),
-          messageId: 'noMissingImports',
+          messageId: 'noUnresolvedImports',
           data: {
             name: importEntry.importAlias,
           },
@@ -109,7 +109,7 @@ export const noMissingImports = createRule({
       ) {
         context.report({
           loc: getLocFromRange(context, importEntry.reportNodeRange),
-          messageId: 'noMissingImports',
+          messageId: 'noUnresolvedImports',
           data: {
             name: importEntry.importName,
           },
@@ -131,7 +131,7 @@ export const noMissingImports = createRule({
       ) {
         context.report({
           loc: getLocFromRange(context, reexportEntry.reportNodeRange),
-          messageId: 'noMissingImports',
+          messageId: 'noUnresolvedImports',
           data: {
             name: reexportEntry.exportName,
           },
@@ -147,7 +147,7 @@ export const noMissingImports = createRule({
       ) {
         context.report({
           loc: getLocFromRange(context, reexportEntry.reportNodeRange),
-          messageId: 'noMissingImports',
+          messageId: 'noUnresolvedImports',
           data: {
             name: reexportEntry.exportName,
           },

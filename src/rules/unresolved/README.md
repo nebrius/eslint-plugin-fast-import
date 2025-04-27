@@ -1,10 +1,10 @@
-# fast-import/no-missing-exports
+# fast-import/no-unresolved-exports
 
 Ensures that module specifiers in import statements (aka `foo` in `import { bar } from 'foo'`) resolve to known modules.
 
 ## Rule Details
 
-`no-missing-exports` ensure that imports can be resolved to known exports. An import resolves to a known export if one of the following is true:
+`no-unresolved-exports` ensure that imports can be resolved to known exports. An import resolves to a known export if one of the following is true:
 
 1. The module specifier matches a built-in Node.js module specifier, as reported by `builtinModules` in the `node:module` module. Note that the symbol (aka `bar` in `import { bar } from 'foo'`) is _not_ checked for validity
 2. The module specifier resolves to another code file. Note that the symbol _is_ checked for validity

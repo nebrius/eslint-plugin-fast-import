@@ -57,12 +57,11 @@ npm install --save-dev eslint-plugin-fast-import
 | Name                                                                        | 💼   | 🔧   |
 | --------------------------------------------------------------------------- | --- | --- |
 | [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
+| [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
 | [no-cycle](src/rules/cycle/README.md)                                       | 🧰 ☑️ |     |
+| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
 | [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 🧰 ☑️ |     |
-| [no-missing-imports](src/rules/missing/README.md)                           | 🧰 ☑️ |     |
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
-| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
-| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
 
 ## Configuration
@@ -71,10 +70,12 @@ Fast Import only supports ESLint 9+ and flat configs. For most simple TypeScript
 
 ```js
 import { recommended } from 'eslint-plugin-fast-import';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export default [
   recommended({
-    rootDir: __dirname
+    rootDir: dirname(fileURLToPath(import.meta.url))
   })
 ];
 ```
@@ -115,9 +116,9 @@ recommended({
 
 Type: `Record<string, string>`
 
-`alias` defines a set of module specifier aliases. For example, if you use Next.js with its default configuration, then an alias is automatically set so that `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
+`alias` defines a set of module specifier aliases. For example, if you use Next.js with its default configuration, you're probably familiar with the alias it creates: `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
 
-Fast Import defaults to the values inside of `tsconfig.json`, with a few limitations:
+Fast Import defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
 - Aliases that point to files outside of `rootDir`, or point to files inside of `node_modules`, are ignored
 - Aliases with more than one file, e.g. `"@/": ["a.ts", "b.ts"]`, are ignored
 
@@ -141,9 +142,9 @@ Type: `Array<{ glob: string, symbols: string[]}>`
 
 Entry points define exports that are not imported by code inside of the code base, but instead by code outside of the codebase.
 
-For example, if you are building a Next.js application, then `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
+For example, if you are building a Next.js application, then the `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
 
-Entry points allows you to define these types of imports so they are not flagged as unused, and enable other useful checks
+Entry points allows you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/entryPoint/README.md) rule.
 
 Example:
 
@@ -182,28 +183,20 @@ recommended({
   ]
 })
 ```
+
 #### mode
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
 When set to `auto`, the default, Fast Import will do it's best to determine which environment it's running in.
 
-`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint from the command line without the `--fix` flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run.
+`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
 
-`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
+`fix` builds on `one-shot` by introducing the caching layer, and is the default when ESLint is supplied with a fix flag. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file. This mode is used by default when the `--fix`, `--fix-dry-run`, or `--fix-type` is sent to ESLint.
 
 Finally, `editor` mode builds on `fix` mode by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
 
-Note: currently, VS Code is the only supported editor. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the mean time, you can create a config that extends your standard config, set the mode to editor, and tell your editor to use this config file
-
-Example:
-
-```js
-recommended({
-  rootDir: __dirname
-  mode: 'editor'
-})
-```
+Note: currently, VS Code and Cursor are the only supported editors. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the mean time, you can create a config that extends your standard config, set the mode to editor, and tell your editor to use this config file
 
 #### editorUpdateRate
 
@@ -358,7 +351,7 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ### All first party code must live inside `rootDir`
 
-If files exist outside of `rootDir` and are imported by files inside of `rootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-missing-imports](src/rules/missing/README.md) rule.
+If files exist outside of `rootDir` and are imported by files inside of `rootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-unresolved-imports](src/rules/unresolved/README.md) rule.
 
 ### CommonJS is not supported
 
@@ -378,7 +371,7 @@ import { fake } from './a';
 
 Fast Import will not flag this as an error. This level of indirection is discouraged anyways, and is why Fast Import ships with the [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) rule.
 
-For more details, see the limitations section of the [src/rules/missing/README.md#limitations](src/rules/missing/README.md)
+For more details, see the limitations section of the [src/rules/unresolved/README.md#limitations](src/rules/unresolved/README.md)
 
 ### Case insensitivity inconsistency in ESLint arguments
 

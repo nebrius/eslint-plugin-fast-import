@@ -485,7 +485,7 @@ function resolveModuleSpecifier({
       currentFolderTreeNode =
         currentFolderTreeNode.folders[currentFolderSegment];
 
-      // If there is no folder segment present, then that means this is a missing import
+      // If there is no folder segment present, then that means this is an unresolved import
       if (!currentFolderTreeNode) {
         return undefined;
       }
