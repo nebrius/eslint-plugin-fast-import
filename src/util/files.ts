@@ -1,5 +1,5 @@
 import type { Stats } from 'node:fs';
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { basename, dirname, join, relative, sep } from 'node:path';
 
@@ -178,6 +178,7 @@ export function getDependenciesFromPackageJson(packageJsonPath: string) {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
     peerDependencies?: Record<string, string>;
+    workspaces?: string[];
   };
   const dependencies: string[] = [];
   if (parsedPackageJson.dependencies) {
@@ -189,6 +190,30 @@ export function getDependenciesFromPackageJson(packageJsonPath: string) {
   if (parsedPackageJson.peerDependencies) {
     dependencies.push(...Object.keys(parsedPackageJson.peerDependencies));
   }
+
+  // Find workspaces here
+  if (parsedPackageJson.workspaces) {
+    for (const workspace of parsedPackageJson.workspaces) {
+      if (workspace.includes('*')) {
+        throw new Error(`Glob workspaces are not supported`);
+      }
+      const workspacePackageJsonPath = join(
+        dirname(packageJsonPath),
+        workspace,
+        'package.json'
+      );
+      if (!existsSync(workspacePackageJsonPath)) {
+        throw new Error(
+          `Workspace package.json not found at "${workspacePackageJsonPath}"`
+        );
+      }
+      const workspacePackageJson = JSON.parse(
+        readFileSync(workspacePackageJsonPath, 'utf-8')
+      ) as { name: string };
+      dependencies.push(workspacePackageJson.name);
+    }
+  }
+
   return dependencies;
 }
 

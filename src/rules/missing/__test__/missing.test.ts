@@ -5,7 +5,7 @@ import { getDirname } from 'cross-dirname';
 
 import { noMissingImports } from '../missing.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const TEST_PROJECT_DIR = join(getDirname(), 'project', 'packages', 'one');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 
 const ruleTester = new RuleTester({
@@ -43,6 +43,16 @@ ruleTester.run('no-missing-exports', noMissingImports, {
     },
     {
       code: `export * from 'type-fest'`,
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import { foo } from '@test/two'`,
       filename: FILE_A,
       settings: {
         'fast-import': {
