@@ -55,6 +55,10 @@ export const noUnusedExports = createRule<
     const { allowNonTestTypeExports = true } = context.options[0] ?? {};
 
     const esmInfo = getESMInfo(context);
+
+    // No project info means this file wasn't found as part of the project, e.g.
+    // because it's ignored
+    /* istanbul ignore if */
     if (!esmInfo) {
       return {};
     }
@@ -63,6 +67,7 @@ export const noUnusedExports = createRule<
       fileInfo,
       projectInfo: { rootDir },
     } = esmInfo;
+    /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
       return {};
     }

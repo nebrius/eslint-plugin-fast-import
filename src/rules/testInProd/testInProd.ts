@@ -21,6 +21,10 @@ export const noTestImportsInProd = createRule({
   defaultOptions: [],
   create(context) {
     const esmInfo = getESMInfo(context);
+
+    // No project info means this file wasn't found as part of the project, e.g.
+    // because it's ignored
+    /* istanbul ignore if */
     if (!esmInfo) {
       return {};
     }
