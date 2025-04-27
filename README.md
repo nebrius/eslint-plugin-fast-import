@@ -6,30 +6,35 @@
 - [Rules](#rules)
 - [Configuration](#configuration)
   - [Configuration options](#configuration-options)
-    - [rootDir (required)](#rootdir)
+    - [rootDir (required)](#rootdir-required)
     - [alias](#alias)
     - [entryPoints](#entrypoints)
     - [ignorePatterns](#ignorepatterns)
     - [mode](#mode)
     - [editorUpdateRate](#editorupdaterate)
     - [debugLogging](#debuglogging)
-- [Performance comparison](#performance-comparison)
+- [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
+  - [Performance](#performance)
+  - [Accuracy](#accuracy)
 - [Algorithm](#algorithm)
   - [Phase 1: AST analysis](#phase-1-ast-analysis)
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
   - [Phase 3: Import graph analysis](#phase-3-import-graph-analysis)
 - [Limitations](#limitations)
   - [All first party code must live inside `rootDir`](#all-first-party-code-must-live-inside-rootdir)
+  - [CommonJS is not supported](#commonjs-is-not-supported)
   - [Barrel exporting from third-party/built-in modules are ignored](#barrel-exporting-from-third-partybuilt-in-modules-are-ignored)
   - [Case insensitivity inconsistency in ESLint arguments](#case-insensitivity-inconsistency-in-eslint-arguments)
 - [Creating new rules](#creating-new-rules)
   - [getESMInfo(context)](#getesminfocontext)
+  - [getLocFromRange(context, range)](#getlocfromrangecontext-range)
   - [registerUpdateListener(listener)](#registerupdatelistenerlistener)
   - [isNonTestFile(filePath)](#isnontestfilefilepath)
 - [Frequently Asked Questions](#frequently-asked-questions)
   - [Is this plugin a replacement for eslint-plugin-import/eslint-plugin-import-x?](#is-this-plugin-a-replacement-for-eslint-plugin-importeslint-plugin-import-x)
   - [Do you support user-supplied resolvers like eslint-plugin-import does?](#do-you-support-user-supplied-resolvers-like-eslint-plugin-import-does)
 - [License](#license)
+
 
 
 Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
@@ -230,9 +235,13 @@ recommended({
 })
 ```
 
-## Performance comparison
+## Comparisons to import and import-x
 
-To compare performance of this plugin vs other plugins, I forked the VS Code codebase. VS Code is a large codebase with the following stats as of this writing:
+Below are performance and accuracy comparisons to [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import) and [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x)
+
+### Performance
+
+To compare performance of this plugin vs the other plugins, I forked the VS Code codebase. VS Code is a large codebase with the following stats as of this writing:
 
 - 5,299 files
 - 1,255,760 lines of code, excluding blank lines and comments (according to [cloc](https://github.com/AlDanial/cloc))
@@ -240,7 +249,7 @@ To compare performance of this plugin vs other plugins, I forked the VS Code cod
 - 17,477 exports
 - 184 reexports
 
-Here are the results of [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import), [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x), and Fast Import for three commonly expensive rules:
+Here are the results for three commonly expensive rules that flag unused exports, import cycles, and unresolved imports:
 
 <img src="./perf.png" alt="Performance comparison of three import plugins" width="700"/>
 
@@ -254,7 +263,26 @@ And here's the raw data:
 
 If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/fast-import-perf/compare.ts).
 
-Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of OXC, which you can see [here](https://github.com/nebrius/eslint-plugin-fast-import/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of the Fast Import took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvements between this plugin and others is split almost exactly 50/50 between the Rust parser and the algorithm described below.
+Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of OXC, which you can see [here](https://github.com/nebrius/eslint-plugin-fast-import/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Fast Import took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvements between this plugin and others is split almost exactly 50/50 between the switch to OXC and the [algorithm described below](#algorithm).
+
+### Accuracy
+
+The performance script I wrote above also counts the number of errors found. Before I present the results, I want to emphasis that these are _not_ issues in VS Code! I intentionally configured ESLint to check test files, and VS Code includes test files with intentional errors so that they can make sure VS Code handles errors correctly. Now on to the errors:
+
+|             | Unused | Cycle | Unresolved |
+| ----------- | ------ | ----- | ---------- |
+| Fast Import | 4,672  | 686   | 306        |
+| Import      | 4,500  | 600   | 29         |
+| Import X    | 4,521  | 600   | 49         |
+
+We notice that the numbers are pretty close to each other, with Fast import reporting a few more. While I haven't looked at each error to determine precisely what's going on, I'm pretty certain it's due to:
+
+- Fast Import flagging non-test exports as unused if they are only imported in test files, which the other two don't check
+- Fast import flagging imports of third party modules that are not listed in package.json (aka transient imports) as unresolved
+
+I do find it interesting that Fast Import finds a few more cycles. The 600 number is oddly round though, so perhaps their cycle detection algorithm has a limit on how many cycles it reports.
+
+Details aside, we can safely say that all three libraries have about the same level of accuracy
 
 ## Algorithm
 
@@ -273,26 +301,28 @@ For example, the import statement `import { foo } from './bar'` gets boiled down
   importType: 'single',
   isTypeImport: false,
   moduleSpecifier: './bar',
-  statementNote: <AST Node of entire import statement>,
-  reportNode: <AST Node of "foo">
+  statementNodeRange: [0, 27],
+  reportNode: [9, 12]
 }
 ```
 
-This phase is by far the most performance intensive of the three phases due to file reads and AST parsing, comprising over 95% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This correlation is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
+This phase is by far the most performance intensive of the three phases due to file reads and AST parsing, comprising over 80% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This correlation is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
 
-For example, this phase takes 90ms on a cold cache running on this codebase on my laptop, out of 92ms total. Subsequent file edits only take 1ms due to the high cacheability of this phase.
+For example, this phase takes 1.26 seconds on a cold cache running on the VS Code codebase on my laptop, out of 1.52 seconds total. Subsequent file edits in the editor only take ~1ms due to the high cacheability of this phase.
 
 Details for the information computed in this stage can be viewed in the [types file for base information](./src/types/base.ts).
 
 ### Phase 2: Module specifier resolution
 
-This phase goes through every import/reexport entry from the first phase and resolves the module specifier. Fast Import uses its own high-performance resolver to improve lint speed that uses the file cache built up in the first phase. It then resolves module specifiers to one of three types in a very specific order:
+This phase goes through every import/reexport entry from the first phase and resolves the module specifier. This fast is the second most performance intensive phase, taking aroudn 15% of total execution time. On VS Code, this phase takes 0.21 seconds, out of 1.52 seconds total.
+
+Fast Import uses its own high-performance resolver to achieve this speed. It resolves module specifiers to one of three types in a very specific order:
 
 1. A Node.js built-in module, as reported by `builtinModules()` in the `node:module` module
 2. A file within `rootDir`, aka first party
 3. A third party module
 
-Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving. This makes Fast Imports resolution algorithm considerably faster than other resolvers. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
+Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Fast Imports resolution algorithm considerably faster than other resolvers. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
 
 In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measureably improve performance.
 
@@ -301,6 +331,8 @@ Details for the information computed in this stage can be viewed in the [types f
 ### Phase 3: Import graph analysis
 
 This final stage traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of everyone who imports a specific export, and linking each import statement to a specific export statement.
+
+This phase is the least performance intensive, representing only about 3% of total run time. On the VS Code Codebase, this phase takes 48ms, out of 1.52 seconds total.
 
 Linking imports to exports can be non-trivial, especially if there are a lot of reexports. For example:
 
@@ -318,7 +350,7 @@ export { default } from './d';
 export default 10; // Export for import in file a.ts!
 ```
 
-Due to all the heavy lifting we've done in the first two phases, this phase is the least performance intensive of the three, comprising less than 1% of total execution time on a cold cache. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overal performance anyways.
+As we'v seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overal performance anyways.
 
 Details for the information computed in this stage can be viewed in the [types file for analyzed information](./src/types/analyzed.ts).
 
