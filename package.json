@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
   "keywords": [
     "eslint",

@@ -39,7 +39,8 @@ function argsInclude(strs: string[]) {
 /* instanbul ignore next */
 const DEFAULT_MODE =
   process.argv[0].includes('Visual Studio Code') ||
-  process.argv[0].includes('Cursor')
+  process.argv[0].includes('Cursor') ||
+  process.argv[0].includes('Windsurf')
     ? 'editor'
     : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
       ? 'fix'
