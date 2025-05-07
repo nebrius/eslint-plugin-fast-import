@@ -110,7 +110,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
 
   async function refresh() {
     try {
-      const start = Date.now();
+      const start = performance.now();
       const latestUpdatedTimes = await getUpdatedAtTimes();
 
       // First, find files that were deleted, represented by entries that are in
