@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
   "keywords": [
     "eslint",
@@ -30,7 +30,7 @@
     "@typescript-eslint/utils": "^8.19.1",
     "cross-dirname": "^0.1.0",
     "ignore": "^7.0.3",
-    "oxc-parser": "^0.67.0",
+    "oxc-parser": "^0.69.0",
     "zod": "^3.24.2",
     "zod-to-json-schema": "^3.24.5"
   },

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.1.0 (5/10/2025)
+
+- Added `no-named-as-default` rule
+- Brought in the latest version of OXC Parser to fix a bug
+
 ## 1.0.3 (5/7/2025)
 
 - Fixed a bug where file sync total time wasn't reporting the correct value

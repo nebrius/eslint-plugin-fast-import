@@ -62,7 +62,10 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
 | [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 🧰 ☑️ |     |
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
+| [no-named-as-default](src/rules/namedAsDefault/README.md)                   | 🧰 ☑️ |     |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
+
+There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
 
 ## Configuration
 
