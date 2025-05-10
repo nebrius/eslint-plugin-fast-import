@@ -55,6 +55,9 @@ function runStep(command: string, args: string[]): Promise<void> {
   });
 }
 
+// install
+await runStep('npm', ['ci']);
+
 // build
 await runStep('npm', ['run', 'build']);
 
