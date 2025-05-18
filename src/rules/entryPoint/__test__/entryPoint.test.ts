@@ -5,7 +5,7 @@ import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
 import { _resetProjectInfo } from '../../../module/module.js';
-import { _resetSettings } from '../../../settings/settings.js';
+import { resetSettings } from '../../../settings/settings.js';
 import { getRelativePathFromRoot } from '../../../util/files.js';
 import { noEntryPointImports } from '../entryPoint.js';
 
@@ -30,7 +30,7 @@ const ruleTester = new RuleTester({
 });
 
 beforeEach(() => {
-  _resetSettings();
+  resetSettings();
   _resetProjectInfo();
 });
 

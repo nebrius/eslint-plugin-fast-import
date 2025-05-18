@@ -194,18 +194,15 @@ it('Ignores aliases that point outside of rootDir', () => {
   expect(settings.wildcardAliases).toEqual({});
 });
 
-it('Throws when an entry point is absolute', () => {
-  expect(() =>
-    getSettings({
-      filename: FILE_A,
-      settings: {
-        'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
-          entryPoints: { '/foo/a.ts': ['a'] },
-        },
+it('Ignores when an entry point is absolute', () => {
+  const settings = getSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        rootDir: TEST_PROJECT_DIR,
+        entryPoints: { '/foo/a.ts': ['a'] },
       },
-    })
-  ).toThrow(
-    `Invalid entry point file patter "/foo/a.ts". Entry point files patterns must be relative to the directory with your ESLint config file, not absolute`
-  );
+    },
+  });
+  expect(settings.entryPoints.length).toEqual(0);
 });

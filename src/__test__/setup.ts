@@ -2,7 +2,7 @@ import deepEqual from 'fast-deep-equal';
 import { diff } from 'jest-diff';
 
 import { _resetProjectInfo } from '../module/module.js';
-import { _resetSettings } from '../settings/settings.js';
+import { resetSettings } from '../settings/settings.js';
 import type { AnalyzedProjectInfo } from '../types/analyzed.js';
 import type { BaseESMStatement, BaseProjectInfo } from '../types/base.js';
 import { InternalError } from '../util/error.js';
@@ -219,7 +219,7 @@ expect.extend({
 
 // eslint-disable-next-line no-undef
 beforeEach(() => {
-  _resetSettings();
+  resetSettings();
   _resetProjectInfo();
   _reset();
 });

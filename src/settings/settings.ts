@@ -6,7 +6,7 @@ import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
 import { trimTrailingPathSeparator } from '../util/files.js';
-import { debug } from '../util/logging.js';
+import { debug, warn } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
 
@@ -48,9 +48,8 @@ const DEFAULT_MODE =
 
 let settings: ParsedSettings | null = null;
 
-// We need to reset settings between runs, since some tests try different settings
-// eslint-disable-next-line fast-import/no-unused-exports
-export function _resetSettings() {
+// Used for tests and when settings files have changed in editor mode
+export function resetSettings() {
   settings = null;
 }
 
@@ -68,10 +67,6 @@ export function getSettings(
 
   // Get TypeScript supplied settings
   const typeScriptSettings = getTypeScriptSettings(userSettings.rootDir);
-
-  // We can't call debug until after parsing user settings, so we log this here,
-  // even if we could do it sooner.
-  debug(`Launched via "${process.argv[0]}"`);
 
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
@@ -123,9 +118,10 @@ export function getSettings(
     );
 
     if (isAbsolute(filePattern)) {
-      throw new Error(
-        `Invalid entry point file patter "${filePattern}". Entry point files patterns must be relative to the directory with your ESLint config file, not absolute`
+      warn(
+        `Invalid entry point file patter "${filePattern}". Entry point files patterns must be relative to the directory with your ESLint config file, not absolute. This entry point will be ignored.`
       );
+      continue;
     }
     parsedEntryPoints.push({
       file: ignore().add(filePattern),

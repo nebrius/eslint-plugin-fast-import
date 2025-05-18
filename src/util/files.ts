@@ -8,6 +8,7 @@ import ignore from 'ignore';
 
 import type { IgnorePattern } from '../settings/settings.js';
 import { InternalError } from './error.js';
+import { warn } from './logging.js';
 
 type PotentialFile = {
   filePath: string;
@@ -195,7 +196,8 @@ export function getDependenciesFromPackageJson(packageJsonPath: string) {
   if (parsedPackageJson.workspaces) {
     for (const workspace of parsedPackageJson.workspaces) {
       if (workspace.includes('*')) {
-        throw new Error(`Glob workspaces are not supported`);
+        warn(`Glob workspaces are not supported, and will be ignored`);
+        continue;
       }
       const workspacePackageJsonPath = join(
         dirname(packageJsonPath),

@@ -199,7 +199,18 @@ When set to `auto`, the default, Fast Import will do it's best to determine whic
 
 Finally, `editor` mode builds on `fix` mode by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
 
-Note: currently, VS Code and Cursor are the only supported editors. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the mean time, you can create a config that extends your standard config, set the mode to editor, and tell your editor to use this config file
+Note: currently, VS Code, Cursor, and Windsurf are the only supported editors. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the mean time, you can create a config that extends your standard config, set the mode to editor, and tell your editor to use this config file:
+
+```js
+export default [
+  ...yourConfig,
+  settings: {
+    'fast-import': {
+      mode: 'editor'
+    }
+  }
+]
+```
 
 #### editorUpdateRate
 
