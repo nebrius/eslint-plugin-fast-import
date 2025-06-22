@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.0 (6/16/2025)
+
+- Added `no-restricted-imports` rule
+
 ## 1.1.2 (5/18/2025)
 
 - Relaxed a few settings checks to warn instead of throwing an error

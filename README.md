@@ -64,8 +64,12 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
 | [no-named-as-default](src/rules/namedAsDefault/README.md)                   | 🧰 ☑️ |     |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
+| [no-restricted-imports](src/rules/restricted/README.md) *                   |     |     |
+
+* No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
 
 There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
+
 
 ## Configuration
 

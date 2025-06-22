@@ -9,6 +9,7 @@ import { noEntryPointImports } from './rules/entryPoint/entryPoint.js';
 import { noExternalBarrelReexports } from './rules/externalBarrelReexports/externalBarrelReexports.js';
 import { namedAsDefault } from './rules/namedAsDefault/namedAsDefault.js';
 import { nodePrefix } from './rules/nodePrefix/nodePrefix.js';
+import { noRestrictedImports } from './rules/restricted/restricted.js';
 import { noTestImportsInProd } from './rules/testInProd/testInProd.js';
 import { noUnresolvedImports } from './rules/unresolved/unresolved.js';
 import { noUnusedExports } from './rules/unused/unused.js';
@@ -41,6 +42,7 @@ const plugin = {
     'no-test-imports-in-prod': noTestImportsInProd,
     'no-named-as-default': namedAsDefault,
     'require-node-prefix': nodePrefix,
+    'no-restricted-imports': noRestrictedImports,
   },
   processors: {},
 };
@@ -90,6 +92,7 @@ const offConfig = {
     'fast-import/no-test-imports-in-prod': 'off',
     'fast-import/no-named-as-default': 'off',
     'fast-import/require-node-prefix': 'off',
+    'fast-import/no-restricted-imports': 'off',
   },
 } as const;
 
