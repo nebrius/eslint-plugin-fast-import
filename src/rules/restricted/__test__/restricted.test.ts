@@ -29,7 +29,7 @@ beforeEach(() => {
 ruleTester.run('no-restricted-imports', noRestrictedImports, {
   valid: [
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
       options: [
@@ -50,7 +50,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
     },
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
       options: [
@@ -71,7 +71,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
     },
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
       options: [
@@ -92,7 +92,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
     },
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
       options: [
@@ -115,7 +115,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
   ],
   invalid: [
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       errors: [
         {
@@ -151,7 +151,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
     },
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       errors: [
         {
@@ -187,7 +187,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
     },
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       errors: [
         {
@@ -223,7 +223,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
     },
     {
-      code: `import { b } from './b';\nimport { fs } from 'node:fs';`,
+      code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       errors: [
         {

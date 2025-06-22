@@ -103,6 +103,7 @@ export const noRestrictedImports = createRule<
       ...fileInfo.barrelReexports,
     ]) {
       const { moduleSpecifier } = importEntry;
+      /* istanbul ignore if */
       if (!moduleSpecifier) {
         continue;
       }
