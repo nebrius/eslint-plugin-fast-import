@@ -325,7 +325,7 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ### Phase 2: Module specifier resolution
 
-This phase goes through every import/reexport entry from the first phase and resolves the module specifier. This fast is the second most performance intensive phase, taking aroudn 15% of total execution time. On VS Code, this phase takes 0.21 seconds, out of 1.52 seconds total.
+This phase goes through every import/reexport entry from the first phase and resolves the module specifier. This phase is the second most performance intensive phase, taking around 15% of total execution time. On VS Code, this phase takes 0.21 seconds, out of 1.52 seconds total.
 
 Fast Import uses its own high-performance resolver to achieve this speed. It resolves module specifiers to one of three types in a very specific order:
 
@@ -341,7 +341,7 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ### Phase 3: Import graph analysis
 
-This final stage traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of everyone who imports a specific export, and linking each import statement to a specific export statement.
+This final stage traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of every file that imports a specific export, and linking each import statement to a specific export statement.
 
 This phase is the least performance intensive, representing only about 3% of total run time. On the VS Code Codebase, this phase takes 48ms, out of 1.52 seconds total.
 
@@ -361,7 +361,7 @@ export { default } from './d';
 export default 10; // Export for import in file a.ts!
 ```
 
-As we'v seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overal performance anyways.
+As we've seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overal performance anyways.
 
 Details for the information computed in this stage can be viewed in the [types file for analyzed information](./src/types/analyzed.ts).
 
@@ -409,7 +409,7 @@ This is the most important of the three functions. If the file represented by th
 
 See the TypeScript types for full details, which are reasonably well commented.
 
-Each ESM entry includes two AST node ranges. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexprt. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
+Each ESM entry includes two AST node ranges. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexport. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
 
 See [getLocFromRange](#getlocfromrange) for more information on using ranges to report errors
 
