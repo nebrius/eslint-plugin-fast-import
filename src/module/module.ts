@@ -57,7 +57,9 @@ function getEntryPointCheck(
           convertToUnixishPath(getRelativePathFromRoot(rootDir, filePath))
         )
       ) {
-        return symbols.includes(symbolName);
+        return Array.isArray(symbols)
+          ? symbols.includes(symbolName)
+          : symbols.test(symbolName);
       }
     }
     return false;

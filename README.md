@@ -145,7 +145,7 @@ Note: patterns with a single star after them will match any symbols/files that s
 
 #### entryPoints
 
-Type: `Array<{ glob: string, symbols: string[]}>`
+Type: `Array<{ glob: string, symbols: string[] | RegExp }>`
 
 Entry points define exports that are not imported by code inside of the code base, but instead by code outside of the codebase.
 

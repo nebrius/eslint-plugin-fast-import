@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.0 (7/12/2025)
+
+- Added support for defining entry point symbols using regex
+
 ## 1.2.0 (6/16/2025)
 
 - Added `no-restricted-imports` rule

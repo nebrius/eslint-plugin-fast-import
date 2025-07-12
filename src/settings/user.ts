@@ -10,7 +10,9 @@ import { setVerbose } from '../util/logging.js';
 const settingsSchema = z.strictObject({
   rootDir: z.string(),
   alias: z.record(z.string(), z.string()).optional(),
-  entryPoints: z.record(z.string(), z.array(z.string())).optional(),
+  entryPoints: z
+    .record(z.string(), z.union([z.array(z.string()), z.instanceof(RegExp)]))
+    .optional(),
   ignorePatterns: z.array(z.string()).optional(),
   mode: z.enum(['auto', 'one-shot', 'fix', 'editor']).optional(),
   editorUpdateRate: z.number().optional(),

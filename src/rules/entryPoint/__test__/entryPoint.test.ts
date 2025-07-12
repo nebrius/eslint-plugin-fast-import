@@ -71,7 +71,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPoints: {
-            [FILE_A_ENTRY_POINT]: ['a'],
+            [FILE_A_ENTRY_POINT]: /.*/,
           },
         },
       },

@@ -22,7 +22,7 @@ export type ParsedSettings = Omit<
   ignorePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
-  entryPoints: Array<{ file: Ignore; symbols: string[] }>;
+  entryPoints: Array<{ file: Ignore; symbols: string[] | RegExp }>;
 };
 
 // Honestly the process.argv stuff isn't worth the effort to test, since it
@@ -113,9 +113,9 @@ export function getSettings(
   // Clean up any entry points
   const parsedEntryPoints: ParsedSettings['entryPoints'] = [];
   for (const [filePattern, symbols] of Object.entries(entryPoints)) {
-    const formattedSymbols = symbols.map((symbol) =>
-      trimTrailingPathSeparator(symbol)
-    );
+    const formattedSymbols = Array.isArray(symbols)
+      ? symbols.map((symbol) => trimTrailingPathSeparator(symbol))
+      : symbols;
 
     if (isAbsolute(filePattern)) {
       warn(
@@ -153,8 +153,12 @@ export function getSettings(
   debug(`Entry points:`);
   for (const [filePattern, symbols] of Object.entries(entryPoints)) {
     debug(`  ${filePattern}:`);
-    for (const symbol of symbols) {
-      debug(`    ${symbol}`);
+    if (Array.isArray(symbols)) {
+      for (const symbol of symbols) {
+        debug(`    ${symbol}`);
+      }
+    } else {
+      debug(`    ${symbols.toString()}`);
     }
   }
 
