@@ -11,6 +11,7 @@ const firstPartyEntrySchema = z.strictObject({
   filepath: z.union([z.string(), z.instanceof(RegExp)]),
   allowed: z.array(z.union([z.string(), z.instanceof(RegExp)])).optional(),
   denied: z.array(z.union([z.string(), z.instanceof(RegExp)])).optional(),
+  excludeTypeImports: z.boolean().optional(),
   message: z.string().optional(),
 });
 
@@ -19,6 +20,7 @@ const thirdPartyEntrySchema = z.strictObject({
   moduleSpecifier: z.union([z.string(), z.instanceof(RegExp)]),
   allowed: z.array(z.union([z.string(), z.instanceof(RegExp)])).optional(),
   denied: z.array(z.union([z.string(), z.instanceof(RegExp)])).optional(),
+  excludeTypeImports: z.boolean().optional(),
   message: z.string().optional(),
 });
 
@@ -120,6 +122,13 @@ export const noRestrictedImports = createRule<
       }
 
       for (const entry of entries) {
+        if (
+          'isTypeImport' in importEntry &&
+          importEntry.isTypeImport &&
+          entry.excludeTypeImports
+        ) {
+          continue;
+        }
         // Check if this import applies to this entry
         let matches: string[] | null = null;
         if (entry.type === 'third-party') {

@@ -167,6 +167,23 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
     },
+    {
+      code: `import type { e1 } from '../e/e1';`,
+      filename: FILE_D,
+      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      options: [
+        {
+          rules: [
+            {
+              type: 'first-party',
+              filepath: /(.+?)\/[a-zA-Z0-9-_]+\.ts$/,
+              allowed: [/$1\/[a-zA-Z0-9-_]+\.ts$/],
+              excludeTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
   ],
   invalid: [
     {

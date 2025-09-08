@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.1 (9/8/2025)
+
+- Added support for excluding type imports in `no-restricted-imports`
+
 ## 1.4.0 (9/8/2025)
 
 - Fixed bug in `no-unused-exports` rule where it generated a false positive if
