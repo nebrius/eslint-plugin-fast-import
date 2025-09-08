@@ -8,6 +8,7 @@ import { noUnusedExports } from '../unused.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
+const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_D_DTS = join(TEST_PROJECT_DIR, 'd.d.ts');
 const FILE_E = join(TEST_PROJECT_DIR, 'e.ts');
 
@@ -33,6 +34,19 @@ export const a2 = 10;
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
+        },
+      },
+    },
+    {
+      code: readFileSync(FILE_B, 'utf8'),
+      filename: FILE_B,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+          entryPoints: {
+            'f.ts': ['a2'],
+          },
         },
       },
     },

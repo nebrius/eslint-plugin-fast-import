@@ -354,7 +354,22 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
       isEntryPoint: false,
       resolvedModuleType: 'firstPartyCode',
       resolvedModulePath: FILE_D,
-      importedBy: [],
+      importedBy: [
+        {
+          filePath: FILE_A,
+          importEntry: {
+            type: 'singleImport',
+            moduleSpecifier: './e',
+            importName: 'd1',
+            importAlias: 'd1',
+            isTypeImport: false,
+            resolvedModuleType: 'firstPartyCode',
+            resolvedModulePath: FILE_E,
+            rootModuleType: 'firstPartyCode',
+            rootModulePath: FILE_D,
+          },
+        },
+      ],
       barrelImportedBy: [],
       rootModuleType: undefined,
     },

@@ -128,7 +128,26 @@ export type StrippedAnalyzedFileDetails = StrippedFileDetails<
       >;
     }>;
   },
-  Omit<AnalyzedSingleReexport, 'rootExportEntry'> & {
+  Omit<AnalyzedSingleReexport, 'rootExportEntry' | 'importedBy' | 'barrelImportedBy'> & {
+    importedBy?: Array<{
+      filePath: string;
+      importEntry: 
+        | Omit<
+            AnalyzedSingleImport,
+            'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+          >
+        | Omit<
+            AnalyzedSingleReexport,
+            'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+          >;
+    }>;
+    barrelImportedBy?: Array<{
+      filePath: string;
+      importEntry: Omit<
+        AnalyzedBarrelImport,
+        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+      >;
+    }>;
     rootExportEntry?:
       | Omit<
           AnalyzedExport,

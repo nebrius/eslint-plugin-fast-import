@@ -285,6 +285,12 @@ function analyzeSingleImport({
           return true;
         }
         case 'firstPartyCode': {
+          // This will always be a single import to start with, so we know it
+          // won't use barrelExportedBy at this point
+          singleReexportEntry.importedBy.push({
+            filePath: originAnalyzedImport.filePath,
+            importEntry: originAnalyzedImport.importEntry,
+          });
           if (
             traverse(
               singleReexportEntry.resolvedModulePath,
