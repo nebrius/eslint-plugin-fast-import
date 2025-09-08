@@ -128,10 +128,13 @@ export type StrippedAnalyzedFileDetails = StrippedFileDetails<
       >;
     }>;
   },
-  Omit<AnalyzedSingleReexport, 'rootExportEntry' | 'importedBy' | 'barrelImportedBy'> & {
+  Omit<
+    AnalyzedSingleReexport,
+    'rootExportEntry' | 'importedBy' | 'barrelImportedBy'
+  > & {
     importedBy?: Array<{
       filePath: string;
-      importEntry: 
+      importEntry:
         | Omit<
             AnalyzedSingleImport,
             'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'

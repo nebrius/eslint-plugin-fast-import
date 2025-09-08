@@ -18,9 +18,12 @@ The `rules` option is an array of objects that define the rules for restricting 
 
 - `type`: The type of module we're restricting. Must be one of `first-party` or `third-party`.
 - `filepath`: (first-party) The filepath to restrict. Can be a string or a regular expression.
+  - If `filepath` is a regular expression, then you can specify capture groups and reference them in `allowed` or `denied`.
 - `moduleSpecifier`: (third-party) The module specifier to restrict. Can be a string or a regular expression.
 - `allowed`: An array of filepaths that are allowed to import the restricted filepath. Can be strings or regular expressions.
+  - If `allowed` and `filepath` are regular expressions, then you can specify capture groups from `filepath` and reference them in `allowed` as `$1`, `$2`, etc.
 - `denied`: An array of filepaths that are denied from importing the restricted filepath. Can be strings or regular expressions.
+  - If `denied` and `filepath` are regular expressions, then you can specify capture groups from `filepath` and reference them in `denied` as `$1`, `$2`, etc.
 - `message`: An optional custom message to display when a restricted import is found.
   - Supplying a custom message is strongly recommended, because you can communicate to your users _why_ this import is restricted, e.g. `this component can only be used on the settings page`.
 

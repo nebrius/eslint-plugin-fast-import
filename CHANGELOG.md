@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.4.0 (9/8/2025)
+
+- Fixed bug in `no-unused-exports` rule where it generated a false positive if
+  a reexport was later reexported as an entry point
+- Added support for regex matches in `no-restricted-imports` in allowed/denied
+  options
+
 ## 1.3.0 (7/12/2025)
 
 - Added support for defining entry point symbols using regex

@@ -31,6 +31,17 @@ type FirstPartyEntry = z.infer<typeof firstPartyEntrySchema>;
 type ThirdPartyEntry = z.infer<typeof thirdPartyEntrySchema>;
 type Entry = FirstPartyEntry | ThirdPartyEntry;
 
+function replaceMatchesInRegex(regex: RegExp, matches: string[] | null) {
+  if (!matches) {
+    return regex;
+  }
+  let source = regex.source;
+  for (let i = 0; i < matches.length; i++) {
+    source = source.replaceAll('$' + (i + 1).toString(), matches[i]);
+  }
+  return new RegExp(source, regex.flags);
+}
+
 export const noRestrictedImports = createRule<
   [{ rules: Entry[] }],
   'restrictedImport'
@@ -110,6 +121,7 @@ export const noRestrictedImports = createRule<
 
       for (const entry of entries) {
         // Check if this import applies to this entry
+        let matches: string[] | null = null;
         if (entry.type === 'third-party') {
           // Check if the module specifier matches
           if (typeof entry.moduleSpecifier === 'string') {
@@ -132,8 +144,14 @@ export const noRestrictedImports = createRule<
             if (entry.filepath !== importEntry.resolvedModulePath) {
               continue;
             }
-          } else if (!entry.filepath.test(importEntry.resolvedModulePath)) {
-            continue;
+          } else {
+            const match = entry.filepath.exec(importEntry.resolvedModulePath);
+            if (!match) {
+              continue;
+            }
+            if (match.length > 1) {
+              matches = match.slice(1);
+            }
           }
         }
 
@@ -145,7 +163,9 @@ export const noRestrictedImports = createRule<
               if (allowed === context.filename) {
                 isAllowed = true;
               }
-            } else if (allowed.test(context.filename)) {
+            } else if (
+              replaceMatchesInRegex(allowed, matches).test(context.filename)
+            ) {
               isAllowed = true;
             }
           }
@@ -171,7 +191,9 @@ export const noRestrictedImports = createRule<
               if (denied === context.filename) {
                 isDenied = true;
               }
-            } else if (denied.test(context.filename)) {
+            } else if (
+              replaceMatchesInRegex(denied, matches).test(context.filename)
+            ) {
               isDenied = true;
             }
           }
