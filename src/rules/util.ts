@@ -52,7 +52,7 @@ export function getESMInfo(context: GenericContext) {
     }
   }
 
-  const projectInfo = getProjectInfo();
+  const projectInfo = getProjectInfo(settings.rootDir);
 
   // Initialize file watching if we're in editor mode
   if (settings.mode === 'editor') {
@@ -90,7 +90,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
   fileWatchingInitialized = true;
 
   async function getUpdatedAtTimes() {
-    const projectInfo = getProjectInfo();
+    const projectInfo = getProjectInfo(settings.rootDir);
     const { files, packageJsons } = await getFiles(
       projectInfo.rootDir,
       settings.ignorePatterns
@@ -156,6 +156,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
       // Update the cache
       if (
         updateCacheFromFileSystem(
+          settings.rootDir,
           {
             added,
             deleted,

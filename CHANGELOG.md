@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.2 (9/11/2025)
+
+- Fixed a bug where caching didn't work properly in monorepos
+
 ## 1.4.1 (9/8/2025)
 
 - Added support for excluding type imports in `no-restricted-imports`

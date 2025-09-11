@@ -109,7 +109,7 @@ afterEach(() => {
 it('Updates cache when a new file is added', () => {
   initializeProject(settings);
 
-  let projectInfo = getProjectInfo();
+  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   updateCacheForFile(
@@ -135,7 +135,7 @@ it('Updates cache when a new file is added', () => {
     barrelReexports: [],
   };
 
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
@@ -146,7 +146,7 @@ it('Updates cache when a new file is added', () => {
 it('Updates cache when an unused export is added to an existing file', () => {
   initializeProject(settings);
 
-  let projectInfo = getProjectInfo();
+  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   const FILE_A_UPDATED_CONTENTS = `export type One = string;
@@ -165,7 +165,7 @@ export type Two = string;
     settings
   );
 
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
 
   const EXPECTED_FILE_A_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
@@ -246,12 +246,13 @@ export type Two = string;
 it('Updates cache in bulk for a code file', () => {
   initializeProject(settings);
 
-  let projectInfo = getProjectInfo();
+  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   // Add a new file
   writeFileSync(FILE_TS_NEW, '');
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [
         {
@@ -276,7 +277,7 @@ it('Updates cache in bulk for a code file', () => {
     singleReexports: [],
     barrelReexports: [],
   };
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
@@ -286,6 +287,7 @@ it('Updates cache in bulk for a code file', () => {
   // Modify the new new file
   writeFileSync(FILE_TS_NEW, `console.log()`);
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [],
       modified: [
@@ -310,7 +312,7 @@ it('Updates cache in bulk for a code file', () => {
     singleReexports: [],
     barrelReexports: [],
   };
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
@@ -321,6 +323,7 @@ it('Updates cache in bulk for a code file', () => {
   // info isn't changed in any way)
   writeFileSync(FILE_TS_NEW, `+_)(*&^%$%)`);
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [],
       modified: [
@@ -335,7 +338,7 @@ it('Updates cache in bulk for a code file', () => {
     settings,
     Date.now()
   );
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
@@ -345,6 +348,7 @@ it('Updates cache in bulk for a code file', () => {
   // Delete the file
   unlinkSync(FILE_TS_NEW);
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [],
       modified: [],
@@ -354,19 +358,20 @@ it('Updates cache in bulk for a code file', () => {
     settings,
     Date.now()
   );
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 });
 
 it('Updates cache in bulk for a non-code file', () => {
   initializeProject(settings);
 
-  let projectInfo = getProjectInfo();
+  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 
   // Add a new file
   writeFileSync(FILE_JSON_NEW, '{}');
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [
         {
@@ -384,7 +389,7 @@ it('Updates cache in bulk for a non-code file', () => {
   const EXPECTED_FILE_JSON_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'other',
   };
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
@@ -394,6 +399,7 @@ it('Updates cache in bulk for a non-code file', () => {
   // Modify the new new file
   writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [],
       modified: [
@@ -411,7 +417,7 @@ it('Updates cache in bulk for a non-code file', () => {
   const EXPECTED_FILE_JSON_NEW_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'other',
   };
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
@@ -421,6 +427,7 @@ it('Updates cache in bulk for a non-code file', () => {
   // Delete the file
   unlinkSync(FILE_JSON_NEW);
   updateCacheFromFileSystem(
+    settings.rootDir,
     {
       added: [],
       modified: [],
@@ -430,6 +437,6 @@ it('Updates cache in bulk for a non-code file', () => {
     settings,
     Date.now()
   );
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 });

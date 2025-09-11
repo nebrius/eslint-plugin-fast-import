@@ -38,9 +38,35 @@ import {
   updateResolvedInfoForFile,
 } from './computeResolvedInfo.js';
 
-let baseProjectInfo: BaseProjectInfo | null = null;
-let resolvedProjectInfo: ResolvedProjectInfo | null = null;
-let analyzedProjectInfo: AnalyzedProjectInfo | null = null;
+// When running in monorepos, we need to track project info for each root dir
+// separately, since they have different root dirs, entry points, etc.
+
+const baseProjectInfos = new Map<string, BaseProjectInfo>();
+function getBaseProjectInfo(filename: string) {
+  for (const [rootDir, baseProjectInfo] of baseProjectInfos) {
+    if (filename.startsWith(rootDir)) {
+      return baseProjectInfo;
+    }
+  }
+}
+
+const resolvedProjectInfos = new Map<string, ResolvedProjectInfo>();
+function getResolvedProjectInfo(filename: string) {
+  for (const [rootDir, resolvedProjectInfo] of resolvedProjectInfos) {
+    if (filename.startsWith(rootDir)) {
+      return resolvedProjectInfo;
+    }
+  }
+}
+
+const analyzedProjectInfos = new Map<string, AnalyzedProjectInfo>();
+function getAnalyzedProjectInfo(filename: string) {
+  for (const [rootDir, analyzedProjectInfo] of analyzedProjectInfos) {
+    if (filename.startsWith(rootDir)) {
+      return analyzedProjectInfo;
+    }
+  }
+}
 
 function getEntryPointCheck(
   rootDir: string,
@@ -69,9 +95,9 @@ function getEntryPointCheck(
 // We need to reset settings between runs, since some tests try different settings
 // eslint-disable-next-line fast-import/no-unused-exports
 export function _resetProjectInfo() {
-  baseProjectInfo = null;
-  resolvedProjectInfo = null;
-  analyzedProjectInfo = null;
+  baseProjectInfos.clear();
+  resolvedProjectInfos.clear();
+  analyzedProjectInfos.clear();
 }
 
 export function initializeProject({
@@ -82,12 +108,16 @@ export function initializeProject({
   entryPoints,
 }: ParsedSettings) {
   // If we've already analyzed the project and settings haven't changed, bail
-  if (analyzedProjectInfo) {
+  if (
+    getBaseProjectInfo(rootDir) &&
+    getResolvedProjectInfo(rootDir) &&
+    getAnalyzedProjectInfo(rootDir)
+  ) {
     return;
   }
 
   const baseStart = performance.now();
-  baseProjectInfo = computeBaseInfo({
+  const baseProjectInfo = computeBaseInfo({
     rootDir,
     wildcardAliases,
     fixedAliases,
@@ -97,11 +127,11 @@ export function initializeProject({
   const baseEnd = performance.now();
 
   const resolveStart = performance.now();
-  resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
+  const resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
   const resolveEnd = performance.now();
 
   const analyzestart = performance.now();
-  analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+  const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
   const analyzeEnd = performance.now();
 
   debug(`Initial computation files complete :`);
@@ -125,6 +155,10 @@ export function initializeProject({
     numReexports += fileDetails.barrelReexports.length;
   }
 
+  baseProjectInfos.set(rootDir, baseProjectInfo);
+  resolvedProjectInfos.set(rootDir, resolvedProjectInfo);
+  analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
+
   debug(
     `Project contains ${analyzedProjectInfo.files.size.toLocaleString()} files with:`
   );
@@ -133,7 +167,8 @@ export function initializeProject({
   debug(`  ${numReexports.toLocaleString()} reexports`);
 }
 
-export function getProjectInfo() {
+export function getProjectInfo(rootDir: string) {
+  const analyzedProjectInfo = getAnalyzedProjectInfo(rootDir);
   /* istanbul ignore if */
   if (!analyzedProjectInfo) {
     throw new InternalError('Project info requested before initialization');
@@ -156,11 +191,16 @@ type Changes = {
 // Batch updates file changes. Note that the order of operations (delete, then
 // add, then modified) is critical
 export function updateCacheFromFileSystem(
+  rootDir: string,
   changes: Changes,
   packageJsons: string[],
   settings: ParsedSettings,
   operationStart: number
 ) {
+  const baseProjectInfo = getBaseProjectInfo(rootDir);
+  let resolvedProjectInfo = getResolvedProjectInfo(rootDir);
+  let analyzedProjectInfo = getAnalyzedProjectInfo(rootDir);
+
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
@@ -239,6 +279,7 @@ export function updateCacheFromFileSystem(
   // TODO: it's probably possible to do a more performant+surgical recomputation
   if (numDeletes || numAdditions) {
     resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
+    resolvedProjectInfos.set(rootDir, resolvedProjectInfo);
   }
   const resolveEnd = performance.now();
 
@@ -282,6 +323,7 @@ export function updateCacheFromFileSystem(
   if (numDeletes || numAdditions | numModified) {
     const analyzestart = performance.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+    analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
     const analyzeEnd = performance.now();
 
     debug(
@@ -305,6 +347,10 @@ export function updateCacheForFile(
   ast: TSESTree.Program,
   { entryPoints, rootDir }: ParsedSettings
 ) {
+  const baseProjectInfo = getBaseProjectInfo(filePath);
+  const resolvedProjectInfo = getResolvedProjectInfo(filePath);
+  const analyzedProjectInfo = getAnalyzedProjectInfo(filePath);
+
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
   if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
@@ -334,7 +380,8 @@ export function updateCacheForFile(
       const resolveEnd = performance.now();
 
       const analyzeStart = performance.now();
-      analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+      const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+      analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
       const analyzeEnd = performance.now();
 
       debug(`Update for ${filePath.replace(rootDir, '')} complete:`);
@@ -444,7 +491,8 @@ export function updateCacheForFile(
     const resolveEnd = performance.now();
 
     const anazlyzeStart = performance.now();
-    analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+    const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+    analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
     const analyzeEnd = performance.now();
 
     debug(`${filePath.replace(rootDir, '')} add complete:`);

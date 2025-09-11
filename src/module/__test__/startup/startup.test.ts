@@ -24,7 +24,7 @@ it('Updates cache when a new file is added', () => {
   };
   initializeProject(settings);
 
-  let projectInfo = getProjectInfo();
+  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({});
 
   updateCacheForFile(
@@ -39,7 +39,7 @@ it('Updates cache when a new file is added', () => {
     settings
   );
 
-  projectInfo = getProjectInfo();
+  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec({
     [FILE_A]: {
       fileType: 'code',
