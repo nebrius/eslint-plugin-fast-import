@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.3 (9/11/2025)
+
+- Fixed a bug with the recent bug fix
+
 ## 1.4.2 (9/11/2025)
 
 - Fixed a bug where caching didn't work properly in monorepos

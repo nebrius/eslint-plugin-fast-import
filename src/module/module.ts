@@ -124,14 +124,17 @@ export function initializeProject({
     ignorePatterns,
     isEntryPointCheck: getEntryPointCheck(rootDir, entryPoints),
   });
+  baseProjectInfos.set(rootDir, baseProjectInfo);
   const baseEnd = performance.now();
 
   const resolveStart = performance.now();
   const resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
+  resolvedProjectInfos.set(rootDir, resolvedProjectInfo);
   const resolveEnd = performance.now();
 
   const analyzestart = performance.now();
   const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
+  analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
   const analyzeEnd = performance.now();
 
   debug(`Initial computation files complete :`);
@@ -154,10 +157,6 @@ export function initializeProject({
     numReexports += fileDetails.singleReexports.length;
     numReexports += fileDetails.barrelReexports.length;
   }
-
-  baseProjectInfos.set(rootDir, baseProjectInfo);
-  resolvedProjectInfos.set(rootDir, resolvedProjectInfo);
-  analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
 
   debug(
     `Project contains ${analyzedProjectInfo.files.size.toLocaleString()} files with:`
