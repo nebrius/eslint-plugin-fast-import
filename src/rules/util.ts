@@ -18,7 +18,7 @@ import {
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/nebrius/esm-utils/tree/main/src/rules/${name}/README.md`
+    `https://github.com/nebrius/eslint-plugin-fast-import/tree/main/src/rules/${name}/README.md`
 );
 
 const updateListeners = new Set<() => void>();
@@ -80,14 +80,14 @@ export function getLocFromRange(
   return { start, end };
 }
 
-let fileWatchingInitialized = false;
+const fileWatchingInitialized = new Set<string>();
 // This code is too dynamic w.r.t. the filesystem to effectively test
 /* istanbul ignore next*/
 async function initializeFileWatching(settings: ParsedSettings) {
-  if (fileWatchingInitialized) {
+  if (fileWatchingInitialized.has(settings.rootDir)) {
     return;
   }
-  fileWatchingInitialized = true;
+  fileWatchingInitialized.add(settings.rootDir);
 
   async function getUpdatedAtTimes() {
     const projectInfo = getProjectInfo(settings.rootDir);
@@ -112,7 +112,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
     try {
       // Reset settings in case package.json, tsconfig.json, eslint.config.js,
       // or other files that control users settings have changed
-      resetSettings();
+      resetSettings(settings.rootDir);
       const start = performance.now();
       const latestUpdatedTimes = await getUpdatedAtTimes();
 

@@ -4,7 +4,7 @@ import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
 import { _resetProjectInfo } from '../../../module/module.js';
-import { resetSettings } from '../../../settings/settings.js';
+import { resetAllSettings } from '../../../settings/settings.js';
 import { noRestrictedImports } from '../restricted.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
@@ -24,7 +24,7 @@ const ruleTester = new RuleTester({
 });
 
 beforeEach(() => {
-  resetSettings();
+  resetAllSettings();
   _resetProjectInfo();
 });
 

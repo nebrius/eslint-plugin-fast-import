@@ -46,19 +46,26 @@ const DEFAULT_MODE =
       ? 'fix'
       : 'one-shot';
 
-let settings: ParsedSettings | null = null;
+const settings = new Map<string, ParsedSettings>();
 
-// Used for tests and when settings files have changed in editor mode
-export function resetSettings() {
-  settings = null;
+// Used when settings files have changed in editor mode
+export function resetSettings(rootDir: string) {
+  settings.delete(rootDir);
+}
+
+// Used for tests
+// eslint-disable-next-line fast-import/no-unused-exports
+export function resetAllSettings() {
+  settings.clear();
 }
 
 export function getSettings(
   context: Pick<GenericContext, 'filename' | 'settings'>
 ): ParsedSettings {
   // Return the cached copy if we have it
-  if (settings) {
-    return settings;
+  const cachedSettings = settings.get(context.filename);
+  if (cachedSettings) {
+    return cachedSettings;
   }
 
   // Get user supplied settings first, since we need rootDir from it to proceed
@@ -168,7 +175,7 @@ export function getSettings(
   }));
 
   // Apply defaults and save to the settings cache
-  settings = {
+  const newSettings = {
     rootDir,
     wildcardAliases,
     fixedAliases,
@@ -177,5 +184,6 @@ export function getSettings(
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode,
   };
-  return settings;
+  settings.set(rootDir, newSettings);
+  return newSettings;
 }
