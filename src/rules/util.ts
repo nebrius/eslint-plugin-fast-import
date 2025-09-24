@@ -8,7 +8,7 @@ import {
   updateCacheFromFileSystem,
 } from '../module/module.js';
 import type { ParsedSettings } from '../settings/settings.js';
-import { getSettings, resetSettings } from '../settings/settings.js';
+import { getSettings, markSettingsForRefresh } from '../settings/settings.js';
 import type { GenericContext } from '../types/context.js';
 import {
   getFiles,
@@ -112,7 +112,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
     try {
       // Reset settings in case package.json, tsconfig.json, eslint.config.js,
       // or other files that control users settings have changed
-      resetSettings(settings.rootDir);
+      markSettingsForRefresh(settings.rootDir);
       const start = performance.now();
       const latestUpdatedTimes = await getUpdatedAtTimes();
 

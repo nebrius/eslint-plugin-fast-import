@@ -46,25 +46,46 @@ const DEFAULT_MODE =
       ? 'fix'
       : 'one-shot';
 
-const settings = new Map<string, ParsedSettings>();
-
-// Used when settings files have changed in editor mode
-export function resetSettings(rootDir: string) {
-  settings.delete(rootDir);
-}
+const settingsCache = new Map<
+  string,
+  { settings: ParsedSettings; refresh: boolean }
+>();
 
 // Used for tests
 // eslint-disable-next-line fast-import/no-unused-exports
 export function _resetAllSettings() {
-  settings.clear();
+  settingsCache.clear();
+}
+
+// Used when settings files have changed in editor mode
+export function markSettingsForRefresh(rootDir: string) {
+  const cacheEntry = settingsCache.get(rootDir);
+  if (!cacheEntry) {
+    return;
+  }
+  settingsCache.set(rootDir, { settings: cacheEntry.settings, refresh: true });
+}
+
+function compareSettingsObjects(
+  a: Record<string, unknown>,
+  b: Record<string, unknown> | undefined
+) {
+  return !!b && JSON.stringify(a) === JSON.stringify(b);
 }
 
 export function getSettings(
   context: Pick<GenericContext, 'filename' | 'settings'>
 ): ParsedSettings {
   // Return the cached copy if we have it
-  const cachedSettings = settings.get(context.filename);
-  if (cachedSettings) {
+  let cachedSettings: ParsedSettings | undefined;
+  let needsRefresh = false;
+  for (const [rootDir, cacheEntry] of settingsCache) {
+    if (context.filename.startsWith(rootDir)) {
+      cachedSettings = cacheEntry.settings;
+      needsRefresh = cacheEntry.refresh;
+    }
+  }
+  if (cachedSettings && !needsRefresh) {
     return cachedSettings;
   }
 
@@ -80,7 +101,7 @@ export function getSettings(
     ...typeScriptSettings,
     ...userSettings,
   };
-  const { alias = {}, entryPoints = [] } = mergedSettings;
+  const { alias = {}, entryPoints = {} } = mergedSettings;
 
   // Clean up any aliases
   const wildcardAliases: ParsedSettings['wildcardAliases'] = {};
@@ -139,33 +160,66 @@ export function getSettings(
   mergedSettings.mode = mergedSettings.mode ?? 'auto';
   const mode =
     mergedSettings.mode === 'auto' ? DEFAULT_MODE : mergedSettings.mode;
-  debug(`Running in ${mode} mode`);
-  debug(`Setting root dir to ${rootDir}`);
-  if (!Object.keys(wildcardAliases).length) {
-    debug(`No wildcard aliases defined`);
-  } else {
-    debug(`Wildcard aliases:`);
-    for (const [symbol, path] of Object.entries(wildcardAliases)) {
-      debug(`  ${symbol}: ${path}`);
-    }
-  }
-  if (!Object.keys(fixedAliases).length) {
-    debug(`No fixed aliases defined`);
-  } else {
-    debug(`Fixed aliases:`);
-    for (const [symbol, path] of Object.entries(fixedAliases)) {
-      debug(`  ${symbol}: ${path}`);
-    }
-  }
-  debug(`Entry points:`);
-  for (const [filePattern, symbols] of Object.entries(entryPoints)) {
-    debug(`  ${filePattern}:`);
-    if (Array.isArray(symbols)) {
-      for (const symbol of symbols) {
-        debug(`    ${symbol}`);
-      }
+  if (cachedSettings?.mode !== mode) {
+    if (cachedSettings) {
+      debug(`Mode change from ${cachedSettings.mode} to ${mode}`);
     } else {
-      debug(`    ${symbols.toString()}`);
+      debug(`Running in ${mode} mode`);
+    }
+  }
+  if (cachedSettings?.rootDir !== rootDir) {
+    if (cachedSettings) {
+      debug(`Root dir change from ${cachedSettings.rootDir} to ${rootDir}`);
+    } else {
+      debug(`Setting root dir to ${rootDir}`);
+    }
+  }
+
+  if (
+    !compareSettingsObjects(wildcardAliases, cachedSettings?.wildcardAliases)
+  ) {
+    if (cachedSettings) {
+      debug(`Wildcard aliases changed`);
+    }
+    if (!Object.keys(wildcardAliases).length) {
+      debug(`No wildcard aliases defined`);
+    } else {
+      debug(`Wildcard aliases:`);
+      for (const [symbol, path] of Object.entries(wildcardAliases)) {
+        debug(`  ${symbol}: ${path}`);
+      }
+    }
+  }
+
+  if (!compareSettingsObjects(fixedAliases, cachedSettings?.fixedAliases)) {
+    if (cachedSettings) {
+      debug(`Fixed aliases changed`);
+    }
+    if (!Object.keys(fixedAliases).length) {
+      debug(`No fixed aliases defined`);
+    } else {
+      debug(`Fixed aliases:`);
+      for (const [symbol, path] of Object.entries(fixedAliases)) {
+        debug(`  ${symbol}: ${path}`);
+      }
+    }
+  }
+
+  // TODO: Comparing entry points is a bit more complex since we have to compare
+  // the parsed entry points, which can't be serialized and don't have
+  // referential stability, so we skip printing changes if we have a cached
+  // copy. It's not accurate, but good enough for now
+  if (!cachedSettings) {
+    debug(`Entry points:`);
+    for (const [filePattern, symbols] of Object.entries(entryPoints)) {
+      debug(`  ${filePattern}:`);
+      if (Array.isArray(symbols)) {
+        for (const symbol of symbols) {
+          debug(`    ${symbol}`);
+        }
+      } else {
+        debug(`    ${symbols.toString()}`);
+      }
     }
   }
 
@@ -184,6 +238,6 @@ export function getSettings(
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode,
   };
-  settings.set(rootDir, newSettings);
+  settingsCache.set(rootDir, { settings: newSettings, refresh: false });
   return newSettings;
 }
