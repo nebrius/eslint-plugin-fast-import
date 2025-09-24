@@ -55,7 +55,7 @@ export function resetSettings(rootDir: string) {
 
 // Used for tests
 // eslint-disable-next-line fast-import/no-unused-exports
-export function resetAllSettings() {
+export function _resetAllSettings() {
   settings.clear();
 }
 

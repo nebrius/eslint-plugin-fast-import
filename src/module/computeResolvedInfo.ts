@@ -199,11 +199,12 @@ export function deleteResolvedInfoForFile(
 
 export function computeFolderTree(baseInfo: BaseProjectInfo) {
   // Reset the cache before we start
-  folderTree = {
+  const folderTree: FolderTreeNode = {
     folders: {},
     files: {},
     filesAndExtensions: {},
   };
+  folderTrees.set(baseInfo.rootDir, folderTree);
   for (const [file] of baseInfo.files) {
     const folders = splitPathIntoSegments(
       getRelativePathFromRoot(baseInfo.rootDir, file)
@@ -222,6 +223,7 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
       if (!currentFolder) {
         break;
       }
+
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!currentFolderTreeNode.folders[currentFolder]) {
         currentFolderTreeNode.folders[currentFolder] = {
@@ -240,6 +242,7 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
         ? '.d.tsx'
         : extname(basefile);
     const baseFileName = basename(basefile, extension);
+
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!currentFolderTreeNode.filesAndExtensions[baseFileName]) {
       currentFolderTreeNode.filesAndExtensions[baseFileName] = [];
@@ -423,11 +426,8 @@ type FolderTreeNode = {
   filesAndExtensions: Record<string, string[]>;
 };
 
-let folderTree: FolderTreeNode = {
-  folders: {},
-  files: {},
-  filesAndExtensions: {},
-};
+// Map from rootDir to folder tree
+const folderTrees = new Map<string, FolderTreeNode>();
 
 const formattedBuiltinModules = builtinModules.filter(
   (m) => !m.startsWith('_')
@@ -476,7 +476,11 @@ function resolveModuleSpecifier({
       );
     }
 
-    let currentFolderTreeNode = folderTree;
+    let currentFolderTreeNode = folderTrees.get(baseProjectInfo.rootDir) ?? {
+      folders: {},
+      files: {},
+      filesAndExtensions: {},
+    };
     while (true) {
       const currentFolderSegment = segments.shift();
       if (!currentFolderSegment) {

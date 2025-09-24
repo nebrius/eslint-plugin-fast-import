@@ -39,7 +39,8 @@ import {
 } from './computeResolvedInfo.js';
 
 // When running in monorepos, we need to track project info for each root dir
-// separately, since they have different root dirs, entry points, etc.
+// separately, since they have different root dirs, entry points, etc. To
+// support this, we use a map from root dir to project info.
 
 const baseProjectInfos = new Map<string, BaseProjectInfo>();
 function getBaseProjectInfo(filename: string) {

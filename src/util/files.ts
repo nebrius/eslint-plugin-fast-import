@@ -137,40 +137,42 @@ export function getRelativePathFromRoot(rootDir: string, filePath: string) {
   return relativePath;
 }
 
-let ignores: Array<{ dir: string; ig: Ignore }> | null = null;
-const ignoreCache = new Map<string, boolean>();
+type IgnoreData = {
+  cache: Map<string, boolean>;
+  ignores: Array<{ dir: string; ig: Ignore }>;
+};
+
+// Map from rootDir to ignore data
+const ignoreData = new Map<string, IgnoreData>();
 export function isFileIgnored(rootDir: string, filePath: string) {
-  /* istanbul ignore if */
+  const ignores = ignoreData.get(rootDir);
   if (!ignores) {
-    throw new InternalError(`isFileIgnored called before ignores initialized`);
-  }
-  if (!filePath.startsWith(rootDir)) {
     return true;
   }
 
   // Get the file from the cache, if it's already cached
-  const fileCacheResult = ignoreCache.get(filePath);
+  const fileCacheResult = ignores.cache.get(filePath);
   if (typeof fileCacheResult === 'boolean') {
     return fileCacheResult;
   }
 
   // Otherwise compare with ignore
-  for (const { dir, ig } of ignores) {
+  for (const { dir, ig } of ignores.ignores) {
     // Ignore file paths are relative to the directory the ignore file is in,
     // and needs files passed in to check to also be relative to that same
     // directory, so we get the relative path to the ignore file directory
     if (filePath.startsWith(dir) && ig.ignores(relative(dir, filePath))) {
-      ignoreCache.set(filePath, true);
+      ignores.cache.set(filePath, true);
       return true;
     }
   }
-  ignoreCache.set(filePath, false);
+  ignores.cache.set(filePath, false);
   return false;
 }
 
 // eslint-disable-next-line fast-import/no-unused-exports
 export function _reset() {
-  ignores = null;
+  ignoreData.clear();
 }
 
 export function getDependenciesFromPackageJson(packageJsonPath: string) {
@@ -284,7 +286,7 @@ function initializeIgnores(
   ignorePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
-  if (ignores) {
+  if (ignoreData.has(rootDir)) {
     return;
   }
 
@@ -323,14 +325,17 @@ function initializeIgnores(
     contents: readFileSync(filePath, 'utf-8'),
   }));
 
-  ignores = [
-    ...ignorePatterns.map((i) => ({
-      dir: i.dir,
-      ig: ignore().add(i.contents),
-    })),
-    ...ignoreFiles.map((i) => ({
-      dir: dirname(i.filePath),
-      ig: ignore().add(i.contents),
-    })),
-  ];
+  ignoreData.set(rootDir, {
+    ignores: [
+      ...ignorePatterns.map((i) => ({
+        dir: i.dir,
+        ig: ignore().add(i.contents),
+      })),
+      ...ignoreFiles.map((i) => ({
+        dir: dirname(i.filePath),
+        ig: ignore().add(i.contents),
+      })),
+    ],
+    cache: new Map<string, boolean>(),
+  });
 }
