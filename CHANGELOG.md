@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.4.4 (9/24/2025)
+
+- More monorepo bug fixes
+
 ## 1.4.3 (9/11/2025)
 
 - Fixed a bug with the recent bug fix
