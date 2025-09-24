@@ -10,8 +10,9 @@ import {
 type Options = [];
 type MessageIds = 'noCycles';
 
-// Map of filepaths to imports/reexports with cycle dependencies
-const cycleMap = new Map<string, Set<string>>();
+// TODO
+// Map of rootDirs to filepaths to imports/reexports with cycle dependencies
+const cycleMaps = new Map<string, Map<string, Set<string>>>();
 
 function checkFile(
   originalFilePath: string,
@@ -28,6 +29,12 @@ function checkFile(
   // Non-JS files by definition can't be circilar, since they can't import JS
   if (fileDetails.fileType !== 'code') {
     return;
+  }
+
+  let cycleMap = cycleMaps.get(projectInfo.rootDir);
+  if (!cycleMap) {
+    cycleMap = new Map<string, Set<string>>();
+    cycleMaps.set(projectInfo.rootDir, cycleMap);
   }
 
   // Now check if this file is part of a cycle
@@ -86,14 +93,14 @@ function checkFile(
 }
 
 registerUpdateListener(() => {
-  cycleMap.clear();
+  cycleMaps.clear();
 });
 
 // This is only used in tests, since update listeners aren't guaranteed to
 // be called on each run
 // eslint-disable-next-line fast-import/no-unused-exports
 export function _resetCycleMap() {
-  cycleMap.clear();
+  cycleMaps.clear();
 }
 
 export const noCycle = createRule<Options, MessageIds>({
@@ -126,6 +133,11 @@ export const noCycle = createRule<Options, MessageIds>({
       return {};
     }
 
+    let cycleMap = cycleMaps.get(projectInfo.rootDir);
+    if (!cycleMap) {
+      cycleMap = new Map<string, Set<string>>();
+      cycleMaps.set(projectInfo.rootDir, cycleMap);
+    }
     let cycleImports = cycleMap.get(context.filename);
     if (!cycleImports) {
       checkFile(context.filename, context.filename, projectInfo, []);
