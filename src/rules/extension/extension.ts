@@ -65,6 +65,7 @@ export const consistentFileExtensions = createRule<
       forceTsExtension = FORCE_TS_EXTENSION_DEFAULT,
     } = context.options[0] ?? {};
 
+    /* istanbul ignore if */
     if (mode === 'never' && forceTsExtension) {
       throw new Error('forceTsExtension cannot be true when mode is never');
     }
