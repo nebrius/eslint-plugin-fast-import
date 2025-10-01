@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.0 (10/1/2025)
+
+- Added `consistent-file-extensions` rule
+
 ## 1.4.4 (9/24/2025)
 
 - More monorepo bug fixes

@@ -6,6 +6,7 @@ import { getDirname } from 'cross-dirname';
 
 import { noCycle } from './rules/cycle/cycle.js';
 import { noEntryPointImports } from './rules/entryPoint/entryPoint.js';
+import { consistentFileExtensions } from './rules/extension/extension.js';
 import { noExternalBarrelReexports } from './rules/externalBarrelReexports/externalBarrelReexports.js';
 import { namedAsDefault } from './rules/namedAsDefault/namedAsDefault.js';
 import { nodePrefix } from './rules/nodePrefix/nodePrefix.js';
@@ -34,6 +35,7 @@ const plugin = {
   },
   configs: {},
   rules: {
+    'consistent-file-extensions': consistentFileExtensions,
     'no-unused-exports': noUnusedExports,
     'no-cycle': noCycle,
     'no-entry-point-imports': noEntryPointImports,
@@ -68,6 +70,7 @@ const allConfig = {
     'fast-import': plugin,
   },
   rules: {
+    'fast-import/consistent-file-extensions': 'error',
     'fast-import/no-unused-exports': 'error',
     'fast-import/no-cycle': 'error',
     'fast-import/no-entry-point-imports': 'error',
@@ -84,8 +87,9 @@ const offConfig = {
     'fast-import': plugin,
   },
   rules: {
+    'fast-import/consistent-file-extensions': 'off',
     'fast-import/no-unused-exports': 'off',
-    'fast-import/no-cycle-imports': 'off',
+    'fast-import/no-cycle': 'off',
     'fast-import/no-entry-point-imports': 'off',
     'fast-import/no-unresolved-imports': 'off',
     'fast-import/no-external-barrel-reexports': 'off',
