@@ -55,7 +55,7 @@ export const noRestrictedImports = createRule<
         'Esnures restricted imports are only imported by allowed consumers',
     },
     schema: [zodToJsonSchema(schema) as JSONSchema4],
-    fixable: 'code',
+    fixable: undefined,
     type: 'problem',
     messages: {
       restrictedImport: '{{message}}',

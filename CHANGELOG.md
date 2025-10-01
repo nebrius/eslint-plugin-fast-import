@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.1 (10/1/2025)
+
+- Added fixer to `consistent-file-extensions` rule
+
 ## 1.5.0 (10/1/2025)
 
 - Added `consistent-file-extensions` rule

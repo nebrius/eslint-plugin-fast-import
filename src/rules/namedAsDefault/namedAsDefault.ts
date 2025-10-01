@@ -8,7 +8,7 @@ export const namedAsDefault = createRule({
         'Ensures that imports of Node.js modules use the `node:` prefix',
     },
     schema: [],
-    fixable: 'code',
+    fixable: undefined,
     type: 'problem',
     messages: {
       noNamedAsDefault:

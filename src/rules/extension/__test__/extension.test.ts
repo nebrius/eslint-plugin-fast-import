@@ -22,7 +22,7 @@ const ruleTester = new RuleTester({
 ruleTester.run('consistent-file-extensions', consistentFileExtensions, {
   valid: [
     {
-      code: `import { a } from '@/a.ts';
+      code: `import { a } from '@/a.tsx';
 import { b } from './b.js';
 `,
       filename: FILE_C,
@@ -73,9 +73,12 @@ import { b } from './b';
           mode: 'fix',
         },
       },
+      output: `import { a } from '@/a.tsx';
+import { b } from './b.ts';
+`,
     },
     {
-      code: `import { a } from '@/a.ts';
+      code: `import { a } from '@/a.tsx';
 import { b } from './b.js';
 `,
       filename: FILE_C,
@@ -92,7 +95,7 @@ import { b } from './b.js';
       options: [{ forceTsExtension: true }],
     },
     {
-      code: `import { a } from '@/a.ts';
+      code: `import { a } from '@/a.tsx';
 import { b } from './b.ts';
 `,
       filename: FILE_C,
@@ -110,6 +113,9 @@ import { b } from './b.ts';
         },
       },
       options: [{ mode: 'never' }],
+      output: `import { a } from '@/a';
+import { b } from './b';
+`,
     },
   ],
 });

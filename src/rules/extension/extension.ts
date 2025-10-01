@@ -1,10 +1,17 @@
 import { extname } from 'node:path';
 
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
+import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
+
+type ImportDeclaration = TSESTree.ImportDeclaration | TSESTree.ImportExpression;
+type ReexportDeclaration =
+  | TSESTree.ExportNamedDeclarationWithSource
+  | TSESTree.ExportAllDeclaration;
 
 const MODE_DEFAULT = 'always';
 const FORCE_TS_EXTENSION_DEFAULT = false;
@@ -77,8 +84,12 @@ export const consistentFileExtensions = createRule<
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {
-      const { moduleSpecifier, resolvedModuleType, resolvedModulePath } =
-        importEntry;
+      const {
+        moduleSpecifier,
+        resolvedModuleType,
+        resolvedModulePath,
+        statementNodeRange,
+      } = importEntry;
       if (!moduleSpecifier || resolvedModuleType !== 'firstPartyCode') {
         continue;
       }
@@ -86,11 +97,47 @@ export const consistentFileExtensions = createRule<
         context.report({
           messageId: 'missingExtension',
           loc: getLocFromRange(context, importEntry.reportNodeRange),
+          fix(fixer) {
+            const sourceNode = context.sourceCode.getNodeByRangeIndex(
+              statementNodeRange[0]
+            ) as ImportDeclaration | ReexportDeclaration;
+            /* istanbul ignore if */
+            if (!('raw' in sourceNode.source)) {
+              throw new InternalError(
+                `Property "raw" is missing in sourceNode.source`
+              );
+            }
+            return fixer.replaceText(
+              sourceNode.source,
+              sourceNode.source.raw.replace(
+                moduleSpecifier,
+                moduleSpecifier + extname(resolvedModulePath)
+              )
+            );
+          },
         });
       } else if (mode === 'never' && EXTENSION_REGEX.test(moduleSpecifier)) {
         context.report({
           messageId: 'extraExtension',
           loc: getLocFromRange(context, importEntry.reportNodeRange),
+          fix(fixer) {
+            const sourceNode = context.sourceCode.getNodeByRangeIndex(
+              statementNodeRange[0]
+            ) as ImportDeclaration | ReexportDeclaration;
+            /* istanbul ignore if */
+            if (!('raw' in sourceNode.source)) {
+              throw new InternalError(
+                `Property "raw" is missing in sourceNode.source`
+              );
+            }
+            return fixer.replaceText(
+              sourceNode.source,
+              sourceNode.source.raw.replace(
+                moduleSpecifier,
+                moduleSpecifier.replace(EXTENSION_REGEX, '')
+              )
+            );
+          },
         });
       }
       if (

@@ -56,6 +56,7 @@ npm install --save-dev eslint-plugin-fast-import
 
 | Name                                                                        | 💼   | 🔧   |
 | --------------------------------------------------------------------------- | --- | --- |
+| [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰   | 🔧   |
 | [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
 | [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
 | [no-cycle](src/rules/cycle/README.md)                                       | 🧰 ☑️ |     |
