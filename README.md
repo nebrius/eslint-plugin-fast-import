@@ -56,14 +56,14 @@ npm install --save-dev eslint-plugin-fast-import
 
 | Name                                                                        | 💼   | 🔧   |
 | --------------------------------------------------------------------------- | --- | --- |
-| [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰   | 🔧   |
-| [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
-| [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
 | [no-cycle](src/rules/cycle/README.md)                                       | 🧰 ☑️ |     |
-| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
 | [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 🧰 ☑️ |     |
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
 | [no-named-as-default](src/rules/namedAsDefault/README.md)                   | 🧰 ☑️ |     |
+| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
+| [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
+| [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
+| [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰   | 🔧   |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
 | [no-restricted-imports](src/rules/restricted/README.md) *                   |     |     |
 
