@@ -42,6 +42,16 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       },
     },
     {
+      code: `import type { JSX } from 'react'`,
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
       code: `export * from 'type-fest'`,
       filename: FILE_A,
       settings: {
@@ -79,6 +89,17 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       code: `export { SourceCode } from './c';`,
       filename: FILE_A,
       errors: [{ messageId: 'noUnresolvedImports' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import React from 'react'`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTransientDependencies' }],
       settings: {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.5.2 (10/21/2025)
+
+- Fixed bug where type imports from a package where only the DefinitelyTyped
+  package was installed were not being recognized as listed in package.json
+
 ## 1.5.1 (10/1/2025)
 
 - Added fixer to `consistent-file-extensions` rule

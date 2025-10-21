@@ -53,6 +53,12 @@ export const noUnresolvedImports = createRule({
               (dep) =>
                 // Check if this is exactly the import specifier, e.g. 'react'
                 importEntry.moduleSpecifier === dep ||
+                // Check if this is a type import for a dep from DefinitelyTyped
+                // just in case someone is only using type imports w/o the
+                // implementation package installed
+                ('isTypeImport' in importEntry &&
+                  importEntry.isTypeImport &&
+                  `@types/${importEntry.moduleSpecifier}` === dep) ||
                 // Check if this is reaching into the package, e.g. 'react/path'
                 importEntry.moduleSpecifier?.startsWith(dep + '/')
             )
