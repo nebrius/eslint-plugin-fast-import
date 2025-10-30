@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.5.3 (10/30/2025)
+
+- Cleaned up caching updates in monorepos
+
 ## 1.5.2 (10/21/2025)
 
 - Fixed bug where type imports from a package where only the DefinitelyTyped

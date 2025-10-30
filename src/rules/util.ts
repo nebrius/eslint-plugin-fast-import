@@ -21,10 +21,8 @@ export const createRule = ESLintUtils.RuleCreator(
     `https://github.com/nebrius/eslint-plugin-fast-import/tree/main/src/rules/${name}/README.md`
 );
 
-// TODO: This should also be project dependent so that we don't call update
-// listeners for files that are part of a different project
-const updateListeners = new Set<() => void>();
-export function registerUpdateListener(cb: () => void) {
+const updateListeners = new Set<(rootDir: string) => void>();
+export function registerUpdateListener(cb: (rootDir: string) => void) {
   updateListeners.add(cb);
 }
 
@@ -50,7 +48,7 @@ export function getESMInfo(context: GenericContext) {
     )
   ) {
     for (const updateListener of updateListeners) {
-      updateListener();
+      updateListener(settings.rootDir);
     }
   }
 
@@ -170,7 +168,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
         )
       ) {
         for (const updateListener of updateListeners) {
-          updateListener();
+          updateListener(settings.rootDir);
         }
       }
 

@@ -92,8 +92,8 @@ function checkFile(
   return;
 }
 
-registerUpdateListener(() => {
-  cycleMaps.clear();
+registerUpdateListener((root) => {
+  cycleMaps.delete(root);
 });
 
 // This is only used in tests, since update listeners aren't guaranteed to

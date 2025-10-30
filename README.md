@@ -67,7 +67,7 @@ npm install --save-dev eslint-plugin-fast-import
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
 | [no-restricted-imports](src/rules/restricted/README.md) *                   |     |     |
 
-* No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
+&ast; No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
 
 There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
 
@@ -98,7 +98,7 @@ Fast Import supports a number of configuration options. Fast Import attempts to 
 
 Type: `string`
 
-Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzing remaining files.
+Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
 
 Note: Fast Import automatically filters out folders named `node_modules`, `.git`, `build`, and `dist` regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze one of these folders, file an issue and we'll find a way to support your use case.
 
@@ -302,7 +302,7 @@ Fast import works by using a three phase pipelined algorithm that is very cache 
 
 ### Phase 1: AST analysis
 
-This phase reads in every non-ignored inside `rootDir` with a known JavaScript extension (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`) and parses the file into an AST. The AST is then converted into an import/export specific form optimized for import/export analysis.
+This phase reads in every non-ignored file inside `rootDir` with a known JavaScript extension (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`) and parses the file into an AST. The AST is then converted into an import/export specific form optimized for import/export analysis.
 
 For example, the import statement `import { foo } from './bar'` gets boiled down to:
 
@@ -334,7 +334,7 @@ Fast Import uses its own high-performance resolver to achieve this speed. It res
 2. A file within `rootDir`, aka first party
 3. A third party module
 
-Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Fast Imports resolution algorithm considerably faster than other resolvers. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
+Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Fast Import's resolution algorithm considerably faster than other resolvers. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
 
 In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measureably improve performance.
 
