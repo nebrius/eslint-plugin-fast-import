@@ -146,7 +146,7 @@ Note: patterns with a single star after them will match any symbols/files that s
 
 #### entryPoints
 
-Type: `Array<{ glob: string, symbols: string[] | RegExp }>`
+Type: `Record<string, Array<string | RegExp>>`
 
 Entry points define exports that are not imported by code inside of the code base, but instead by code outside of the codebase.
 
@@ -159,16 +159,10 @@ Example:
 ```js
 recommended({
   rootDir: __dirname
-  entryPoints: [
-    {
-      file: './src/index.ts',
-      symbols: ['default', 'anotherExport']
-    },
-    {
-      file: './src/app/**/page.tsx',
-      symbols: ['default']
-    }
-  ]
+  entryPoints: {
+    './src/index.ts': ['default', 'anotherExport'],
+    './src/app/**/page.tsx': ['default']
+  }
 })
 ```
 
