@@ -2,7 +2,6 @@ import { isAbsolute, resolve } from 'node:path';
 
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
@@ -54,7 +53,7 @@ export const noRestrictedImports = createRule<
       description:
         'Esnures restricted imports are only imported by allowed consumers',
     },
-    schema: [zodToJsonSchema(schema) as JSONSchema4],
+    schema: [schema.toJSONSchema({ unrepresentable: 'any' }) as JSONSchema4],
     fixable: undefined,
     type: 'problem',
     messages: {

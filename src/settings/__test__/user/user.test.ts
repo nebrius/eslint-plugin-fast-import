@@ -65,8 +65,7 @@ it('Throws on missing rootDir in settings', () => {
   ).toThrow(`Invalid settings:
   Invalid type for property "rootDir"
     expected: string
-    received: undefined
-    message: Required
+    message: Invalid input: expected string, received undefined
 `);
 });
 
@@ -108,10 +107,9 @@ it('Throws on invalid user supplied mode', () => {
       },
     })
   ).toThrow(`Invalid settings:
-  Invalid enum_value for property "mode"
-    received: fake
-    options: auto,one-shot,fix,editor
-    message: Invalid enum value. Expected 'auto' | 'one-shot' | 'fix' | 'editor', received 'fake'
+  Invalid value for property "mode"
+    values: auto,one-shot,fix,editor
+    message: Invalid option: expected one of "auto"|"one-shot"|"fix"|"editor"
 `);
 });
 

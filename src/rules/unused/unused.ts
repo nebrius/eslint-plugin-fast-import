@@ -1,6 +1,5 @@
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import {
   createRule,
@@ -27,7 +26,7 @@ export const noUnusedExports = createRule<
       description:
         'Ensure exports are imported elsewhere, taking into account whether files are test files or non-test files, and whether the export is a type export or value export',
     },
-    schema: [zodToJsonSchema(schema) as JSONSchema4],
+    schema: [schema.toJSONSchema() as JSONSchema4],
     fixable: undefined,
     type: 'problem',
     messages: {

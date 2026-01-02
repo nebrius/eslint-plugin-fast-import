@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@types/react": "*"
+    "@types/react": "*",
+    "@test/two": "*"
   }
 }

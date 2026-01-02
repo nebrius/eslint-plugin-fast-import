@@ -8,6 +8,7 @@ export type BaseESMStatement = {
    */
   statementNodeRange: TSESTree.Node['range'];
 
+  // TODO: convert this to "moduleSpecifierNodeRange", "importNameNodeRange", etc.
   /**
    * The AST node range to report an error on, if one exists.
    *

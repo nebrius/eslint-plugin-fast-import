@@ -3,7 +3,6 @@ import { extname } from 'node:path';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
@@ -35,7 +34,7 @@ export const consistentFileExtensions = createRule<
       description:
         'Ensures that first party imports always or never include file extensions',
     },
-    schema: [zodToJsonSchema(schema) as JSONSchema4],
+    schema: [schema.toJSONSchema() as JSONSchema4],
     fixable: 'code',
     type: 'problem',
     messages: {

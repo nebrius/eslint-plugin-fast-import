@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.6.0 (1/2/2026)
+
+- Removed support for implicit workspace dependency resolution
+  - npm workspaces, but not pnpm or yarn workspaces, have an (unintentional?) side effect that you can import other cross-repo packages without specifying them in package.json.
+  - This is generally a bad-practice, and can be solved by explicitly listing the package as `"@scope/package-name": "*"` in package.json to achieve the same behavior.
+- Updated dependencies
+
 ## 1.5.3 (10/30/2025)
 
 - Cleaned up caching updates in monorepos

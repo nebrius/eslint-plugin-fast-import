@@ -250,7 +250,7 @@ function getRange(
     // This shouldn't happen in practice, but oxc's types are defined rather
     // loosely, marking entries as optional instead of using unions to indicate
     // when values are undefined.
-    if (start === undefined || end === undefined) {
+    if (!start || !end) {
       if (fallBack) {
         return fallBack;
       }
@@ -394,7 +394,7 @@ function computeFileDetails({
           fileDetails.barrelReexports.push({
             type: 'barrelReexport',
             moduleSpecifier,
-            exportName,
+            exportName: exportName ?? undefined,
             isEntryPoint,
             statementNodeRange,
             reportNodeRange,
