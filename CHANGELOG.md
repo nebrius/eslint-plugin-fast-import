@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.7.0 (1/2/2026)
+
+- Added `requireFileExtensions` option to configuration helpers
+
 ## 1.6.0 (1/2/2026)
 
 - Removed support for implicit workspace dependency resolution

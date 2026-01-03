@@ -35,8 +35,6 @@
   - [Do you support user-supplied resolvers like eslint-plugin-import does?](#do-you-support-user-supplied-resolvers-like-eslint-plugin-import-does)
 - [License](#license)
 
-
-
 Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
 
 Fast Import uses a novel algorithm combined with the [OXC Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
@@ -54,8 +52,8 @@ npm install --save-dev eslint-plugin-fast-import
 ☑️ Set in the recommended configuration.<br />
 🧰 Set in the all configuration.
 
-| Name                                                                        | 💼   | 🔧   |
-| --------------------------------------------------------------------------- | --- | --- |
+| Name                                                                        | 💼    | 🔧  |
+| --------------------------------------------------------------------------- | ----- | --- |
 | [no-cycle](src/rules/cycle/README.md)                                       | 🧰 ☑️ |     |
 | [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 🧰 ☑️ |     |
 | [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
@@ -63,14 +61,13 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
 | [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
 | [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
-| [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰   | 🔧   |
-| [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰   | 🔧   |
-| [no-restricted-imports](src/rules/restricted/README.md) *                   |     |     |
+| [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰    | 🔧  |
+| [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰    | 🔧  |
+| [no-restricted-imports](src/rules/restricted/README.md) \*                  |       |     |
 
-&ast; No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
+\* No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
 
 There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
-
 
 ## Configuration
 
@@ -83,8 +80,8 @@ import { fileURLToPath } from 'node:url';
 
 export default [
   recommended({
-    rootDir: dirname(fileURLToPath(import.meta.url))
-  })
+    rootDir: dirname(fileURLToPath(import.meta.url)),
+  }),
 ];
 ```
 
@@ -108,16 +105,16 @@ CommonJS Example:
 
 ```js
 recommended({
-  rootDir: __dirname
-})
+  rootDir: __dirname,
+});
 ```
 
 ESM Example using `dirname` from `node:path` and `fileURLToPath` from `node:url`:
 
 ```js
 recommended({
-  rootDir: dirname(fileURLToPath(import.meta.url))
-})
+  rootDir: dirname(fileURLToPath(import.meta.url)),
+});
 ```
 
 #### alias
@@ -127,6 +124,7 @@ Type: `Record<string, string>`
 `alias` defines a set of module specifier aliases. For example, if you use Next.js with its default configuration, you're probably familiar with the alias it creates: `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
 
 Fast Import defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
+
 - Aliases that point to files outside of `rootDir`, or point to files inside of `node_modules`, are ignored
 - Aliases with more than one file, e.g. `"@/": ["a.ts", "b.ts"]`, are ignored
 
@@ -238,6 +236,21 @@ Example:
 recommended({
   rootDir: __dirname
   debugLogging: true
+})
+```
+
+#### requireFileExtensions
+
+Type: boolean
+
+A quick way to set the `mode` for `consistent-file-extensions`. See [consistent-file-extensions](src/rules/extension/README.md#options) for more details. `true` sets the mode to `always`, `false` sets the mode to `never`.
+
+Example:
+
+```js
+recommended({
+  rootDir: __dirname
+  requireFileExtensions: true
 })
 ```
 
@@ -439,8 +452,8 @@ As we read in the previous section, Fast Import provides AST ranges for reportin
 ```js
 context.report({
   messageId: 'someMessageId',
-  loc: getLocFromRange(context, someImportEntry.reportNodeRange)
-})
+  loc: getLocFromRange(context, someImportEntry.reportNodeRange),
+});
 ```
 
 ### registerUpdateListener(listener)
