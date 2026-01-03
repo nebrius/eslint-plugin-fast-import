@@ -108,9 +108,12 @@ Object.assign(plugin.configs, {
 
 export default plugin;
 
-export function recommended(
-  settings: UserSettings & { requireFileExtensions?: boolean }
-): TSESLint.FlatConfig.Config {
+export function recommended({
+  requireFileExtensions,
+  ...settings
+}: UserSettings & {
+  requireFileExtensions?: boolean;
+}): TSESLint.FlatConfig.Config {
   return {
     ...{
       ...recommendedConfig,
@@ -119,7 +122,7 @@ export function recommended(
         'fast-import/consistent-file-extensions': [
           'error',
           {
-            mode: settings.requireFileExtensions !== false ? 'always' : 'never',
+            mode: requireFileExtensions !== false ? 'always' : 'never',
           },
         ],
       },
@@ -130,9 +133,12 @@ export function recommended(
   };
 }
 
-export function all(
-  settings: UserSettings & { requireFileExtensions?: boolean }
-): TSESLint.FlatConfig.Config {
+export function all({
+  requireFileExtensions,
+  ...settings
+}: UserSettings & {
+  requireFileExtensions?: boolean;
+}): TSESLint.FlatConfig.Config {
   return {
     ...{
       ...allConfig,
@@ -141,7 +147,7 @@ export function all(
         'fast-import/consistent-file-extensions': [
           'error',
           {
-            mode: settings.requireFileExtensions !== false ? 'always' : 'never',
+            mode: requireFileExtensions !== false ? 'always' : 'never',
           },
         ],
       },

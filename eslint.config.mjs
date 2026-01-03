@@ -42,6 +42,7 @@ export default tseslint.config(
     },
     debugLogging: true,
     rootDir: getDirname(),
+    requireFileExtensions: true,
   }),
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>

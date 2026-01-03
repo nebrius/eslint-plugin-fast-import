@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.7.1 (1/3/2026)
+
+- Fixed bug where `requireFileExtensions` option was causing settings validation to fail
+
 ## 1.7.0 (1/2/2026)
 
 - Added `requireFileExtensions` option to configuration helpers
