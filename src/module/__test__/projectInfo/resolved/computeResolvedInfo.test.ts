@@ -326,6 +326,7 @@ it('Computes resolved into', () => {
       wildcardAliases: { '@/': TEST_PROJECT_DIR },
       fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
       ignorePatterns: [],
+      ignoreOverridePatterns: [],
       isEntryPointCheck: () => false,
     })
   );

@@ -14,7 +14,11 @@ type PotentialFile = {
   stats: Stats;
 };
 
-export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
+export function getFilesSync(
+  rootDir: string,
+  ignorePatterns: IgnorePattern[],
+  ignoreOverridePatterns: IgnorePattern[]
+) {
   // Read in the files and their stats, and filter out directories
   const potentialFiles = getPotentialFilesList(rootDir)
     // Stats will be used for multiple checks later, so we want to cache it now.
@@ -47,13 +51,15 @@ export function getFilesSync(rootDir: string, ignorePatterns: IgnorePattern[]) {
     rootDir,
     parentPackageJsons,
     ignorePatterns,
+    ignoreOverridePatterns,
     potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
   );
 }
 
 export async function getFiles(
   rootDir: string,
-  ignorePatterns: IgnorePattern[]
+  ignorePatterns: IgnorePattern[],
+  ignoreOverridePatterns: IgnorePattern[]
 ) {
   // First, read in the files and convert the results to absolute path
   const potentialFilePaths = getPotentialFilesList(rootDir);
@@ -90,6 +96,7 @@ export async function getFiles(
     rootDir,
     parentPackageJsons,
     ignorePatterns,
+    ignoreOverridePatterns,
     potentialFiles.filter(
       ({ filePath }) =>
         !filePath.includes('node_modules') &&
@@ -139,33 +146,42 @@ export function getRelativePathFromRoot(rootDir: string, filePath: string) {
 type IgnoreData = {
   cache: Map<string, boolean>;
   ignores: Array<{ dir: string; ig: Ignore }>;
+  overrides: Array<{ dir: string; ig: Ignore }>;
 };
 
 // Map from rootDir to ignore data
 const ignoreData = new Map<string, IgnoreData>();
 export function isFileIgnored(rootDir: string, filePath: string) {
-  const ignores = ignoreData.get(rootDir);
-  if (!ignores) {
+  const data = ignoreData.get(rootDir);
+  if (!data) {
     return true;
   }
 
   // Get the file from the cache, if it's already cached
-  const fileCacheResult = ignores.cache.get(filePath);
+  const fileCacheResult = data.cache.get(filePath);
   if (typeof fileCacheResult === 'boolean') {
     return fileCacheResult;
   }
 
-  // Otherwise compare with ignore
-  for (const { dir, ig } of ignores.ignores) {
+  // Check override patterns first - if matched, file is NOT ignored
+  for (const { dir, ig } of data.overrides) {
+    if (filePath.startsWith(dir) && ig.ignores(relative(dir, filePath))) {
+      data.cache.set(filePath, false);
+      return false;
+    }
+  }
+
+  // Check ignore patterns
+  for (const { dir, ig } of data.ignores) {
     // Ignore file paths are relative to the directory the ignore file is in,
     // and needs files passed in to check to also be relative to that same
     // directory, so we get the relative path to the ignore file directory
     if (filePath.startsWith(dir) && ig.ignores(relative(dir, filePath))) {
-      ignores.cache.set(filePath, true);
+      data.cache.set(filePath, true);
       return true;
     }
   }
-  ignores.cache.set(filePath, false);
+  data.cache.set(filePath, false);
   return false;
 }
 
@@ -229,10 +245,11 @@ function buildFileList(
   rootDir: string,
   parentPackageJsons: string[],
   ignorePatterns: IgnorePattern[],
+  ignoreOverridePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
   // Create the ignore instances for use in filtering
-  initializeIgnores(rootDir, ignorePatterns, potentialFiles);
+  initializeIgnores(rootDir, ignorePatterns, ignoreOverridePatterns, potentialFiles);
 
   // Filter out ignored files
   const files: Array<{
@@ -259,6 +276,7 @@ function buildFileList(
 function initializeIgnores(
   rootDir: string,
   ignorePatterns: IgnorePattern[],
+  ignoreOverridePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
   if (ignoreData.has(rootDir)) {
@@ -311,6 +329,10 @@ function initializeIgnores(
         ig: ignore().add(i.contents),
       })),
     ],
+    overrides: ignoreOverridePatterns.map((i) => ({
+      dir: i.dir,
+      ig: ignore().add(i.contents),
+    })),
     cache: new Map<string, boolean>(),
   });
 }

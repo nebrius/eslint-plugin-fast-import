@@ -106,6 +106,7 @@ export function initializeProject({
   wildcardAliases,
   fixedAliases,
   ignorePatterns,
+  ignoreOverridePatterns,
   entryPoints,
 }: ParsedSettings) {
   // If we've already analyzed the project and settings haven't changed, bail
@@ -123,6 +124,7 @@ export function initializeProject({
     wildcardAliases,
     fixedAliases,
     ignorePatterns,
+    ignoreOverridePatterns,
     isEntryPointCheck: getEntryPointCheck(rootDir, entryPoints),
   });
   baseProjectInfos.set(rootDir, baseProjectInfo);

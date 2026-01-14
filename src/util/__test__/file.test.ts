@@ -14,9 +14,11 @@ const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const ROOT_DIR = resolve(join(getDirname(), '..', '..', '..'));
 
 it('Fetchings files asynchronously', async () => {
-  const files = await getFiles(join(TEST_PROJECT_DIR, 'src'), [
-    { dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' },
-  ]);
+  const files = await getFiles(
+    join(TEST_PROJECT_DIR, 'src'),
+    [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
+    []
+  );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   expect(files.files.map(({ latestUpdatedAt, ...rest }) => rest)).toEqual([
     {

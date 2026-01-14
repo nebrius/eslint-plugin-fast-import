@@ -17,9 +17,10 @@ export type IgnorePattern = {
 
 export type ParsedSettings = Omit<
   RequiredDeep<Settings>,
-  'ignorePatterns' | 'alias' | 'entryPoints'
+  'ignorePatterns' | 'ignoreOverridePatterns' | 'alias' | 'entryPoints'
 > & {
   ignorePatterns: IgnorePattern[];
+  ignoreOverridePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
   entryPoints: Array<{ file: Ignore; symbols: string[] | RegExp }>;
@@ -228,6 +229,13 @@ export function getSettings(
     contents: p,
   }));
 
+  const ignoreOverridePatterns = (
+    mergedSettings.ignoreOverridePatterns ?? []
+  ).map((p) => ({
+    dir: rootDir,
+    contents: p,
+  }));
+
   // Apply defaults and save to the settings cache
   const newSettings = {
     rootDir,
@@ -235,6 +243,7 @@ export function getSettings(
     fixedAliases,
     entryPoints: parsedEntryPoints,
     ignorePatterns,
+    ignoreOverridePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode,
   };

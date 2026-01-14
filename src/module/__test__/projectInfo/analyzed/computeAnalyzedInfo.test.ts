@@ -486,6 +486,7 @@ it('Computes analyzed info', () => {
         wildcardAliases: {},
         fixedAliases: {},
         ignorePatterns: [],
+        ignoreOverridePatterns: [],
         isEntryPointCheck: (filePath, symbolName) =>
           filePath === FILE_A && symbolName === 'ASourceCode',
       })

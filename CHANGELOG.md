@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.8.0 (1/14/2026)
+
+- Added `ignoreOverridePatterns` option
+
 ## 1.7.1 (1/3/2026)
 
 - Fixed bug where `requireFileExtensions` option was causing settings validation to fail

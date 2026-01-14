@@ -26,7 +26,11 @@ type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
 
 type ComputeBaseInfoOptions = Pick<
   ParsedSettings,
-  'rootDir' | 'fixedAliases' | 'wildcardAliases' | 'ignorePatterns'
+  | 'rootDir'
+  | 'fixedAliases'
+  | 'wildcardAliases'
+  | 'ignorePatterns'
+  | 'ignoreOverridePatterns'
 > & {
   isEntryPointCheck?: IsEntryPointCheck;
 };
@@ -39,6 +43,7 @@ export function computeBaseInfo({
   fixedAliases,
   wildcardAliases,
   ignorePatterns,
+  ignoreOverridePatterns,
   isEntryPointCheck = () => false,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
@@ -49,7 +54,11 @@ export function computeBaseInfo({
     availableThirdPartyDependencies: new Map(),
   };
 
-  const { files, packageJsons } = getFilesSync(rootDir, ignorePatterns);
+  const { files, packageJsons } = getFilesSync(
+    rootDir,
+    ignorePatterns,
+    ignoreOverridePatterns
+  );
 
   for (const packageJson of packageJsons) {
     info.availableThirdPartyDependencies.set(

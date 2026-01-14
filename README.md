@@ -184,6 +184,23 @@ recommended({
 })
 ```
 
+#### ignoreOverridePatterns
+
+Type : `string[]`
+
+A list of "inverse" ignore patterns that negate other ignore patterns, using the format used by `.gitignore` files. This pattern is useful if your `.gitignore` file includes generated code that is needed for proper import/export analysis.
+
+Example:
+
+```js
+recommended({
+  rootDir: __dirname
+  ignoreOverridePatterns: [
+    'src/generated/**/*.ts',
+  ]
+})
+```
+
 #### mode
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`

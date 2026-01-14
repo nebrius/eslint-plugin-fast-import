@@ -13,9 +13,7 @@
         "${workspaceRoot}/node_modules/.bin/jest",
         "--runInBand"
       ],
-      "args": [
-        "src"
-      ],
+      "args": ["src"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
@@ -23,16 +21,20 @@
       "name": "Debug ESLint",
       "type": "node",
       "request": "launch",
-      "runtimeArgs": [
-        "${workspaceRoot}/node_modules/.bin/eslint"
-      ],
-      "args": [
-        "-c",
-        "eslint.config.mjs",
-        "src/**/*"
-      ],
+      "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/eslint"],
+      "args": ["-c", "eslint.config.mjs", "src/**/*"],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     },
+    {
+      "name": "Debug core-ts",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/eslint"],
+      "cwd": "/Users/bryan/Projects/hive-kube/packages/core-ts",
+      "args": ["-c", "eslint.config.mjs", "src/**/*"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
   ]
 }

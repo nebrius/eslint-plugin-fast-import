@@ -397,6 +397,7 @@ it('Computes base info', () => {
     wildcardAliases: {},
     fixedAliases: {},
     ignorePatterns: [],
+    ignoreOverridePatterns: [],
     isEntryPointCheck: () => false,
   });
   expect(info).toMatchBaseSpec(EXPECTED);
@@ -419,6 +420,7 @@ it('Adds, modifies, and deletes a new file', () => {
     wildcardAliases: {},
     fixedAliases: {},
     ignorePatterns: [],
+    ignoreOverridePatterns: [],
     isEntryPointCheck: () => false,
   });
 

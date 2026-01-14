@@ -29,6 +29,7 @@ it('Fetchings user supplied settings', () => {
     rootDir: TEST_PROJECT_DIR,
     mode: 'one-shot',
     ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
+    ignoreOverridePatterns: [],
     wildcardAliases: {
       '@/': join(TEST_PROJECT_DIR, 'src' + sep),
     },

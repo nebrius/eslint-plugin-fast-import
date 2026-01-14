@@ -14,6 +14,7 @@ const settingsSchema = z.strictObject({
     .record(z.string(), z.union([z.array(z.string()), z.instanceof(RegExp)]))
     .optional(),
   ignorePatterns: z.array(z.string()).optional(),
+  ignoreOverridePatterns: z.array(z.string()).optional(),
   mode: z.enum(['auto', 'one-shot', 'fix', 'editor']).optional(),
   editorUpdateRate: z.number().optional(),
   debugLogging: z.boolean().optional(),

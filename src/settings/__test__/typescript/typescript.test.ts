@@ -24,6 +24,7 @@ it('Fetchings settings from typescript', () => {
     entryPoints: [],
     mode: 'one-shot',
     ignorePatterns: [],
+    ignoreOverridePatterns: [],
     wildcardAliases: {
       '@/': join(TEST_PROJECT_DIR, 'src/'),
     },

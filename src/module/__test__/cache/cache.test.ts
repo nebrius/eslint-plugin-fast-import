@@ -24,6 +24,7 @@ const settings = {
   fixedAliases: {},
   entryPoints: [],
   ignorePatterns: [],
+  ignoreOverridePatterns: [],
   mode: 'fix' as const,
   editorUpdateRate: 5_000,
 };

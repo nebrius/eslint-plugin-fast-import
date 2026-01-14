@@ -93,7 +93,8 @@ async function initializeFileWatching(settings: ParsedSettings) {
     const projectInfo = getProjectInfo(settings.rootDir);
     const { files, packageJsons } = await getFiles(
       projectInfo.rootDir,
-      settings.ignorePatterns
+      settings.ignorePatterns,
+      settings.ignoreOverridePatterns
     );
     return {
       files: new Map(
