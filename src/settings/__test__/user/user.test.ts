@@ -20,6 +20,7 @@ it('Fetchings user supplied settings', () => {
           '@a': 'src/a.ts',
         },
         ignorePatterns: ['src/b*'],
+        ignoreOverridePatterns: ['src/c*'],
         entryPoints: { 'src/a.ts': ['a'] },
       },
     },
@@ -29,7 +30,7 @@ it('Fetchings user supplied settings', () => {
     rootDir: TEST_PROJECT_DIR,
     mode: 'one-shot',
     ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
-    ignoreOverridePatterns: [],
+    ignoreOverridePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/c*' }],
     wildcardAliases: {
       '@/': join(TEST_PROJECT_DIR, 'src' + sep),
     },

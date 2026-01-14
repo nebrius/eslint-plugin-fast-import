@@ -249,7 +249,12 @@ function buildFileList(
   potentialFiles: PotentialFile[]
 ) {
   // Create the ignore instances for use in filtering
-  initializeIgnores(rootDir, ignorePatterns, ignoreOverridePatterns, potentialFiles);
+  initializeIgnores(
+    rootDir,
+    ignorePatterns,
+    ignoreOverridePatterns,
+    potentialFiles
+  );
 
   // Filter out ignored files
   const files: Array<{
