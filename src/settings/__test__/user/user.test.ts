@@ -31,6 +31,7 @@ it('Fetchings user supplied settings', () => {
     mode: 'one-shot',
     ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
     ignoreOverridePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/c*' }],
+    testFilePatterns: [],
     wildcardAliases: {
       '@/': join(TEST_PROJECT_DIR, 'src' + sep),
     },

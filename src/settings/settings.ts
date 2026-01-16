@@ -246,6 +246,7 @@ export function getSettings(
     ignoreOverridePatterns,
     editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
     mode,
+    testFilePatterns: mergedSettings.testFilePatterns ?? [],
   };
   settingsCache.set(rootDir, { settings: newSettings, refresh: false });
   return newSettings;

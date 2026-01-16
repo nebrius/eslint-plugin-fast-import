@@ -183,13 +183,19 @@ async function initializeFileWatching(settings: ParsedSettings) {
   setTimeout(() => void refresh(), settings.editorUpdateRate);
 }
 
-export function isNonTestFile(filePath: string, rootDir: string) {
+const DEFAULT_TEST_FILE_PATTERNS = ['.test.', '__test__', '__tests__'];
+export function isNonTestFile(
+  filePath: string,
+  rootDir: string,
+  { testFilePatterns }: ParsedSettings
+) {
   // We want to ignore folders named __test__ outside of this project, in case
   // the entire project is itself a test (e.g. the unit tests for fast-import)
   const relativeFilePath = getRelativePathFromRoot(rootDir, filePath);
-  return (
-    !relativeFilePath.includes('.test.') &&
-    !relativeFilePath.includes('__test__') &&
-    !relativeFilePath.includes('__tests__')
-  );
+  for (const pattern of [...DEFAULT_TEST_FILE_PATTERNS, ...testFilePatterns]) {
+    if (relativeFilePath.includes(pattern)) {
+      return false;
+    }
+  }
+  return true;
 }

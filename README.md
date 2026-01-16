@@ -201,6 +201,28 @@ recommended({
 })
 ```
 
+#### testFilePatterns
+
+type: `string[]`
+
+Several rules take into account whether or not a given file is a "test" file or a "production" file. By default, any
+file path that contains `__test__`, `__tests__`, or `.tests.` is considered a test file, and everything else is
+considering a production file.
+
+This option allows you to define extra patterns in addition to the default three to indicate other test files. Note that
+globs are not currently supported.
+
+Example:
+
+```js
+recommended({
+  rootDir: __dirname
+  ignoreOverridePatterns: [
+    '__fixture__',
+  ]
+})
+```
+
 #### mode
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`

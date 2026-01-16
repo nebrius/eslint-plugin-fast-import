@@ -9,6 +9,7 @@ import { noUnusedExports } from '../unused.js';
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
+const FILE_C_TEST = join(TEST_PROJECT_DIR, '__fixture__', 'c-test.ts');
 const FILE_D_DTS = join(TEST_PROJECT_DIR, 'd.d.ts');
 const FILE_E = join(TEST_PROJECT_DIR, 'e.ts');
 
@@ -16,7 +17,7 @@ const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
       projectService: {
-        allowDefaultProject: ['*.ts*'],
+        allowDefaultProject: ['*.ts*', '__fixture__/*.ts*', '__test__/*.ts*'],
       },
       tsconfigRootDir: TEST_PROJECT_DIR,
     },
@@ -73,6 +74,19 @@ export const a2 = 10;
         },
       },
     },
+    // __fixture__ is added to testFilePatterns, so c-test.ts is a test file
+    // and its exports only being used by other test files is valid
+    {
+      code: readFileSync(FILE_C_TEST, 'utf8'),
+      filename: FILE_C_TEST,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+          testFilePatterns: ['__fixture__'],
+        },
+      },
+    },
   ],
 
   invalid: [
@@ -114,6 +128,19 @@ export const a2 = 10;
           allowNonTestTypeExports: false,
         },
       ],
+      errors: [{ messageId: 'noTestOnlyImports' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    // __fixture__ is NOT in testFilePatterns, so c-test.ts is a prod file
+    // and its exports only being used by test files is an error
+    {
+      code: readFileSync(FILE_C_TEST, 'utf8'),
+      filename: FILE_C_TEST,
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {

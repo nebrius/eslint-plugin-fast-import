@@ -18,6 +18,7 @@ const settingsSchema = z.strictObject({
   mode: z.enum(['auto', 'one-shot', 'fix', 'editor']).optional(),
   editorUpdateRate: z.number().optional(),
   debugLogging: z.boolean().optional(),
+  testFilePatterns: z.array(z.string()).optional(),
 });
 
 export type UserSettings = z.infer<typeof settingsSchema>;

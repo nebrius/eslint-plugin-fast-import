@@ -25,6 +25,7 @@ const settings = {
   entryPoints: [],
   ignorePatterns: [],
   ignoreOverridePatterns: [],
+  testFilePatterns: [],
   mode: 'fix' as const,
   editorUpdateRate: 5_000,
 };

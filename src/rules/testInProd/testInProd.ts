@@ -29,10 +29,10 @@ export const noTestImportsInProd = createRule({
       return {};
     }
 
-    const { fileInfo } = esmInfo;
+    const { fileInfo, settings } = esmInfo;
     if (
       fileInfo.fileType !== 'code' ||
-      !isNonTestFile(context.filename, esmInfo.projectInfo.rootDir)
+      !isNonTestFile(context.filename, esmInfo.projectInfo.rootDir, settings)
     ) {
       return {};
     }
@@ -54,7 +54,8 @@ export const noTestImportsInProd = createRule({
         importEntry.resolvedModulePath &&
         !isNonTestFile(
           importEntry.resolvedModulePath,
-          esmInfo.projectInfo.rootDir
+          esmInfo.projectInfo.rootDir,
+          settings
         )
       ) {
         context.report({

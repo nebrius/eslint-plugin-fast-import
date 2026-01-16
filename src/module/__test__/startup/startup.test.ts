@@ -20,6 +20,7 @@ it('Updates cache when a new file is added', () => {
     entryPoints: [],
     ignorePatterns: [],
     ignoreOverridePatterns: [],
+    testFilePatterns: [],
     mode: 'fix' as const,
     editorUpdateRate: 5_000,
   };

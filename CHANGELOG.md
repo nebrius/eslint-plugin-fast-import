@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.9.0 (1/16/2026)
+
+- Added `testFilePatterns` option
+
 ## 1.8.0 (1/14/2026)
 
 - Added `ignoreOverridePatterns` option

@@ -25,6 +25,7 @@ it('Recovers from an invalid tsconfig file', () => {
     mode: 'one-shot',
     ignorePatterns: [],
     ignoreOverridePatterns: [],
+    testFilePatterns: [],
     wildcardAliases: {},
     fixedAliases: {},
   };
