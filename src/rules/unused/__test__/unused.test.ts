@@ -39,6 +39,21 @@ export const a2 = 10;
       },
     },
     {
+      code: `export function a1(arg: number): void;
+export function a1(arg: string): void;
+export function a1(arg: number | string): void {
+  console.log(arg);
+}
+`,
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
       code: readFileSync(FILE_B, 'utf8'),
       filename: FILE_B,
       settings: {

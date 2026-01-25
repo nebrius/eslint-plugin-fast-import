@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.9.1 (1/25/2026)
+
+- Fixed bug where exports with the same name (e.g. TypeScript function overloads) were not being deduped properly
+
 ## 1.9.0 (1/16/2026)
 
 - Added `testFilePatterns` option

@@ -466,5 +466,19 @@ function computeFileDetails({
     fileDetails.hasEntryPoints = true;
   }
 
+  // De-dupe exports with the same name (e.g. TypeScript function overloads).
+  // We keep the last occurrence, which is the actual implementation, because
+  // this is the version that users will want to actually see. This is why
+  // we filter exports in reverse order after our previous loop, not inline.
+  const seenExportNames = new Set<string>();
+  for (let i = fileDetails.exports.length - 1; i >= 0; i--) {
+    const exportEntry = fileDetails.exports[i];
+    if (seenExportNames.has(exportEntry.exportName)) {
+      fileDetails.exports.splice(i, 1);
+    } else {
+      seenExportNames.add(exportEntry.exportName);
+    }
+  }
+
   return fileDetails;
 }
