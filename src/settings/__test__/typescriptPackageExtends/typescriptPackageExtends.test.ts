@@ -1,0 +1,35 @@
+import { join } from 'node:path';
+
+import { getDirname } from 'cross-dirname';
+
+import type { ParsedSettings } from '../../settings.js';
+import { getSettings } from '../../settings.js';
+
+const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
+
+it('Fetches settings from tsconfig with package path extends', () => {
+  const settings = getSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'one-shot',
+        rootDir: TEST_PROJECT_DIR,
+      },
+    },
+  });
+  const expected: ParsedSettings = {
+    editorUpdateRate: 5_000,
+    rootDir: TEST_PROJECT_DIR,
+    entryPoints: [],
+    mode: 'one-shot',
+    ignorePatterns: [],
+    ignoreOverridePatterns: [],
+    testFilePatterns: [],
+    wildcardAliases: {
+      '@pkg/': join(TEST_PROJECT_DIR, 'src/'),
+    },
+    fixedAliases: {},
+  };
+  expect(settings).toEqual(expected);
+});

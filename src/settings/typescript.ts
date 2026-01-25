@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 
 import ts from 'typescript';
@@ -27,7 +28,10 @@ export function getTypeScriptSettings(rootDir: string): TypeScriptSettings {
   return parseTsConfig(configPath);
 }
 
-function parseTsConfig(configPath: string): TypeScriptSettings {
+function parseTsConfig(
+  configPath: string,
+  projectRootDir?: string
+): TypeScriptSettings {
   const config = ts.readConfigFile(configPath, (file) =>
     readFileSync(file, 'utf-8')
   );
@@ -58,15 +62,31 @@ function parseTsConfig(configPath: string): TypeScriptSettings {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const rootDir = config.config?.compilerOptions?.rootDir as string | undefined;
+  const absoluteRootDir =
+    projectRootDir ?? (rootDir && join(dirname(configPath), rootDir));
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const configExtends = config.config?.extends as string | undefined;
   let baseConfig: TypeScriptSettings = {};
   if (typeof configExtends === 'string') {
-    baseConfig = parseTsConfig(resolve(dirname(configPath), configExtends));
+    // Check if this is a relative path or package path
+    if (configExtends.startsWith('.')) {
+      baseConfig = parseTsConfig(
+        resolve(dirname(configPath), configExtends),
+        absoluteRootDir
+      );
+    } else {
+      // Package path - resolve using Node.js module resolution
+      const require = createRequire(configPath);
+      try {
+        const resolvedPath = require.resolve(configExtends);
+        baseConfig = parseTsConfig(resolvedPath, absoluteRootDir);
+      } catch {
+        warn(`Could not resolve tsconfig extends path "${configExtends}"`);
+      }
+    }
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const rootDir = config.config?.compilerOptions?.rootDir as string | undefined;
-  const absoluteRootDir = rootDir && join(dirname(configPath), rootDir);
 
   let baseUrl =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

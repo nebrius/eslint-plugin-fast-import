@@ -1,0 +1,6 @@
+{
+  "name": "@test-pkg/tsconfig",
+  "exports": {
+    "./tsconfig.json": "./tsconfig.json"
+  }
+}

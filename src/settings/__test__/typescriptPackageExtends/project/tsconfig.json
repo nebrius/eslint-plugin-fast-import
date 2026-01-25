@@ -1,0 +1,6 @@
+{
+  "extends": "@test-pkg/tsconfig/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src"
+  }
+}
