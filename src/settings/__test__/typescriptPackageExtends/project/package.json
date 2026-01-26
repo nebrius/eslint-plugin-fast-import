@@ -1,6 +1,0 @@
-{
-  "name": "test-project",
-  "dependencies": {
-    "@test-pkg/tsconfig": "file:./packages/test-pkg-tsconfig"
-  }
-}
