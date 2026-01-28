@@ -63,9 +63,12 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
 | [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰    | 🔧  |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰    | 🔧  |
-| [no-restricted-imports](src/rules/restricted/README.md) \*                  |       |     |
+| [no-node-builtins](src/rules/nodeBuiltins/README.md) \*                     |       |     |
+| [no-restricted-imports](src/rules/restricted/README.md) \*\*                |       |     |
 
-\* No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
+\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any configuration.
+
+\*\* No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
 
 There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
 
@@ -456,7 +459,7 @@ This is the most important of the three functions. If the file represented by th
 
 See the TypeScript types for full details, which are reasonably well commented.
 
-Each ESM entry includes two AST node ranges. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexport. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
+Each ESM entry includes two AST node ranges: `statementNodeRange` and `reportNodeRange`. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexport. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
 
 See [getLocFromRange](#getlocfromrange) for more information on using ranges to report errors
 

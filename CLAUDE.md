@@ -36,9 +36,10 @@ The plugin uses a three-phase pipelined algorithm for analyzing imports/exports.
 See [mode configuration in README.md](README.md#mode) for details on caching modes.
 
 **Important for development:**
+
 - Caching is disabled when running `npm run lint` (uses `one-shot` mode via auto-detection)
-- Caching is disabled in tests (tests explicitly set `mode: 'fix'` in settings)
-- The `fix` and `editor` modes enable caching for file updates
+- Caching is enabled but file watching is disabled in tests (tests explicitly set `mode: 'fix'` in settings)
+- The `fix` and `editor` modes enable caching for file updates, but only `editor` mode enables file watching
 
 ### Project Structure
 
@@ -75,6 +76,8 @@ src/
 
 ### Adding a New Rule
 
+See [Creating new rules](README.md#creating-new-rules) for detailed documentation.
+
 1. Create a new directory under `src/rules/`
 2. Implement the rule using `createRule` from `src/rules/util.ts`
 3. Use `getESMInfo(context)` to access parsed import/export information
@@ -82,7 +85,9 @@ src/
    - Create a `project/` directory with sample source files for the rule to analyze
    - Tests point `rootDir` to this project directory (see `TEST_PROJECT_DIR` constant)
    - Test cases reference files within that project (e.g., `FILE_A`, `FILE_B`)
-5. Export from `src/plugin.ts`
+5. Create a README.md in the rule directory following the style of other rules
+6. Export from `src/plugin.ts`
+7. Add the rule to the list of rules in [Rules](README.md#rules)
 
 ### Working with Function Overloads
 

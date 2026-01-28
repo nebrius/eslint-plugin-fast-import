@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.10.0 (1/28/2026)
+
+- Added `no-node-builtins` rule
+
 ## 1.9.2 (1/25/2026)
 
 - Fixed bug where tsconfig with non-relative extends was not being resolved correctly

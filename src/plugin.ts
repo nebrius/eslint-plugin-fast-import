@@ -9,6 +9,7 @@ import { noEntryPointImports } from './rules/entryPoint/entryPoint.js';
 import { consistentFileExtensions } from './rules/extension/extension.js';
 import { noExternalBarrelReexports } from './rules/externalBarrelReexports/externalBarrelReexports.js';
 import { namedAsDefault } from './rules/namedAsDefault/namedAsDefault.js';
+import { noNodeBuiltins } from './rules/nodeBuiltins/nodeBuiltins.js';
 import { nodePrefix } from './rules/nodePrefix/nodePrefix.js';
 import { noRestrictedImports } from './rules/restricted/restricted.js';
 import { noTestImportsInProd } from './rules/testInProd/testInProd.js';
@@ -43,6 +44,7 @@ const plugin = {
     'no-external-barrel-reexports': noExternalBarrelReexports,
     'no-test-imports-in-prod': noTestImportsInProd,
     'no-named-as-default': namedAsDefault,
+    'no-node-builtins': noNodeBuiltins,
     'require-node-prefix': nodePrefix,
     'no-restricted-imports': noRestrictedImports,
   },
@@ -95,6 +97,7 @@ const offConfig = {
     'fast-import/no-external-barrel-reexports': 'off',
     'fast-import/no-test-imports-in-prod': 'off',
     'fast-import/no-named-as-default': 'off',
+    'fast-import/no-node-builtins': 'off',
     'fast-import/require-node-prefix': 'off',
     'fast-import/no-restricted-imports': 'off',
   },
