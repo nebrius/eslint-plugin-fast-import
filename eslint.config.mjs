@@ -5,6 +5,7 @@ import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import { getDirname } from 'cross-dirname';
 import { globalIgnores } from 'eslint/config';
+import { defineConfig } from 'eslint/config';
 import jest from 'eslint-plugin-jest';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
@@ -13,19 +14,22 @@ import tseslint from 'typescript-eslint';
 
 import { all } from './dist/plugin.js';
 
-const compat = new FlatCompat({
-  baseDirectory: getDirname(),
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
-
-export default tseslint.config(
+export default defineConfig([
   includeIgnoreFile(join(getDirname(), '.gitignore')),
   globalIgnores(['src/**/__test__/**/project/*', 'jest.config.ts']),
   {
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {
       globals: globals.node,
+    },
+    plugins: { js, 'simple-import-sort': simpleImportSort },
+    extends: ['js/recommended'],
+    rules: {
+      'object-shorthand': 'error',
+      'simple-import-sort/imports': 'error',
+
+      // Handled by TypeScript eslint
+      'no-unused-vars': 'off',
     },
   },
   all({
@@ -70,14 +74,6 @@ export default tseslint.config(
     },
   },
   {
-    plugins: {
-      'simple-import-sort': simpleImportSort,
-    },
-    rules: {
-      'simple-import-sort/imports': 'error',
-    },
-  },
-  {
     files: ['**/*.test.ts'],
     ...jest.configs['flat/recommended'],
   },
@@ -86,13 +82,4 @@ export default tseslint.config(
     files: ['**/*..jsx,mjs}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
-  ...compat.extends('eslint:recommended'),
-  {
-    rules: {
-      'object-shorthand': 'error',
-
-      // Handled by TypeScript eslint
-      'no-unused-vars': 'off',
-    },
-  }
-);
+]);
