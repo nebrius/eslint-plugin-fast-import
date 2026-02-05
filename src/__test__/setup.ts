@@ -136,7 +136,6 @@ function toMatchSpec<
   };
 }
 
-// eslint-disable-next-line no-undef
 expect.extend({
   toMatchBaseSpec(
     baseProjectInfo: unknown,
@@ -217,7 +216,6 @@ expect.extend({
   },
 });
 
-// eslint-disable-next-line no-undef
 beforeEach(() => {
   _resetAllSettings();
   _resetProjectInfo();
