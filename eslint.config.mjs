@@ -1,9 +1,7 @@
 import { join, resolve } from 'node:path';
 
 import { includeIgnoreFile } from '@eslint/compat';
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
-import { getDirname } from 'cross-dirname';
 import { globalIgnores } from 'eslint/config';
 import { defineConfig } from 'eslint/config';
 import jest from 'eslint-plugin-jest';
@@ -14,8 +12,10 @@ import tseslint from 'typescript-eslint';
 
 import { all } from './dist/plugin.js';
 
+const ROOT_DIR = import.meta.dirname;
+
 export default defineConfig([
-  includeIgnoreFile(join(getDirname(), '.gitignore')),
+  includeIgnoreFile(join(ROOT_DIR, '.gitignore')),
   globalIgnores(['src/**/__test__/**/project/*', 'jest.config.ts']),
   {
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
@@ -32,7 +32,7 @@ export default defineConfig([
       'no-unused-vars': 'off',
     },
   },
-  all(getDirname()),
+  all(ROOT_DIR),
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'
@@ -47,7 +47,7 @@ export default defineConfig([
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: getDirname(),
+        tsconfigRootDir: ROOT_DIR,
       },
     },
     rules: {

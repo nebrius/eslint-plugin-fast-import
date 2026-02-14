@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 
 import type { TSESLint } from '@typescript-eslint/utils';
 import { getDirname } from 'cross-dirname';
@@ -120,6 +120,9 @@ type ConfigArgs = ExtendedSettings | string;
 function processArgs(args: ConfigArgs): ExtendedSettings {
   if (typeof args === 'string') {
     const rootDir = args;
+    if (!isAbsolute(rootDir)) {
+      throw new Error('rootDir must be an absolute path');
+    }
     const configPath = join(rootDir, 'fast-import.config.json');
     let configContent: string;
     let parsedConfig: unknown;
