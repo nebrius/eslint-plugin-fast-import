@@ -24,7 +24,6 @@ it('Fetches files asynchronously, respecting ignorePatterns', async () => {
     [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
     []
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   expect(files.files.map(({ latestUpdatedAt, ...rest }) => rest)).toEqual([
     {
       filePath: join(TEST_PROJECT_DIR, 'src/a.ts'),
@@ -64,7 +63,6 @@ it('ignoreOverridePatterns overrides .gitignore patterns', async () => {
     [{ dir: TEST_PROJECT_DIR, contents: 'src/c.ts' }]
   );
   expect(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     filesWithOverride.files.map(({ latestUpdatedAt, ...rest }) => rest)
   ).toEqual([
     {
@@ -87,7 +85,6 @@ it('ignoreOverridePatterns works with glob patterns', async () => {
     [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
     [{ dir: TEST_PROJECT_DIR, contents: 'src/*.ts' }]
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   expect(files.files.map(({ latestUpdatedAt, ...rest }) => rest)).toEqual([
     {
       filePath: join(TEST_PROJECT_DIR, 'src/a.ts'),

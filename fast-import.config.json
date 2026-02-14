@@ -1,0 +1,17 @@
+{
+  "entryPoints": {
+    "src/plugin.ts": [
+      "default",
+      "getESMInfo",
+      "registerUpdateListener",
+      "isNonTestFile",
+      "recommended",
+      "all"
+    ],
+    "*.config.*": [
+      "default"
+    ]
+  },
+  "debugLogging": true,
+  "requireFileExtensions": true
+}

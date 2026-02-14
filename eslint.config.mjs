@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import { includeIgnoreFile } from '@eslint/compat';
 import { FlatCompat } from '@eslint/eslintrc';
@@ -32,22 +32,7 @@ export default defineConfig([
       'no-unused-vars': 'off',
     },
   },
-  all({
-    entryPoints: {
-      'src/plugin.ts': [
-        'default',
-        'getESMInfo',
-        'registerUpdateListener',
-        'isNonTestFile',
-        'recommended',
-        'all',
-      ],
-      '*.config.*': ['default'],
-    },
-    debugLogging: true,
-    rootDir: getDirname(),
-    requireFileExtensions: true,
-  }),
+  all(getDirname()),
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'

@@ -78,17 +78,37 @@ Fast Import only supports ESLint 9+ and flat configs. For most simple TypeScript
 
 ```js
 import { recommended } from 'eslint-plugin-fast-import';
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 export default [
   recommended({
-    rootDir: dirname(fileURLToPath(import.meta.url)),
+    rootDir: import.meta.dirname,
   }),
 ];
 ```
 
 This will apply the recommended rules along with the default configuration.
+
+### Using fast-import.config.json
+
+You can also define the configuration in a `fast-import.config.json` file. This file should contain the same configuration options as the [Configuration options](#configuration-options) section, except that it should not include the `rootDir` option.
+
+To use this file, pass in a path to the directory containing the `fast-import.config.json` file. `rootDir` will automatically be set to this path, like so:
+
+```js
+import { recommended } from 'eslint-plugin-fast-import';
+
+export default [recommended(import.meta.dirname)];
+```
+
+And then the configuration file:
+
+```json
+{
+  "entryPoints": {
+    "./src/index.ts": ["default"]
+  }
+}
+```
 
 ### Configuration options
 
@@ -116,7 +136,7 @@ ESM Example using `dirname` from `node:path` and `fileURLToPath` from `node:url`
 
 ```js
 recommended({
-  rootDir: dirname(fileURLToPath(import.meta.url)),
+  rootDir: import.meta.dirname,
 });
 ```
 

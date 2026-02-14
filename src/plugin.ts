@@ -111,12 +111,59 @@ Object.assign(plugin.configs, {
 
 export default plugin;
 
-export function recommended({
-  requireFileExtensions,
-  ...settings
-}: UserSettings & {
+type ExtendedSettings = UserSettings & {
   requireFileExtensions?: boolean;
-}): TSESLint.FlatConfig.Config {
+};
+
+type ConfigArgs = ExtendedSettings | string;
+
+function processArgs(args: ConfigArgs): ExtendedSettings {
+  if (typeof args === 'string') {
+    const rootDir = args;
+    const configPath = join(rootDir, 'fast-import.config.json');
+    let configContent: string;
+    let parsedConfig: unknown;
+
+    try {
+      configContent = readFileSync(configPath, 'utf8');
+    } catch (error) {
+      throw new Error(
+        `Failed to read config file at "${configPath}": ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    try {
+      parsedConfig = JSON.parse(configContent);
+    } catch (error) {
+      throw new Error(
+        `Failed to parse config file at "${configPath}": ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
+    if (typeof parsedConfig !== 'object' || parsedConfig === null) {
+      throw new Error(
+        `Config file at "${configPath}" must contain a JSON object`
+      );
+    }
+
+    const config = parsedConfig as ExtendedSettings;
+
+    if (config.rootDir) {
+      throw new Error(
+        `Config file at "${configPath}" must not contain a "rootDir" property when loading from a directory path`
+      );
+    }
+
+    config.rootDir = rootDir;
+
+    return config;
+  }
+
+  return args;
+}
+
+export function recommended(args: ConfigArgs): TSESLint.FlatConfig.Config {
+  const { requireFileExtensions, ...settings } = processArgs(args);
   return {
     ...{
       ...recommendedConfig,
@@ -136,12 +183,8 @@ export function recommended({
   };
 }
 
-export function all({
-  requireFileExtensions,
-  ...settings
-}: UserSettings & {
-  requireFileExtensions?: boolean;
-}): TSESLint.FlatConfig.Config {
+export function all(args: ConfigArgs): TSESLint.FlatConfig.Config {
+  const { requireFileExtensions, ...settings } = processArgs(args);
   return {
     ...{
       ...allConfig,

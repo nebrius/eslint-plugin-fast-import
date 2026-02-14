@@ -1,3 +1,5 @@
+import { getDirname } from 'cross-dirname';
+
 // eslint-disable-next-line fast-import/no-entry-point-imports
 import { all, recommended } from '../plugin.js';
 
@@ -35,6 +37,16 @@ describe('recommended', () => {
       'error',
       { mode: 'always' },
     ]);
+  });
+
+  it('can read config from a file', () => {
+    const config = recommended(getDirname());
+    expect(config.settings?.['fast-import']).toEqual({
+      entryPoints: {
+        'test.ts': ['testExport'],
+      },
+      rootDir: getDirname(),
+    });
   });
 });
 

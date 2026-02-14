@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.11.0 (2/14/2026)
+
+- Added support for reading config from a separate JSON file
+
 ## 1.10.0 (1/28/2026)
 
 - Added `no-node-builtins` rule
