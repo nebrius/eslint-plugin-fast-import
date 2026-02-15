@@ -22,6 +22,7 @@ it('Fetchings user supplied settings', () => {
         ignorePatterns: ['src/b*'],
         ignoreOverridePatterns: ['src/c*'],
         entryPoints: { 'src/a.ts': ['a'] },
+        externallyImported: { 'src/b.ts': ['b'] },
       },
     },
   });
@@ -40,10 +41,13 @@ it('Fetchings user supplied settings', () => {
     },
   };
   expect(settings).toEqual(expected);
-  expect(entryPoints).toHaveLength(1);
+  expect(entryPoints).toHaveLength(2);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
   expect(entryPoints[0].file.ignores('src/b.ts')).toBeFalsy();
   expect(entryPoints[0].symbols).toEqual(['a']);
+  expect(entryPoints[1].file.ignores('src/b.ts')).toBeTruthy();
+  expect(entryPoints[1].file.ignores('src/a.ts')).toBeFalsy();
+  expect(entryPoints[1].symbols).toEqual(['b']);
 });
 
 it('Throws on missing settings', () => {

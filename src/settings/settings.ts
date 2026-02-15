@@ -17,7 +17,11 @@ export type IgnorePattern = {
 
 export type ParsedSettings = Omit<
   RequiredDeep<Settings>,
-  'ignorePatterns' | 'ignoreOverridePatterns' | 'alias' | 'entryPoints'
+  | 'ignorePatterns'
+  | 'ignoreOverridePatterns'
+  | 'alias'
+  | 'entryPoints'
+  | 'externallyImported'
 > & {
   ignorePatterns: IgnorePattern[];
   ignoreOverridePatterns: IgnorePattern[];
@@ -102,7 +106,11 @@ export function getSettings(
     ...typeScriptSettings,
     ...userSettings,
   };
-  const { alias = {}, entryPoints = {} } = mergedSettings;
+  const {
+    alias = {},
+    entryPoints = {},
+    externallyImported = {},
+  } = mergedSettings;
 
   // Clean up any aliases
   const wildcardAliases: ParsedSettings['wildcardAliases'] = {};
@@ -141,7 +149,13 @@ export function getSettings(
 
   // Clean up any entry points
   const parsedEntryPoints: ParsedSettings['entryPoints'] = [];
-  for (const [filePattern, symbols] of Object.entries(entryPoints)) {
+  // Merge entry points and externally imported exports, since they mean the
+  // same thing from inside the module. They are kept separate in settings for
+  // use by monorepo package analysis rules (aka outside the module)
+  for (const [filePattern, symbols] of Object.entries({
+    ...entryPoints,
+    ...externallyImported,
+  })) {
     const formattedSymbols = Array.isArray(symbols)
       ? symbols.map((symbol) => trimTrailingPathSeparator(symbol))
       : symbols;

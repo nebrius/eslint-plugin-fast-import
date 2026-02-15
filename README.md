@@ -5,14 +5,19 @@
 - [Installation](#installation)
 - [Rules](#rules)
 - [Configuration](#configuration)
+  - [Using fast-import.config.json](#using-fast-importconfigjson)
   - [Configuration options](#configuration-options)
     - [rootDir (required)](#rootdir-required)
     - [alias](#alias)
-    - [entryPoints](#entrypoints)
+    - [externallyImported / entryPoints](#externallyimported--entrypoints)
     - [ignorePatterns](#ignorepatterns)
+    - [ignoreOverridePatterns](#ignoreoverridepatterns)
+    - [testFilePatterns](#testfilepatterns)
     - [mode](#mode)
     - [editorUpdateRate](#editorupdaterate)
     - [debugLogging](#debuglogging)
+    - [requireFileExtensions](#requirefileextensions)
+  - [Use in monorepos](#use-in-monorepos)
 - [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
   - [Performance](#performance)
   - [Accuracy](#accuracy)
@@ -155,7 +160,7 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   alias: {
     '@/*': 'src/*'
     'foo': 'src/foo.ts'
@@ -165,11 +170,16 @@ recommended({
 
 Note: patterns with a single star after them will match any symbols/files that start with the symbol/filepath.
 
-#### entryPoints
+#### externallyImported / entryPoints
 
-Type: `Record<string, Array<string | RegExp>>`
+Type: `Record<string, Array<string> | RegExp>`
 
-Entry points define exports that are not imported by code inside of the code base, but instead by code outside of the codebase.
+Exports specified with `externallyImported` or `entryPoints` define exports that are not imported by code inside of the code base, but instead by code outside of the codebase. The difference between `externallyImported` and `entryPoints` is:
+
+- `entryPoints` are intended to represent entry points in a library intended for use by others, aka a "public API."
+- `externallyImported` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application or the default export in a file called `eslint.config.mjs` in a ESLint configuration.
+
+In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary for determining if a package's entry points are intended to be used by other packages in the monorepo, and thus should be analyzed for usage. See [Use in monorepos](#use-in-monorepos) for more info.
 
 For example, if you are building a Next.js application, then the `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
 
@@ -179,12 +189,14 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname,
   entryPoints: {
-    './src/index.ts': ['default', 'anotherExport'],
-    './src/app/**/page.tsx': ['default']
-  }
-})
+    './src/app/**/page.tsx': ['default', 'metadata'],
+  },
+  externallyImported: {
+    'index.ts': /.*/,
+  },
+});
 ```
 
 #### ignorePatterns
@@ -199,7 +211,7 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   ignorePatterns: [
     'src/**/__test__/**/snapshot/**/*',
     '*.pid'
@@ -217,7 +229,7 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   ignoreOverridePatterns: [
     'src/generated/**/*.ts',
   ]
@@ -239,7 +251,7 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   ignoreOverridePatterns: [
     '__fixture__',
   ]
@@ -281,7 +293,7 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   editorUpdateRate: 2_000
 })
 ```
@@ -296,7 +308,7 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   debugLogging: true
 })
 ```
@@ -311,10 +323,16 @@ Example:
 
 ```js
 recommended({
-  rootDir: __dirname
+  rootDir: import.meta.dirname
   requireFileExtensions: true
 })
 ```
+
+### Use in monorepos
+
+Fast import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
+
+Coming soon: a `no-unused-package-imports` rule for detecting package exports not used by any other package in the monorepo.
 
 ## Comparisons to import and import-x
 

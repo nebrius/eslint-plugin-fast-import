@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.0 (2/15/2026)
+
+- Added `externallyImported` option
+
 ## 1.11.0 (2/15/2026)
 
 - Added support for reading config from a separate JSON file
