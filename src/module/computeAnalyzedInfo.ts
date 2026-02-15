@@ -223,7 +223,12 @@ function analyzeSingleImport({
   }
 
   // Return value indicates if we've found the root export yet or not
+  const visited = new Set<string>();
   function traverse(currentFile: string, currentImportName: string): boolean {
+    if (visited.has(currentFile)) {
+      return false;
+    }
+    visited.add(currentFile);
     // Get the file from the project info
     const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 
@@ -421,7 +426,12 @@ function analyzeBarrelImport({
     return;
   }
 
+  const visited = new Set<string>();
   function traverse(currentFile: string) {
+    if (visited.has(currentFile)) {
+      return;
+    }
+    visited.add(currentFile);
     // Get the file from the project info
     const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
 

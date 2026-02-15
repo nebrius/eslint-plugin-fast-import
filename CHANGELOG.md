@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 1.11.0 (2/14/2026)
+## 1.11.0 (2/15/2026)
 
 - Added support for reading config from a separate JSON file
+- Fixed a bug where a file importing itself would cause a crash
 
 ## 1.10.0 (1/28/2026)
 

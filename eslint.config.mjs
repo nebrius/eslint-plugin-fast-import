@@ -16,7 +16,7 @@ const ROOT_DIR = import.meta.dirname;
 
 export default defineConfig([
   includeIgnoreFile(join(ROOT_DIR, '.gitignore')),
-  globalIgnores(['src/**/__test__/**/project/*', 'jest.config.ts']),
+  globalIgnores(['src/**/__test__/**/project/**/*', 'jest.config.ts']),
   {
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {

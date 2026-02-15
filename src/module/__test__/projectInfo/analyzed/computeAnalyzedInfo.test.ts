@@ -7,7 +7,7 @@ import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const TEST_PROJECT_DIR = join(getDirname(), 'project', 'default');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
@@ -493,4 +493,66 @@ it('Computes analyzed info', () => {
     )
   );
   expect(info).toMatchAnalyzedSpec(EXPECTED);
+});
+
+it('Computes analyzed info for a project with a file that imports itself', () => {
+  const selfImportProjectDir = join(getDirname(), 'project', 'self-import');
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          rootDir: selfImportProjectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a project with a reexport cycle triggered by an entry point', () => {
+  const reexportCycleProjectDir = join(
+    getDirname(),
+    'project',
+    'reexport-cycle'
+  );
+  const fileA = join(reexportCycleProjectDir, 'a.ts');
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          rootDir: reexportCycleProjectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+          isEntryPointCheck: (filePath, symbolName) =>
+            filePath === fileA && symbolName === 'foo',
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a project with a reexport cycle triggered by an import', () => {
+  const reexportCycleProjectDir = join(
+    getDirname(),
+    'project',
+    'reexport-cycle-import'
+  );
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          rootDir: reexportCycleProjectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+        })
+      )
+    )
+  ).not.toThrow();
 });

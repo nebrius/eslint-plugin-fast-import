@@ -70,5 +70,31 @@ console.log(c);
         },
       },
     },
+    {
+      code: `import { a } from './a';
+
+export const a = 10;`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noCycles' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import { a } from './a';
+
+export const a = 10;`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noCycles' }],
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 });
