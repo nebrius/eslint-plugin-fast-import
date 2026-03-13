@@ -4,6 +4,7 @@ import { isAbsolute, join } from 'node:path';
 import type { TSESLint } from '@typescript-eslint/utils';
 import { getDirname } from 'cross-dirname';
 
+import { preferAliasImports } from './rules/alias/alias.js';
 import { noCycle } from './rules/cycle/cycle.js';
 import { noEntryPointImports } from './rules/entryPoint/entryPoint.js';
 import { consistentFileExtensions } from './rules/extension/extension.js';
@@ -47,6 +48,7 @@ const plugin = {
     'no-node-builtins': noNodeBuiltins,
     'require-node-prefix': nodePrefix,
     'no-restricted-imports': noRestrictedImports,
+    'prefer-alias-imports': preferAliasImports,
   },
   processors: {},
 };
@@ -63,6 +65,7 @@ const recommendedConfig = {
     'fast-import/no-external-barrel-reexports': 'error',
     'fast-import/no-test-imports-in-prod': 'error',
     'fast-import/no-named-as-default': 'error',
+    'fast-import/prefer-alias-imports': 'error',
     'fast-import/require-node-prefix': 'off',
   },
 } as const;
@@ -81,6 +84,7 @@ const allConfig = {
     'fast-import/no-test-imports-in-prod': 'error',
     'fast-import/no-named-as-default': 'error',
     'fast-import/require-node-prefix': 'error',
+    'fast-import/prefer-alias-imports': 'error',
   },
 } as const;
 
@@ -100,6 +104,7 @@ const offConfig = {
     'fast-import/no-node-builtins': 'off',
     'fast-import/require-node-prefix': 'off',
     'fast-import/no-restricted-imports': 'off',
+    'fast-import/prefer-alias-imports': 'off',
   },
 } as const;
 

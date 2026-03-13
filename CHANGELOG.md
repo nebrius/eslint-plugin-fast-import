@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.0.0 (3/13/2026)
+
+- Added `prefer-alias-imports` rule
+- BREAKING CHANGE: added `prefer-alias-imports` rule to the recommend and all configs
+    - This rule is likely to cause new errors in codebases that use aliases and have the recommended or all configs enabled
+    - To disable this rule to preserve existing behavior, add `"fast-import/prefer-alias-imports": "off"` to your eslint config.
+
 ## 1.12.0 (2/15/2026)
 
 - Added `externallyImported` option

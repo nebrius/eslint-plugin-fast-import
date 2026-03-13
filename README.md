@@ -67,6 +67,7 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
 | [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
 | [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰    | 🔧  |
+| [prefer-alias-imports](src/rules/alias/README.md)                           | 🧰 ☑️ | 🔧  |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰    | 🔧  |
 | [no-node-builtins](src/rules/nodeBuiltins/README.md) \*                     |       |     |
 | [no-restricted-imports](src/rules/restricted/README.md) \*\*                |       |     |
