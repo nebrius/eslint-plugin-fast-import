@@ -333,8 +333,6 @@ recommended({
 
 Fast import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
 
-Coming soon: a `no-unused-package-imports` rule for detecting package exports not used by any other package in the monorepo.
-
 ## Comparisons to import and import-x
 
 Below are performance and accuracy comparisons to [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import) and [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x)
