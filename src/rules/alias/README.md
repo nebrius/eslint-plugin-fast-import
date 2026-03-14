@@ -22,25 +22,28 @@ Examples of _incorrect_ code with mode = relative-if-descendant (default)
 └── src
     ├── components
     │   └── Button.ts
+    |   └── Card.ts
     └── utils
         └── helper.ts
 
 alias: { '@/*': 'src/*' }
 */
 
-// src/components/Button.ts
+// src/components/Card.ts
 
 // Wrong: uses alias for file under the same alias scope
-import { helper } from '@/utils/helper';
+import { Button } from '@/components/Button';
+import { helper } from '../utils/helper';
 ```
 
 Examples of _correct_ code with mode = relative-if-descendant (default)
 
 ```js
-// src/components/Button.ts
+// src/components/Card.ts
 
 // Correct: uses relative path for file under the same alias scope
-import { helper } from '../utils/helper';
+import { Button } from './Button';
+import { helper } from '@/utils/helper';
 ```
 
 Examples of _incorrect_ code with mode = always
@@ -52,24 +55,27 @@ Examples of _incorrect_ code with mode = always
 └── src
     ├── components
     │   └── Button.ts
+    |   └── Card.ts
     └── utils
         └── helper.ts
 
 alias: { '@/*': 'src/*' }
 */
 
-// src/components/Button.ts
+// src/components/Card.ts
 
 // Wrong: uses relative path when an alias is available
+import { Button } from './Button';
 import { helper } from '../utils/helper';
 ```
 
 Examples of _correct_ code with mode = always
 
 ```js
-// src/components/Button.ts
+// src/components/Card.ts
 
 // Correct: uses alias path
+import { Button } from '@/components/Button';
 import { helper } from '@/utils/helper';
 ```
 
