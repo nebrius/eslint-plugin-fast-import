@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.1.0 (3/13/2026)
+
+- Fixed logic errors in `prefer-alias-imports` rule
+    - Renamed `relative-if-descendant` mode to `relative-if-local` to accurately represent what it actually does
+    - Technically this is a breaking change, but due to the previous release being so recent and very few downloads of 2.0.0, I'm instead going to just deprecate 2.0.0
+- Added configurable `minSharedPathDepth` option to `prefer-alias-imports` rule
+
 ## 2.0.0 (3/13/2026)
 
 - Added `prefer-alias-imports` rule

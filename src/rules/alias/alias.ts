@@ -12,11 +12,13 @@ type ReexportDeclaration =
   | TSESTree.ExportNamedDeclarationWithSource
   | TSESTree.ExportAllDeclaration;
 
-const MODE_DEFAULT = 'relative-if-descendant';
+const MODE_DEFAULT = 'relative-if-local';
+const MIN_SHARED_PATH_DEPTH_DEFAULT = 1;
 
 const schema = z
   .strictObject({
-    mode: z.enum(['always', 'relative-if-descendant']).optional(),
+    mode: z.enum(['always', 'relative-if-local']).optional(),
+    minSharedPathDepth: z.number().int().min(0).optional(),
   })
   .optional();
 type Options = z.infer<typeof schema>;
@@ -41,6 +43,41 @@ function findBestWildcardAlias(
   return best;
 }
 
+function getAliasInternalPathSegments(absolutePath: string, aliasPath: string) {
+  if (!absolutePath.startsWith(aliasPath)) {
+    return;
+  }
+
+  return absolutePath
+    .slice(aliasPath.length)
+    .split(/[/\\]+/)
+    .filter(Boolean);
+}
+
+function getSharedPathDepth(
+  sourcePath: string,
+  targetPath: string,
+  aliasPath: string
+) {
+  const sourceSegments = getAliasInternalPathSegments(sourcePath, aliasPath);
+  const targetSegments = getAliasInternalPathSegments(targetPath, aliasPath);
+
+  if (!sourceSegments || !targetSegments) {
+    return;
+  }
+
+  let sharedPathDepth = 0;
+  while (
+    sharedPathDepth < sourceSegments.length &&
+    sharedPathDepth < targetSegments.length &&
+    sourceSegments[sharedPathDepth] === targetSegments[sharedPathDepth]
+  ) {
+    sharedPathDepth++;
+  }
+
+  return sharedPathDepth;
+}
+
 export const preferAliasImports = createRule<
   [Options],
   'preferAlias' | 'preferRelative'
@@ -49,7 +86,7 @@ export const preferAliasImports = createRule<
   meta: {
     docs: {
       description:
-        'Enforces the use of alias imports instead of relative paths when an alias is available, and vice versa for files under the same alias',
+        'Enforces the use of alias imports instead of relative paths when an alias is available, and vice versa for sufficiently local files under the same alias',
     },
     schema: [schema.toJSONSchema() as JSONSchema4],
     fixable: 'code',
@@ -58,7 +95,7 @@ export const preferAliasImports = createRule<
       preferAlias:
         'Use alias import "{{alias}}" instead of relative path "{{relative}}"',
       preferRelative:
-        'Use relative import "{{relative}}" instead of alias "{{alias}}" for files under the same alias',
+        'Use relative import "{{relative}}" instead of alias "{{alias}}" for local files under the same alias',
     },
   },
   defaultOptions: [{ mode: MODE_DEFAULT }],
@@ -86,9 +123,12 @@ export const preferAliasImports = createRule<
       return {};
     }
 
-    const { mode = MODE_DEFAULT } = context.options[0] ?? {};
+    const {
+      mode = MODE_DEFAULT,
+      minSharedPathDepth = MIN_SHARED_PATH_DEPTH_DEFAULT,
+    } = context.options[0] ?? {};
 
-    // Pre-compute the current file's "home alias" for relative-if-descendant mode
+    // Pre-compute the current file's "home alias" for relative-if-local mode
     const homeAlias = findBestWildcardAlias(context.filename, wildcardAliases);
 
     for (const importEntry of [
@@ -128,12 +168,11 @@ export const preferAliasImports = createRule<
         }
 
         // Check wildcard aliases
-        if (!matchedAliasName) {
-          const absolutePath = resolve(
-            dirname(context.filename),
-            moduleSpecifier
+        if (!matchedAliasName && resolvedModulePath) {
+          const match = findBestWildcardAlias(
+            resolvedModulePath,
+            wildcardAliases
           );
-          const match = findBestWildcardAlias(absolutePath, wildcardAliases);
           if (match) {
             matchedAliasSymbol = match.symbol;
             matchedAliasPath = match.path;
@@ -144,16 +183,29 @@ export const preferAliasImports = createRule<
           continue;
         }
 
-        // In relative-if-descendant mode, skip if same alias as home
-        if (mode === 'relative-if-descendant') {
+        const sharedPathDepth =
+          homeAlias &&
+          resolvedModulePath &&
+          matchedAliasSymbol === homeAlias.symbol &&
+          matchedAliasPath === homeAlias.path
+            ? getSharedPathDepth(
+                context.filename,
+                resolvedModulePath,
+                homeAlias.path
+              )
+            : undefined;
+
+        // In relative-if-local mode, skip if the files are local enough
+        if (mode === 'relative-if-local') {
           if (matchedAliasName) {
             // Fixed alias — always different from a wildcard home alias, so report
           } else if (
             homeAlias &&
             matchedAliasSymbol === homeAlias.symbol &&
-            matchedAliasPath === homeAlias.path
+            matchedAliasPath === homeAlias.path &&
+            sharedPathDepth !== undefined &&
+            sharedPathDepth >= minSharedPathDepth
           ) {
-            // Same wildcard alias — relative is preferred
             continue;
           }
         }
@@ -191,36 +243,46 @@ export const preferAliasImports = createRule<
             );
           },
         });
-      } else if (mode === 'relative-if-descendant') {
+      } else if (mode === 'relative-if-local') {
         // --- Alias import: check if it should be relative ---
 
-        // Check wildcard aliases
-        let matchedSymbol: string | undefined;
-        let matchedPath: string | undefined;
-
-        for (const [symbol, path] of Object.entries(wildcardAliases)) {
-          if (
-            moduleSpecifier.startsWith(symbol) &&
-            (!matchedSymbol || path.length > (matchedPath?.length ?? 0))
-          ) {
-            matchedSymbol = symbol;
-            matchedPath = path;
-          }
+        if (moduleSpecifier in fixedAliases) {
+          continue;
         }
 
-        // Only convert wildcard aliases that match the home alias
+        if (!importEntry.resolvedModulePath) {
+          continue;
+        }
+
+        const matchedAlias = findBestWildcardAlias(
+          importEntry.resolvedModulePath,
+          wildcardAliases
+        );
+
+        const sharedPathDepth =
+          homeAlias && matchedAlias && matchedAlias.path === homeAlias.path
+            ? getSharedPathDepth(
+                context.filename,
+                importEntry.resolvedModulePath,
+                homeAlias.path
+              )
+            : undefined;
+
         if (
-          matchedSymbol &&
-          matchedPath &&
+          matchedAlias &&
           homeAlias &&
-          matchedSymbol === homeAlias.symbol &&
-          matchedPath === homeAlias.path
+          matchedAlias.symbol === homeAlias.symbol &&
+          matchedAlias.path === homeAlias.path &&
+          sharedPathDepth !== undefined &&
+          sharedPathDepth >= minSharedPathDepth
         ) {
-          // Compute the absolute target path and then a relative path from current file
-          const targetAbsPath =
-            matchedPath + moduleSpecifier.slice(matchedSymbol.length);
-          let newSpecifier = relative(dirname(context.filename), targetAbsPath);
-          // Ensure it starts with ./ or ../
+          let newSpecifier = relative(
+            dirname(context.filename),
+            resolve(
+              matchedAlias.path,
+              moduleSpecifier.slice(matchedAlias.symbol.length)
+            )
+          );
           if (!newSpecifier.startsWith('.')) {
             newSpecifier = './' + newSpecifier;
           }

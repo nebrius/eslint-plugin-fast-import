@@ -181,100 +181,138 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
 });
 
 // =============================================================================
-// mode: 'relative-if-descendant' (default)
+// mode: 'relative-if-local' (default)
+// =============================================================================
+
+ruleTester.run('prefer-alias-imports (relative-if-local)', preferAliasImports, {
+  valid: [
+    // Relative into subdirectory within the same top-level alias folder — should NOT flag
+    {
+      code: `import { Label } from './internal/Label';\n`,
+      filename: FILE_BUTTON,
+      settings: WILDCARD_SETTINGS,
+    },
+    // Relative from subdirectory to parent within the same top-level alias folder — should NOT flag
+    {
+      code: `import { Button } from '../Button';\n`,
+      filename: FILE_LABEL,
+      settings: WILDCARD_SETTINGS,
+    },
+    // Alias used across top-level alias folders — should NOT flag
+    {
+      code: `import { helper } from '@/utils/helper';\n`,
+      filename: FILE_BUTTON,
+      settings: WILDCARD_SETTINGS,
+    },
+    // Alias used from the alias root into a top-level folder — should NOT flag
+    {
+      code: `import { Button } from '@/components/Button';\n`,
+      filename: FILE_INDEX,
+      settings: WILDCARD_SETTINGS,
+    },
+    // Third-party import
+    {
+      code: `import { foo } from 'lodash';\n`,
+      filename: FILE_INDEX,
+      settings: WILDCARD_SETTINGS,
+    },
+  ],
+
+  invalid: [
+    // Relative import from outside alias scope should use alias
+    {
+      code: `import { Button } from './src/components/Button';\n`,
+      filename: FILE_STANDALONE,
+      settings: WILDCARD_SETTINGS,
+      errors: [{ messageId: 'preferAlias' }],
+      output: `import { Button } from '@/components/Button';\n`,
+    },
+    // Relative import from the alias root to a top-level folder should use alias
+    {
+      code: `import { Button } from './components/Button';\n`,
+      filename: FILE_INDEX,
+      settings: WILDCARD_SETTINGS,
+      errors: [{ messageId: 'preferAlias' }],
+      output: `import { Button } from '@/components/Button';\n`,
+    },
+    // Relative import across top-level alias folders should use alias
+    {
+      code: `import { helper } from '../utils/helper';\n`,
+      filename: FILE_BUTTON,
+      settings: WILDCARD_SETTINGS,
+      errors: [{ messageId: 'preferAlias' }],
+      output: `import { helper } from '@/utils/helper';\n`,
+    },
+    // Alias import should be relative when within the same top-level alias folder
+    {
+      code: `import { Label } from '@/components/internal/Label';\n`,
+      filename: FILE_BUTTON,
+      settings: WILDCARD_SETTINGS,
+      errors: [{ messageId: 'preferRelative' }],
+      output: `import { Label } from './internal/Label';\n`,
+    },
+    // Alias import from subdirectory to parent within the same top-level alias folder should be relative
+    {
+      code: `import { Button } from '@/components/Button';\n`,
+      filename: FILE_LABEL,
+      settings: WILDCARD_SETTINGS,
+      errors: [{ messageId: 'preferRelative' }],
+      output: `import { Button } from '../Button';\n`,
+    },
+    // Relative import from outside alias scope — fixed alias
+    {
+      code: `import { standalone } from '../standalone';\n`,
+      filename: FILE_INDEX,
+      settings: WILDCARD_AND_FIXED_SETTINGS,
+      errors: [{ messageId: 'preferAlias' }],
+      output: `import { standalone } from '@standalone';\n`,
+    },
+  ],
+});
+
+// =============================================================================
+// mode: 'relative-if-local' with minSharedPathDepth: 0
 // =============================================================================
 
 ruleTester.run(
-  'prefer-alias-imports (relative-if-descendant)',
+  'prefer-alias-imports (relative-if-local, minSharedPathDepth: 0)',
   preferAliasImports,
   {
     valid: [
-      // Relative within same alias — should NOT flag
+      // Relative import from the alias root is allowed when any shared alias root is enough
       {
         code: `import { Button } from './components/Button';\n`,
         filename: FILE_INDEX,
         settings: WILDCARD_SETTINGS,
+        options: [{ mode: 'relative-if-local', minSharedPathDepth: 0 }],
       },
-      // Relative deeper within same alias — should NOT flag
+      // Relative import across top-level alias folders is allowed when any shared alias root is enough
       {
         code: `import { helper } from '../utils/helper';\n`,
         filename: FILE_BUTTON,
         settings: WILDCARD_SETTINGS,
-      },
-      // Relative into subdirectory within same alias — should NOT flag
-      {
-        code: `import { Label } from './internal/Label';\n`,
-        filename: FILE_BUTTON,
-        settings: WILDCARD_SETTINGS,
-      },
-      // Relative from subdirectory to parent within same alias — should NOT flag
-      {
-        code: `import { Button } from '../Button';\n`,
-        filename: FILE_LABEL,
-        settings: WILDCARD_SETTINGS,
-      },
-      // Alias used for cross-alias import — should NOT flag
-      {
-        code: `import { Button } from '@/components/Button';\n`,
-        filename: FILE_STANDALONE,
-        settings: WILDCARD_SETTINGS,
-      },
-      // Third-party import
-      {
-        code: `import { foo } from 'lodash';\n`,
-        filename: FILE_INDEX,
-        settings: WILDCARD_SETTINGS,
+        options: [{ mode: 'relative-if-local', minSharedPathDepth: 0 }],
       },
     ],
 
     invalid: [
-      // Relative import from outside alias scope should use alias
+      // Alias import from the alias root should become relative when any shared alias root is enough
       {
-        code: `import { Button } from './src/components/Button';\n`,
-        filename: FILE_STANDALONE,
+        code: `import { Button } from '@/components/Button';\n`,
+        filename: FILE_INDEX,
         settings: WILDCARD_SETTINGS,
-        errors: [{ messageId: 'preferAlias' }],
-        output: `import { Button } from '@/components/Button';\n`,
+        options: [{ mode: 'relative-if-local', minSharedPathDepth: 0 }],
+        errors: [{ messageId: 'preferRelative' }],
+        output: `import { Button } from './components/Button';\n`,
       },
-      // Alias import should be relative when under same alias
+      // Alias import across top-level alias folders should become relative when any shared alias root is enough
       {
         code: `import { helper } from '@/utils/helper';\n`,
         filename: FILE_BUTTON,
         settings: WILDCARD_SETTINGS,
+        options: [{ mode: 'relative-if-local', minSharedPathDepth: 0 }],
         errors: [{ messageId: 'preferRelative' }],
         output: `import { helper } from '../utils/helper';\n`,
-      },
-      // Alias import from index.ts — same alias scope
-      {
-        code: `import { Button } from '@/components/Button';\n`,
-        filename: FILE_INDEX,
-        settings: WILDCARD_SETTINGS,
-        errors: [{ messageId: 'preferRelative' }],
-        output: `import { Button } from './components/Button';\n`,
-      },
-      // Alias import into subdirectory — same alias scope, should be relative
-      {
-        code: `import { Label } from '@/components/internal/Label';\n`,
-        filename: FILE_BUTTON,
-        settings: WILDCARD_SETTINGS,
-        errors: [{ messageId: 'preferRelative' }],
-        output: `import { Label } from './internal/Label';\n`,
-      },
-      // Alias import from subdirectory to parent — same alias scope, should be relative
-      {
-        code: `import { Button } from '@/components/Button';\n`,
-        filename: FILE_LABEL,
-        settings: WILDCARD_SETTINGS,
-        errors: [{ messageId: 'preferRelative' }],
-        output: `import { Button } from '../Button';\n`,
-      },
-      // Relative import from outside alias scope — fixed alias
-      {
-        code: `import { standalone } from '../standalone';\n`,
-        filename: FILE_INDEX,
-        settings: WILDCARD_AND_FIXED_SETTINGS,
-        errors: [{ messageId: 'preferAlias' }],
-        output: `import { standalone } from '@standalone';\n`,
       },
     ],
   }
