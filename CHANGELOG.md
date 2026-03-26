@@ -3,6 +3,7 @@
 ## 2.2.0 (3/26/2026)
 
 - Added support for `regexp` property in `entryPoints` and `externallyImported` options
+- Added formal support for Oxlint
 
 ## 2.1.0 (3/13/2026)
 
