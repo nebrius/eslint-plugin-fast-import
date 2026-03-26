@@ -5,7 +5,6 @@
 - [Installation](#installation)
 - [Rules](#rules)
 - [Configuration](#configuration)
-  - [Using fast-import.config.json](#using-fast-importconfigjson)
   - [Configuration options](#configuration-options)
     - [rootDir (required)](#rootdir-required)
     - [alias](#alias)
@@ -17,7 +16,9 @@
     - [editorUpdateRate](#editorupdaterate)
     - [debugLogging](#debuglogging)
     - [requireFileExtensions](#requirefileextensions)
+  - [Using fast-import.config.json](#using-fast-importconfigjson)
   - [Use in monorepos](#use-in-monorepos)
+  - [Using with OXLint](#using-with-oxlint)
 - [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
   - [Performance](#performance)
   - [Accuracy](#accuracy)
@@ -94,28 +95,6 @@ export default [
 
 This will apply the recommended rules along with the default configuration.
 
-### Using fast-import.config.json
-
-You can also define the configuration in a `fast-import.config.json` file. This file should contain the same configuration options as the [Configuration options](#configuration-options) section, except that it should not include the `rootDir` option.
-
-To use this file, pass in a path to the directory containing the `fast-import.config.json` file. `rootDir` will automatically be set to this path, like so:
-
-```js
-import { recommended } from 'eslint-plugin-fast-import';
-
-export default [recommended(import.meta.dirname)];
-```
-
-And then the configuration file:
-
-```json
-{
-  "entryPoints": {
-    "./src/index.ts": ["default"]
-  }
-}
-```
-
 ### Configuration options
 
 Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or suppliment these options.
@@ -173,7 +152,7 @@ Note: patterns with a single star after them will match any symbols/files that s
 
 #### externallyImported / entryPoints
 
-Type: `Record<string, Array<string> | RegExp>`
+Type: `Record<string, Array<string> | RegExp | { regexp: string }>`
 
 Exports specified with `externallyImported` or `entryPoints` define exports that are not imported by code inside of the code base, but instead by code outside of the codebase. The difference between `externallyImported` and `entryPoints` is:
 
@@ -196,6 +175,9 @@ recommended({
   },
   externallyImported: {
     'index.ts': /.*/,
+    // Or use { regexp: string } for environments that don't support RegExp
+    // (e.g. OXLint's JS plugin interface):
+    // 'index.ts': { regexp: '.*' },
   },
 });
 ```
@@ -253,7 +235,7 @@ Example:
 ```js
 recommended({
   rootDir: import.meta.dirname
-  ignoreOverridePatterns: [
+  testFilePatterns: [
     '__fixture__',
   ]
 })
@@ -329,9 +311,39 @@ recommended({
 })
 ```
 
+### Using fast-import.config.json
+
+You can also define the configuration in a `fast-import.config.json` file. This file should contain the same configuration options as the [Configuration options](#configuration-options) section, except that it should not include the `rootDir` option.
+
+To use this file, pass in a path to the directory containing the `fast-import.config.json` file. `rootDir` will automatically be set to this path, like so:
+
+```js
+import { recommended } from 'eslint-plugin-fast-import';
+
+export default [recommended(import.meta.dirname)];
+```
+
+And then the configuration file:
+
+```json
+{
+  "entryPoints": {
+    "./src/index.ts": ["default"]
+  }
+}
+```
+
 ### Use in monorepos
 
 Fast import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
+
+### Using with OXLint
+
+Fast Import works with [OXLint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
+
+Configuration is essentially the same as with ESLint, with one exception: OXLint's JS plugin interface does not yet [support `RegExp` values in settings](https://github.com/oxc-project/oxc/issues/20530). If you use regexes in `entryPoints` or `externallyImported`, use the `{ regexp: string }` form instead (see [externallyImported / entryPoints](#externallyimported--entrypoints)).
+
+For a full working example, see this repo's own [oxlint.config.ts](./oxlint.config.ts).
 
 ## Comparisons to import and import-x
 

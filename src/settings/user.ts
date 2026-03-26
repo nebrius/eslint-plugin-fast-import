@@ -11,10 +11,24 @@ const settingsSchema = z.strictObject({
   rootDir: z.string(),
   alias: z.record(z.string(), z.string()).optional(),
   entryPoints: z
-    .record(z.string(), z.union([z.array(z.string()), z.instanceof(RegExp)]))
+    .record(
+      z.string(),
+      z.union([
+        z.array(z.string()),
+        z.instanceof(RegExp),
+        z.strictObject({ regexp: z.string() }),
+      ])
+    )
     .optional(),
   externallyImported: z
-    .record(z.string(), z.union([z.array(z.string()), z.instanceof(RegExp)]))
+    .record(
+      z.string(),
+      z.union([
+        z.array(z.string()),
+        z.instanceof(RegExp),
+        z.strictObject({ regexp: z.string() }),
+      ])
+    )
     .optional(),
   ignorePatterns: z.array(z.string()).optional(),
   ignoreOverridePatterns: z.array(z.string()).optional(),

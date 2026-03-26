@@ -199,6 +199,23 @@ it('Ignores aliases that point outside of rootDir', () => {
   expect(settings.wildcardAliases).toEqual({});
 });
 
+it('Supports { regexp: string } for entry point symbols', () => {
+  const { entryPoints } = getSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'one-shot',
+        rootDir: TEST_PROJECT_DIR,
+        entryPoints: { 'src/a.ts': { regexp: '.*' } },
+      },
+    },
+  });
+  expect(entryPoints).toHaveLength(1);
+  expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
+  expect(entryPoints[0].symbols).toBeInstanceOf(RegExp);
+  expect((entryPoints[0].symbols as RegExp).test('anything')).toBeTruthy();
+});
+
 it('Ignores when an entry point is absolute', () => {
   const settings = getSettings({
     filename: FILE_A,

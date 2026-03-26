@@ -89,6 +89,19 @@ export function a1(arg: number | string): void {
         },
       },
     },
+    {
+      code: readFileSync(FILE_E, 'utf8'),
+      filename: FILE_E,
+      settings: {
+        'fast-import': {
+          rootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+          entryPoints: {
+            'e.ts': { regexp: '^e$' },
+          },
+        },
+      },
+    },
     // __fixture__ is added to testFilePatterns, so c-test.ts is a test file
     // and its exports only being used by other test files is valid
     {

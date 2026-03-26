@@ -158,7 +158,9 @@ export function getSettings(
   })) {
     const formattedSymbols = Array.isArray(symbols)
       ? symbols.map((symbol) => trimTrailingPathSeparator(symbol))
-      : symbols;
+      : symbols instanceof RegExp
+        ? symbols
+        : new RegExp(symbols.regexp);
 
     if (isAbsolute(filePattern)) {
       warn(
@@ -232,8 +234,10 @@ export function getSettings(
         for (const symbol of symbols) {
           debug(`    ${symbol}`);
         }
-      } else {
+      } else if (symbols instanceof RegExp) {
         debug(`    ${symbols.toString()}`);
+      } else {
+        debug(`    /${symbols.regexp}/`);
       }
     }
   }

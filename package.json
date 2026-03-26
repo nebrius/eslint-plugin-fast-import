@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
   "keywords": [
     "eslint",
@@ -18,8 +18,10 @@
   "main": "dist/plugin.js",
   "type": "module",
   "scripts": {
-    "lint": "TIMING=1 eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts,js,jsx,mjs}\"",
-    "lint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
+    "lint": "npm run lint:eslint && npm run lint:oxlint",
+    "lint:eslint": "TIMING=1 eslint --report-unused-disable-directives \"**/*.{ts,tsx,mts,js,jsx,mjs}\"",
+    "lint:eslint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
+    "lint:oxlint": "oxlint --type-aware",
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage src",
     "format": "prettier --write \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
@@ -52,6 +54,8 @@
     "global": "^4.4.0",
     "globals": "^17.0.0",
     "jest-diff": "^30.0.0",
+    "oxlint": "^1.57.0",
+    "oxlint-tsgolint": "^0.17.4",
     "prettier": "^3.4.2",
     "simple-git": "^3.27.0",
     "ts-jest": "^29.2.5",

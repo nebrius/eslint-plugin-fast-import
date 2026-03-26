@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.0 (3/26/2026)
+
+- Added support for `regexp` property in `entryPoints` and `externallyImported` options
+
 ## 2.1.0 (3/13/2026)
 
 - Fixed logic errors in `prefer-alias-imports` rule

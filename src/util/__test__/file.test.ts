@@ -106,7 +106,7 @@ it('Can split paths into segments', () => {
   expect(splitPathIntoSegments('C:\\a\\b\\c')).toEqual(['a', 'b', 'c']);
   expect(() => {
     splitPathIntoSegments('a/b\\c');
-  }).toThrow();
+  }).toThrow('contains both / and \\');
 });
 
 it('Can convert to unixish path', () => {
