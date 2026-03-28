@@ -18,7 +18,7 @@
     - [requireFileExtensions](#requirefileextensions)
   - [Using fast-import.config.json](#using-fast-importconfigjson)
   - [Use in monorepos](#use-in-monorepos)
-  - [Using with OXLint](#using-with-oxlint)
+  - [Using with Oxlint](#using-with-oxlint)
 - [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
   - [Performance](#performance)
   - [Accuracy](#accuracy)
@@ -176,7 +176,7 @@ recommended({
   externallyImported: {
     'index.ts': /.*/,
     // Or use { regexp: string } for environments that don't support RegExp
-    // (e.g. OXLint's JS plugin interface):
+    // (e.g. Oxlint's JS plugin interface):
     // 'index.ts': { regexp: '.*' },
   },
 });
@@ -337,11 +337,32 @@ And then the configuration file:
 
 Fast import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
 
-### Using with OXLint
+### Using with Oxlint
 
-Fast Import works with [OXLint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
+Fast Import works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
 
-Configuration is essentially the same as with ESLint, with one exception: OXLint's JS plugin interface does not yet [support `RegExp` values in settings](https://github.com/oxc-project/oxc/issues/20530). If you use regexes in `entryPoints` or `externallyImported`, use the `{ regexp: string }` form instead (see [externallyImported / entryPoints](#externallyimported--entrypoints)).
+Configuration is essentially the same as with ESLint, with two differences:
+
+1. Oxlint's JS plugin interface does not yet [support `RegExp` values in settings](https://github.com/oxc-project/oxc/issues/20530). If you use regexes in `entryPoints` or `externallyImported`, use the `{ regexp: string }` form instead (see [externallyImported / entryPoints](#externallyimported--entrypoints)).
+2. Oxlint does not have an equivalent to ESLint's flat config, so the `recommended()` and `all()` helper functions cannot be used directly. Instead, call the helper and spread its `rules` and `settings` into Oxlint's config separately:
+
+```ts
+import { all } from 'eslint-plugin-fast-import';
+
+const ROOT_DIR = import.meta.dirname;
+const { rules: fastImportRules, settings } = all(ROOT_DIR);
+
+export default {
+  jsPlugins: [
+    { name: 'fast-import', specifier: 'eslint-plugin-fast-import' },
+  ],
+  rules: {
+    ...fastImportRules,
+    // other rules...
+  },
+  settings,
+};
+```
 
 For a full working example, see this repo's own [oxlint.config.ts](./oxlint.config.ts).
 
