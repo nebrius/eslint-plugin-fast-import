@@ -4,15 +4,14 @@
       "default",
       "getESMInfo",
       "registerUpdateListener",
+      "getLocFromRange",
       "isNonTestFile",
       "recommended",
       "all"
     ]
   },
   "externallyImported": {
-    "*.config.*": [
-      "default"
-    ]
+    "*.config.*": ["default"]
   },
   "debugLogging": true,
   "requireFileExtensions": true
