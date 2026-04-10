@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
   "keywords": [
     "eslint",
@@ -16,6 +16,12 @@
   "author": "Bryan Hughes <bryan@nebri.us>",
   "license": "MIT",
   "main": "dist/plugin.js",
+  "exports": {
+    ".": {
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
+    }
+  },
   "type": "module",
   "scripts": {
     "lint": "npm run lint:eslint && npm run lint:oxlint",

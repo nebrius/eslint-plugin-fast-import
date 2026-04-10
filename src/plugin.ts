@@ -23,6 +23,7 @@ export {
   getESMInfo,
   registerUpdateListener,
   isNonTestFile,
+  getLocFromRange,
 } from './rules/util.js';
 
 // Plugin export

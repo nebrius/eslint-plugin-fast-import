@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.1 (10/13/2025)
+
+- Added missing export for `getLocFromRange`
+
 ## 2.2.0 (3/26/2026)
 
 - Added support for `regexp` property in `entryPoints` and `externallyImported` options
