@@ -8,7 +8,7 @@
   - [Configuration options](#configuration-options)
     - [rootDir (required)](#rootdir-required)
     - [alias](#alias)
-    - [externallyImported / entryPoints](#externallyimported--entrypoints)
+    - [externallyImportedFiles / entryPointFiles](#externallyimportedfiles--entrypointfiles)
     - [ignorePatterns](#ignorepatterns)
     - [ignoreOverridePatterns](#ignoreoverridepatterns)
     - [testFilePatterns](#testfilepatterns)
@@ -81,12 +81,17 @@ There is also a configuration called "off" that disables all rules. This configu
 Fast Import supports ESLint 9+ and Oxlint. For most simple TypeScript applications using ESLint, you can add Fast Import with:
 
 ```js
-import { recommended } from 'eslint-plugin-fast-import';
+import fastImportPlugin from 'eslint-plugin-fast-import';
 
 export default [
-  recommended({
-    rootDir: import.meta.dirname,
-  }),
+  {
+    settings: {
+      'fast-import': {
+        rootDir: import.meta.dirname,
+      },
+    },
+  },
+  fastImportPlugin.configs.recommended,
 ];
 ```
 
@@ -109,17 +114,25 @@ Note: Fast Import automatically filters out folders named `node_modules`, `.git`
 CommonJS Example:
 
 ```js
-recommended({
-  rootDir: __dirname,
-});
+{
+  settings: {
+    'fast-import': {
+      rootDir: __dirname,
+    },
+  },
+}
 ```
 
-ESM Example using `dirname` from `node:path` and `fileURLToPath` from `node:url`:
+ESM Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname,
-});
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+    },
+  },
+}
 ```
 
 #### alias
@@ -136,25 +149,29 @@ Fast Import defaults to the values inside of `tsconfig.json`, if present, with a
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname
-  alias: {
-    '@/*': 'src/*'
-    'foo': 'src/foo.ts'
-  }
-})
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      alias: {
+        '@/*': 'src/*',
+        'foo': 'src/foo.ts',
+      },
+    },
+  },
+}
 ```
 
 Note: patterns with a single star after them will match any symbols/files that start with the symbol/filepath.
 
-#### externallyImported / entryPoints
+#### externallyImportedFiles / entryPointFiles
 
-Type: `Record<string, Array<string> | RegExp | { regexp: string }>`
+Type: `string[]`
 
-Exports specified with `externallyImported` or `entryPoints` define exports that are not imported by code inside of the code base, but instead by code outside of the codebase. The difference between `externallyImported` and `entryPoints` is:
+Files specified with `externallyImportedFiles` or `entryPointFiles` define files whose exports are not imported by code inside of the codebase, but instead by code outside of the codebase. All exports from any matching file are treated as entry points or externally imported. The difference between the two options is:
 
-- `entryPoints` are intended to represent entry points in a library intended for use by others, aka a "public API."
-- `externallyImported` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application or the default export in a file called `eslint.config.mjs` in a ESLint configuration.
+- `entryPointFiles` are intended to represent entry points in a library intended for use by others, aka a "public API."
+- `externallyImportedFiles` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application.
 
 In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary for determining if a package's entry points are intended to be used by other packages in the monorepo, and thus should be analyzed for usage. See [Use in monorepos](#use-in-monorepos) for more info.
 
@@ -162,21 +179,20 @@ For example, if you are building a Next.js application, then the `default` expor
 
 Entry points allows you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/entryPoint/README.md) rule.
 
+Note: config files matching `/*.config.*` are always treated as externally imported, regardless of this setting.
+
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname,
-  entryPoints: {
-    './src/app/**/page.tsx': ['default', 'metadata'],
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      entryPointFiles: ['./src/app/**/page.tsx', './src/app/**/layout.tsx'],
+      externallyImportedFiles: ['index.ts'],
+    },
   },
-  externallyImported: {
-    'index.ts': /.*/,
-    // Or use { regexp: string } for environments that don't support RegExp
-    // (e.g. Oxlint's JS plugin interface):
-    // 'index.ts': { regexp: '.*' },
-  },
-});
+}
 ```
 
 #### ignorePatterns
@@ -190,13 +206,17 @@ By default, Fast Import includes the contents of all `.gitignore` files that app
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname
-  ignorePatterns: [
-    'src/**/__test__/**/snapshot/**/*',
-    '*.pid'
-  ]
-})
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      ignorePatterns: [
+        'src/**/__test__/**/snapshot/**/*',
+        '*.pid',
+      ],
+    },
+  },
+}
 ```
 
 #### ignoreOverridePatterns
@@ -208,12 +228,16 @@ A list of "inverse" ignore patterns that negate other ignore patterns, using the
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname
-  ignoreOverridePatterns: [
-    'src/generated/**/*.ts',
-  ]
-})
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      ignoreOverridePatterns: [
+        'src/generated/**/*.ts',
+      ],
+    },
+  },
+}
 ```
 
 #### testFilePatterns
@@ -230,12 +254,14 @@ globs are not currently supported.
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname
-  testFilePatterns: [
-    '__fixture__',
-  ]
-})
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      testFilePatterns: ['__fixture__'],
+    },
+  },
+}
 ```
 
 #### mode
@@ -272,10 +298,14 @@ Defines the rate in milliseconds at which Fast Import looks for file changes, an
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname
-  editorUpdateRate: 2_000
-})
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      editorUpdateRate: 2_000,
+    },
+  },
+}
 ```
 
 #### debugLogging
@@ -287,10 +317,14 @@ When set to `true`, enables extra logging that tells you performance numbers, wh
 Example:
 
 ```js
-recommended({
-  rootDir: import.meta.dirname
-  debugLogging: true
-})
+{
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      debugLogging: true,
+    },
+  },
+}
 ```
 
 ### Use in monorepos
@@ -301,26 +335,24 @@ Fast import is designed to work well in monorepos. The caching mechanism describ
 
 Fast Import works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
 
-Configuration is essentially the same as with ESLint, with two differences:
-
-1. Oxlint's JS plugin interface does not yet [support `RegExp` values in settings](https://github.com/oxc-project/oxc/issues/20530). If you use regexes in `entryPoints` or `externallyImported`, use the `{ regexp: string }` form instead (see [externallyImported / entryPoints](#externallyimported--entrypoints)).
-2. Oxlint does not have an equivalent to ESLint's flat config, so the `recommended()` and `all()` helper functions cannot be used directly. Instead, call the helper and spread its `rules` and `settings` into Oxlint's config separately:
+Configuration is essentially the same as with ESLint. The main difference is that Oxlint does not have an equivalent to ESLint's flat config, so you need to dig into the config object to find the rules properties:
 
 ```ts
-import { all } from 'eslint-plugin-fast-import';
-
-const ROOT_DIR = import.meta.dirname;
-const { rules: fastImportRules, settings } = all(ROOT_DIR);
+import fastImportPlugin from 'eslint-plugin-fast-import';
 
 export default {
   jsPlugins: [
     { name: 'fast-import', specifier: 'eslint-plugin-fast-import' },
   ],
   rules: {
-    ...fastImportRules,
+    ...fastImportPlugin.configs.all.rules,
     // other rules...
   },
-  settings,
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+    },
+  },
 };
 ```
 

@@ -6,7 +6,7 @@ Ensure exports are imported elsewhere, taking into account whether files are tes
 
 `no-unused-exports` looks at all exports and analyzes who imports the export, if any. An export is considered used if any of the following are true:
 
-1. The export is [listed as an entry point](../../../README.md#entrypoints)
+1. The export is [in an entry point file or externally imported file](../../../README.md#externallyimportedfiles--entrypointfiles)
 2. The export is a non-test file and is imported by another non-test file
 3. The export is a test file (exports in test files are not analyzed by this rule)
 4. The export is a type export and is imported in a test or non-test file
