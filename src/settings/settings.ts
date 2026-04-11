@@ -6,7 +6,7 @@ import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
 import { trimTrailingPathSeparator } from '../util/files.js';
-import { debug, warn } from '../util/logging.js';
+import { debug } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import { getUserSettings, type Settings } from './user.js';
 
@@ -20,14 +20,14 @@ export type ParsedSettings = Omit<
   | 'ignorePatterns'
   | 'ignoreOverridePatterns'
   | 'alias'
-  | 'entryPoints'
-  | 'externallyImported'
+  | 'entryPointFiles'
+  | 'externallyImportedFiles'
 > & {
   ignorePatterns: IgnorePattern[];
   ignoreOverridePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
-  entryPoints: Array<{ file: Ignore; symbols: string[] | RegExp }>;
+  entryPoints: Array<{ file: Ignore }>;
 };
 
 // Honestly the process.argv stuff isn't worth the effort to test, since it
@@ -108,8 +108,8 @@ export function getSettings(
   };
   const {
     alias = {},
-    entryPoints = {},
-    externallyImported = {},
+    entryPointFiles = [],
+    externallyImportedFiles = [],
   } = mergedSettings;
 
   // Clean up any aliases
@@ -152,25 +152,15 @@ export function getSettings(
   // Merge entry points and externally imported exports, since they mean the
   // same thing from inside the module. They are kept separate in settings for
   // use by monorepo package analysis rules (aka outside the module)
-  for (const [filePattern, symbols] of Object.entries({
-    ...entryPoints,
-    ...externallyImported,
-  })) {
-    const formattedSymbols = Array.isArray(symbols)
-      ? symbols.map((symbol) => trimTrailingPathSeparator(symbol))
-      : symbols instanceof RegExp
-        ? symbols
-        : new RegExp(symbols.regexp);
+  for (const filePattern of [
+    ...entryPointFiles,
+    ...externallyImportedFiles,
 
-    if (isAbsolute(filePattern)) {
-      warn(
-        `Invalid entry point file patter "${filePattern}". Entry point files patterns must be relative to the directory with your ESLint config file, not absolute. This entry point will be ignored.`
-      );
-      continue;
-    }
+    // Always ignore config files in the root directory
+    '/*.config.*',
+  ]) {
     parsedEntryPoints.push({
       file: ignore().add(filePattern),
-      symbols: formattedSymbols,
     });
   }
 
@@ -222,26 +212,6 @@ export function getSettings(
     }
   }
 
-  // TODO: Comparing entry points is a bit more complex since we have to compare
-  // the parsed entry points, which can't be serialized and don't have
-  // referential stability, so we skip printing changes if we have a cached
-  // copy. It's not accurate, but good enough for now
-  if (!cachedSettings) {
-    debug(`Entry points:`);
-    for (const [filePattern, symbols] of Object.entries(entryPoints)) {
-      debug(`  ${filePattern}:`);
-      if (Array.isArray(symbols)) {
-        for (const symbol of symbols) {
-          debug(`    ${symbol}`);
-        }
-      } else if (symbols instanceof RegExp) {
-        debug(`    ${symbols.toString()}`);
-      } else {
-        debug(`    /${symbols.regexp}/`);
-      }
-    }
-  }
-
   const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
     dir: rootDir,
     contents: p,
@@ -255,7 +225,7 @@ export function getSettings(
   }));
 
   // Apply defaults and save to the settings cache
-  const newSettings = {
+  const newSettings: ParsedSettings = {
     rootDir,
     wildcardAliases,
     fixedAliases,

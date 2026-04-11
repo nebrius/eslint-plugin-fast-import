@@ -21,8 +21,8 @@ it('Fetchings user supplied settings', () => {
         },
         ignorePatterns: ['src/b*'],
         ignoreOverridePatterns: ['src/c*'],
-        entryPoints: { 'src/a.ts': ['a'] },
-        externallyImported: { 'src/b.ts': ['b'] },
+        entryPointFiles: ['src/a.ts'],
+        externallyImportedFiles: ['src/b.ts'],
       },
     },
   });
@@ -41,13 +41,11 @@ it('Fetchings user supplied settings', () => {
     },
   };
   expect(settings).toEqual(expected);
-  expect(entryPoints).toHaveLength(2);
+  expect(entryPoints).toHaveLength(3);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
   expect(entryPoints[0].file.ignores('src/b.ts')).toBeFalsy();
-  expect(entryPoints[0].symbols).toEqual(['a']);
   expect(entryPoints[1].file.ignores('src/b.ts')).toBeTruthy();
   expect(entryPoints[1].file.ignores('src/a.ts')).toBeFalsy();
-  expect(entryPoints[1].symbols).toEqual(['b']);
 });
 
 it('Throws on missing settings', () => {
@@ -206,25 +204,10 @@ it('Supports { regexp: string } for entry point symbols', () => {
       'fast-import': {
         mode: 'one-shot',
         rootDir: TEST_PROJECT_DIR,
-        entryPoints: { 'src/a.ts': { regexp: '.*' } },
+        entryPointFiles: ['src/a.ts'],
       },
     },
   });
-  expect(entryPoints).toHaveLength(1);
+  expect(entryPoints).toHaveLength(2);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
-  expect(entryPoints[0].symbols).toBeInstanceOf(RegExp);
-  expect((entryPoints[0].symbols as RegExp).test('anything')).toBeTruthy();
-});
-
-it('Ignores when an entry point is absolute', () => {
-  const settings = getSettings({
-    filename: FILE_A,
-    settings: {
-      'fast-import': {
-        rootDir: TEST_PROJECT_DIR,
-        entryPoints: { '/foo/a.ts': ['a'] },
-      },
-    },
-  });
-  expect(settings.entryPoints.length).toEqual(0);
 });

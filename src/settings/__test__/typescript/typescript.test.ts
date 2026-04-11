@@ -18,6 +18,11 @@ it('Fetchings settings from typescript', () => {
       },
     },
   });
+
+  // This contains the default entry point setting, which is an internal
+  // representation that's difficult to represent here, so we just override it
+  settings.entryPoints = [];
+
   const expected: ParsedSettings = {
     editorUpdateRate: 5_000,
     rootDir: TEST_PROJECT_DIR,

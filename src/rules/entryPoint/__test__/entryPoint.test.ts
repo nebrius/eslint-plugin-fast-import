@@ -56,9 +56,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: {
-            [FILE_A_ENTRY_POINT]: ['a'],
-          },
+          entryPointFiles: [FILE_A_ENTRY_POINT],
         },
       },
     },
@@ -70,23 +68,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: {
-            [FILE_A_ENTRY_POINT]: /.*/,
-          },
-        },
-      },
-    },
-    {
-      code: FILE_C_CONTENTS,
-      filename: FILE_C,
-      errors: [{ messageId: 'noEntryPointImports' }],
-      settings: {
-        'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
-          mode: 'fix',
-          entryPoints: {
-            [FILE_A_ENTRY_POINT]: { regexp: '.*' },
-          },
+          entryPointFiles: [FILE_A_ENTRY_POINT],
         },
       },
     },

@@ -22,7 +22,7 @@ import { InternalError } from '../util/error.js';
 import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
 import { debug } from '../util/logging.js';
 
-type IsEntryPointCheck = (filePath: string, symbolName: string) => boolean;
+type IsEntryPointCheck = (filePath: string) => boolean;
 
 type ComputeBaseInfoOptions = Pick<
   ParsedSettings,
@@ -394,9 +394,7 @@ function computeFileDetails({
 
         if (isBarrel) {
           const exportName = entry.exportName.name;
-          const isEntryPoint = exportName
-            ? isEntryPointCheck(filePath, exportName)
-            : false;
+          const isEntryPoint = exportName ? isEntryPointCheck(filePath) : false;
           if (isEntryPoint) {
             hasEntryPoints = true;
           }
@@ -419,7 +417,7 @@ function computeFileDetails({
           if (!exportName) {
             throw new InternalError(`exportName is undefined`);
           }
-          const isEntryPoint = isEntryPointCheck(filePath, exportName);
+          const isEntryPoint = isEntryPointCheck(filePath);
           if (isEntryPoint) {
             hasEntryPoints = true;
           }
@@ -446,7 +444,7 @@ function computeFileDetails({
         if (!exportName) {
           throw new InternalError(`exportName is undefined`);
         }
-        const isEntryPoint = isEntryPointCheck(filePath, exportName);
+        const isEntryPoint = isEntryPointCheck(filePath);
         if (isEntryPoint) {
           hasEntryPoints = true;
         }

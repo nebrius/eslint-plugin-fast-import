@@ -487,8 +487,7 @@ it('Computes analyzed info', () => {
         fixedAliases: {},
         ignorePatterns: [],
         ignoreOverridePatterns: [],
-        isEntryPointCheck: (filePath, symbolName) =>
-          filePath === FILE_A && symbolName === 'ASourceCode',
+        isEntryPointCheck: (filePath) => filePath === FILE_A,
       })
     )
   );
@@ -528,8 +527,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: (filePath, symbolName) =>
-            filePath === fileA && symbolName === 'foo',
+          isEntryPointCheck: (filePath) => filePath === fileA,
         })
       )
     )

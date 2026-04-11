@@ -45,12 +45,7 @@ export default {
   settings: {
     'fast-import': {
       rootDir: import.meta.dirname,
-      entryPoints: {
-        'src/plugin.ts': { regexp: '.*' },
-      },
-      externallyImported: {
-        '*.config.*': ['default'],
-      },
+      entryPointFiles: ['src/plugin.ts'],
       debugLogging: true,
     },
   },

@@ -5,6 +5,11 @@
 - BREAKING CHANGE: Removed support for config files when not using new monorepo configuration
 - BREAKING CHANGE: Removed the `consistent-file-extensions` rule
     - This rule papered over gaps in tooling that is no longer needed, and was difficult to use
+- BREAKING CHANGE: Replaced `entryPoints` with `entryPointFiles` and `externallyImported` with `externallyImportedFiles`
+    - Previously, `entryPoints`/`externallyImported` indicated a list of exports from a given file that were considered for analysis. In practice this has proven difficult for users to maintain, so basically everyone wrote `/.*/` to include all exports from that file.
+    - Regexes themselves are tricky, since they're not serializable, so we also added a change to allow `{ regexp: "..." }` objects to be used instead of strings.
+    - This complexity doesn't benefit us, so the new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
+- `externallyImported` now contains `/*.config.*` files by default
 
 ## 2.2.1 (10/13/2025)
 

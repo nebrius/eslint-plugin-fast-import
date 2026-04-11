@@ -60,9 +60,7 @@ export function a1(arg: number | string): void {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: {
-            'f.ts': ['a2'],
-          },
+          entryPointFiles: ['f.ts'],
         },
       },
     },
@@ -83,22 +81,7 @@ export function a1(arg: number | string): void {
         'fast-import': {
           rootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPoints: {
-            'e.ts': ['e'],
-          },
-        },
-      },
-    },
-    {
-      code: readFileSync(FILE_E, 'utf8'),
-      filename: FILE_E,
-      settings: {
-        'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
-          mode: 'fix',
-          entryPoints: {
-            'e.ts': { regexp: '^e$' },
-          },
+          entryPointFiles: ['e.ts'],
         },
       },
     },

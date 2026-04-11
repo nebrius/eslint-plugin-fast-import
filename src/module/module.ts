@@ -73,8 +73,8 @@ function getEntryPointCheck(
   rootDir: string,
   entryPoints: ParsedSettings['entryPoints']
 ) {
-  return (filePath: string, symbolName: string) => {
-    for (const { file, symbols } of entryPoints) {
+  return (filePath: string) => {
+    for (const { file } of entryPoints) {
       // We're using the ignore library in reverse fashion: we're using it to
       // identify when a file is _included_, not _excluded_. We also have to
       // be careful with Windows styled paths, since gitignores use unix paths
@@ -84,9 +84,7 @@ function getEntryPointCheck(
           convertToUnixishPath(getRelativePathFromRoot(rootDir, filePath))
         )
       ) {
-        return Array.isArray(symbols)
-          ? symbols.includes(symbolName)
-          : symbols.test(symbolName);
+        return true;
       }
     }
     return false;
