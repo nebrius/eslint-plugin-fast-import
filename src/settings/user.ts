@@ -49,7 +49,7 @@ export function getUserSettings(
   const fastEsmSettings = settings?.['fast-import'];
   if (!fastEsmSettings) {
     throw new Error(
-      `eslint-plugin-fast-import settings are required in your ESLint config file`
+      `eslint-plugin-fast-import settings are required in your ESLint/Oxlint config file`
     );
   }
   const parseResult = settingsSchema.safeParse(fastEsmSettings);

@@ -57,7 +57,7 @@ it('Throws on missing settings', () => {
       settings: {},
     })
   ).toThrow(
-    `eslint-plugin-fast-import settings are required in your ESLint config file`
+    `eslint-plugin-fast-import settings are required in your ESLint/Oxlint config file`
   );
 });
 

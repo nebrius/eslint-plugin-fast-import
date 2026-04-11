@@ -81,7 +81,7 @@ There is also a configuration called "off" that disables all rules. This configu
 
 ## Configuration
 
-Fast Import only supports ESLint 9+ and flat configs. For most simple TypeScript applications, you can add Fast Import with:
+Fast Import supports ESLint 9+ and Oxlint. For most simple TypeScript applications using ESLint, you can add Fast Import with:
 
 ```js
 import { recommended } from 'eslint-plugin-fast-import';
@@ -247,9 +247,9 @@ Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
 When set to `auto`, the default, Fast Import will do it's best to determine which environment it's running in.
 
-`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
+`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint or Oxlint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
 
-`fix` builds on `one-shot` by introducing the caching layer, and is the default when ESLint is supplied with a fix flag. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file. This mode is used by default when the `--fix`, `--fix-dry-run`, or `--fix-type` is sent to ESLint.
+`fix` builds on `one-shot` by introducing the caching layer, and is the default when ESLint is supplied with a fix flag. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file. This mode is used by default when `--fix` is sent to Oxlint, or `--fix`, `--fix-dry-run`, or `--fix-type` is sent to ESLint.
 
 Finally, `editor` mode builds on `fix` mode by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
 
