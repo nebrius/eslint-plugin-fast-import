@@ -10,7 +10,7 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-import { all } from './dist/plugin.js';
+import fastImportPlugin from './dist/plugin.js';
 
 const ROOT_DIR = import.meta.dirname;
 
@@ -35,8 +35,21 @@ export default defineConfig([
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
     },
+    settings: {
+      'fast-import': {
+        rootDir: import.meta.dirname,
+        entryPoints: {
+          'src/plugin.ts': { regexp: '.*' },
+        },
+        externallyImported: {
+          '*.config.*': ['default'],
+        },
+        debugLogging: true,
+      },
+    },
   },
-  all(ROOT_DIR),
+
+  fastImportPlugin.configs.all,
   eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'

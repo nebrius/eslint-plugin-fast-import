@@ -1,0 +1,3 @@
+- Monorepo refactor
+- Change entry points/externally imported to be an array of file paths, not dictionary
+- Automatically add *.config.* files in rootDir to externally imported (unless sourceRoot is specified and the config file is outside of sourceRoot)

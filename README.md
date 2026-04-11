@@ -15,8 +15,6 @@
     - [mode](#mode)
     - [editorUpdateRate](#editorupdaterate)
     - [debugLogging](#debuglogging)
-    - [requireFileExtensions](#requirefileextensions)
-  - [Using fast-import.config.json](#using-fast-importconfigjson)
   - [Use in monorepos](#use-in-monorepos)
   - [Using with Oxlint](#using-with-oxlint)
 - [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
@@ -67,7 +65,6 @@ npm install --save-dev eslint-plugin-fast-import
 | [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
 | [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
 | [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
-| [consistent-file-extensions](src/rules/extension/README.md)                 | 🧰    | 🔧  |
 | [prefer-alias-imports](src/rules/alias/README.md)                           | 🧰 ☑️ | 🔧  |
 | [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰    | 🔧  |
 | [no-node-builtins](src/rules/nodeBuiltins/README.md) \*                     |       |     |
@@ -294,43 +291,6 @@ recommended({
   rootDir: import.meta.dirname
   debugLogging: true
 })
-```
-
-#### requireFileExtensions
-
-Type: boolean
-
-A quick way to set the `mode` for `consistent-file-extensions`. See [consistent-file-extensions](src/rules/extension/README.md#options) for more details. `true` sets the mode to `always`, `false` sets the mode to `never`.
-
-Example:
-
-```js
-recommended({
-  rootDir: import.meta.dirname
-  requireFileExtensions: true
-})
-```
-
-### Using fast-import.config.json
-
-You can also define the configuration in a `fast-import.config.json` file. This file should contain the same configuration options as the [Configuration options](#configuration-options) section, except that it should not include the `rootDir` option.
-
-To use this file, pass in a path to the directory containing the `fast-import.config.json` file. `rootDir` will automatically be set to this path, like so:
-
-```js
-import { recommended } from 'eslint-plugin-fast-import';
-
-export default [recommended(import.meta.dirname)];
-```
-
-And then the configuration file:
-
-```json
-{
-  "entryPoints": {
-    "./src/index.ts": ["default"]
-  }
-}
 ```
 
 ### Use in monorepos

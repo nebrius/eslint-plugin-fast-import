@@ -49,7 +49,6 @@ src/
 ├── rules/           # ESLint rule implementations
 │   ├── cycle/       # no-cycle rule
 │   ├── entryPoint/  # no-entry-point-imports rule
-│   ├── extension/   # consistent-file-extensions rule
 │   ├── unused/      # no-unused-exports rule
 │   └── ...
 ├── settings/        # Configuration parsing and validation

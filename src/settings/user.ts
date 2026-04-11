@@ -38,7 +38,7 @@ const settingsSchema = z.strictObject({
   testFilePatterns: z.array(z.string()).optional(),
 });
 
-export type UserSettings = z.infer<typeof settingsSchema>;
+type UserSettings = z.infer<typeof settingsSchema>;
 
 export type Settings = Omit<UserSettings, 'debugLogging'>;
 

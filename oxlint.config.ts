@@ -1,10 +1,4 @@
-import { all } from './dist/plugin.js';
-
-const ROOT_DIR = import.meta.dirname;
-
-// Get fast-import rules and settings from the plugin helper,
-// same as eslint.config.mjs uses all(ROOT_DIR)
-const fastImportConfig = all(ROOT_DIR);
+import fastImportPlugin from './dist/plugin.js';
 
 export default {
   plugins: ['typescript', 'jest'],
@@ -46,8 +40,18 @@ export default {
     'typescript/consistent-type-imports': 'error',
     'typescript/no-unsafe-enum-comparison': 'off',
 
-    // fast-import rules from the all() helper
-    ...fastImportConfig.rules,
+    ...fastImportPlugin.configs.all.rules,
   },
-  settings: fastImportConfig.settings,
+  settings: {
+    'fast-import': {
+      rootDir: import.meta.dirname,
+      entryPoints: {
+        'src/plugin.ts': { regexp: '.*' },
+      },
+      externallyImported: {
+        '*.config.*': ['default'],
+      },
+      debugLogging: true,
+    },
+  },
 };

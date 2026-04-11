@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 3.0.0
+
+- BREAKING CHANGE: Removed support for config files when not using new monorepo configuration
+- BREAKING CHANGE: Removed the `consistent-file-extensions` rule
+    - This rule papered over gaps in tooling that is no longer needed, and was difficult to use
+
 ## 2.2.1 (10/13/2025)
 
 - Added missing export for `getLocFromRange`

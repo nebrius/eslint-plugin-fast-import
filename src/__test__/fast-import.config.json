@@ -1,6 +1,0 @@
-{
-  "entryPoints": {
-    "test.ts": ["testExport"]
-  },
-  "requireFileExtensions": true
-}
