@@ -26,7 +26,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -36,7 +36,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -46,7 +46,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -56,7 +56,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -66,7 +66,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -80,7 +80,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -91,7 +91,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -102,7 +102,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       errors: [{ messageId: 'noTransientDependencies' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -113,7 +113,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       errors: [{ messageId: 'noTransientDependencies' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -124,7 +124,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -135,7 +135,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

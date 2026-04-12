@@ -27,7 +27,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -38,7 +38,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -53,7 +53,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -65,7 +65,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -77,7 +77,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -89,7 +89,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -101,7 +101,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

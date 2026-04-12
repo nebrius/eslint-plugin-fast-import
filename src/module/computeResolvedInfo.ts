@@ -204,10 +204,10 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
     files: {},
     filesAndExtensions: {},
   };
-  folderTrees.set(baseInfo.rootDir, folderTree);
+  folderTrees.set(baseInfo.packageRootDir, folderTree);
   for (const [file] of baseInfo.files) {
     const folders = splitPathIntoSegments(
-      getRelativePathFromRoot(baseInfo.rootDir, file)
+      getRelativePathFromRoot(baseInfo.packageRootDir, file)
     );
     const basefile = folders.pop();
     /* istanbul ignore if */
@@ -426,7 +426,7 @@ type FolderTreeNode = {
   filesAndExtensions: Record<string, string[]>;
 };
 
-// Map from rootDir to folder tree
+// Map from packageRootDir to folder tree
 const folderTrees = new Map<string, FolderTreeNode>();
 
 const formattedBuiltinModules = builtinModules.filter(
@@ -458,7 +458,7 @@ function resolveModuleSpecifier({
   }
 
   // This function takes in a bath that is "absolute" looking but relative to
-  // rootDir, excluding the leading /
+  // packageRootDir, excluding the leading /
   function resolveFirstPartyImport(absolutishFilePath: string) {
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
@@ -476,7 +476,9 @@ function resolveModuleSpecifier({
       );
     }
 
-    let currentFolderTreeNode = folderTrees.get(baseProjectInfo.rootDir) ?? {
+    let currentFolderTreeNode = folderTrees.get(
+      baseProjectInfo.packageRootDir
+    ) ?? {
       folders: {},
       files: {},
       filesAndExtensions: {},
@@ -496,7 +498,7 @@ function resolveModuleSpecifier({
     }
 
     function computeFilePath(file: string) {
-      return join(baseProjectInfo.rootDir, ...folderSegments, file);
+      return join(baseProjectInfo.packageRootDir, ...folderSegments, file);
     }
 
     // First we check if this directly references a file + extension, and
@@ -611,12 +613,12 @@ function resolveModuleSpecifier({
     // import with a specifier like `../..` such that the absolitish path
     // resolves to the root dir itself, then the standard absolitish path is
     // computed to be '' (empty string). In this case, the import may still be
-    // valid though if there is an index file in the root door. We pre-apply
+    // valid though if there is an index file in the root folder. We pre-apply
     // index in this case so that there are still path segments to resolve.
     const absolutish =
-      resolvedPath === baseProjectInfo.rootDir
+      resolvedPath === baseProjectInfo.packageRootDir
         ? 'index'
-        : getRelativePathFromRoot(baseProjectInfo.rootDir, resolvedPath);
+        : getRelativePathFromRoot(baseProjectInfo.packageRootDir, resolvedPath);
     const resolvedModulePath = resolveFirstPartyImport(absolutish);
     return formatResolvedEntry(resolvedModulePath);
   }
@@ -625,7 +627,7 @@ function resolveModuleSpecifier({
   for (const [alias, path] of Object.entries(baseProjectInfo.wildcardAliases)) {
     if (moduleSpecifier.startsWith(alias)) {
       const absolutishPath = getRelativePathFromRoot(
-        baseProjectInfo.rootDir,
+        baseProjectInfo.packageRootDir,
         path
       );
       const resolvedModulePath = resolveFirstPartyImport(

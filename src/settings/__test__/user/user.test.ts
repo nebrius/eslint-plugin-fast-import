@@ -2,19 +2,19 @@ import { join, sep } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import type { ParsedSettings } from '../../settings.js';
-import { getSettings } from '../../settings.js';
+import type { ParsedPackageSettings } from '../../settings.js';
+import { getPackageSettings, getRepoSettings } from '../../settings.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
 it('Fetchings user supplied settings', () => {
-  const { entryPoints, ...settings } = getSettings({
+  const { entryPoints, ...settings } = getPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
         alias: {
           '@/*': 'src/*',
           '@a': 'src/a.ts',
@@ -26,10 +26,9 @@ it('Fetchings user supplied settings', () => {
       },
     },
   });
-  const expected: Omit<ParsedSettings, 'entryPoints'> = {
-    editorUpdateRate: 5_000,
-    rootDir: TEST_PROJECT_DIR,
-    mode: 'one-shot',
+  const expected: Omit<ParsedPackageSettings, 'entryPoints'> = {
+    repoRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PROJECT_DIR,
     ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
     ignoreOverridePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/c*' }],
     testFilePatterns: [],
@@ -50,7 +49,7 @@ it('Fetchings user supplied settings', () => {
 
 it('Throws on missing settings', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {},
     })
@@ -59,55 +58,57 @@ it('Throws on missing settings', () => {
   );
 });
 
-it('Throws on missing rootDir in settings', () => {
+it('Throws on missing packageRootDir in settings', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {},
       },
     })
   ).toThrow(`Invalid settings:
-  Invalid type for property "rootDir"
+  Invalid type for property "packageRootDir"
     expected: string
     message: Invalid input: expected string, received undefined
 `);
 });
 
-it('Throws on relative rootDir in settings', () => {
+it('Throws on relative packageRootDir in settings', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: './foo',
+          packageRootDir: './foo',
         },
       },
     })
-  ).toThrow(`rootDir "./foo" must be absolute`);
+  ).toThrow(`packageRootDir "./foo" must be absolute`);
 });
 
-it("Throws on rootDir that doesn't exist in settings", () => {
+it("Throws on packageRootDir that doesn't exist in settings", () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: join(TEST_PROJECT_DIR, 'fake'),
+          packageRootDir: join(TEST_PROJECT_DIR, 'fake'),
         },
       },
     })
-  ).toThrow(`rootDir "${join(TEST_PROJECT_DIR, 'fake')}" does not exist`);
+  ).toThrow(
+    `packageRootDir "${join(TEST_PROJECT_DIR, 'fake')}" does not exist`
+  );
 });
 
 it('Throws on invalid user supplied mode', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
           mode: 'fake',
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
         },
       },
     })
@@ -120,11 +121,11 @@ it('Throws on invalid user supplied mode', () => {
 
 it('Throws on mismatched wildcard aliases', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           alias: {
             '@/*': 'src/a.ts',
           },
@@ -138,11 +139,11 @@ it('Throws on mismatched wildcard aliases', () => {
 
 it('Throws on mismatched fixed aliases', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           alias: {
             '@a': 'src/a.ts*',
           },
@@ -155,12 +156,12 @@ it('Throws on mismatched fixed aliases', () => {
 });
 
 it('Can set mode to editor', () => {
-  const editorSettings = getSettings({
+  const editorSettings = getRepoSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
         mode: 'editor',
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
       },
     },
   });
@@ -168,24 +169,24 @@ it('Can set mode to editor', () => {
 });
 
 it('Can set mode to fix', () => {
-  const fixSettings = getSettings({
+  const fixSettings = getRepoSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
         mode: 'fix',
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
       },
     },
   });
   expect(fixSettings.mode).toBe('fix');
 });
 
-it('Ignores aliases that point outside of rootDir', () => {
-  const settings = getSettings({
+it('Ignores aliases that point outside of packageRootDir', () => {
+  const settings = getPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
         alias: {
           '@foo': '../foo',
           '@bar/*': '../bar/*',
@@ -198,12 +199,12 @@ it('Ignores aliases that point outside of rootDir', () => {
 });
 
 it('Supports { regexp: string } for entry point symbols', () => {
-  const { entryPoints } = getSettings({
+  const { entryPoints } = getPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
         entryPointFiles: ['src/a.ts'],
       },
     },

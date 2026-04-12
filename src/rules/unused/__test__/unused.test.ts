@@ -33,7 +33,7 @@ export const a2 = 10;
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -48,7 +48,7 @@ export function a1(arg: number | string): void {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -58,7 +58,7 @@ export function a1(arg: number | string): void {
       filename: FILE_B,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPointFiles: ['f.ts'],
         },
@@ -69,7 +69,7 @@ export function a1(arg: number | string): void {
       filename: FILE_D_DTS,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -79,7 +79,7 @@ export function a1(arg: number | string): void {
       filename: FILE_E,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPointFiles: ['e.ts'],
         },
@@ -92,7 +92,7 @@ export function a1(arg: number | string): void {
       filename: FILE_C_TEST,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           testFilePatterns: ['__fixture__'],
         },
@@ -111,7 +111,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noUnusedExports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -126,7 +126,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -142,7 +142,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -155,7 +155,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

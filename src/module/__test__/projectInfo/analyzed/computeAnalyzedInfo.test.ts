@@ -482,7 +482,7 @@ it('Computes analyzed info', () => {
   const info = computeAnalyzedInfo(
     computeResolvedInfo(
       computeBaseInfo({
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
         wildcardAliases: {},
         fixedAliases: {},
         ignorePatterns: [],
@@ -500,7 +500,7 @@ it('Computes analyzed info for a project with a file that imports itself', () =>
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          rootDir: selfImportProjectDir,
+          packageRootDir: selfImportProjectDir,
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -522,7 +522,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          rootDir: reexportCycleProjectDir,
+          packageRootDir: reexportCycleProjectDir,
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -544,7 +544,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          rootDir: reexportCycleProjectDir,
+          packageRootDir: reexportCycleProjectDir,
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],

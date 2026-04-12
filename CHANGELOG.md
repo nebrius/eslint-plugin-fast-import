@@ -11,7 +11,10 @@
     - Previously, `entryPoints`/`externallyImported` indicated a list of exports from a given file that were considered for analysis. In practice this has proven difficult for users to maintain, so basically everyone wrote `/.*/` to include all exports from that file.
     - Regexes themselves are tricky, since they're not serializable, so we also added a change to allow `{ regexp: "..." }` objects to be used instead of strings.
     - This complexity doesn't benefit us, so the new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
-- Config files matching `/*.config.*` are now always treated as externally imported
+- BREAKING CHANGE:  `rootDir` renamed to `packageRootDir` in the single repo setup and in ESM File info returned from `getESMInfo` to better indicate that this is the directory for the package, not source
+  - The previous naming was a little confusing. In practice, it is meant to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause fast import to not parse tsconfig and automatically extra aliases, etc.
+- Config files matching `/*.config.*` are now automatically treated as externally imported
+    - If you previously specified these entries in your config, you can remove them
 
 ## 2.2.1 (10/13/2025)
 

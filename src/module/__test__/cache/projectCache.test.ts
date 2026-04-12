@@ -5,6 +5,7 @@ import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
 import type { StrippedAnalyzedFileDetails } from '../../../__test__/util.js';
+import type { ParsedPackageSettings } from '../../../settings/settings.js';
 import {
   getProjectInfo,
   initializeProject,
@@ -18,16 +19,15 @@ const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_TS_NEW = join(TEST_PROJECT_DIR, 'new.ts');
 const FILE_JSON_NEW = join(TEST_PROJECT_DIR, 'new.json');
 
-const settings = {
-  rootDir: TEST_PROJECT_DIR,
+const packageSettings: ParsedPackageSettings = {
+  repoRootDir: TEST_PROJECT_DIR,
+  packageRootDir: TEST_PROJECT_DIR,
   wildcardAliases: {},
   fixedAliases: {},
   entryPoints: [],
   ignorePatterns: [],
   ignoreOverridePatterns: [],
   testFilePatterns: [],
-  mode: 'fix' as const,
-  editorUpdateRate: 5_000,
 };
 
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
@@ -108,8 +108,8 @@ afterEach(() => {
   }
 });
 
-it('Updates cache when a new file is added', () => {
-  initializeProject(settings);
+it('Updates project cache when a new file is added', () => {
+  initializeProject(packageSettings);
 
   let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
@@ -123,7 +123,7 @@ it('Updates cache when a new file is added', () => {
       tokens: true,
       jsx: true,
     }),
-    settings
+    packageSettings
   );
 
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
@@ -145,8 +145,8 @@ it('Updates cache when a new file is added', () => {
   });
 });
 
-it('Updates cache when an unused export is added to an existing file', () => {
-  initializeProject(settings);
+it('Updates project cache when an unused export is added to an existing file', () => {
+  initializeProject(packageSettings);
 
   let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
@@ -164,7 +164,7 @@ export type Two = string;
       tokens: true,
       jsx: true,
     }),
-    settings
+    packageSettings
   );
 
   projectInfo = getProjectInfo(TEST_PROJECT_DIR);
@@ -245,8 +245,8 @@ export type Two = string;
   });
 });
 
-it('Updates cache in bulk for a code file', () => {
-  initializeProject(settings);
+it('Updates project cache in bulk for a code file', () => {
+  initializeProject(packageSettings);
 
   let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
@@ -254,7 +254,7 @@ it('Updates cache in bulk for a code file', () => {
   // Add a new file
   writeFileSync(FILE_TS_NEW, '');
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [
         {
@@ -266,7 +266,7 @@ it('Updates cache in bulk for a code file', () => {
       deleted: [],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
@@ -289,7 +289,7 @@ it('Updates cache in bulk for a code file', () => {
   // Modify the new new file
   writeFileSync(FILE_TS_NEW, `console.log()`);
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [],
       modified: [
@@ -301,7 +301,7 @@ it('Updates cache in bulk for a code file', () => {
       deleted: [],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   const EXPECTED_FILE_TS_NEW_UPDATED: StrippedAnalyzedFileDetails = {
@@ -325,7 +325,7 @@ it('Updates cache in bulk for a code file', () => {
   // info isn't changed in any way)
   writeFileSync(FILE_TS_NEW, `+_)(*&^%$%)`);
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [],
       modified: [
@@ -337,7 +337,7 @@ it('Updates cache in bulk for a code file', () => {
       deleted: [],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   projectInfo = getProjectInfo(TEST_PROJECT_DIR);
@@ -350,22 +350,22 @@ it('Updates cache in bulk for a code file', () => {
   // Delete the file
   unlinkSync(FILE_TS_NEW);
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [],
       modified: [],
       deleted: [FILE_TS_NEW],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
 });
 
-it('Updates cache in bulk for a non-code file', () => {
-  initializeProject(settings);
+it('Updates project cache in bulk for a non-code file', () => {
+  initializeProject(packageSettings);
 
   let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
   expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
@@ -373,7 +373,7 @@ it('Updates cache in bulk for a non-code file', () => {
   // Add a new file
   writeFileSync(FILE_JSON_NEW, '{}');
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [
         {
@@ -385,7 +385,7 @@ it('Updates cache in bulk for a non-code file', () => {
       deleted: [],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   const EXPECTED_FILE_JSON_NEW: StrippedAnalyzedFileDetails = {
@@ -401,7 +401,7 @@ it('Updates cache in bulk for a non-code file', () => {
   // Modify the new new file
   writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [],
       modified: [
@@ -413,7 +413,7 @@ it('Updates cache in bulk for a non-code file', () => {
       deleted: [],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   const EXPECTED_FILE_JSON_NEW_UPDATED: StrippedAnalyzedFileDetails = {
@@ -429,14 +429,14 @@ it('Updates cache in bulk for a non-code file', () => {
   // Delete the file
   unlinkSync(FILE_JSON_NEW);
   updateCacheFromFileSystem(
-    settings.rootDir,
+    packageSettings.packageRootDir,
     {
       added: [],
       modified: [],
       deleted: [FILE_JSON_NEW],
     },
     [],
-    settings,
+    packageSettings,
     Date.now()
   );
   projectInfo = getProjectInfo(TEST_PROJECT_DIR);

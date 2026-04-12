@@ -26,7 +26,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -40,7 +40,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       errors: [{ messageId: 'noExternalBarrelReexports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -51,7 +51,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       errors: [{ messageId: 'noExternalBarrelReexports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

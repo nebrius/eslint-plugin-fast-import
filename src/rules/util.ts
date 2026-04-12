@@ -7,8 +7,15 @@ import {
   updateCacheForFile,
   updateCacheFromFileSystem,
 } from '../module/module.js';
-import type { ParsedSettings } from '../settings/settings.js';
-import { getSettings, markSettingsForRefresh } from '../settings/settings.js';
+import type {
+  ParsedPackageSettings,
+  ParsedRepoSettings,
+} from '../settings/settings.js';
+import {
+  getPackageSettings,
+  getRepoSettings,
+  markSettingsForRefresh,
+} from '../settings/settings.js';
 import type { GenericContext } from '../types/context.js';
 import {
   getFiles,
@@ -21,42 +28,43 @@ export const createRule = ESLintUtils.RuleCreator(
     `https://github.com/nebrius/eslint-plugin-fast-import/tree/main/src/rules/${name}/README.md`
 );
 
-const updateListeners = new Set<(rootDir: string) => void>();
-export function registerUpdateListener(cb: (rootDir: string) => void) {
+const updateListeners = new Set<(packageRootDir: string) => void>();
+export function registerUpdateListener(cb: (packageRootDir: string) => void) {
   updateListeners.add(cb);
 }
 
 export function getESMInfo(context: GenericContext) {
-  const settings = getSettings(context);
-  initializeProject(settings);
+  const repoSettings = getRepoSettings(context);
+  const packageSettings = getPackageSettings(context);
+  initializeProject(packageSettings);
 
   // We have to call initializeProject first before we can check if this file
   // is ignored, because initializeProject initializes the ignore cache
-  if (isFileIgnored(settings.rootDir, context.filename)) {
+  if (isFileIgnored(packageSettings.packageRootDir, context.filename)) {
     return;
   }
 
   // If we're not in one-shot mode, update the cache, and if there were changes
   // call any esm change subscribers
   if (
-    settings.mode !== 'one-shot' &&
+    repoSettings.mode !== 'one-shot' &&
     updateCacheForFile(
       context.filename,
       context.sourceCode.getText(),
       context.sourceCode.ast,
-      settings
+      packageSettings
     )
   ) {
     for (const updateListener of updateListeners) {
-      updateListener(settings.rootDir);
+      updateListener(packageSettings.packageRootDir);
     }
   }
 
-  const projectInfo = getProjectInfo(settings.rootDir);
+  const projectInfo = getProjectInfo(packageSettings.packageRootDir);
 
   // Initialize file watching if we're in editor mode
-  if (settings.mode === 'editor') {
-    void initializeFileWatching(settings);
+  if (repoSettings.mode === 'editor') {
+    void initializeFileWatching(repoSettings, packageSettings);
   }
 
   // Format and return the ESM info
@@ -67,7 +75,7 @@ export function getESMInfo(context: GenericContext) {
   return {
     fileInfo,
     projectInfo,
-    settings,
+    packageSettings,
   };
 }
 
@@ -83,18 +91,21 @@ export function getLocFromRange(
 const fileWatchingInitialized = new Set<string>();
 // This code is too dynamic w.r.t. the filesystem to effectively test
 /* istanbul ignore next*/
-async function initializeFileWatching(settings: ParsedSettings) {
-  if (fileWatchingInitialized.has(settings.rootDir)) {
+async function initializeFileWatching(
+  repoSettings: ParsedRepoSettings,
+  packageSettings: ParsedPackageSettings
+) {
+  if (fileWatchingInitialized.has(packageSettings.packageRootDir)) {
     return;
   }
-  fileWatchingInitialized.add(settings.rootDir);
+  fileWatchingInitialized.add(packageSettings.packageRootDir);
 
   async function getUpdatedAtTimes() {
-    const projectInfo = getProjectInfo(settings.rootDir);
+    const projectInfo = getProjectInfo(packageSettings.packageRootDir);
     const { files, packageJsons } = await getFiles(
-      projectInfo.rootDir,
-      settings.ignorePatterns,
-      settings.ignoreOverridePatterns
+      projectInfo.packageRootDir,
+      packageSettings.ignorePatterns,
+      packageSettings.ignoreOverridePatterns
     );
     return {
       files: new Map(
@@ -113,7 +124,7 @@ async function initializeFileWatching(settings: ParsedSettings) {
     try {
       // Reset settings in case package.json, tsconfig.json, eslint.config.js,
       // or other files that control users settings have changed
-      markSettingsForRefresh(settings.rootDir);
+      markSettingsForRefresh(packageSettings.packageRootDir);
       const start = performance.now();
       const latestUpdatedTimes = await getUpdatedAtTimes();
 
@@ -157,41 +168,41 @@ async function initializeFileWatching(settings: ParsedSettings) {
       // Update the cache
       if (
         updateCacheFromFileSystem(
-          settings.rootDir,
+          packageSettings.packageRootDir,
           {
             added,
             deleted,
             modified,
           },
           latestUpdatedTimes.packageJsons,
-          settings,
+          packageSettings,
           start
         )
       ) {
         for (const updateListener of updateListeners) {
-          updateListener(settings.rootDir);
+          updateListener(packageSettings.packageRootDir);
         }
       }
 
       // Set up for the next refresh
       updatedAtTimes = latestUpdatedTimes;
     } finally {
-      setTimeout(() => void refresh(), settings.editorUpdateRate);
+      setTimeout(() => void refresh(), repoSettings.editorUpdateRate);
     }
   }
 
-  setTimeout(() => void refresh(), settings.editorUpdateRate);
+  setTimeout(() => void refresh(), repoSettings.editorUpdateRate);
 }
 
 const DEFAULT_TEST_FILE_PATTERNS = ['.test.', '__test__', '__tests__'];
 export function isNonTestFile(
   filePath: string,
-  rootDir: string,
-  { testFilePatterns }: ParsedSettings
+  packageRootDir: string,
+  { testFilePatterns }: ParsedPackageSettings
 ) {
   // We want to ignore folders named __test__ outside of this project, in case
   // the entire project is itself a test (e.g. the unit tests for fast-import)
-  const relativeFilePath = getRelativePathFromRoot(rootDir, filePath);
+  const relativeFilePath = getRelativePathFromRoot(packageRootDir, filePath);
   for (const pattern of [...DEFAULT_TEST_FILE_PATTERNS, ...testFilePatterns]) {
     if (relativeFilePath.includes(pattern)) {
       return false;

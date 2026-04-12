@@ -107,13 +107,13 @@ export const preferAliasImports = createRule<
       return {};
     }
 
-    const { fileInfo, settings } = esmInfo;
+    const { fileInfo, packageSettings } = esmInfo;
     /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
       return {};
     }
 
-    const { wildcardAliases, fixedAliases } = settings;
+    const { wildcardAliases, fixedAliases } = packageSettings;
 
     // No aliases configured — nothing to enforce
     if (

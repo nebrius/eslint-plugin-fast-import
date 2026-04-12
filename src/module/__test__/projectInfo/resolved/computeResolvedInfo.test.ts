@@ -321,7 +321,7 @@ const EXPECTED = {
 it('Computes resolved into', () => {
   const info = computeResolvedInfo(
     computeBaseInfo({
-      rootDir: TEST_PROJECT_DIR,
+      packageRootDir: TEST_PROJECT_DIR,
       // This takes in the already formatted version, hence why we join() here
       wildcardAliases: { '@/': TEST_PROJECT_DIR },
       fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },

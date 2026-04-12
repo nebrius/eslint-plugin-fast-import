@@ -2,18 +2,18 @@ import { join } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import { getSettings } from '../../settings.js';
+import { getPackageSettings } from '../../settings.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
 it('Throws on invalid tsconfig.compilerOptions.paths', () => {
   expect(() =>
-    getSettings({
+    getPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
         },
       },
     })

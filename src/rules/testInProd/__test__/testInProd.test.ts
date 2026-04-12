@@ -33,7 +33,7 @@ ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -49,7 +49,7 @@ console.log(bTest);
       errors: [{ messageId: 'noTestImports' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

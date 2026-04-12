@@ -36,7 +36,7 @@ const ruleTester = new RuleTester({
 
 const WILDCARD_SETTINGS = {
   'fast-import': {
-    rootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PROJECT_DIR,
     alias: {
       '@/*': './src/*',
     },
@@ -46,7 +46,7 @@ const WILDCARD_SETTINGS = {
 
 const WILDCARD_AND_FIXED_SETTINGS = {
   'fast-import': {
-    rootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PROJECT_DIR,
     alias: {
       '@/*': './src/*',
       '@standalone': './standalone.ts',
@@ -81,7 +81,7 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       filename: FILE_INDEX,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           alias: {
             '@/*': './src/*',
           },
@@ -96,7 +96,7 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       filename: FILE_INDEX,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

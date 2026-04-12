@@ -2,19 +2,19 @@ import { join } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import type { ParsedSettings } from '../../settings.js';
-import { getSettings } from '../../settings.js';
+import type { ParsedPackageSettings } from '../../settings.js';
+import { getPackageSettings } from '../../settings.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
 it('Fetches settings from tsconfig with package path extends', () => {
-  const settings = getSettings({
+  const settings = getPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        rootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PROJECT_DIR,
       },
     },
   });
@@ -23,11 +23,10 @@ it('Fetches settings from tsconfig with package path extends', () => {
   // representation that's difficult to represent here, so we just override it
   settings.entryPoints = [];
 
-  const expected: ParsedSettings = {
-    editorUpdateRate: 5_000,
-    rootDir: TEST_PROJECT_DIR,
+  const expected: ParsedPackageSettings = {
+    repoRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PROJECT_DIR,
     entryPoints: [],
-    mode: 'one-shot',
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     testFilePatterns: [],

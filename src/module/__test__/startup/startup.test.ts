@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
+import type { ParsedPackageSettings } from '../../../settings/settings.js';
 import {
   getProjectInfo,
   initializeProject,
@@ -13,16 +14,15 @@ const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 
 it('Updates cache when a new file is added', () => {
-  const settings = {
-    rootDir: TEST_PROJECT_DIR,
+  const settings: ParsedPackageSettings = {
+    repoRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PROJECT_DIR,
     wildcardAliases: {},
     fixedAliases: {},
     entryPoints: [],
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     testFilePatterns: [],
-    mode: 'fix' as const,
-    editorUpdateRate: 5_000,
   };
   initializeProject(settings);
 

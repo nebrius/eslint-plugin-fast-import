@@ -5,16 +5,18 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 import ts from 'typescript';
 
 import { warn } from '../util/logging.js';
-import type { Settings } from './user.js';
+import type { PackageSettings } from './user.js';
 
-type TypeScriptSettings = Pick<Settings, 'alias'>;
+type TypeScriptSettings = Pick<PackageSettings, 'alias'>;
 
-export function getTypeScriptSettings(rootDir: string): TypeScriptSettings {
+export function getTypeScriptSettings(
+  packageRootDir: string
+): TypeScriptSettings {
   // Read in the file. Note: we don't support the full breadth of tsconfigs,
   // notably we don't support multiple nested configs and only look at the
   // config found in the eslint config file's directory
   const configPath = ts.findConfigFile(
-    rootDir,
+    packageRootDir,
     ts.sys.fileExists.bind(ts.sys),
     'tsconfig.json'
   );
@@ -62,9 +64,12 @@ function parseTsConfig(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const rootDir = config.config?.compilerOptions?.rootDir as string | undefined;
+  const packageRootDir = config.config?.compilerOptions?.rootDir as
+    | string
+    | undefined;
   const absoluteRootDir =
-    projectRootDir ?? (rootDir && join(dirname(configPath), rootDir));
+    projectRootDir ??
+    (packageRootDir && join(dirname(configPath), packageRootDir));
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const configExtends = config.config?.extends as string | undefined;

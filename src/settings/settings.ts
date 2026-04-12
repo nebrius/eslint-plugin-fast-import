@@ -2,32 +2,45 @@ import { isAbsolute, resolve } from 'node:path';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
-import type { RequiredDeep } from 'type-fest';
 
 import type { GenericContext } from '../types/context.js';
-import { trimTrailingPathSeparator } from '../util/files.js';
+import { InternalError } from '../util/error.js';
+import {
+  getMonorepoPackageSettings,
+  trimTrailingPathSeparator,
+} from '../util/files.js';
 import { debug } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
-import { getUserSettings, type Settings } from './user.js';
+import type { PackageSettings, RepoUserSettings } from './user.js';
+import {
+  getUserPackageSettingsFromConfigFile,
+  getUserRepoSettings,
+} from './user.js';
 
 export type IgnorePattern = {
   dir: string;
   contents: string;
 };
 
-export type ParsedSettings = Omit<
-  RequiredDeep<Settings>,
+export type ParsedPackageSettings = Omit<
+  PackageSettings,
   | 'ignorePatterns'
   | 'ignoreOverridePatterns'
-  | 'alias'
-  | 'entryPointFiles'
-  | 'externallyImportedFiles'
+  | 'wildcardAliases'
+  | 'fixedAliases'
+  | 'entryPoints'
+  | 'testFilePatterns'
 > & {
   ignorePatterns: IgnorePattern[];
   ignoreOverridePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
   entryPoints: Array<{ file: Ignore }>;
+  testFilePatterns: string[];
+};
+
+export type ParsedRepoSettings = Exclude<RepoUserSettings, 'mode'> & {
+  mode: 'editor' | 'fix' | 'one-shot';
 };
 
 // Honestly the process.argv stuff isn't worth the effort to test, since it
@@ -51,24 +64,40 @@ const DEFAULT_MODE =
       ? 'fix'
       : 'one-shot';
 
-const settingsCache = new Map<
+const packageSettingsCache = new Map<
   string,
-  { settings: ParsedSettings; refresh: boolean }
+  { settings: ParsedPackageSettings }
+>();
+
+const repoSettingsCache = new Map<
+  string,
+  { settings: ParsedRepoSettings; refresh: boolean }
 >();
 
 // Used for tests
 // eslint-disable-next-line fast-import/no-unused-exports
 export function _resetAllSettings() {
-  settingsCache.clear();
+  packageSettingsCache.clear();
+  repoSettingsCache.clear();
 }
 
 // Used when settings files have changed in editor mode
-export function markSettingsForRefresh(rootDir: string) {
-  const cacheEntry = settingsCache.get(rootDir);
-  if (!cacheEntry) {
-    return;
+export function markSettingsForRefresh(packageRootDir: string) {
+  const packageCacheEntry = packageSettingsCache.get(packageRootDir);
+  if (packageCacheEntry) {
+    const repoCacheEntry = repoSettingsCache.get(
+      packageCacheEntry.settings.repoRootDir
+    );
+    if (!repoCacheEntry) {
+      throw new InternalError(
+        'Could not get repo cache settings from package cache settings'
+      );
+    }
+    repoSettingsCache.set(packageRootDir, {
+      settings: repoCacheEntry.settings,
+      refresh: true,
+    });
   }
-  settingsCache.set(rootDir, { settings: cacheEntry.settings, refresh: true });
 }
 
 function compareSettingsObjects(
@@ -78,34 +107,104 @@ function compareSettingsObjects(
   return !!b && JSON.stringify(a) === JSON.stringify(b);
 }
 
-export function getSettings(
+export function getRepoSettings(
   context: Pick<GenericContext, 'filename' | 'settings'>
-): ParsedSettings {
-  // Return the cached copy if we have it
-  let cachedSettings: ParsedSettings | undefined;
+): ParsedRepoSettings {
+  let cachedSettings: ParsedRepoSettings | undefined;
   let needsRefresh = false;
-  for (const [rootDir, cacheEntry] of settingsCache) {
-    if (context.filename.startsWith(rootDir)) {
-      cachedSettings = cacheEntry.settings;
-      needsRefresh = cacheEntry.refresh;
-    }
+  const cachedRepoEntry = getRepoCacheEntryForFile(context.filename);
+  if (cachedRepoEntry) {
+    cachedSettings = cachedRepoEntry.settings;
+    needsRefresh = cachedRepoEntry.refresh;
   }
   if (cachedSettings && !needsRefresh) {
     return cachedSettings;
   }
 
-  // Get user supplied settings first, since we need rootDir from it to proceed
-  const userSettings = getUserSettings(context.settings);
-  const { rootDir } = userSettings;
+  const { mode: rawMode, ...rest } = getUserRepoSettings(context.settings);
 
+  const mode =
+    rawMode === 'auto' || rawMode === undefined ? DEFAULT_MODE : rawMode;
+  if (cachedSettings?.mode !== mode) {
+    if (cachedSettings) {
+      debug(`Mode change from ${cachedSettings.mode} to ${mode}`);
+    } else {
+      debug(`Running in ${mode} mode`);
+    }
+  }
+
+  const repoSettings: ParsedRepoSettings = {
+    ...rest,
+    mode,
+  };
+  repoSettingsCache.set(rest.repoRootDir, {
+    settings: repoSettings,
+    refresh: false,
+  });
+
+  // If we're in single repo mode, we need to also parse and store the
+  // package settings here
+  if (rest.type === 'singlerepo') {
+    populatePackageSettingsCache(rest.packageSettings);
+  } else {
+    const packageConfigFiles = getMonorepoPackageSettings(rest.repoRootDir);
+    for (const packageConfigFile of packageConfigFiles) {
+      const packageSettings = getUserPackageSettingsFromConfigFile({
+        repoRootDir: rest.repoRootDir,
+        configFilePath: packageConfigFile,
+      });
+      populatePackageSettingsCache(packageSettings);
+    }
+  }
+
+  return repoSettings;
+}
+
+export function getPackageSettings(
+  context: Pick<GenericContext, 'filename' | 'settings'>
+): ParsedPackageSettings {
+  // Return the cached copy of the
+  const cachedRepoEntry = getRepoCacheEntryForFile(context.filename);
+  if (cachedRepoEntry && !cachedRepoEntry.refresh) {
+    // If we got here, then that means we're eligible to use the cached copy of
+    // the package settings, if it exists.
+    const cachedPackageEntry = getPackageCacheEntryForFile(context.filename);
+    if (cachedPackageEntry) {
+      return cachedPackageEntry;
+    }
+    //  If we got here, that means that this is a new package since the last
+    // time we computed repo settings, which necessitates recomputing the entire
+    // repo settings.
+  }
+
+  // Calling this will repopulate the repo settings cache and the cache for this
+  // package' settings, as well as repo settings. We don't need the return value
+  // here, but we do need the side effects.
+  getRepoSettings(context);
+
+  // We're now guaranteed to have the latest package settings, since they're
+  // computed as part of the repo settings computation.
+  const packageSettings = getPackageCacheEntryForFile(context.filename);
+  if (!packageSettings) {
+    throw new InternalError(
+      'Package settings should be cached after repo settings computation'
+    );
+  }
+  return packageSettings;
+}
+
+function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   // Get TypeScript supplied settings
-  const typeScriptSettings = getTypeScriptSettings(userSettings.rootDir);
+  const typeScriptSettings = getTypeScriptSettings(
+    userPackageSettings.packageRootDir
+  );
 
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
     ...typeScriptSettings,
-    ...userSettings,
+    ...userPackageSettings,
   };
+
   const {
     alias = {},
     entryPointFiles = [],
@@ -113,19 +212,20 @@ export function getSettings(
   } = mergedSettings;
 
   // Clean up any aliases
-  const wildcardAliases: ParsedSettings['wildcardAliases'] = {};
-  const fixedAliases: ParsedSettings['fixedAliases'] = {};
+  const wildcardAliases: ParsedPackageSettings['wildcardAliases'] = {};
+  const fixedAliases: ParsedPackageSettings['fixedAliases'] = {};
+  const { packageRootDir } = userPackageSettings;
   for (let [symbol, path] of Object.entries(alias)) {
     // Compute the absolute version of the path if needed (TypeScript does this
     // already since it has different resolution rules)
     if (!isAbsolute(path)) {
-      path = resolve(rootDir, path);
+      path = resolve(packageRootDir, path);
     }
     symbol = trimTrailingPathSeparator(symbol);
 
-    // Filter out paths that don't resolve to files inside rootDir, since they're
-    // either third party or doing something not supported
-    if (!path.startsWith(rootDir)) {
+    // Filter out paths that don't resolve to files inside packageRootDir, since
+    // they're either third party or doing something not supported
+    if (!isPackageFile({ filePath: path, packageRootDir })) {
       continue;
     }
 
@@ -148,7 +248,7 @@ export function getSettings(
   }
 
   // Clean up any entry points
-  const parsedEntryPoints: ParsedSettings['entryPoints'] = [];
+  const parsedEntryPoints: ParsedPackageSettings['entryPoints'] = [];
   // Merge entry points and externally imported exports, since they mean the
   // same thing from inside the module. They are kept separate in settings for
   // use by monorepo package analysis rules (aka outside the module)
@@ -164,21 +264,14 @@ export function getSettings(
     });
   }
 
-  mergedSettings.mode = mergedSettings.mode ?? 'auto';
-  const mode =
-    mergedSettings.mode === 'auto' ? DEFAULT_MODE : mergedSettings.mode;
-  if (cachedSettings?.mode !== mode) {
+  const cachedSettings = packageSettingsCache.get(packageRootDir)?.settings;
+  if (cachedSettings?.packageRootDir !== packageRootDir) {
     if (cachedSettings) {
-      debug(`Mode change from ${cachedSettings.mode} to ${mode}`);
+      debug(
+        `Package root dir change from ${cachedSettings.packageRootDir} to ${packageRootDir}`
+      );
     } else {
-      debug(`Running in ${mode} mode`);
-    }
-  }
-  if (cachedSettings?.rootDir !== rootDir) {
-    if (cachedSettings) {
-      debug(`Root dir change from ${cachedSettings.rootDir} to ${rootDir}`);
-    } else {
-      debug(`Setting root dir to ${rootDir}`);
+      debug(`Setting package root dir to ${packageRootDir}`);
     }
   }
 
@@ -213,29 +306,60 @@ export function getSettings(
   }
 
   const ignorePatterns = (mergedSettings.ignorePatterns ?? []).map((p) => ({
-    dir: rootDir,
+    dir: packageRootDir,
     contents: p,
   }));
 
   const ignoreOverridePatterns = (
     mergedSettings.ignoreOverridePatterns ?? []
   ).map((p) => ({
-    dir: rootDir,
+    dir: packageRootDir,
     contents: p,
   }));
 
   // Apply defaults and save to the settings cache
-  const newSettings: ParsedSettings = {
-    rootDir,
+  const newSettings: ParsedPackageSettings = {
+    repoRootDir: mergedSettings.repoRootDir,
+    packageRootDir,
     wildcardAliases,
     fixedAliases,
     entryPoints: parsedEntryPoints,
     ignorePatterns,
     ignoreOverridePatterns,
-    editorUpdateRate: mergedSettings.editorUpdateRate ?? 5_000,
-    mode,
     testFilePatterns: mergedSettings.testFilePatterns ?? [],
   };
-  settingsCache.set(rootDir, { settings: newSettings, refresh: false });
-  return newSettings;
+  packageSettingsCache.set(packageRootDir, {
+    settings: newSettings,
+  });
+}
+
+function isPackageFile({
+  filePath,
+  packageRootDir,
+}: {
+  filePath: string;
+  packageRootDir: string;
+}) {
+  // TODO: need to switch to an algorithm that uses a "matches longest path segment set algorithm"
+  return filePath.startsWith(packageRootDir);
+}
+
+function getRepoCacheEntryForFile(filePath: string) {
+  for (const [packageRootDir, cacheEntry] of repoSettingsCache) {
+    if (isPackageFile({ filePath, packageRootDir })) {
+      return cacheEntry;
+    }
+  }
+  return undefined;
+}
+
+function getPackageCacheEntryForFile(
+  filePath: string
+): ParsedPackageSettings | undefined {
+  for (const [packageRootDir, cacheEntry] of packageSettingsCache) {
+    if (isPackageFile({ filePath, packageRootDir })) {
+      return cacheEntry.settings;
+    }
+  }
+  return undefined;
 }

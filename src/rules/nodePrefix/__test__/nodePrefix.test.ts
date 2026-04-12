@@ -26,7 +26,7 @@ ruleTester.run('require-node-prefix', nodePrefix, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -40,7 +40,7 @@ ruleTester.run('require-node-prefix', nodePrefix, {
       errors: [{ messageId: 'missingNodePrefix' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -53,7 +53,7 @@ ruleTester.run('require-node-prefix', nodePrefix, {
       errors: [{ messageId: 'missingNodePrefix' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

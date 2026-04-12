@@ -10,8 +10,7 @@ import {
 type Options = [];
 type MessageIds = 'noCycles';
 
-// TODO
-// Map of rootDirs to filepaths to imports/reexports with cycle dependencies
+// Map of packageRootDirs to filepaths to imports/reexports with cycle dependencies
 const cycleMaps = new Map<string, Map<string, Set<string>>>();
 
 function checkFile(
@@ -31,10 +30,10 @@ function checkFile(
     return;
   }
 
-  let cycleMap = cycleMaps.get(projectInfo.rootDir);
+  let cycleMap = cycleMaps.get(projectInfo.packageRootDir);
   if (!cycleMap) {
     cycleMap = new Map<string, Set<string>>();
-    cycleMaps.set(projectInfo.rootDir, cycleMap);
+    cycleMaps.set(projectInfo.packageRootDir, cycleMap);
   }
 
   // Now check if this file is part of a cycle
@@ -133,10 +132,10 @@ export const noCycle = createRule<Options, MessageIds>({
       return {};
     }
 
-    let cycleMap = cycleMaps.get(projectInfo.rootDir);
+    let cycleMap = cycleMaps.get(projectInfo.packageRootDir);
     if (!cycleMap) {
       cycleMap = new Map<string, Set<string>>();
-      cycleMaps.set(projectInfo.rootDir, cycleMap);
+      cycleMaps.set(projectInfo.packageRootDir, cycleMap);
     }
     let cycleImports = cycleMap.get(context.filename);
     if (!cycleImports) {

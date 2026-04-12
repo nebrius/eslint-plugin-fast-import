@@ -27,7 +27,7 @@ import bDefault from './b';`,
       filename: FILE_A,
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -42,7 +42,7 @@ import b from './b';`,
       errors: [{ messageId: 'noNamedAsDefault' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -53,7 +53,7 @@ import b from './b';`,
       errors: [{ messageId: 'noNamedAsDefault' }],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },

@@ -85,7 +85,7 @@ export const noRestrictedImports = createRule<
       if (entry.allowed) {
         entry.allowed = entry.allowed.map((allowed) => {
           if (typeof allowed === 'string' && !isAbsolute(allowed)) {
-            return resolve(esmInfo.projectInfo.rootDir, allowed);
+            return resolve(esmInfo.projectInfo.packageRootDir, allowed);
           }
           return allowed;
         });
@@ -93,7 +93,7 @@ export const noRestrictedImports = createRule<
       if (entry.denied) {
         entry.denied = entry.denied.map((denied) => {
           if (typeof denied === 'string' && !isAbsolute(denied)) {
-            return resolve(esmInfo.projectInfo.rootDir, denied);
+            return resolve(esmInfo.projectInfo.packageRootDir, denied);
           }
           return denied;
         });
@@ -101,7 +101,10 @@ export const noRestrictedImports = createRule<
       if (entry.type === 'first-party') {
         // Normalize string paths to absolute
         if (typeof entry.filepath === 'string' && !isAbsolute(entry.filepath)) {
-          entry.filepath = resolve(esmInfo.projectInfo.rootDir, entry.filepath);
+          entry.filepath = resolve(
+            esmInfo.projectInfo.packageRootDir,
+            entry.filepath
+          );
         }
       }
     }

@@ -14,13 +14,43 @@ type PotentialFile = {
   stats: Stats;
 };
 
+const IGNORE_DIRECTORIES = ['node_modules', 'dist', 'build', '.git'];
+
+// Fetch a list of all fast-import.config.json files, which correspond to each
+// package that we want to analyze in a monorepo. We use our own recursive
+// implementation instead of a library like glob to avoid recusring into folders
+// that are a) very large and b) guaranteed to not be analyzed.
+export function getMonorepoPackageSettings(packageRootDir: string): string[] {
+  const packages: string[] = [];
+  const directoryStack = [packageRootDir];
+  while (directoryStack.length) {
+    const currentDir = directoryStack.pop();
+    if (!currentDir) {
+      break;
+    }
+    if (IGNORE_DIRECTORIES.includes(basename(currentDir))) {
+      continue;
+    }
+    const directoryContents = readdirSync(currentDir, { withFileTypes: true });
+    for (const item of directoryContents) {
+      if (item.name === 'fast-import.config.json') {
+        packages.push(join(currentDir, 'fast-import.config.json'));
+      }
+      if (item.isDirectory()) {
+        directoryStack.push(join(currentDir, item.name));
+      }
+    }
+  }
+  return packages;
+}
+
 export function getFilesSync(
-  rootDir: string,
+  packageRootDir: string,
   ignorePatterns: IgnorePattern[],
   ignoreOverridePatterns: IgnorePattern[]
 ) {
   // Read in the files and their stats, and filter out directories
-  const potentialFiles = getPotentialFilesList(rootDir)
+  const potentialFiles = getPotentialFilesList(packageRootDir)
     // Stats will be used for multiple checks later, so we want to cache it now.
     // Unfortunately we need more than what {withFileTypes: true} provides, so
     // we still need to call statSync separately
@@ -29,10 +59,10 @@ export function getFilesSync(
     // Filter out any directories, so that this is only a file list
     .filter((f) => !f.stats.isDirectory());
 
-  // Find all package.json files between rootDir and the file system root, since
+  // Find all package.json files between packageRootDir and the file system root, since
   // Node.js will always look this far for dependencies
   const parentPackageJsons: string[] = [];
-  let currentDir = rootDir;
+  let currentDir = packageRootDir;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const dirContents = readdirSync(currentDir);
@@ -48,7 +78,7 @@ export function getFilesSync(
 
   // Return the list of files
   return buildFileList(
-    rootDir,
+    packageRootDir,
     parentPackageJsons,
     ignorePatterns,
     ignoreOverridePatterns,
@@ -57,12 +87,12 @@ export function getFilesSync(
 }
 
 export async function getFiles(
-  rootDir: string,
+  packageRootDir: string,
   ignorePatterns: IgnorePattern[],
   ignoreOverridePatterns: IgnorePattern[]
 ) {
   // First, read in the files and convert the results to absolute path
-  const potentialFilePaths = getPotentialFilesList(rootDir);
+  const potentialFilePaths = getPotentialFilesList(packageRootDir);
 
   // Now add the stats to each file
   const potentialFiles = (
@@ -77,7 +107,7 @@ export async function getFiles(
     .filter((f) => !f.stats.isDirectory());
 
   const parentPackageJsons: string[] = [];
-  let currentDir = rootDir;
+  let currentDir = packageRootDir;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const dirContents = await readdir(currentDir);
@@ -93,14 +123,13 @@ export async function getFiles(
 
   // Return the list of files
   return buildFileList(
-    rootDir,
+    packageRootDir,
     parentPackageJsons,
     ignorePatterns,
     ignoreOverridePatterns,
     potentialFiles.filter(
       ({ filePath }) =>
-        !filePath.includes('node_modules') &&
-        !filePath.includes(sep + '.git' + sep) &&
+        !IGNORE_DIRECTORIES.some((dir) => filePath.includes(sep + dir + sep)) &&
         basename(filePath) !== '.gitignore'
     )
   );
@@ -135,8 +164,11 @@ export function splitPathIntoSegments(path: string) {
     .filter((s) => s);
 }
 
-export function getRelativePathFromRoot(rootDir: string, filePath: string) {
-  const relativePath = filePath.replace(rootDir, '');
+export function getRelativePathFromRoot(
+  packageRootDir: string,
+  filePath: string
+) {
+  const relativePath = filePath.replace(packageRootDir, '');
   if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
     return relativePath.substring(1);
   }
@@ -149,10 +181,10 @@ type IgnoreData = {
   overrides: Array<{ dir: string; ig: Ignore }>;
 };
 
-// Map from rootDir to ignore data
+// Map from packageRootDir to ignore data
 const ignoreData = new Map<string, IgnoreData>();
-export function isFileIgnored(rootDir: string, filePath: string) {
-  const data = ignoreData.get(rootDir);
+export function isFileIgnored(packageRootDir: string, filePath: string) {
+  const data = ignoreData.get(packageRootDir);
   if (!data) {
     return true;
   }
@@ -216,24 +248,19 @@ export function getDependenciesFromPackageJson(packageJsonPath: string) {
 // known to contain lots of files we always want to ignore early on for perf
 // reasons. Waiting to check against ignores incurs a big perf hit due to the
 // more complex and Regex based logic of ignores.
-function getPotentialFilesList(rootDir: string): string[] {
+function getPotentialFilesList(packageRootDir: string): string[] {
   const potentialFilesList: string[] = [];
 
-  const dirContents = readdirSync(rootDir, {
+  const dirContents = readdirSync(packageRootDir, {
     withFileTypes: true,
   });
 
   for (const content of dirContents) {
     if (!content.isDirectory()) {
-      potentialFilesList.push(join(rootDir, content.name));
-    } else if (
-      content.name !== 'node_modules' &&
-      content.name !== 'dist' &&
-      content.name !== 'build' &&
-      content.name !== '.git'
-    ) {
+      potentialFilesList.push(join(packageRootDir, content.name));
+    } else if (!IGNORE_DIRECTORIES.includes(content.name)) {
       potentialFilesList.push(
-        ...getPotentialFilesList(join(rootDir, content.name))
+        ...getPotentialFilesList(join(packageRootDir, content.name))
       );
     }
   }
@@ -242,7 +269,7 @@ function getPotentialFilesList(rootDir: string): string[] {
 }
 
 function buildFileList(
-  rootDir: string,
+  packageRootDir: string,
   parentPackageJsons: string[],
   ignorePatterns: IgnorePattern[],
   ignoreOverridePatterns: IgnorePattern[],
@@ -250,7 +277,7 @@ function buildFileList(
 ) {
   // Create the ignore instances for use in filtering
   initializeIgnores(
-    rootDir,
+    packageRootDir,
     ignorePatterns,
     ignoreOverridePatterns,
     potentialFiles
@@ -266,7 +293,7 @@ function buildFileList(
     if (basename(filePath) === 'package.json') {
       packageJsons.push(filePath);
     }
-    if (isFileIgnored(rootDir, filePath)) {
+    if (isFileIgnored(packageRootDir, filePath)) {
       continue;
     }
     files.push({
@@ -279,21 +306,21 @@ function buildFileList(
 }
 
 function initializeIgnores(
-  rootDir: string,
+  packageRootDir: string,
   ignorePatterns: IgnorePattern[],
   ignoreOverridePatterns: IgnorePattern[],
   potentialFiles: PotentialFile[]
 ) {
-  if (ignoreData.has(rootDir)) {
+  if (ignoreData.has(packageRootDir)) {
     return;
   }
 
   // First, we need to traverse up the folder tree until we find the git root
-  // folder. We're often operating in a project where `rootDir` is a `src`
+  // folder. We're often operating in a project where `packageRootDir` is a `src`
   // folder, or even in a monorepo. In these cases, there is likely a gitignore
   // file(s) futher up the tree
   const extraIgnoreFiles: string[] = [];
-  let currentDir = rootDir;
+  let currentDir = packageRootDir;
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const currentDirContents = readdirSync(currentDir);
@@ -305,11 +332,11 @@ function initializeIgnores(
       currentDirContents.includes('.git') ||
       // If we're at the root folder of the file system, bail. Note: we do the
       // check this way to support both UNIX and Windows filesystems
-      currentDir === dirname(rootDir)
+      currentDir === dirname(packageRootDir)
     ) {
       break;
     }
-    currentDir = dirname(rootDir);
+    currentDir = dirname(packageRootDir);
   }
 
   // Normalize and read in all ignore file contents
@@ -323,7 +350,7 @@ function initializeIgnores(
     contents: readFileSync(filePath, 'utf-8'),
   }));
 
-  ignoreData.set(rootDir, {
+  ignoreData.set(packageRootDir, {
     ignores: [
       ...ignorePatterns.map((i) => ({
         dir: i.dir,

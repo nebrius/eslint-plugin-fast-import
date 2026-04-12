@@ -33,7 +33,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -54,7 +56,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -75,7 +79,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -96,7 +102,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -117,7 +125,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -138,7 +148,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { e1 } from './e1';`,
       filename: FILE_E2,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -154,7 +166,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import { e1 } from './e1';`,
       filename: FILE_E2,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -170,7 +184,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
     {
       code: `import type { e1 } from '../e/e1';`,
       filename: FILE_D,
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -201,7 +217,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -237,7 +253,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -273,7 +289,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -309,7 +325,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          rootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
         },
       },
@@ -339,7 +355,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
           data: { message: `${FILE_D} is not allowed to import ../e/e1` },
         },
       ],
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [
@@ -361,7 +379,9 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
           data: { message: `${FILE_D} is denied from importing ../e/e1` },
         },
       ],
-      settings: { 'fast-import': { rootDir: TEST_PROJECT_DIR, mode: 'fix' } },
+      settings: {
+        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+      },
       options: [
         {
           rules: [

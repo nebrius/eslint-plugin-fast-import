@@ -11,7 +11,7 @@ import type {
 } from 'oxc-parser';
 import { parseSync } from 'oxc-parser';
 
-import type { ParsedSettings } from '../settings/settings.js';
+import type { ParsedPackageSettings } from '../settings/settings.js';
 import type {
   BaseCodeFileDetails,
   BaseESMStatement,
@@ -25,8 +25,8 @@ import { debug } from '../util/logging.js';
 type IsEntryPointCheck = (filePath: string) => boolean;
 
 type ComputeBaseInfoOptions = Pick<
-  ParsedSettings,
-  | 'rootDir'
+  ParsedPackageSettings,
+  | 'packageRootDir'
   | 'fixedAliases'
   | 'wildcardAliases'
   | 'ignorePatterns'
@@ -39,7 +39,7 @@ type ComputeBaseInfoOptions = Pick<
  * Computes base ESM info for all source files recursively found in basePath
  */
 export function computeBaseInfo({
-  rootDir,
+  packageRootDir,
   fixedAliases,
   wildcardAliases,
   ignorePatterns,
@@ -48,14 +48,14 @@ export function computeBaseInfo({
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
     files: new Map(),
-    rootDir,
+    packageRootDir,
     fixedAliases,
     wildcardAliases,
     availableThirdPartyDependencies: new Map(),
   };
 
   const { files, packageJsons } = getFilesSync(
-    rootDir,
+    packageRootDir,
     ignorePatterns,
     ignoreOverridePatterns
   );

@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import type { ParsedSettings } from '../settings/settings.js';
+import type { ParsedPackageSettings } from '../settings/settings.js';
 
 export type BaseESMStatement = {
   /**
@@ -286,20 +286,20 @@ export type BaseProjectInfo = {
   files: Map<string, BaseFileDetails>;
 
   /**
-   * The root path of source code in the project
+   * The root path of the package
    */
-  rootDir: string;
+  packageRootDir: string;
 
   /**
    * An alias for referencing first party imports absolutely.
    */
-  fixedAliases: ParsedSettings['fixedAliases'];
+  fixedAliases: ParsedPackageSettings['fixedAliases'];
 
   /**
    * For example, Next.js defaults to `@`, meaning
    * a file at `src/components/foo` can be imported anywhere with `@/components/foo`
    */
-  wildcardAliases: ParsedSettings['wildcardAliases'];
+  wildcardAliases: ParsedPackageSettings['wildcardAliases'];
 
   /**
    * Mapping of available third party dependencies by module specifier name

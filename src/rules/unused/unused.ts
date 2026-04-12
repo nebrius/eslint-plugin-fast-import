@@ -64,8 +64,8 @@ export const noUnusedExports = createRule<
 
     const {
       fileInfo,
-      projectInfo: { rootDir },
-      settings,
+      projectInfo: { packageRootDir },
+      packageSettings,
     } = esmInfo;
     /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
@@ -96,9 +96,9 @@ export const noUnusedExports = createRule<
 
       // Otherwise, check to see if all of its imports are only in tests
       else if (
-        isNonTestFile(context.filename, rootDir, settings) &&
+        isNonTestFile(context.filename, packageRootDir, packageSettings) &&
         !exportEntry.importedBy.some((i) =>
-          isNonTestFile(i.filePath, rootDir, settings)
+          isNonTestFile(i.filePath, packageRootDir, packageSettings)
         )
       ) {
         if (

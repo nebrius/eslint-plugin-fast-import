@@ -4,7 +4,7 @@ import { dirname } from 'node:path';
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import type { ParsedSettings } from '../settings/settings.js';
+import type { ParsedPackageSettings } from '../settings/settings.js';
 import type {
   AnalyzedBarrelImport,
   AnalyzedBarrelReexport,
@@ -44,8 +44,8 @@ import {
 
 const baseProjectInfos = new Map<string, BaseProjectInfo>();
 function getBaseProjectInfo(filename: string) {
-  for (const [rootDir, baseProjectInfo] of baseProjectInfos) {
-    if (filename.startsWith(rootDir)) {
+  for (const [packageRootDir, baseProjectInfo] of baseProjectInfos) {
+    if (filename.startsWith(packageRootDir)) {
       return baseProjectInfo;
     }
   }
@@ -53,8 +53,8 @@ function getBaseProjectInfo(filename: string) {
 
 const resolvedProjectInfos = new Map<string, ResolvedProjectInfo>();
 function getResolvedProjectInfo(filename: string) {
-  for (const [rootDir, resolvedProjectInfo] of resolvedProjectInfos) {
-    if (filename.startsWith(rootDir)) {
+  for (const [packageRootDir, resolvedProjectInfo] of resolvedProjectInfos) {
+    if (filename.startsWith(packageRootDir)) {
       return resolvedProjectInfo;
     }
   }
@@ -62,16 +62,16 @@ function getResolvedProjectInfo(filename: string) {
 
 const analyzedProjectInfos = new Map<string, AnalyzedProjectInfo>();
 function getAnalyzedProjectInfo(filename: string) {
-  for (const [rootDir, analyzedProjectInfo] of analyzedProjectInfos) {
-    if (filename.startsWith(rootDir)) {
+  for (const [packageRootDir, analyzedProjectInfo] of analyzedProjectInfos) {
+    if (filename.startsWith(packageRootDir)) {
       return analyzedProjectInfo;
     }
   }
 }
 
 function getEntryPointCheck(
-  rootDir: string,
-  entryPoints: ParsedSettings['entryPoints']
+  packageRootDir: string,
+  entryPoints: ParsedPackageSettings['entryPoints']
 ) {
   return (filePath: string) => {
     for (const { file } of entryPoints) {
@@ -81,7 +81,9 @@ function getEntryPointCheck(
       // even on Windows.
       if (
         file.ignores(
-          convertToUnixishPath(getRelativePathFromRoot(rootDir, filePath))
+          convertToUnixishPath(
+            getRelativePathFromRoot(packageRootDir, filePath)
+          )
         )
       ) {
         return true;
@@ -100,42 +102,42 @@ export function _resetProjectInfo() {
 }
 
 export function initializeProject({
-  rootDir,
+  packageRootDir,
   wildcardAliases,
   fixedAliases,
   ignorePatterns,
   ignoreOverridePatterns,
   entryPoints,
-}: ParsedSettings) {
+}: ParsedPackageSettings) {
   // If we've already analyzed the project and settings haven't changed, bail
   if (
-    getBaseProjectInfo(rootDir) &&
-    getResolvedProjectInfo(rootDir) &&
-    getAnalyzedProjectInfo(rootDir)
+    getBaseProjectInfo(packageRootDir) &&
+    getResolvedProjectInfo(packageRootDir) &&
+    getAnalyzedProjectInfo(packageRootDir)
   ) {
     return;
   }
 
   const baseStart = performance.now();
   const baseProjectInfo = computeBaseInfo({
-    rootDir,
+    packageRootDir,
     wildcardAliases,
     fixedAliases,
     ignorePatterns,
     ignoreOverridePatterns,
-    isEntryPointCheck: getEntryPointCheck(rootDir, entryPoints),
+    isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
   });
-  baseProjectInfos.set(rootDir, baseProjectInfo);
+  baseProjectInfos.set(packageRootDir, baseProjectInfo);
   const baseEnd = performance.now();
 
   const resolveStart = performance.now();
   const resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
-  resolvedProjectInfos.set(rootDir, resolvedProjectInfo);
+  resolvedProjectInfos.set(packageRootDir, resolvedProjectInfo);
   const resolveEnd = performance.now();
 
   const analyzestart = performance.now();
   const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-  analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
+  analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
   const analyzeEnd = performance.now();
 
   debug(`Initial computation files complete :`);
@@ -167,8 +169,8 @@ export function initializeProject({
   debug(`  ${numReexports.toLocaleString()} reexports`);
 }
 
-export function getProjectInfo(rootDir: string) {
-  const analyzedProjectInfo = getAnalyzedProjectInfo(rootDir);
+export function getProjectInfo(packageRootDir: string) {
+  const analyzedProjectInfo = getAnalyzedProjectInfo(packageRootDir);
   /* istanbul ignore if */
   if (!analyzedProjectInfo) {
     throw new InternalError('Project info requested before initialization');
@@ -191,15 +193,15 @@ type Changes = {
 // Batch updates file changes. Note that the order of operations (delete, then
 // add, then modified) is critical
 export function updateCacheFromFileSystem(
-  rootDir: string,
+  packageRootDir: string,
   changes: Changes,
   packageJsons: string[],
-  settings: ParsedSettings,
+  packageSettings: ParsedPackageSettings,
   operationStart: number
 ) {
-  const baseProjectInfo = getBaseProjectInfo(rootDir);
-  let resolvedProjectInfo = getResolvedProjectInfo(rootDir);
-  let analyzedProjectInfo = getAnalyzedProjectInfo(rootDir);
+  const baseProjectInfo = getBaseProjectInfo(packageRootDir);
+  let resolvedProjectInfo = getResolvedProjectInfo(packageRootDir);
+  let analyzedProjectInfo = getAnalyzedProjectInfo(packageRootDir);
 
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
@@ -248,8 +250,8 @@ export function updateCacheFromFileSystem(
               filePath,
               fileContents,
               isEntryPointCheck: getEntryPointCheck(
-                settings.rootDir,
-                settings.entryPoints
+                packageSettings.packageRootDir,
+                packageSettings.entryPoints
               ),
             },
             baseProjectInfo
@@ -279,7 +281,7 @@ export function updateCacheFromFileSystem(
   // TODO: it's probably possible to do a more performant+surgical recomputation
   if (numDeletes || numAdditions) {
     resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
-    resolvedProjectInfos.set(rootDir, resolvedProjectInfo);
+    resolvedProjectInfos.set(packageRootDir, resolvedProjectInfo);
   }
   const resolveEnd = performance.now();
 
@@ -300,8 +302,8 @@ export function updateCacheFromFileSystem(
             filePath,
             fileContents,
             isEntryPointCheck: getEntryPointCheck(
-              settings.rootDir,
-              settings.entryPoints
+              packageSettings.packageRootDir,
+              packageSettings.entryPoints
             ),
           },
           baseProjectInfo
@@ -323,7 +325,7 @@ export function updateCacheFromFileSystem(
   if (numDeletes || numAdditions | numModified) {
     const analyzestart = performance.now();
     analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-    analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
+    analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
     const analyzeEnd = performance.now();
 
     debug(
@@ -345,7 +347,7 @@ export function updateCacheForFile(
   filePath: string,
   fileContents: string,
   ast: TSESTree.Program,
-  { entryPoints, rootDir }: ParsedSettings
+  { entryPoints, packageRootDir }: ParsedPackageSettings
 ) {
   const baseProjectInfo = getBaseProjectInfo(filePath);
   const resolvedProjectInfo = getResolvedProjectInfo(filePath);
@@ -361,7 +363,7 @@ export function updateCacheForFile(
     filePath,
     fileContents,
     ast,
-    isEntryPointCheck: getEntryPointCheck(rootDir, entryPoints),
+    isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
   };
 
   // Check if we're updating file info or adding a new file
@@ -381,10 +383,10 @@ export function updateCacheForFile(
 
       const analyzeStart = performance.now();
       const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-      analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
+      analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
       const analyzeEnd = performance.now();
 
-      debug(`Update for ${filePath.replace(rootDir, '')} complete:`);
+      debug(`Update for ${filePath.replace(packageRootDir, '')} complete:`);
       debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
       debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
       debug(
@@ -492,10 +494,10 @@ export function updateCacheForFile(
 
     const anazlyzeStart = performance.now();
     const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-    analyzedProjectInfos.set(rootDir, analyzedProjectInfo);
+    analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
     const analyzeEnd = performance.now();
 
-    debug(`${filePath.replace(rootDir, '')} add complete:`);
+    debug(`${filePath.replace(packageRootDir, '')} add complete:`);
     debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
