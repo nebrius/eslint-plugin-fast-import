@@ -34,7 +34,7 @@
   - [getESMInfo(context)](#getesminfocontext)
   - [getLocFromRange(context, range)](#getlocfromrangecontext-range)
   - [registerUpdateListener(listener)](#registerupdatelistenerlistener)
-  - [isNonTestFile(filePath, packageRootDir, packageSettings)](#isnontestfilefilepath-packagerootdir-packagesettings)
+  - [isNonTestFile(filePath)](#isnontestfilefilepath-packagerootdir-packagesettings)
 - [Frequently Asked Questions](#frequently-asked-questions)
   - [Is this plugin a replacement for eslint-plugin-import/eslint-plugin-import-x?](#is-this-plugin-a-replacement-for-eslint-plugin-importeslint-plugin-import-x)
   - [Do you support user-supplied resolvers like eslint-plugin-import does?](#do-you-support-user-supplied-resolvers-like-eslint-plugin-import-does)
@@ -692,14 +692,14 @@ context.report({
 
 Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on `registerUpdateListener` to be notified any time Fast Import refreshes the cache for a package. The callback receives the affected `packageRootDir`.
 
-### isNonTestFile(filePath, packageRootDir, packageSettings)
+### isNonTestFile(filePath)
 
 A helper function to determine whether or not a given file path should be treated as a non-test file. It uses the default test-file patterns (`.test.`, `__test__`, and `__tests__`) plus any additional entries from `packageSettings.testFilePatterns`.
 
 Example:
 
 ```js
-if (isNonTestFile(context.filename, packageSettings.packageRootDir, packageSettings)) {
+if (isNonTestFile(context.filename)) {
   // production-only logic
 }
 ```
@@ -720,7 +720,7 @@ For more information, see the algorithm section [Phase 2: Module specifier resol
 
 ## License
 
-Copyright (c) 2025 Bryan Hughes
+Copyright (c) 2026 Bryan Hughes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

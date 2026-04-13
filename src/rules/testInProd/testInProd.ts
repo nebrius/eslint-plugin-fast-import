@@ -29,15 +29,8 @@ export const noTestImportsInProd = createRule({
       return {};
     }
 
-    const { fileInfo, packageSettings } = esmInfo;
-    if (
-      fileInfo.fileType !== 'code' ||
-      !isNonTestFile(
-        context.filename,
-        esmInfo.projectInfo.packageRootDir,
-        packageSettings
-      )
-    ) {
+    const { fileInfo } = esmInfo;
+    if (fileInfo.fileType !== 'code' || !isNonTestFile(context.filename)) {
       return {};
     }
 
@@ -56,11 +49,7 @@ export const noTestImportsInProd = createRule({
       }
       if (
         importEntry.resolvedModulePath &&
-        !isNonTestFile(
-          importEntry.resolvedModulePath,
-          esmInfo.projectInfo.packageRootDir,
-          packageSettings
-        )
+        !isNonTestFile(importEntry.resolvedModulePath)
       ) {
         context.report({
           loc: getLocFromRange(context, importEntry.reportNodeRange),

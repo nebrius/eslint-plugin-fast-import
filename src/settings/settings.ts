@@ -357,7 +357,7 @@ function getRepoCacheEntryForFile(filePath: string) {
   });
 }
 
-function getPackageCacheEntryForFile(filePath: string) {
+export function getPackageCacheEntryForFile(filePath: string) {
   const result = getSubpathEntry({
     filePath,
     data: packageSettingsCache,

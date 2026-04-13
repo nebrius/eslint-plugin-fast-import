@@ -13,10 +13,12 @@ import type {
 } from '../settings/settings.js';
 import {
   getAllPackageSettings,
+  getPackageCacheEntryForFile,
   getRepoSettings,
   markSettingsForRefresh,
 } from '../settings/settings.js';
 import type { GenericContext } from '../types/context.js';
+import { InternalError } from '../util/error.js';
 import {
   getFiles,
   getRelativePathFromRoot,
@@ -198,15 +200,21 @@ async function initializeFileWatching(
 }
 
 const DEFAULT_TEST_FILE_PATTERNS = ['.test.', '__test__', '__tests__'];
-export function isNonTestFile(
-  filePath: string,
-  packageRootDir: string,
-  { testFilePatterns }: ParsedPackageSettings
-) {
+export function isNonTestFile(filePath: string) {
+  const packageSettings = getPackageCacheEntryForFile(filePath);
+  if (!packageSettings) {
+    throw new InternalError('package settings are unexpectedly undefined');
+  }
   // We want to ignore folders named __test__ outside of this project, in case
   // the entire project is itself a test (e.g. the unit tests for fast-import)
-  const relativeFilePath = getRelativePathFromRoot(packageRootDir, filePath);
-  for (const pattern of [...DEFAULT_TEST_FILE_PATTERNS, ...testFilePatterns]) {
+  const relativeFilePath = getRelativePathFromRoot(
+    packageSettings.packageRootDir,
+    filePath
+  );
+  for (const pattern of [
+    ...DEFAULT_TEST_FILE_PATTERNS,
+    ...packageSettings.testFilePatterns,
+  ]) {
     if (relativeFilePath.includes(pattern)) {
       return false;
     }
