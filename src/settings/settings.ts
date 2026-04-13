@@ -162,19 +162,32 @@ export function getRepoSettings(
   return repoSettings;
 }
 
-export function getPackageSettings(
+// Gets all known package settings. This takes into account the current file
+// being linted so that we can detect if we're in an editor and a new package
+// was just added. This also refreshes the cache after invalidation.
+export function getAllPackageSettings(
   context: Pick<GenericContext, 'filename' | 'settings'>
-): ParsedPackageSettings {
-  // Return the cached copy of the
+) {
+  // First we check if this file has a cached entry or not
   const cachedRepoEntry = getRepoCacheEntryForFile(context.filename);
   if (cachedRepoEntry && !cachedRepoEntry.refresh) {
     // If we got here, then that means we're eligible to use the cached copy of
     // the package settings, if it exists.
     const cachedPackageEntry = getPackageCacheEntryForFile(context.filename);
     if (cachedPackageEntry) {
-      return cachedPackageEntry;
+      const packageSettings = getPackageCacheEntryForFile(context.filename);
+      /* istanbul ignore if */
+      if (!packageSettings) {
+        throw new InternalError(
+          'Current package settings is unexpectedly undefined'
+        );
+      }
+      return {
+        allPackageSettings: getAllPackageCacheEntries(),
+        packageSettings,
+      };
     }
-    //  If we got here, that means that this is a new package since the last
+    // If we got here, that means that this is a new package since the last
     // time we computed repo settings, which necessitates recomputing the entire
     // repo settings.
   }
@@ -186,14 +199,15 @@ export function getPackageSettings(
 
   // We're now guaranteed to have the latest package settings, since they're
   // computed as part of the repo settings computation.
+  const allPackageSettings = getAllPackageCacheEntries();
   const packageSettings = getPackageCacheEntryForFile(context.filename);
-  /* instanbul ignore next */
+  /* istanbul ignore if */
   if (!packageSettings) {
     throw new InternalError(
-      'Package settings should be cached after repo settings computation'
+      'Current package settings is unexpectedly undefined'
     );
   }
-  return packageSettings;
+  return { allPackageSettings, packageSettings };
 }
 
 function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
@@ -349,4 +363,10 @@ function getPackageCacheEntryForFile(filePath: string) {
     data: packageSettingsCache,
   });
   return result?.settings;
+}
+
+function getAllPackageCacheEntries() {
+  return Array.from(
+    packageSettingsCache.entries().map(([, { settings }]) => settings)
+  );
 }

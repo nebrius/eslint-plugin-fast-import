@@ -12,7 +12,7 @@ import type {
   ParsedRepoSettings,
 } from '../settings/settings.js';
 import {
-  getPackageSettings,
+  getAllPackageSettings,
   getRepoSettings,
   markSettingsForRefresh,
 } from '../settings/settings.js';
@@ -35,8 +35,11 @@ export function registerUpdateListener(cb: (packageRootDir: string) => void) {
 
 export function getESMInfo(context: GenericContext) {
   const repoSettings = getRepoSettings(context);
-  const packageSettings = getPackageSettings(context);
-  initializeProject(packageSettings);
+  const { allPackageSettings, packageSettings } =
+    getAllPackageSettings(context);
+  for (const packageSettings of allPackageSettings) {
+    initializeProject(packageSettings);
+  }
 
   // We have to call initializeProject first before we can check if this file
   // is ignored, because initializeProject initializes the ignore cache

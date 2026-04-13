@@ -155,7 +155,7 @@ export function deleteResolvedInfoForFile(
     const fileDetailsToUpdate =
       previousResolvedProjectInfo.files.get(filePathToUpdate);
 
-    /* instanbul ignore if */
+    /* istanbul ignore if */
     if (!fileDetailsToUpdate) {
       throw new InternalError(
         'filePathToUpdate missing in resolved project info'

@@ -7,7 +7,7 @@ import type {
   ParsedRepoSettings,
 } from '../../settings.js';
 import {
-  getPackageSettings,
+  getAllPackageSettings,
   getRepoSettings,
   markSettingsForRefresh,
 } from '../../settings.js';
@@ -26,7 +26,9 @@ const MONOREPO_FILE_A = join(MONOREPO_PKG_ONE, 'a.ts');
 const MONOREPO_FILE_C = join(MONOREPO_PKG_TWO, 'c.ts');
 
 it('Fetchings user supplied settings', () => {
-  const { entryPoints, ...settings } = getPackageSettings({
+  const {
+    packageSettings: { entryPoints, ...settings },
+  } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -66,7 +68,7 @@ it('Fetchings user supplied settings', () => {
 
 it('Throws on missing settings', () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {},
     })
@@ -77,7 +79,7 @@ it('Throws on missing settings', () => {
 
 it('Throws on missing packageRootDir in settings', () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {},
@@ -92,7 +94,7 @@ it('Throws on missing packageRootDir in settings', () => {
 
 it('Throws on relative packageRootDir in settings', () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
@@ -105,7 +107,7 @@ it('Throws on relative packageRootDir in settings', () => {
 
 it("Throws on packageRootDir that doesn't exist in settings", () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
@@ -120,7 +122,7 @@ it("Throws on packageRootDir that doesn't exist in settings", () => {
 
 it('Throws on invalid user supplied mode', () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
@@ -138,7 +140,7 @@ it('Throws on invalid user supplied mode', () => {
 
 it('Throws on mismatched wildcard aliases', () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
@@ -156,7 +158,7 @@ it('Throws on mismatched wildcard aliases', () => {
 
 it('Throws on mismatched fixed aliases', () => {
   expect(() =>
-    getPackageSettings({
+    getAllPackageSettings({
       filename: FILE_A,
       settings: {
         'fast-import': {
@@ -199,7 +201,7 @@ it('Can set mode to fix', () => {
 });
 
 it('Ignores aliases that point outside of packageRootDir', () => {
-  const settings = getPackageSettings({
+  const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -211,12 +213,14 @@ it('Ignores aliases that point outside of packageRootDir', () => {
       },
     },
   });
-  expect(settings.fixedAliases).toEqual({});
-  expect(settings.wildcardAliases).toEqual({});
+  expect(packageSettings.fixedAliases).toEqual({});
+  expect(packageSettings.wildcardAliases).toEqual({});
 });
 
 it('Supports { regexp: string } for entry point symbols', () => {
-  const { entryPoints } = getPackageSettings({
+  const {
+    packageSettings: { entryPoints },
+  } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -269,7 +273,7 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
   });
 
   // getPackageSettings should now return cached settings without re-parsing
-  const packageSettings = getPackageSettings({
+  const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -312,7 +316,7 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
     },
   });
 
-  const packageSettings = getPackageSettings({
+  const { packageSettings } = getAllPackageSettings({
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
@@ -337,7 +341,7 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
     },
   });
 
-  const packageSettings = getPackageSettings({
+  const { packageSettings } = getAllPackageSettings({
     filename: MONOREPO_FILE_C,
     settings: {
       'fast-import': {
