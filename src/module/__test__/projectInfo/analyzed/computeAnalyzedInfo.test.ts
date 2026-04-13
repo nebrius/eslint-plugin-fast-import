@@ -554,3 +554,102 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
     )
   ).not.toThrow();
 });
+
+it('Computes analyzed info for a project with a single reexport of a firstPartyOther module', () => {
+  const projectDir = join(getDirname(), 'project', 'single-reexport-of-other');
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          packageRootDir: projectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a project with a named barrel reexport of a builtin module', () => {
+  const projectDir = join(
+    getDirname(),
+    'project',
+    'named-barrel-reexport-of-builtin'
+  );
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          packageRootDir: projectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a project with a named barrel reexport of a firstPartyOther module', () => {
+  const projectDir = join(
+    getDirname(),
+    'project',
+    'named-barrel-reexport-of-other'
+  );
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          packageRootDir: projectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a project with a dynamic import', () => {
+  const projectDir = join(getDirname(), 'project', 'dynamic-import');
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          packageRootDir: projectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a project with a barrel reexport that is an entry point and forms a cycle', () => {
+  const projectDir = join(
+    getDirname(),
+    'project',
+    'barrel-reexport-entry-point'
+  );
+  const fileA = join(projectDir, 'a.ts');
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          packageRootDir: projectDir,
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+          isEntryPointCheck: (filePath) => filePath === fileA,
+        })
+      )
+    )
+  ).not.toThrow();
+});

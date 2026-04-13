@@ -3,10 +3,21 @@ import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 
 import type { StrippedResolvedFileDetails } from '../../../../__test__/util.js';
-import { computeBaseInfo } from '../../../computeBaseInfo.js';
-import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
+import {
+  addBaseInfoForFile,
+  computeBaseInfo,
+  updateBaseInfoForFile,
+} from '../../../computeBaseInfo.js';
+import {
+  addResolvedInfoForFile,
+  computeFolderTree,
+  computeResolvedInfo,
+  deleteResolvedInfoForFile,
+  updateResolvedInfoForFile,
+} from '../../../computeResolvedInfo.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const NEW_FILE_PATH = join(TEST_PROJECT_DIR, 'newFile.ts');
 const FILE_INDEX = join(TEST_PROJECT_DIR, 'index.ts');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'one', 'b.ts');
@@ -318,18 +329,230 @@ const EXPECTED = {
   [FILE_F]: EXPECTED_FILE_F,
 };
 
-it('Computes resolved into', () => {
-  const info = computeResolvedInfo(
-    computeBaseInfo({
-      packageRootDir: TEST_PROJECT_DIR,
-      // This takes in the already formatted version, hence why we join() here
-      wildcardAliases: { '@/': TEST_PROJECT_DIR },
-      fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
-      ignorePatterns: [],
-      ignoreOverridePatterns: [],
-      isEntryPointCheck: () => false,
-    })
-  );
+function makeBaseInfo() {
+  return computeBaseInfo({
+    packageRootDir: TEST_PROJECT_DIR,
+    // This takes in the already formatted version, hence why we join() here
+    wildcardAliases: { '@/': TEST_PROJECT_DIR },
+    fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
+    ignorePatterns: [],
+    ignoreOverridePatterns: [],
+    isEntryPointCheck: () => false,
+  });
+}
 
+it('Computes resolved into', () => {
+  const info = computeResolvedInfo(makeBaseInfo());
   expect(info).toMatchResolvedSpec(EXPECTED);
+});
+
+it('Adds and updates resolved info for files', () => {
+  const baseInfo = makeBaseInfo();
+  const resolvedInfo = computeResolvedInfo(baseInfo);
+
+  // Add a new code file that imports from FILE_B
+  addBaseInfoForFile(
+    {
+      filePath: NEW_FILE_PATH,
+      fileContents: `import { b1 } from './one/b';\nexport const newThing = 1;`,
+      isEntryPointCheck: () => false,
+    },
+    baseInfo
+  );
+  computeFolderTree(baseInfo);
+  addResolvedInfoForFile(NEW_FILE_PATH, baseInfo, resolvedInfo);
+
+  expect(resolvedInfo).toMatchResolvedSpec({
+    ...EXPECTED,
+    [NEW_FILE_PATH]: {
+      fileType: 'code',
+      hasEntryPoints: false,
+      exports: [
+        {
+          type: 'export',
+          exportName: 'newThing',
+          isEntryPoint: false,
+          isTypeExport: false,
+        },
+      ],
+      singleImports: [
+        {
+          type: 'singleImport',
+          importAlias: 'b1',
+          importName: 'b1',
+          isTypeImport: false,
+          moduleSpecifier: './one/b',
+          resolvedModuleType: 'firstPartyCode',
+          resolvedModulePath: FILE_B,
+        },
+      ],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
+    },
+  });
+
+  // Adding a non-code file goes through the else branch of addResolvedInfoForFile
+  const NEW_JSON_PATH = join(TEST_PROJECT_DIR, 'newData.json');
+  baseInfo.files.set(NEW_JSON_PATH, { fileType: 'other' });
+  addResolvedInfoForFile(NEW_JSON_PATH, baseInfo, resolvedInfo);
+  expect(resolvedInfo.files.get(NEW_JSON_PATH)).toEqual({ fileType: 'other' });
+
+  // Update the code file to have a different import
+  updateBaseInfoForFile(
+    {
+      filePath: NEW_FILE_PATH,
+      fileContents: `import { c1 } from './one/c';\nexport const newThing = 1;`,
+      isEntryPointCheck: () => false,
+    },
+    baseInfo
+  );
+  updateResolvedInfoForFile(NEW_FILE_PATH, baseInfo, resolvedInfo);
+
+  expect(resolvedInfo).toMatchResolvedSpec({
+    ...EXPECTED,
+    [NEW_FILE_PATH]: {
+      fileType: 'code',
+      hasEntryPoints: false,
+      exports: [
+        {
+          type: 'export',
+          exportName: 'newThing',
+          isEntryPoint: false,
+          isTypeExport: false,
+        },
+      ],
+      singleImports: [
+        {
+          type: 'singleImport',
+          importAlias: 'c1',
+          importName: 'c1',
+          isTypeImport: false,
+          moduleSpecifier: './one/c',
+          resolvedModuleType: 'firstPartyCode',
+          resolvedModulePath: FILE_C,
+        },
+      ],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
+    },
+    [NEW_JSON_PATH]: {
+      fileType: 'other',
+    },
+  });
+});
+
+it('deleteResolvedInfoForFile recomputes files that import the deleted file', () => {
+  const baseInfo = makeBaseInfo();
+  const resolvedInfo = computeResolvedInfo(baseInfo);
+
+  // Delete FILE_B which is imported by FILE_A. Production code calls
+  // deleteResolvedInfoForFile before deleteBaseInfoForFile so that baseInfo
+  // still contains the entry needed for the initial lookup.
+  deleteResolvedInfoForFile(FILE_B, baseInfo, resolvedInfo);
+
+  // FILE_B must be gone from resolved info
+  expect(resolvedInfo.files.has(FILE_B)).toBe(false);
+
+  // FILE_A imported FILE_B, so getFileReferences found it and recomputed it
+  expect(resolvedInfo.files.has(FILE_A)).toBe(true);
+});
+
+it('Resolves Vite-style imports with query strings', () => {
+  const baseInfo = makeBaseInfo();
+  const resolvedInfo = computeResolvedInfo(baseInfo);
+
+  addBaseInfoForFile(
+    {
+      filePath: NEW_FILE_PATH,
+      fileContents: `import { b1 } from './one/b?raw';`,
+      isEntryPointCheck: () => false,
+    },
+    baseInfo
+  );
+  computeFolderTree(baseInfo);
+  addResolvedInfoForFile(NEW_FILE_PATH, baseInfo, resolvedInfo);
+
+  expect(resolvedInfo).toMatchResolvedSpec({
+    ...EXPECTED,
+    [NEW_FILE_PATH]: {
+      fileType: 'code',
+      hasEntryPoints: false,
+      exports: [],
+      singleImports: [
+        {
+          type: 'singleImport',
+          importAlias: 'b1',
+          importName: 'b1',
+          isTypeImport: false,
+          moduleSpecifier: './one/b?raw',
+          resolvedModuleType: 'firstPartyCode',
+          resolvedModulePath: FILE_B,
+        },
+      ],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
+    },
+  });
+});
+
+it('Resolves an extensionless import when one code file shares a basename with a non-code file', () => {
+  // This exercises the `default` case in findFileWithExtension: two files with
+  // the same basename but extensions that aren't a .js/.d.ts pair.  The
+  // resolver should pick the single code file.
+  const SHARED_TS = join(TEST_PROJECT_DIR, 'sharedName.ts');
+  const SHARED_JSON = join(TEST_PROJECT_DIR, 'sharedName.json');
+  const CONSUMER_PATH = join(TEST_PROJECT_DIR, 'consumer.ts');
+
+  const baseInfo = makeBaseInfo();
+  const resolvedInfo = computeResolvedInfo(baseInfo);
+
+  addBaseInfoForFile(
+    {
+      filePath: SHARED_TS,
+      fileContents: `export const x = 1;`,
+      isEntryPointCheck: () => false,
+    },
+    baseInfo
+  );
+  baseInfo.files.set(SHARED_JSON, { fileType: 'other' });
+  addBaseInfoForFile(
+    {
+      filePath: CONSUMER_PATH,
+      fileContents: `import { x } from './sharedName';`,
+      isEntryPointCheck: () => false,
+    },
+    baseInfo
+  );
+  computeFolderTree(baseInfo);
+  addResolvedInfoForFile(CONSUMER_PATH, baseInfo, resolvedInfo);
+
+  expect(resolvedInfo).toMatchResolvedSpec({
+    ...EXPECTED,
+    [CONSUMER_PATH]: {
+      fileType: 'code',
+      hasEntryPoints: false,
+      exports: [],
+      singleImports: [
+        {
+          type: 'singleImport',
+          importAlias: 'x',
+          importName: 'x',
+          isTypeImport: false,
+          moduleSpecifier: './sharedName',
+          resolvedModuleType: 'firstPartyCode',
+          resolvedModulePath: SHARED_TS,
+        },
+      ],
+      barrelImports: [],
+      dynamicImports: [],
+      singleReexports: [],
+      barrelReexports: [],
+    },
+  });
 });
