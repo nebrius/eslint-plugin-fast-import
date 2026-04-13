@@ -22,6 +22,7 @@ import {
   getDependenciesFromPackageJson,
   getRelativePathFromRoot,
 } from '../util/files.js';
+import { getSubpathEntry } from '../util/getSubpathEntry.js';
 import { debug, formatMilliseconds } from '../util/logging.js';
 import { computeAnalyzedInfo } from './computeAnalyzedInfo.js';
 import {
@@ -44,29 +45,26 @@ import {
 
 const baseProjectInfos = new Map<string, BaseProjectInfo>();
 function getBaseProjectInfo(filename: string) {
-  for (const [packageRootDir, baseProjectInfo] of baseProjectInfos) {
-    if (filename.startsWith(packageRootDir)) {
-      return baseProjectInfo;
-    }
-  }
+  return getSubpathEntry({
+    filePath: filename,
+    data: baseProjectInfos,
+  });
 }
 
 const resolvedProjectInfos = new Map<string, ResolvedProjectInfo>();
 function getResolvedProjectInfo(filename: string) {
-  for (const [packageRootDir, resolvedProjectInfo] of resolvedProjectInfos) {
-    if (filename.startsWith(packageRootDir)) {
-      return resolvedProjectInfo;
-    }
-  }
+  return getSubpathEntry({
+    filePath: filename,
+    data: resolvedProjectInfos,
+  });
 }
 
 const analyzedProjectInfos = new Map<string, AnalyzedProjectInfo>();
 function getAnalyzedProjectInfo(filename: string) {
-  for (const [packageRootDir, analyzedProjectInfo] of analyzedProjectInfos) {
-    if (filename.startsWith(packageRootDir)) {
-      return analyzedProjectInfo;
-    }
-  }
+  return getSubpathEntry({
+    filePath: filename,
+    data: analyzedProjectInfos,
+  });
 }
 
 function getEntryPointCheck(

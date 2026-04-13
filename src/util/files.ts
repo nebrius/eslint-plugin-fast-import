@@ -14,7 +14,13 @@ type PotentialFile = {
   stats: Stats;
 };
 
-const IGNORE_DIRECTORIES = ['node_modules', 'dist', 'build', '.git'];
+const DEFAULT_IGNORE_DIRECTORIES = ['node_modules', 'dist', 'build', '.git'];
+
+export function isDefaultIgnoredPath(path: string) {
+  return DEFAULT_IGNORE_DIRECTORIES.some(
+    (dir) => path.includes(sep + dir + sep) || path.endsWith(sep + dir)
+  );
+}
 
 // Fetch a list of all fast-import.config.json files, which correspond to each
 // package that we want to analyze in a monorepo. We use our own recursive
@@ -28,7 +34,7 @@ export function getMonorepoPackageSettings(packageRootDir: string): string[] {
     if (!currentDir) {
       break;
     }
-    if (IGNORE_DIRECTORIES.includes(basename(currentDir))) {
+    if (DEFAULT_IGNORE_DIRECTORIES.includes(basename(currentDir))) {
       continue;
     }
     const directoryContents = readdirSync(currentDir, { withFileTypes: true });
@@ -135,8 +141,7 @@ export async function getFiles(
     ignoreOverridePatterns,
     potentialFiles.filter(
       ({ filePath }) =>
-        !IGNORE_DIRECTORIES.some((dir) => filePath.includes(sep + dir + sep)) &&
-        basename(filePath) !== '.gitignore'
+        !isDefaultIgnoredPath(filePath) && basename(filePath) !== '.gitignore'
     )
   );
 }
@@ -264,7 +269,7 @@ function getPotentialFilesList(packageRootDir: string): string[] {
   for (const content of dirContents) {
     if (!content.isDirectory()) {
       potentialFilesList.push(join(packageRootDir, content.name));
-    } else if (!IGNORE_DIRECTORIES.includes(content.name)) {
+    } else if (!DEFAULT_IGNORE_DIRECTORIES.includes(content.name)) {
       potentialFilesList.push(
         ...getPotentialFilesList(join(packageRootDir, content.name))
       );

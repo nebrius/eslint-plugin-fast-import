@@ -131,3 +131,7 @@ dist
 
 .DS_Store
 .plans
+
+# Allow node_modules in test fixtures that want to test ignored paths
+!src/util/__test__/project/nodeModules/node_modules/
+!src/util/__test__/project/nodeModules/node_modules/**

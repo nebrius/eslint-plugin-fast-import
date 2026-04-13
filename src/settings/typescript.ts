@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 
 import ts from 'typescript';
 
+import { isDefaultIgnoredPath } from '../util/files.js';
 import { warn } from '../util/logging.js';
 import type { PackageSettings } from './user.js';
 
@@ -125,7 +126,7 @@ function parseTsConfig(
     }
     if (
       !absolutePathEntry.startsWith(absoluteRootDir ?? dirname(configPath)) ||
-      absolutePathEntry.includes('node_modules')
+      isDefaultIgnoredPath(absolutePathEntry)
     ) {
       continue;
     }

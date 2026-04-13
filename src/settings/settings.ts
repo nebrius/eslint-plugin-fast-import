@@ -7,9 +7,9 @@ import type { GenericContext } from '../types/context.js';
 import { InternalError } from '../util/error.js';
 import {
   getMonorepoPackageSettings,
-  splitPathIntoSegments,
   trimTrailingPathSeparator,
 } from '../util/files.js';
+import { getSubpathEntry } from '../util/getSubpathEntry.js';
 import { debug } from '../util/logging.js';
 import { getTypeScriptSettings } from './typescript.js';
 import type { PackageSettings, RepoUserSettings } from './user.js';
@@ -336,46 +336,17 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   });
 }
 
-function getLongestCommonPrefix<T>({
-  filePath,
-  cache,
-}: {
-  filePath: string;
-  cache: Map<string, T>;
-}) {
-  const filePathSegments = splitPathIntoSegments(filePath);
-  let longestCommonPath: { path: string; value: T } | undefined;
-  for (const [path, value] of cache) {
-    const splitPath = splitPathIntoSegments(path);
-    let isMatch = true;
-    for (let i = 0; i < splitPath.length; i++) {
-      if (filePathSegments[i] !== splitPath[i]) {
-        isMatch = false;
-        break;
-      }
-    }
-    if (
-      isMatch &&
-      (!longestCommonPath ||
-        splitPath.length > splitPathIntoSegments(longestCommonPath.path).length)
-    ) {
-      longestCommonPath = { path, value };
-    }
-  }
-  return longestCommonPath ? longestCommonPath.value : undefined;
-}
-
 function getRepoCacheEntryForFile(filePath: string) {
-  return getLongestCommonPrefix({
+  return getSubpathEntry({
     filePath,
-    cache: repoSettingsCache,
+    data: repoSettingsCache,
   });
 }
 
 function getPackageCacheEntryForFile(filePath: string) {
-  const result = getLongestCommonPrefix({
+  const result = getSubpathEntry({
     filePath,
-    cache: packageSettingsCache,
+    data: packageSettingsCache,
   });
   return result?.settings;
 }
