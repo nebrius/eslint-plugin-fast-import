@@ -1,3 +1,5 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
@@ -6,6 +8,7 @@ import {
   _reset,
   convertToUnixishPath,
   getFiles,
+  getMonorepoPackageSettings,
   getRelativePathFromRoot,
   splitPathIntoSegments,
   trimTrailingPathSeparator,
@@ -130,4 +133,33 @@ it('Can get relative path to root', () => {
   expect(getRelativePathFromRoot(`/base`, '/base')).toEqual('');
   expect(getRelativePathFromRoot(`/base`, '/src/a.ts')).toEqual('src/a.ts');
   expect(getRelativePathFromRoot(`/base`, 'src/a.ts')).toEqual('src/a.ts');
+});
+
+it('Does not find fast-import.config.json files inside node_modules', () => {
+  const tempDir = mkdtempSync(join(tmpdir(), 'fast-import-test-'));
+  try {
+    // A valid package config that should be discovered
+    mkdirSync(join(tempDir, 'packages', 'foo'), { recursive: true });
+    writeFileSync(
+      join(tempDir, 'packages', 'foo', 'fast-import.config.json'),
+      '{}'
+    );
+
+    // A config inside node_modules that must be skipped
+    mkdirSync(join(tempDir, 'node_modules', 'some-package'), {
+      recursive: true,
+    });
+    writeFileSync(
+      join(tempDir, 'node_modules', 'some-package', 'fast-import.config.json'),
+      '{}'
+    );
+
+    const result = getMonorepoPackageSettings(tempDir);
+
+    expect(result).toEqual([
+      join(tempDir, 'packages', 'foo', 'fast-import.config.json'),
+    ]);
+  } finally {
+    rmSync(tempDir, { recursive: true });
+  }
 });

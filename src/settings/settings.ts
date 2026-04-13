@@ -89,6 +89,7 @@ export function markSettingsForRefresh(packageRootDir: string) {
     const repoCacheEntry = repoSettingsCache.get(
       packageCacheEntry.settings.repoRootDir
     );
+    /* instanbul ignore next */
     if (!repoCacheEntry) {
       throw new InternalError(
         'Could not get repo cache settings from package cache settings'
@@ -186,6 +187,7 @@ export function getPackageSettings(
   // We're now guaranteed to have the latest package settings, since they're
   // computed as part of the repo settings computation.
   const packageSettings = getPackageCacheEntryForFile(context.filename);
+  /* instanbul ignore next */
   if (!packageSettings) {
     throw new InternalError(
       'Package settings should be cached after repo settings computation'

@@ -13,7 +13,7 @@ import {
   updateCacheFromFileSystem,
 } from '../../module.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const TEST_PROJECT_DIR = join(getDirname(), 'project', 'singlerepo');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
 const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
 const FILE_TS_NEW = join(TEST_PROJECT_DIR, 'new.ts');

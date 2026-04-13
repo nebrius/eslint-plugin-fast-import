@@ -93,6 +93,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
         'fast-import': {
           packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
+          entryPointFiles: ['a.ts'],
         },
       },
     },
