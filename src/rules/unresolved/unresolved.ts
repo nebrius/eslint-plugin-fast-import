@@ -145,11 +145,12 @@ export const noUnresolvedImports = createRule({
       }
 
       // Next, we check if the root export could be resolved, which is only
-      // available for single reexports
+      // available for single reexports if they are entry points
       if (
         reexportEntry.resolvedModuleType === 'firstPartyCode' &&
         reexportEntry.type === 'singleReexport' &&
-        reexportEntry.rootModuleType === undefined
+        reexportEntry.rootModuleType === undefined &&
+        reexportEntry.isEntryPoint
       ) {
         context.report({
           loc: getLocFromRange(context, reexportEntry.reportNodeRange),

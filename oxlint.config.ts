@@ -44,8 +44,7 @@ export default {
   },
   settings: {
     'fast-import': {
-      packageRootDir: import.meta.dirname,
-      entryPointFiles: ['src/plugin.ts'],
+      monorepoRootDir: import.meta.dirname,
       debugLogging: true,
     },
   },

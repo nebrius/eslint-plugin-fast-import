@@ -1,0 +1,5 @@
+{
+  "entryPointFiles": [
+    "src/plugin.ts"
+  ]
+}
