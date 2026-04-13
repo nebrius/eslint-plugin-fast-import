@@ -15,6 +15,7 @@
   - The previous naming was a little confusing. In practice, it is meant to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause fast import to not parse tsconfig and automatically extra aliases, etc.
 - Config files matching `/*.config.*` are now automatically treated as externally imported
     - If you previously specified these entries in your config, you can remove them
+- Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
 
 ## 2.2.1 (10/13/2025)
 

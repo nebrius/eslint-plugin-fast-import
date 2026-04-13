@@ -7,6 +7,7 @@ import type { GenericContext } from '../types/context.js';
 import { InternalError } from '../util/error.js';
 import {
   getMonorepoPackageSettings,
+  splitPathIntoSegments,
   trimTrailingPathSeparator,
 } from '../util/files.js';
 import { debug } from '../util/logging.js';
@@ -225,7 +226,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
 
     // Filter out paths that don't resolve to files inside packageRootDir, since
     // they're either third party or doing something not supported
-    if (!isPackageFile({ filePath: path, packageRootDir })) {
+    if (!path.startsWith(packageRootDir)) {
       continue;
     }
 
@@ -333,33 +334,46 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   });
 }
 
-function isPackageFile({
+function getLongestCommonPrefix<T>({
   filePath,
-  packageRootDir,
+  cache,
 }: {
   filePath: string;
-  packageRootDir: string;
+  cache: Map<string, T>;
 }) {
-  // TODO: need to switch to an algorithm that uses a "matches longest path segment set algorithm"
-  return filePath.startsWith(packageRootDir);
+  const filePathSegments = splitPathIntoSegments(filePath);
+  let longestCommonPath: { path: string; value: T } | undefined;
+  for (const [path, value] of cache) {
+    const splitPath = splitPathIntoSegments(path);
+    let isMatch = true;
+    for (let i = 0; i < splitPath.length; i++) {
+      if (filePathSegments[i] !== splitPath[i]) {
+        isMatch = false;
+        break;
+      }
+    }
+    if (
+      isMatch &&
+      (!longestCommonPath ||
+        splitPath.length > splitPathIntoSegments(longestCommonPath.path).length)
+    ) {
+      longestCommonPath = { path, value };
+    }
+  }
+  return longestCommonPath ? longestCommonPath.value : undefined;
 }
 
 function getRepoCacheEntryForFile(filePath: string) {
-  for (const [packageRootDir, cacheEntry] of repoSettingsCache) {
-    if (isPackageFile({ filePath, packageRootDir })) {
-      return cacheEntry;
-    }
-  }
-  return undefined;
+  return getLongestCommonPrefix({
+    filePath,
+    cache: repoSettingsCache,
+  });
 }
 
-function getPackageCacheEntryForFile(
-  filePath: string
-): ParsedPackageSettings | undefined {
-  for (const [packageRootDir, cacheEntry] of packageSettingsCache) {
-    if (isPackageFile({ filePath, packageRootDir })) {
-      return cacheEntry.settings;
-    }
-  }
-  return undefined;
+function getPackageCacheEntryForFile(filePath: string) {
+  const result = getLongestCommonPrefix({
+    filePath,
+    cache: packageSettingsCache,
+  });
+  return result?.settings;
 }
