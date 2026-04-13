@@ -23,8 +23,8 @@ Examples of _incorrect_ code with mode = relative-if-local (default)
 ├── package.json
 └── src
     ├── components
-    │   └── Button.ts
-    |   └── Card.ts
+    │   ├── Button.ts
+    │   └── Card.ts
     └── utils
         └── helper.ts
 
@@ -58,8 +58,8 @@ Examples of _incorrect_ code with mode = always
 ├── package.json
 └── src
     ├── components
-    │   └── Button.ts
-    |   └── Card.ts
+    │   ├── Button.ts
+    │   └── Card.ts
     └── utils
         └── helper.ts
 

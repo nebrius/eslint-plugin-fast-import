@@ -1,4 +1,4 @@
-# fast-import/restricted
+# fast-import/no-restricted-imports
 
 Restricts which files can import which modules.
 
@@ -27,7 +27,7 @@ The `rules` option is an array of objects that define the rules for restricting 
 - `message`: An optional custom message to display when a restricted import is found.
   - Supplying a custom message is strongly recommended, because you can communicate to your users _why_ this import is restricted, e.g. `this component can only be used on the settings page`.
 
-For properties that take filepaths, be aware of how filepath matching works. If a string is specified and is a relative path, it is assumed to be relative to the plugin's `rootDir` setting. If a regular expression is specified, be aware that files testing using this regular expression are _always_ absolute. This means that you cannot do something like `allowed: [/^\.a.ts$/]`, since no file passed in will ever start with `./`.
+For properties that take filepaths, be aware of how filepath matching works. If a string is specified and is a relative path, it is assumed to be relative to the current package's `packageRootDir`. If a regular expression is specified, be aware that files tested using this regular expression are _always_ absolute. This means that you cannot do something like `allowed: [/^\.\/a.ts$/]`, since no file passed in will ever start with `./`.
 
 Examples of _incorrect_ code
 

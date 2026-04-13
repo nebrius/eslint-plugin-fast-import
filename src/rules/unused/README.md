@@ -1,6 +1,6 @@
 # fast-import/no-unused-exports
 
-Ensure exports are imported elsewhere, taking into account whether files are test files or non-test files, and whether the export is a type export or value export.
+Ensures exports are imported elsewhere, taking into account whether files are test files or non-test files, and whether the export is a type export or value export.
 
 ## Rule Details
 
@@ -11,7 +11,7 @@ Ensure exports are imported elsewhere, taking into account whether files are tes
 3. The export is a test file (exports in test files are not analyzed by this rule)
 4. The export is a type export and is imported in a test or non-test file
 
-Types are often useful in test code, and so are not flagged as unused if imported in test by files by default unless the `allowNonTestTypeExports` rule option is disabled.
+Types are often useful in test code, and so are not flagged as unused if imported in test files by default unless the `allowNonTestTypeExports` rule option is disabled.
 
 Examples of _incorrect_ code
 
@@ -63,7 +63,7 @@ const a = 10;
 export const a = 10;
 
 // b.ts
-import { b } from './b';
+import { a } from './a';
 ```
 
 ```js
@@ -80,7 +80,7 @@ export interface Foo {
 }
 
 // __test__/b.ts
-import type { Foo } from './b';
+import type { Foo } from '../a';
 ```
 
 ## Options
@@ -93,7 +93,7 @@ This rule takes an options object with the following property:
 
 ### .d.ts exports
 
-Exports listed in `.d.ts` files are not checked. This behavior is desired when `.d.ts` files declair ambient types, aka types for third party modules. However, if a `.d.ts` file is used to declare types for a neighboring `.js` file and exports types not present in the `.js` file, then these exports are not checked for usage.
+Exports listed in `.d.ts` files are not checked. This behavior is desired when `.d.ts` files declare ambient types, aka types for third party modules. However, if a `.d.ts` file is used to declare types for a neighboring `.js` file and exports types not present in the `.js` file, then these exports are not checked for usage.
 
 ### Barrel imports
 
@@ -106,7 +106,7 @@ export const a2 = 10;
 
 // b.ts
 import * as a from './a';
-console.log(a1);
+console.log(a.a1);
 ```
 
 In this example, `a2` is not actually used, but we can't determine this concretely. While this specific example is simple, we can imagine more complicated cases where `a` might be passed to other functions and only referenced (or not) in other files.

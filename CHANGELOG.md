@@ -2,17 +2,24 @@
 
 ## 3.0.0
 
-- BREAKING CHANGE: Removed support for config files when not using new monorepo configuration
+Version 3 introduces a fairly large refactor of the plugin's configuration system. This refactor enables users to configure a single, root-level ESLint/Oxlint config in a monorepo that covers all packages, instead of requiring a separate ESLint/Oxlint config in each package.
+
+- BREAKING CHANGE: `fast-import.config.json` is now only supported when specifying `repoRootDir` in the plugin settings
 - BREAKING CHANGE: Removed the `consistent-file-extensions` rule
     - This rule papered over gaps in tooling that is no longer needed, and was difficult to use
 - BREAKING CHANGE: Removed `all()` and `recommended()` config helpers
     - These helpers became less useful due to other changes, and given that they were a departure from standard plugin configuration mechanisms, I think the value they brought is now outweighed by the confusion they caused
+    - Use `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.all`, and `fastImportPlugin.configs.off` instead for rules
+    - Put plugin settings in `settings['fast-import']`
 - BREAKING CHANGE: Replaced `entryPoints` with `entryPointFiles` and `externallyImported` with `externallyImportedFiles`
     - Previously, `entryPoints`/`externallyImported` indicated a list of exports from a given file that were considered for analysis. In practice this has proven difficult for users to maintain, so basically everyone wrote `/.*/` to include all exports from that file.
     - Regexes themselves are tricky, since they're not serializable, so we also added a change to allow `{ regexp: "..." }` objects to be used instead of strings.
     - This complexity doesn't benefit us, so the new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
-- BREAKING CHANGE:  `rootDir` renamed to `packageRootDir` in the single repo setup and in ESM File info returned from `getESMInfo` to better indicate that this is the directory for the package, not source
-  - The previous naming was a little confusing. In practice, it is meant to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause fast import to not parse tsconfig and automatically extra aliases, etc.
+- BREAKING CHANGE: `rootDir` was renamed to `packageRootDir` across all API surfaces
+  - The previous naming was a little confusing. In practice, it is meant to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause Fast Import to not parse `tsconfig.json` and automatically detect aliases, etc.
+- BREAKING CHANGE: `getESMInfo` now returns `packageSettings` for the current package instead of `settings`, reflecting the new monorepo-aware settings model
+  - In monorepo root-config mode, package settings are discovered recursively from `fast-import.config.json` files
+  - The directory containing each `fast-import.config.json` becomes that package's `packageRootDir`, and nested `fast-import.config.json` files are not allowed
 - Config files matching `/*.config.*` are now automatically treated as externally imported
     - If you previously specified these entries in your config, you can remove them
 - Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)

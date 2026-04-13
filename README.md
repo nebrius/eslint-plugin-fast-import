@@ -6,7 +6,8 @@
 - [Rules](#rules)
 - [Configuration](#configuration)
   - [Configuration options](#configuration-options)
-    - [rootDir (required)](#rootdir-required)
+    - [packageRootDir](#packagerootdir)
+    - [monorepoRootDir (monorepo)](#monoreporootdir-monorepo)
     - [alias](#alias)
     - [externallyImportedFiles / entryPointFiles](#externallyimportedfiles--entrypointfiles)
     - [ignorePatterns](#ignorepatterns)
@@ -25,7 +26,7 @@
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
   - [Phase 3: Import graph analysis](#phase-3-import-graph-analysis)
 - [Limitations](#limitations)
-  - [All first party code must live inside `rootDir`](#all-first-party-code-must-live-inside-rootdir)
+  - [All first party code must live inside `packageRootDir`](#all-first-party-code-must-live-inside-packagerootdir)
   - [CommonJS is not supported](#commonjs-is-not-supported)
   - [Barrel exporting from third-party/built-in modules are ignored](#barrel-exporting-from-third-partybuilt-in-modules-are-ignored)
   - [Case insensitivity inconsistency in ESLint arguments](#case-insensitivity-inconsistency-in-eslint-arguments)
@@ -33,7 +34,7 @@
   - [getESMInfo(context)](#getesminfocontext)
   - [getLocFromRange(context, range)](#getlocfromrangecontext-range)
   - [registerUpdateListener(listener)](#registerupdatelistenerlistener)
-  - [isNonTestFile(filePath)](#isnontestfilefilepath)
+  - [isNonTestFile(filePath, packageRootDir, packageSettings)](#isnontestfilefilepath-packagerootdir-packagesettings)
 - [Frequently Asked Questions](#frequently-asked-questions)
   - [Is this plugin a replacement for eslint-plugin-import/eslint-plugin-import-x?](#is-this-plugin-a-replacement-for-eslint-plugin-importeslint-plugin-import-x)
   - [Do you support user-supplied resolvers like eslint-plugin-import does?](#do-you-support-user-supplied-resolvers-like-eslint-plugin-import-does)
@@ -45,7 +46,7 @@ Fast Import uses a novel algorithm combined with the [OXC Rust based parser](htt
 
 ## Installation
 
-```
+```bash
 npm install --save-dev eslint-plugin-fast-import
 ```
 
@@ -78,38 +79,60 @@ There is also a configuration called "off" that disables all rules. This configu
 
 ## Configuration
 
-Fast Import supports ESLint 9+ and Oxlint. For most simple TypeScript applications using ESLint, you can add Fast Import with:
+Fast Import supports ESLint 9+ and Oxlint. Configure `settings['fast-import']` yourself, then enable one of `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.all`, or `fastImportPlugin.configs.off`.
+
+For most use cases, you can enable Fast Import with:
 
 ```js
+import { defineConfig } from 'eslint/config';
 import fastImportPlugin from 'eslint-plugin-fast-import';
 
-export default [
+export default defineConfig([
   {
     settings: {
       'fast-import': {
-        rootDir: import.meta.dirname,
+        packageRootDir: import.meta.dirname,
       },
     },
   },
   fastImportPlugin.configs.recommended,
-];
+]);
 ```
 
 This will apply the recommended rules along with the default configuration.
 
+In monorepos with multiple packages, you can either:
+- Define separate configs per package using the single-repo setup described above.
+- Use `monorepoRootDir` instead of `packageRootDir` in a single root config and move package-specific settings into per-package `fast-import.config.json` files
+
+See [Use in monorepos](#use-in-monorepos) for more details.
+
 ### Configuration options
 
-Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or suppliment these options.
+Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or supplement these options.
 
-#### rootDir (required)
+In single-repo mode, all options live in `settings['fast-import']`.
+
+In monorepo mode:
+
+- `monorepoRootDir`, `mode`, `editorUpdateRate`, and `debugLogging` live in `settings['fast-import']`
+- `alias`, `entryPointFiles`, `externallyImportedFiles`, `ignorePatterns`, `ignoreOverridePatterns`, and `testFilePatterns` live in each package's `fast-import.config.json`
+
+#### packageRootDir
 
 Type: `string`
 
-Fast Import uses `rootDir` to scan for files. When Fast Import starts up for the first time, it creates a map of all files in a project. Fast Import finds all files inside of `rootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
+Fast Import uses `packageRootDir` to scan for files in the current package. When Fast Import starts up for the first time, it creates a map of all files inside of `packageRootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
+
+In single-repo mode, you must set `packageRootDir` directly in `settings['fast-import']`.
+
+In monorepo mode, every package still has a `packageRootDir` under the hood, but it is inferred automatically from the directory containing that package's `fast-import.config.json` file.
 
 Note: Fast Import automatically filters out folders named `node_modules`, `.git`, `build`, and `dist` regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze one of these folders, file an issue and we'll find a way to support your use case.
 
-`rootDir` _must_ be an absolute path!
+`packageRootDir` _must_ be an absolute path!
+
+`packageRootDir` should generally point to the directory containing the package's `package.json` and `tsconfig.json`, not a nested `src` directory.
 
 CommonJS Example:
 
@@ -117,7 +140,7 @@ CommonJS Example:
 {
   settings: {
     'fast-import': {
-      rootDir: __dirname,
+      packageRootDir: __dirname,
     },
   },
 }
@@ -129,11 +152,33 @@ ESM Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
     },
   },
 }
 ```
+
+#### monorepoRootDir (monorepo)
+
+Type: `string`
+
+`monorepoRootDir` is the absolute path to the monorepo root. Fast Import recursively looks underneath this directory for `fast-import.config.json` files and treats the directory containing each file as that package's `packageRootDir`. `fast-import.config.json` files cannot be nested inside one another.
+
+`packageRootDir` and `monorepoRootDir` are mutually exclusive.
+
+Example:
+
+```js
+{
+  settings: {
+    'fast-import': {
+      monorepoRootDir: import.meta.dirname,
+    },
+  },
+}
+```
+
+The remaining options are package-scoped. In single-repo mode, place them in `settings['fast-import']`. In monorepo mode, place them in each package's `fast-import.config.json`. The examples below use the single-repo form.
 
 #### alias
 
@@ -143,7 +188,7 @@ Type: `Record<string, string>`
 
 Fast Import defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
 
-- Aliases that point to files outside of `rootDir`, or point to files inside of `node_modules`, are ignored
+- Aliases that point to files outside of `packageRootDir`, or point to files inside of `node_modules`/`.git`/`dist`/`build`, are ignored
 - Aliases with more than one file, e.g. `"@/": ["a.ts", "b.ts"]`, are ignored
 
 Example:
@@ -152,7 +197,7 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       alias: {
         '@/*': 'src/*',
         'foo': 'src/foo.ts',
@@ -177,7 +222,7 @@ In practice, this distinction only matters in monorepos. In the monorepo case, t
 
 For example, if you are building a Next.js application, then the `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
 
-Entry points allows you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/entryPoint/README.md) rule.
+Entry points/externally imported files allow you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/entryPoint/README.md) rule.
 
 Note: config files matching `/*.config.*` are always treated as externally imported, regardless of this setting.
 
@@ -187,9 +232,9 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       entryPointFiles: ['./src/app/**/page.tsx', './src/app/**/layout.tsx'],
-      externallyImportedFiles: ['index.ts'],
+      externallyImportedFiles: ['./src/index.ts'],
     },
   },
 }
@@ -209,7 +254,7 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       ignorePatterns: [
         'src/**/__test__/**/snapshot/**/*',
         '*.pid',
@@ -231,7 +276,7 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       ignoreOverridePatterns: [
         'src/generated/**/*.ts',
       ],
@@ -245,8 +290,8 @@ Example:
 type: `string[]`
 
 Several rules take into account whether or not a given file is a "test" file or a "production" file. By default, any
-file path that contains `__test__`, `__tests__`, or `.tests.` is considered a test file, and everything else is
-considering a production file.
+file path that contains `__test__`, `__tests__`, or `.test.` is considered a test file, and everything else is
+considered a production file.
 
 This option allows you to define extra patterns in addition to the default three to indicate other test files. Note that
 globs are not currently supported.
@@ -257,7 +302,7 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       testFilePatterns: ['__fixture__'],
     },
   },
@@ -268,32 +313,40 @@ Example:
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
-When set to `auto`, the default, Fast Import will do it's best to determine which environment it's running in.
+When set to `auto`, Fast Import chooses a mode based on the current environment:
+
+- `editor` when running inside supported editors such as VS Code, Cursor, or Windsurf
+- `fix` when Oxlint or ESLint are run with `--fix`, `--fix-dry-run`, or `--fix-type`
+- `one-shot` otherwise
 
 `one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint or Oxlint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
 
-`fix` builds on `one-shot` by introducing the caching layer, and is the default when ESLint is supplied with a fix flag. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file. This mode is used by default when `--fix` is sent to Oxlint, or `--fix`, `--fix-dry-run`, or `--fix-type` is sent to ESLint.
+`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
 
-Finally, `editor` mode builds on `fix` mode by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout`, `git stash`, etc.
+`editor` builds on `fix` by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout` or `git stash`.
 
-Note: currently, VS Code, Cursor, and Windsurf are the only supported editors. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the mean time, you can create a config that extends your standard config, set the mode to editor, and tell your editor to use this config file:
+Note: currently, VS Code, Cursor, and Windsurf are the only supported editors. If you would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use this config file:
 
 ```js
-export default [
+import { defineConfig } from 'eslint/config';
+
+export default defineConfig([
   ...yourConfig,
-  settings: {
-    'fast-import': {
-      mode: 'editor'
-    }
-  }
-]
+  {
+    settings: {
+      'fast-import': {
+        mode: 'editor'
+      },
+    },
+  },
+]);
 ```
 
 #### editorUpdateRate
 
 Type: `number`
 
-Defines the rate in milliseconds at which Fast Import looks for file changes, and defaults to once every 5 seconds.
+Defines the rate in milliseconds at which editor-mode file watching checks for file changes. This is a repo-level setting, so in monorepos it belongs in the root `settings['fast-import']` object instead of in `fast-import.config.json`.
 
 Example:
 
@@ -301,7 +354,7 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       editorUpdateRate: 2_000,
     },
   },
@@ -310,9 +363,9 @@ Example:
 
 #### debugLogging
 
-Type: boolean
+Type: `boolean`
 
-When set to `true`, enables extra logging that tells you performance numbers, when files are updated, and more.
+When set to `true`, enables verbose logging that tells you performance numbers, when files are updated, and more.
 
 Example:
 
@@ -320,7 +373,7 @@ Example:
 {
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       debugLogging: true,
     },
   },
@@ -329,13 +382,85 @@ Example:
 
 ### Use in monorepos
 
-Fast import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
+Fast Import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
+
+Monorepos can be configured in one of two ways.
+
+#### Option 1: one root config with `monorepoRootDir`
+
+Use this when you want one top-level ESLint or Oxlint config to cover the whole monorepo.
+
+1. Set `settings['fast-import'].monorepoRootDir` in your root ESLint or Oxlint config.
+2. Add a `fast-import.config.json` file to each package you want Fast Import to analyze.
+3. Put package-scoped options such as `alias`, `entryPointFiles`, `externallyImportedFiles`, `ignorePatterns`, `ignoreOverridePatterns`, and `testFilePatterns` in those package config files.
+
+Note that `fast-import.config.json` files cannot be nested inside one another. Once Fast Import finds a `fast-import.config.json` in a directory, that directory becomes the package root and nested config files beneath it are ignored by design.
+
+Example structure:
+```text
+repo
+├── eslint.config.mjs
+└── packages
+    ├── web
+    │   ├── fast-import.config.json
+    │   └── src
+    └── shared
+        ├── fast-import.config.json
+        └── src
+```
+
+Root config:
+
+```js
+{
+  settings: {
+    'fast-import': {
+      monorepoRootDir: import.meta.dirname,
+    },
+  },
+}
+```
+
+Package config:
+
+```json
+{
+  "entryPointFiles": ["src/index.ts"],
+  "alias": {
+    "@/*": "src/*"
+  }
+}
+```
+
+Fast Import discovers package configs recursively under `monorepoRootDir`. Once it finds a `fast-import.config.json` in a directory, that directory becomes the package root.
+
+#### Option 2: separate configs per package
+
+You can also keep monorepo packages on separate ESLint configs using the same single-repo setup shown earlier, with each package setting its own `packageRootDir`.
+
+Example package-local config:
+
+```js
+import { defineConfig } from 'eslint/config';
+import fastImportPlugin from 'eslint-plugin-fast-import';
+
+export default defineConfig([
+  {
+    settings: {
+      'fast-import': {
+        packageRootDir: import.meta.dirname,
+      },
+    },
+  },
+  fastImportPlugin.configs.recommended,
+]);
+```
 
 ### Using with Oxlint
 
 Fast Import works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
 
-Configuration is essentially the same as with ESLint. The main difference is that Oxlint does not have an equivalent to ESLint's flat config, so you need to dig into the config object to find the rules properties:
+Configuration is similar to ESLint, except that you spread `fastImportPlugin.configs.all.rules` or `fastImportPlugin.configs.recommended.rules` into Oxlint's `rules` object and keep `settings['fast-import']` at the top level:
 
 ```ts
 import fastImportPlugin from 'eslint-plugin-fast-import';
@@ -346,15 +471,16 @@ export default {
   ],
   rules: {
     ...fastImportPlugin.configs.all.rules,
-    // other rules...
   },
   settings: {
     'fast-import': {
-      rootDir: import.meta.dirname,
+      monorepoRootDir: import.meta.dirname,
     },
   },
 };
 ```
+
+Oxlint does not currently support putting plugin `settings` inside `overrides`, so if you need package-specific settings in a monorepo with a root-level config, use per-package `fast-import.config.json` files.
 
 For a full working example, see this repo's own [oxlint.config.ts](./oxlint.config.ts).
 
@@ -390,7 +516,7 @@ Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](
 
 ### Accuracy
 
-The performance script I wrote above also counts the number of errors found. Before I present the results, I want to emphasis that these are _not_ issues in VS Code! I intentionally configured ESLint to check test files, and VS Code includes test files with intentional errors so that they can make sure VS Code handles errors correctly. Now on to the errors:
+The performance script I wrote above also counts the number of errors found. Before I present the results, I want to emphasize that these are _not_ issues in VS Code! I intentionally configured ESLint to check test files, and VS Code includes test files with intentional errors so that they can make sure VS Code handles errors correctly. Now on to the errors:
 
 |             | Unused | Cycle | Unresolved |
 | ----------- | ------ | ----- | ---------- |
@@ -398,10 +524,10 @@ The performance script I wrote above also counts the number of errors found. Bef
 | Import      | 4,500  | 600   | 29         |
 | Import X    | 4,521  | 600   | 49         |
 
-We notice that the numbers are pretty close to each other, with Fast import reporting a few more. While I haven't looked at each error to determine precisely what's going on, I'm pretty certain it's due to:
+We notice that the numbers are pretty close to each other, with Fast Import reporting a few more. While I haven't looked at each error to determine precisely what's going on, I'm pretty certain it's due to:
 
 - Fast Import flagging non-test exports as unused if they are only imported in test files, which the other two don't check
-- Fast import flagging imports of third party modules that are not listed in package.json (aka transient imports) as unresolved
+- Fast Import flagging imports of third party modules that are not listed in package.json (aka transient imports) as unresolved
 
 I do find it interesting that Fast Import finds a few more cycles. The 600 number is oddly round though, so perhaps their cycle detection algorithm has a limit on how many cycles it reports.
 
@@ -409,11 +535,11 @@ Details aside, we can safely say that all three libraries have about the same le
 
 ## Algorithm
 
-Fast import works by using a three phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
+Fast Import works by using a three phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
 
 ### Phase 1: AST analysis
 
-This phase reads in every non-ignored file inside `rootDir` with a known JavaScript extension (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`) and parses the file into an AST. The AST is then converted into an import/export specific form optimized for import/export analysis.
+This phase reads in every non-ignored file inside `packageRootDir` with a known JavaScript extension (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`) and parses the file into an AST. In monorepos, this happens independently for each discovered package. The AST is then converted into an import/export specific form optimized for import/export analysis.
 
 For example, the import statement `import { foo } from './bar'` gets boiled down to:
 
@@ -425,7 +551,7 @@ For example, the import statement `import { foo } from './bar'` gets boiled down
   isTypeImport: false,
   moduleSpecifier: './bar',
   statementNodeRange: [0, 27],
-  reportNode: [9, 12]
+  reportNodeRange: [9, 12]
 }
 ```
 
@@ -442,12 +568,12 @@ This phase goes through every import/reexport entry from the first phase and res
 Fast Import uses its own high-performance resolver to achieve this speed. It resolves module specifiers to one of three types in a very specific order:
 
 1. A Node.js built-in module, as reported by `builtinModules()` in the `node:module` module
-2. A file within `rootDir`, aka first party
+2. A file within the current `packageRootDir`, aka first party
 3. A third party module
 
-Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Fast Import's resolution algorithm considerably faster than other resolvers. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
+Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Fast Import's resolution algorithm considerably faster than other resolvers, and is even as fast as algorithms written in Rust despite being written in JavaScript. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
 
-In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measureably improve performance.
+In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measurably improve performance.
 
 Details for the information computed in this stage can be viewed in the [types file for resolved information](./src/types/resolved.ts).
 
@@ -473,15 +599,15 @@ export { default } from './d';
 export default 10; // Export for import in file a.ts!
 ```
 
-As we've seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overal performance anyways.
+As we've seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overall performance anyways.
 
 Details for the information computed in this stage can be viewed in the [types file for analyzed information](./src/types/analyzed.ts).
 
 ## Limitations
 
-### All first party code must live inside `rootDir`
+### All first party code must live inside `packageRootDir`
 
-If files exist outside of `rootDir` and are imported by files inside of `rootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-unresolved-imports](src/rules/unresolved/README.md) rule.
+If files exist outside of `packageRootDir` and are imported by files inside of `packageRootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-unresolved-imports](src/rules/unresolved/README.md) rule.
 
 ### CommonJS is not supported
 
@@ -505,25 +631,27 @@ For more details, see the limitations section of the [src/rules/unresolved/READM
 
 ### Case insensitivity inconsistency in ESLint arguments
 
-If you pass a file pattern or path to ESLint, ESLint inconsistenly applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`.
+If you pass a file pattern or path to ESLint, ESLint inconsistently applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`.
 
 ## Creating new rules
 
-Fast import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) rule for a more complex example. Fast Import exports a few helper functions used to write rules.
+Fast Import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) rule for a more complex example. Fast Import exports a few helper functions used to write rules.
 
 ### getESMInfo(context)
 
-This is the most important of the three functions. If the file represented by the ESLint context has been analyzed by Fast Import, an object with the following properties are returned, otherwise `undefined` is returned:
+This is the most important of the four functions. If the file represented by the ESLint context has been analyzed by Fast Import, an object with the following properties is returned, otherwise `undefined` is returned:
 
-- `fileInfo`: the ESM info of the current file
-- `projectInfo`: the ESM info of the entire project
-- `settings`: the computed settings, with all defaults applied, used by Fast Import
+- `fileInfo`: analyzed ESM info for the current file
+- `projectInfo`: analyzed ESM info for the current package
+- `packageSettings`: the computed package settings, with defaults applied, used by Fast Import for the current file
+
+In monorepos, `packageSettings` may come from a package-local `fast-import.config.json` file while repo-level settings such as `mode` still come from the root ESLint or Oxlint config.
 
 See the TypeScript types for full details, which are reasonably well commented.
 
-Each ESM entry includes two AST node ranges: `statementNodeRange` and `reportNodeRange`. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.reportError`. The report range is scoped to the most useful AST node representing the import, export, or reexport. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
+Each ESM entry includes two AST node ranges: `statementNodeRange` and `reportNodeRange`. A range is the start and end string indices of the node in the original source code. The first range is the range for the entire statement, and the second is a "report" range that is almost always what you want to pass to `context.report`. The report range is scoped to the most useful AST node representing the import, export, or reexport. For example, in `import { foo } from './bar'`, the statement range represents all of the code, and the report range is scoped to just `foo`.
 
-See [getLocFromRange](#getlocfromrange) for more information on using ranges to report errors
+See [getLocFromRange](#getlocfromrangecontext-range) for more information on using ranges to report errors.
 
 When creating a rule, you shouldn't traverse the AST yourself, since the AST has already been traversed for you. Each `context` callback should look something like this:
 
@@ -562,24 +690,29 @@ context.report({
 
 ### registerUpdateListener(listener)
 
-Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on the `registerUpdateListener` callback to be notified any time the cache is updated.
+Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on `registerUpdateListener` to be notified any time Fast Import refreshes the cache for a package. The callback receives the affected `packageRootDir`.
 
-### isNonTestFile(filePath)
+### isNonTestFile(filePath, packageRootDir, packageSettings)
 
-A helper function to determine whether or not a given file path represents a test file. Currently, a file is considered a test file if either of the following are true:
+A helper function to determine whether or not a given file path should be treated as a non-test file. It uses the default test-file patterns (`.test.`, `__test__`, and `__tests__`) plus any additional entries from `packageSettings.testFilePatterns`.
 
-- The file is directly or indirectly inside a folder called `__test__`
-- The file includes `.test.` in it's name.
+Example:
+
+```js
+if (isNonTestFile(context.filename, packageSettings.packageRootDir, packageSettings)) {
+  // production-only logic
+}
+```
 
 ## Frequently Asked Questions
 
-### Is this plugin a replacement for [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import)/[eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x)?
+### Is this plugin a replacement for eslint-plugin-import/eslint-plugin-import-x?
 
-No, not for the most part. Fast Import replaces a few select rules from import and import x that are known to be slow, such as `no-cycle`, but otherwise strives to coexist with these packages. It is recommended that you continue to use these other rules for more comprehensive import analysis.
+No, not for the most part. Fast Import replaces a few select rules from import and import x that are known to be slow, such as `no-cycle`, but otherwise strives to coexist with these packages. It is recommended that you continue to use rules these packages provide that Fast Import does not.
 
 ### Do you support user-supplied resolvers like eslint-plugin-import does?
 
-No, Fast Import cannot use off the shelf resolvers, by design. Off the shelf resolvers work by reading the filesystem to see what files are available, which is inhernetly slow. By contrast, Fast Import uses its own resolution algorithm that reuses information that already exists in memory so that it never has to touch the filesystem. This resolution algorithm is one of the key reasons Fast Import is able to achieve the performance it does.
+No, Fast Import cannot use off the shelf resolvers, by design. Off the shelf resolvers work by reading the filesystem to see what files are available, which is inherently slow. By contrast, Fast Import uses its own resolution algorithm that reuses information that already exists in memory so that it never has to touch the filesystem. This resolution algorithm is one of the key reasons Fast Import is able to achieve the performance it does.
 
 If Fast Import's resolution algorithm does not support your use case, please file an issue and I'll try to add support for it.
 
