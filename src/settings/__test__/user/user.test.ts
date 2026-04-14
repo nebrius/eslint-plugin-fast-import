@@ -26,9 +26,7 @@ const MONOREPO_FILE_A = join(MONOREPO_PKG_ONE, 'a.ts');
 const MONOREPO_FILE_C = join(MONOREPO_PKG_TWO, 'c.ts');
 
 it('Fetchings user supplied settings', () => {
-  const {
-    packageSettings: { entryPoints, ...settings },
-  } = getAllPackageSettings({
+  const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -45,6 +43,10 @@ it('Fetchings user supplied settings', () => {
       },
     },
   });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+  const { entryPoints, ...settings } = packageSettings;
   const expected: Omit<ParsedPackageSettings, 'entryPoints'> = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
@@ -213,14 +215,15 @@ it('Ignores aliases that point outside of packageRootDir', () => {
       },
     },
   });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
   expect(packageSettings.fixedAliases).toEqual({});
   expect(packageSettings.wildcardAliases).toEqual({});
 });
 
 it('Supports { regexp: string } for entry point symbols', () => {
-  const {
-    packageSettings: { entryPoints },
-  } = getAllPackageSettings({
+  const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
       'fast-import': {
@@ -230,6 +233,10 @@ it('Supports { regexp: string } for entry point symbols', () => {
       },
     },
   });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+  const { entryPoints } = packageSettings;
   expect(entryPoints).toHaveLength(2);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
 });
@@ -283,6 +290,9 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
     },
   });
 
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
   expect(packageSettings.packageRootDir).toBe(TEST_PROJECT_DIR);
   expect(packageSettings.repoRootDir).toBe(TEST_PROJECT_DIR);
 });
@@ -326,6 +336,9 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
     },
   });
 
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
   expect(packageSettings.packageRootDir).toBe(MONOREPO_PKG_ONE);
   expect(packageSettings.repoRootDir).toBe(MONOREPO_PROJECT_DIR);
 });
@@ -351,8 +364,35 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
     },
   });
 
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
   expect(packageSettings.packageRootDir).toBe(MONOREPO_PKG_TWO);
   expect(packageSettings.repoRootDir).toBe(MONOREPO_PROJECT_DIR);
+});
+
+it('Returns undefined packageSettings for a file outside any known package', () => {
+  getRepoSettings({
+    filename: MONOREPO_FILE_A,
+    settings: {
+      'fast-import': {
+        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        mode: 'fix',
+      },
+    },
+  });
+
+  const { packageSettings } = getAllPackageSettings({
+    filename: join(MONOREPO_PROJECT_DIR, 'eslint.config.js'),
+    settings: {
+      'fast-import': {
+        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        mode: 'fix',
+      },
+    },
+  });
+
+  expect(packageSettings).toBeUndefined();
 });
 
 it('Throws on relative monorepoRootDir', () => {

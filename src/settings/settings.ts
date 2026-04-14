@@ -173,23 +173,20 @@ export function getAllPackageSettings(
   if (cachedRepoEntry && !cachedRepoEntry.refresh) {
     // If we got here, then that means we're eligible to use the cached copy of
     // the package settings, if it exists.
-    const cachedPackageEntry = getPackageCacheEntryForFile(context.filename);
-    if (cachedPackageEntry) {
-      const packageSettings = getPackageCacheEntryForFile(context.filename);
-      /* istanbul ignore if */
-      if (!packageSettings) {
-        throw new InternalError(
-          'Current package settings is unexpectedly undefined'
-        );
-      }
-      return {
-        allPackageSettings: getAllPackageCacheEntries(),
-        packageSettings,
-      };
-    }
-    // If we got here, that means that this is a new package since the last
-    // time we computed repo settings, which necessitates recomputing the entire
-    // repo settings.
+    const packageSettings = getPackageCacheEntryForFile(context.filename);
+
+    // No package settings means one of two things:
+    // 1. This file is outside the scope of any known package
+    // 2. This is a new package that was just added
+    // We take the optimistic case that this file is outside the scope of any
+    // unknown package and return undefined for the package settings, even
+    // though it will occasionally be wrong. We do this because recomputing
+    // the package settings is expensive, and will be recomputed once the
+    // refresh flag is set anyways.
+    return {
+      allPackageSettings: getAllPackageCacheEntries(),
+      packageSettings,
+    };
   }
 
   // Calling this will repopulate the repo settings cache and the cache for this
@@ -201,12 +198,6 @@ export function getAllPackageSettings(
   // computed as part of the repo settings computation.
   const allPackageSettings = getAllPackageCacheEntries();
   const packageSettings = getPackageCacheEntryForFile(context.filename);
-  /* istanbul ignore if */
-  if (!packageSettings) {
-    throw new InternalError(
-      'Current package settings is unexpectedly undefined'
-    );
-  }
   return { allPackageSettings, packageSettings };
 }
 

@@ -43,6 +43,12 @@ export function getESMInfo(context: GenericContext) {
     initializeProject(packageSettings);
   }
 
+  // If we don't have package settings at this point, that means the file lives
+  // outside of a package, and we can't do anything
+  if (!packageSettings) {
+    return;
+  }
+
   // We have to call initializeProject first before we can check if this file
   // is ignored, because initializeProject initializes the ignore cache
   if (isFileIgnored(packageSettings.packageRootDir, context.filename)) {

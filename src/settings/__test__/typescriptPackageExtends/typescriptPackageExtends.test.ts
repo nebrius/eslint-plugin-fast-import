@@ -19,6 +19,10 @@ it('Fetches settings from tsconfig with package path extends', () => {
     },
   });
 
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+
   // This contains the default entry point setting, which is an internal
   // representation that's difficult to represent here, so we just override it
   packageSettings.entryPoints = [];
