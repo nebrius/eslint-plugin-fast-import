@@ -57,10 +57,13 @@ function argsInclude(strs: string[]) {
 }
 /* instanbul ignore next */
 const DEFAULT_MODE =
+  // For ESLint we see the original executable path and sniff for the editor
   process.argv[0].includes('Visual Studio Code') ||
   process.argv[0].includes('Cursor') ||
-  process.argv[0].includes('Windsurf')
-    ? 'editor'
+  process.argv[0].includes('Windsurf') ||
+  // For Oxlint it's run in a subprocess, so we look for the lsp flag
+  process.argv.includes('--lsp') ?
+    'editor'
     : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
       ? 'fix'
       : 'one-shot';
