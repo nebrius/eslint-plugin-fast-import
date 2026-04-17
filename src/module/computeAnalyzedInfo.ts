@@ -21,7 +21,13 @@ export function computeAnalyzedInfo(
 
   // First we initialize each detail with placeholder data, since we need a
   // completely initialized `analyzedInfo` object available before we can start
-  // traversing/populating analyzed info
+  // traversing/populating analyzed info.
+  //
+  // Note: externallyImportedBy is not initialized in this phase directly
+  // because we need the entire project to be fully analyzed before we can
+  // populate it. This will happen in the computePackageInfo phase. We define
+  // the types as part of the analyzed phase for simplicity, and having a split
+  // phase as more of an implementation detail.
   for (const [filePath, fileDetails] of resolvedProjectInfo.files) {
     if (fileDetails.fileType !== 'code') {
       analyzedProjectInfo.files.set(filePath, {
@@ -48,6 +54,7 @@ export function computeAnalyzedInfo(
         ...exportDetails,
         importedBy: [],
         barrelImportedBy: [],
+        externallyImportedBy: [],
       });
     }
 
@@ -66,6 +73,7 @@ export function computeAnalyzedInfo(
             : undefined,
         importedBy: [],
         barrelImportedBy: [],
+        externallyImportedBy: [],
       });
     }
 
@@ -74,6 +82,7 @@ export function computeAnalyzedInfo(
         ...reexportDetails,
         importedBy: [],
         barrelImportedBy: [],
+        externallyImportedBy: [],
       });
     }
 

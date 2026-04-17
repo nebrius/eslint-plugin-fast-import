@@ -197,6 +197,19 @@ expect.extend({
             delete partialImportEntry.reportNodeRange;
           }
         }
+        if ('externallyImportedBy' in exportEntry) {
+          for (let i = 0; i < exportEntry.externallyImportedBy.length; i++) {
+            const importEntry = {
+              ...exportEntry.externallyImportedBy[i].importEntry,
+            };
+            exportEntry.externallyImportedBy[i].importEntry = importEntry;
+            const partialImportEntry = importEntry as Partial<
+              typeof importEntry
+            >;
+            delete partialImportEntry.statementNodeRange;
+            delete partialImportEntry.reportNodeRange;
+          }
+        }
         if ('rootExportEntry' in exportEntry && exportEntry.rootExportEntry) {
           const rootExportEntry = {
             ...exportEntry.rootExportEntry,
@@ -209,6 +222,7 @@ expect.extend({
           delete partialRootExportEntry.reportNodeRange;
           delete partialRootExportEntry.importedBy;
           delete partialRootExportEntry.barrelImportedBy;
+          delete partialRootExportEntry.externallyImportedBy;
         }
       }
     }

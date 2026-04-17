@@ -58,6 +58,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
         },
       ],
       barrelImportedBy: [],
+      externallyImportedBy: [],
       isEntryPoint: false,
     },
   ],
@@ -178,7 +179,6 @@ export type Two = string;
     exports: [
       {
         type: 'export',
-        barrelImportedBy: [],
         exportName: 'One',
         isTypeExport: true,
         importedBy: [
@@ -197,14 +197,17 @@ export type Two = string;
             },
           },
         ],
+        barrelImportedBy: [],
+        externallyImportedBy: [],
         isEntryPoint: false,
       },
       {
         type: 'export',
-        barrelImportedBy: [],
         exportName: 'Two',
         isTypeExport: true,
         importedBy: [],
+        barrelImportedBy: [],
+        externallyImportedBy: [],
         isEntryPoint: false,
       },
     ],

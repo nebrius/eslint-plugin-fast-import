@@ -57,6 +57,7 @@ it('Updates cache when a new file is added', () => {
           barrelImportedBy: [],
           exportName: 'a',
           importedBy: [],
+          externallyImportedBy: [],
           isEntryPoint: false,
           isTypeExport: false,
         },

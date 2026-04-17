@@ -62,8 +62,8 @@ const DEFAULT_MODE =
   process.argv[0].includes('Cursor') ||
   process.argv[0].includes('Windsurf') ||
   // For Oxlint it's run in a subprocess, so we look for the lsp flag
-  process.argv.includes('--lsp') ?
-    'editor'
+  process.argv.includes('--lsp')
+    ? 'editor'
     : argsInclude(['--fix', '--fix-dry-run', '--fix-type'])
       ? 'fix'
       : 'one-shot';

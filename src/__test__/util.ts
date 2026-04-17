@@ -90,115 +90,91 @@ export type StrippedResolvedFileDetails = StrippedFileDetails<
   ResolvedBarrelReexport
 >;
 
+type StrippedAnalyzedSingleImport = Omit<
+  AnalyzedSingleImport,
+  'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+>;
+type StrippedAnalyzedBarrelImport = Omit<
+  AnalyzedBarrelImport,
+  'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+>;
+type StrippedAnalyzedSingleReexport = Omit<
+  AnalyzedSingleReexport,
+  'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
+>;
+
+type StrippedAnalyzedExport = Omit<
+  AnalyzedExport,
+  | 'statementNodeRange'
+  | 'reportNodeRange'
+  | 'importedBy'
+  | 'barrelImportedBy'
+  | 'externallyImportedBy'
+>;
+type StrippedAnalyzedBarrelReexport = Omit<
+  AnalyzedBarrelReexport,
+  | 'statementNodeRange'
+  | 'reportNodeRange'
+  | 'importedBy'
+  | 'barrelImportedBy'
+  | 'externallyImportedBy'
+>;
+
+type StrippedExportImportedBy = Array<{
+  filePath: string;
+  importEntry: StrippedAnalyzedSingleImport;
+}>;
+type StrippedReexportImportedBy = Array<{
+  filePath: string;
+  importEntry: StrippedAnalyzedSingleImport | StrippedAnalyzedSingleReexport;
+}>;
+type StrippedBarrelImportedBy = Array<{
+  filePath: string;
+  importEntry: StrippedAnalyzedBarrelImport;
+}>;
+type StrippedExternallyImportedBy = Array<{
+  filePath: string;
+  importEntry: StrippedAnalyzedSingleImport;
+}>;
+
 export type StrippedAnalyzedFileDetails = StrippedFileDetails<
   AnalyzedOtherFileDetails,
   AnalyzedCodeFileDetails,
   Omit<AnalyzedSingleImport, 'rootExportEntry'> & {
-    rootExportEntry?:
-      | Omit<
-          AnalyzedExport,
-          | 'statementNodeRange'
-          | 'reportNodeRange'
-          | 'importedBy'
-          | 'barrelImportedBy'
-        >
-      | Omit<
-          AnalyzedBarrelReexport,
-          | 'statementNodeRange'
-          | 'reportNodeRange'
-          | 'importedBy'
-          | 'barrelImportedBy'
-        >;
+    rootExportEntry?: StrippedAnalyzedExport | StrippedAnalyzedBarrelReexport;
   },
   AnalyzedBarrelImport,
   AnalyzedDynamicImport,
-  Omit<AnalyzedExport, 'importedBy' | 'barrelImportedBy'> & {
-    importedBy?: Array<{
-      filePath: string;
-      importEntry: Omit<
-        AnalyzedSingleImport,
-        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-      >;
-    }>;
-    barrelImportedBy?: Array<{
-      filePath: string;
-      importEntry: Omit<
-        AnalyzedBarrelImport,
-        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-      >;
-    }>;
+  Omit<
+    AnalyzedExport,
+    'importedBy' | 'barrelImportedBy' | 'externallyImportedBy'
+  > & {
+    importedBy?: StrippedExportImportedBy;
+    barrelImportedBy?: StrippedBarrelImportedBy;
+    externallyImportedBy?: StrippedExternallyImportedBy;
   },
   Omit<
     AnalyzedSingleReexport,
-    'rootExportEntry' | 'importedBy' | 'barrelImportedBy'
+    | 'rootExportEntry'
+    | 'importedBy'
+    | 'barrelImportedBy'
+    | 'externallyImportedBy'
   > & {
-    importedBy?: Array<{
-      filePath: string;
-      importEntry:
-        | Omit<
-            AnalyzedSingleImport,
-            'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-          >
-        | Omit<
-            AnalyzedSingleReexport,
-            'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-          >;
-    }>;
-    barrelImportedBy?: Array<{
-      filePath: string;
-      importEntry: Omit<
-        AnalyzedBarrelImport,
-        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-      >;
-    }>;
-    rootExportEntry?:
-      | Omit<
-          AnalyzedExport,
-          | 'statementNodeRange'
-          | 'reportNodeRange'
-          | 'importedBy'
-          | 'barrelImportedBy'
-        >
-      | Omit<
-          AnalyzedBarrelReexport,
-          | 'statementNodeRange'
-          | 'reportNodeRange'
-          | 'importedBy'
-          | 'barrelImportedBy'
-        >;
+    importedBy?: StrippedReexportImportedBy;
+    barrelImportedBy?: StrippedBarrelImportedBy;
+    externallyImportedBy?: StrippedExternallyImportedBy;
+    rootExportEntry?: StrippedAnalyzedExport | StrippedAnalyzedBarrelReexport;
   },
   Omit<
     AnalyzedBarrelReexport,
-    'rootExportEntry' | 'importedBy' | 'barrelImportedBy'
+    | 'rootExportEntry'
+    | 'importedBy'
+    | 'barrelImportedBy'
+    | 'externallyImportedBy'
   > & {
-    rootExportEntry?:
-      | Omit<
-          AnalyzedExport,
-          | 'statementNodeRange'
-          | 'reportNodeRange'
-          | 'importedBy'
-          | 'barrelImportedBy'
-        >
-      | Omit<
-          AnalyzedBarrelReexport,
-          | 'statementNodeRange'
-          | 'reportNodeRange'
-          | 'importedBy'
-          | 'barrelImportedBy'
-        >;
-    importedBy?: Array<{
-      filePath: string;
-      importEntry: Omit<
-        AnalyzedSingleImport,
-        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-      >;
-    }>;
-    barrelImportedBy?: Array<{
-      filePath: string;
-      importEntry: Omit<
-        AnalyzedBarrelImport,
-        'statementNodeRange' | 'reportNodeRange' | 'rootExportEntry'
-      >;
-    }>;
+    rootExportEntry?: StrippedAnalyzedExport | StrippedAnalyzedBarrelReexport;
+    importedBy?: StrippedExportImportedBy;
+    barrelImportedBy?: StrippedBarrelImportedBy;
+    externallyImportedBy?: StrippedExternallyImportedBy;
   }
 >;

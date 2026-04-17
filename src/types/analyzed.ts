@@ -129,6 +129,27 @@ type AnalyzedExportBase = {
   }>;
 
   /**
+   * A list of files and import entries that imports this export from another
+   * package in the same monorepo.
+   *
+   * This computation is not as in-depth as `importedBy` because it does not
+   * follow reexports in the consuming package. If another package reexports
+   * this export, then it is immediately considered an external import and added
+   * to this list, instead of tracing through the reexport chain.
+   *
+   * This list is an empty array of monorepoRootDir is not set by the user.
+   */
+  externallyImportedBy: Array<{
+    packageRootDir: string;
+    filePath: string;
+    importEntry:
+      | AnalyzedSingleImport
+      | AnalyzedSingleReexport
+      | AnalyzedBarrelImport
+      | AnalyzedBarrelReexport;
+  }>;
+
+  /**
    * A list of files that barrel imports this export, including indirect imports
    * that are funneled through reexport statements.
    *
@@ -144,8 +165,8 @@ type AnalyzedExportBase = {
       | AnalyzedBarrelReexport
       | AnalyzedSingleImport
       | AnalyzedSingleReexport
-      | ResolvedBarrelImport
-      | ResolvedDynamicImport;
+      | AnalyzedBarrelImport
+      | AnalyzedDynamicImport;
   }>;
 };
 

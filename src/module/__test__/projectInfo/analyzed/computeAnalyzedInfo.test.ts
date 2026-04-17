@@ -123,10 +123,11 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   singleReexports: [
     {
       type: 'singleReexport',
-      barrelImportedBy: [],
       exportName: 'ASourceCode',
       importName: 'SourceCode',
       importedBy: [],
+      barrelImportedBy: [],
+      externallyImportedBy: [],
       isEntryPoint: true,
       isTypeReexport: true,
       moduleSpecifier: './f',
@@ -156,6 +157,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
       resolvedModulePath: FILE_C,
       importedBy: [],
       barrelImportedBy: [],
+      externallyImportedBy: [],
     },
     {
       type: 'barrelReexport',
@@ -166,6 +168,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
       resolvedModulePath: FILE_D,
       importedBy: [],
       barrelImportedBy: [],
+      externallyImportedBy: [],
     },
   ],
 };
@@ -210,6 +213,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
           },
         },
       ],
+      externallyImportedBy: [],
     },
   ],
   singleReexports: [],
@@ -226,10 +230,11 @@ const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
   singleReexports: [
     {
       type: 'singleReexport',
-      barrelImportedBy: [],
       exportName: 'a',
       importName: 'a',
       importedBy: [],
+      barrelImportedBy: [],
+      externallyImportedBy: [],
       isEntryPoint: false,
       isTypeReexport: false,
       moduleSpecifier: './cycle-b',
@@ -251,10 +256,11 @@ const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
   singleReexports: [
     {
       type: 'singleReexport',
-      barrelImportedBy: [],
       exportName: 'a',
       importName: 'a',
       importedBy: [],
+      barrelImportedBy: [],
+      externallyImportedBy: [],
       isEntryPoint: false,
       isTypeReexport: false,
       moduleSpecifier: './cycle-c',
@@ -276,10 +282,11 @@ const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
   singleReexports: [
     {
       type: 'singleReexport',
-      barrelImportedBy: [],
       exportName: 'a',
       importName: 'a',
       importedBy: [],
+      barrelImportedBy: [],
+      externallyImportedBy: [],
       isEntryPoint: false,
       isTypeReexport: false,
       moduleSpecifier: './cycle-a',
@@ -331,6 +338,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
           },
         },
       ],
+      externallyImportedBy: [],
     },
   ],
   singleReexports: [],
@@ -371,6 +379,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
         },
       ],
       barrelImportedBy: [],
+      externallyImportedBy: [],
       rootModuleType: undefined,
     },
   ],
@@ -399,6 +408,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
         },
       ],
       barrelImportedBy: [],
+      externallyImportedBy: [],
     },
   ],
 };
@@ -421,14 +431,16 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
       resolvedModuleType: 'builtin',
       importedBy: [],
       barrelImportedBy: [],
+      externallyImportedBy: [],
       rootModuleType: 'builtin',
     },
     {
       type: 'singleReexport',
-      barrelImportedBy: [],
       exportName: 'SourceCode',
       importName: 'SourceCode',
       importedBy: [],
+      barrelImportedBy: [],
+      externallyImportedBy: [],
       isEntryPoint: false,
       isTypeReexport: true,
       moduleSpecifier: 'eslint',
@@ -456,6 +468,7 @@ const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
       resolvedModuleType: 'thirdParty',
       importedBy: [],
       barrelImportedBy: [],
+      externallyImportedBy: [],
     },
   ],
 };
