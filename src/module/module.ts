@@ -4,7 +4,10 @@ import { dirname } from 'node:path';
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import type { ParsedPackageSettings } from '../settings/settings.js';
+import {
+  getAllPackageSettings,
+  type ParsedPackageSettings,
+} from '../settings/settings.js';
 import type {
   AnalyzedBarrelImport,
   AnalyzedBarrelReexport,
@@ -14,6 +17,7 @@ import type {
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
 import type { BaseProjectInfo } from '../types/base.js';
+import type { GenericContext } from '../types/context.js';
 import type { ResolvedProjectInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
@@ -99,6 +103,17 @@ export function _resetProjectInfo() {
   analyzedProjectInfos.clear();
 }
 
+export function initializeRepo(context: GenericContext) {
+  const { allPackageSettings } = getAllPackageSettings(context);
+  for (const packageSettings of allPackageSettings) {
+    initializeProject(packageSettings);
+  }
+  // TODO: repo initialization for new rule here
+}
+
+// Testing this logic through initializeRepo would be more difficult than just
+// testing this function directly, since we'd have to create full projects
+// eslint-disable-next-line fast-import/no-unused-exports
 export function initializeProject({
   packageRootDir,
   wildcardAliases,

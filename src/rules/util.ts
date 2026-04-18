@@ -3,7 +3,7 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 
 import {
   getProjectInfo,
-  initializeProject,
+  initializeRepo,
   updateCacheForFile,
   updateCacheFromFileSystem,
 } from '../module/module.js';
@@ -36,15 +36,12 @@ export function registerUpdateListener(cb: (packageRootDir: string) => void) {
 }
 
 export function getESMInfo(context: GenericContext) {
-  const repoSettings = getRepoSettings(context);
-  const { allPackageSettings, packageSettings } =
-    getAllPackageSettings(context);
-  for (const packageSettings of allPackageSettings) {
-    initializeProject(packageSettings);
-  }
+  initializeRepo(context);
 
   // If we don't have package settings at this point, that means the file lives
   // outside of a package, and we can't do anything
+  const repoSettings = getRepoSettings(context);
+  const { packageSettings } = getAllPackageSettings(context);
   if (!packageSettings) {
     return;
   }
