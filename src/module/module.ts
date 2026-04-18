@@ -121,6 +121,7 @@ export function initializeProject({
   ignorePatterns,
   ignoreOverridePatterns,
   entryPoints,
+  externallyImported,
 }: ParsedPackageSettings) {
   // If we've already analyzed the project and settings haven't changed, bail
   if (
@@ -139,6 +140,10 @@ export function initializeProject({
     ignorePatterns,
     ignoreOverridePatterns,
     isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
+    isExternallyImportedCheck: getEntryPointCheck(
+      packageRootDir,
+      externallyImported
+    ),
   });
   baseProjectInfos.set(packageRootDir, baseProjectInfo);
   const baseEnd = performance.now();
@@ -266,6 +271,10 @@ export function updateCacheFromFileSystem(
                 packageSettings.packageRootDir,
                 packageSettings.entryPoints
               ),
+              isExternallyImportedCheck: getEntryPointCheck(
+                packageSettings.packageRootDir,
+                packageSettings.externallyImported
+              ),
             },
             baseProjectInfo
           );
@@ -318,6 +327,10 @@ export function updateCacheFromFileSystem(
               packageSettings.packageRootDir,
               packageSettings.entryPoints
             ),
+            isExternallyImportedCheck: getEntryPointCheck(
+              packageSettings.packageRootDir,
+              packageSettings.externallyImported
+            ),
           },
           baseProjectInfo
         );
@@ -360,7 +373,7 @@ export function updateCacheForFile(
   filePath: string,
   fileContents: string,
   ast: TSESTree.Program,
-  { entryPoints, packageRootDir }: ParsedPackageSettings
+  { entryPoints, externallyImported, packageRootDir }: ParsedPackageSettings
 ) {
   const baseProjectInfo = getBaseProjectInfo(filePath);
   const resolvedProjectInfo = getResolvedProjectInfo(filePath);
@@ -377,6 +390,10 @@ export function updateCacheForFile(
     fileContents,
     ast,
     isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
+    isExternallyImportedCheck: getEntryPointCheck(
+      packageRootDir,
+      externallyImported
+    ),
   };
 
   // Check if we're updating file info or adding a new file

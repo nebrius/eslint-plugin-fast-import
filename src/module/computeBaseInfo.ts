@@ -32,7 +32,8 @@ type ComputeBaseInfoOptions = Pick<
   | 'ignorePatterns'
   | 'ignoreOverridePatterns'
 > & {
-  isEntryPointCheck?: IsEntryPointCheck;
+  isEntryPointCheck: IsEntryPointCheck;
+  isExternallyImportedCheck: IsEntryPointCheck;
 };
 
 /**
@@ -44,7 +45,8 @@ export function computeBaseInfo({
   wildcardAliases,
   ignorePatterns,
   ignoreOverridePatterns,
-  isEntryPointCheck = () => false,
+  isEntryPointCheck,
+  isExternallyImportedCheck,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
     files: new Map(),
@@ -74,6 +76,7 @@ export function computeBaseInfo({
         filePath,
         fileContents,
         isEntryPointCheck,
+        isExternallyImportedCheck,
       });
       if (fileDetails) {
         info.files.set(filePath, fileDetails);
@@ -92,10 +95,16 @@ type ComputeFileDetailsOptions = {
   filePath: string;
   fileContents: string;
   isEntryPointCheck: IsEntryPointCheck;
+  isExternallyImportedCheck: IsEntryPointCheck;
 };
 
 export function addBaseInfoForFile(
-  { filePath, fileContents, isEntryPointCheck }: ComputeFileDetailsOptions,
+  {
+    filePath,
+    fileContents,
+    isEntryPointCheck,
+    isExternallyImportedCheck,
+  }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
 ) {
   if (isCodeFile(filePath)) {
@@ -103,6 +112,7 @@ export function addBaseInfoForFile(
       filePath,
       fileContents,
       isEntryPointCheck,
+      isExternallyImportedCheck,
     });
     if (fileDetails) {
       baseProjectInfo.files.set(filePath, fileDetails);
@@ -198,7 +208,12 @@ function hasFileChanged(
 }
 
 export function updateBaseInfoForFile(
-  { filePath, fileContents, isEntryPointCheck }: ComputeFileDetailsOptions,
+  {
+    filePath,
+    fileContents,
+    isEntryPointCheck,
+    isExternallyImportedCheck,
+  }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
 ): boolean {
   const previousFileDetails = baseProjectInfo.files.get(filePath);
@@ -224,6 +239,7 @@ export function updateBaseInfoForFile(
     filePath,
     fileContents,
     isEntryPointCheck,
+    isExternallyImportedCheck,
   });
 
   if (updatedFileDetails) {
@@ -275,6 +291,7 @@ function computeFileDetails({
   filePath,
   fileContents,
   isEntryPointCheck,
+  isExternallyImportedCheck,
 }: ComputeFileDetailsOptions): BaseCodeFileDetails | undefined {
   const result = parseSync(filePath, fileContents, {
     sourceType: 'module',
@@ -296,9 +313,11 @@ function computeFileDetails({
     barrelReexports: [],
     exports: [],
     hasEntryPoints: false,
+    hasExternallyImported: false,
   };
 
   let hasEntryPoints = false;
+  let hasExternallyImported = false;
 
   for (const importEntry of result.module.staticImports) {
     const statementNodeRange = getRange(importEntry);
@@ -395,14 +414,21 @@ function computeFileDetails({
         if (isBarrel) {
           const exportName = entry.exportName.name;
           const isEntryPoint = exportName ? isEntryPointCheck(filePath) : false;
+          const isExternallyImported = exportName
+            ? isExternallyImportedCheck(filePath)
+            : false;
           if (isEntryPoint) {
             hasEntryPoints = true;
+          }
+          if (isExternallyImported) {
+            hasExternallyImported = true;
           }
           fileDetails.barrelReexports.push({
             type: 'barrelReexport',
             moduleSpecifier,
             exportName: exportName ?? undefined,
             isEntryPoint,
+            isExternallyImported,
             statementNodeRange,
             reportNodeRange,
           });
@@ -418,8 +444,12 @@ function computeFileDetails({
             throw new InternalError(`exportName is undefined`);
           }
           const isEntryPoint = isEntryPointCheck(filePath);
+          const isExternallyImported = isExternallyImportedCheck(filePath);
           if (isEntryPoint) {
             hasEntryPoints = true;
+          }
+          if (isExternallyImported) {
+            hasExternallyImported = true;
           }
           fileDetails.singleReexports.push({
             type: 'singleReexport',
@@ -428,6 +458,7 @@ function computeFileDetails({
             exportName,
             isTypeReexport: entry.isType,
             isEntryPoint,
+            isExternallyImported,
             statementNodeRange,
             reportNodeRange,
           });
@@ -445,13 +476,18 @@ function computeFileDetails({
           throw new InternalError(`exportName is undefined`);
         }
         const isEntryPoint = isEntryPointCheck(filePath);
+        const isExternallyImported = isExternallyImportedCheck(filePath);
         if (isEntryPoint) {
           hasEntryPoints = true;
+        }
+        if (isExternallyImported) {
+          hasExternallyImported = true;
         }
         fileDetails.exports.push({
           type: 'export',
           exportName,
           isEntryPoint,
+          isExternallyImported,
           isTypeExport: entry.isType,
           statementNodeRange,
           reportNodeRange,
@@ -462,6 +498,9 @@ function computeFileDetails({
 
   if (hasEntryPoints) {
     fileDetails.hasEntryPoints = true;
+  }
+  if (hasExternallyImported) {
+    fileDetails.hasExternallyImported = true;
   }
 
   // De-dupe exports with the same name (e.g. TypeScript function overloads).

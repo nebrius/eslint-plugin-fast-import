@@ -37,6 +37,7 @@ export type ParsedPackageSettings = Omit<
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
   entryPoints: Array<{ file: Ignore }>;
+  externallyImported: Array<{ file: Ignore }>;
   testFilePatterns: string[];
 };
 
@@ -260,17 +261,20 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
 
   // Clean up any entry points
   const parsedEntryPoints: ParsedPackageSettings['entryPoints'] = [];
-  // Merge entry points and externally imported exports, since they mean the
-  // same thing from inside the module. They are kept separate in settings for
-  // use by monorepo package analysis rules (aka outside the module)
-  for (const filePattern of [
-    ...entryPointFiles,
-    ...externallyImportedFiles,
+  for (const filePattern of entryPointFiles) {
+    parsedEntryPoints.push({
+      file: ignore().add(filePattern),
+    });
+  }
 
+  const parsedExternallyImported: ParsedPackageSettings['externallyImported'] =
+    [];
+  for (const filePattern of [
     // Always ignore config files in the root directory
     '/*.config.*',
+    ...externallyImportedFiles,
   ]) {
-    parsedEntryPoints.push({
+    parsedExternallyImported.push({
       file: ignore().add(filePattern),
     });
   }
@@ -335,6 +339,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     wildcardAliases,
     fixedAliases,
     entryPoints: parsedEntryPoints,
+    externallyImported: parsedExternallyImported,
     ignorePatterns,
     ignoreOverridePatterns,
     testFilePatterns: mergedSettings.testFilePatterns ?? [],

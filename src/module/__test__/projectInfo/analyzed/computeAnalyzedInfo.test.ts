@@ -24,6 +24,7 @@ const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   singleImports: [
     {
       type: 'singleImport',
@@ -39,6 +40,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
         type: 'export',
         exportName: 'c1',
         isEntryPoint: false,
+        isExternallyImported: false,
         isTypeExport: false,
       },
     },
@@ -56,6 +58,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
         type: 'export',
         exportName: 'd1',
         isEntryPoint: false,
+        isExternallyImported: false,
         isTypeExport: false,
       },
     },
@@ -73,6 +76,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
         type: 'barrelReexport',
         exportName: 'f',
         isEntryPoint: false,
+        isExternallyImported: false,
         moduleSpecifier: './f',
         resolvedModulePath: FILE_F,
         resolvedModuleType: 'firstPartyCode',
@@ -129,6 +133,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
       barrelImportedBy: [],
       externallyImportedBy: [],
       isEntryPoint: true,
+      isExternallyImported: false,
       isTypeReexport: true,
       moduleSpecifier: './f',
       resolvedModuleType: 'firstPartyCode',
@@ -142,6 +147,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -153,6 +159,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
       moduleSpecifier: './c',
       exportName: undefined,
       isEntryPoint: false,
+      isExternallyImported: false,
       resolvedModuleType: 'firstPartyCode',
       resolvedModulePath: FILE_C,
       importedBy: [],
@@ -164,6 +171,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
       moduleSpecifier: './d',
       exportName: undefined,
       isEntryPoint: false,
+      isExternallyImported: false,
       resolvedModuleType: 'firstPartyCode',
       resolvedModulePath: FILE_D,
       importedBy: [],
@@ -176,6 +184,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -184,6 +193,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
       type: 'export',
       exportName: 'c1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
       importedBy: [
         {
@@ -222,6 +232,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [],
   fileType: 'code',
   singleImports: [],
@@ -236,6 +247,7 @@ const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
       barrelImportedBy: [],
       externallyImportedBy: [],
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeReexport: false,
       moduleSpecifier: './cycle-b',
       resolvedModuleType: 'firstPartyCode',
@@ -248,6 +260,7 @@ const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [],
   fileType: 'code',
   singleImports: [],
@@ -262,6 +275,7 @@ const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
       barrelImportedBy: [],
       externallyImportedBy: [],
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeReexport: false,
       moduleSpecifier: './cycle-c',
       resolvedModuleType: 'firstPartyCode',
@@ -274,6 +288,7 @@ const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [],
   fileType: 'code',
   singleImports: [],
@@ -288,6 +303,7 @@ const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
       barrelImportedBy: [],
       externallyImportedBy: [],
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeReexport: false,
       moduleSpecifier: './cycle-a',
       resolvedModuleType: 'firstPartyCode',
@@ -300,6 +316,7 @@ const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -309,6 +326,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
       type: 'export',
       exportName: 'd1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
       importedBy: [
         {
@@ -347,6 +365,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -360,6 +379,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
       exportName: 'd1',
       isTypeReexport: false,
       isEntryPoint: false,
+      isExternallyImported: false,
       resolvedModuleType: 'firstPartyCode',
       resolvedModulePath: FILE_D,
       importedBy: [
@@ -389,6 +409,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
       moduleSpecifier: './f',
       exportName: 'f',
       isEntryPoint: false,
+      isExternallyImported: false,
       resolvedModuleType: 'firstPartyCode',
       resolvedModulePath: FILE_F,
       importedBy: [
@@ -415,6 +436,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -428,6 +450,7 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
       exportName: 'join',
       isTypeReexport: false,
       isEntryPoint: false,
+      isExternallyImported: false,
       resolvedModuleType: 'builtin',
       importedBy: [],
       barrelImportedBy: [],
@@ -442,6 +465,7 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
       barrelImportedBy: [],
       externallyImportedBy: [],
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeReexport: true,
       moduleSpecifier: 'eslint',
       resolvedModuleType: 'thirdParty',
@@ -453,6 +477,7 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   singleImports: [],
   barrelImports: [],
@@ -465,6 +490,7 @@ const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
       moduleSpecifier: 'eslint',
       exportName: undefined,
       isEntryPoint: false,
+      isExternallyImported: false,
       resolvedModuleType: 'thirdParty',
       importedBy: [],
       barrelImportedBy: [],
@@ -501,6 +527,7 @@ it('Computes analyzed info', () => {
         ignorePatterns: [],
         ignoreOverridePatterns: [],
         isEntryPointCheck: (filePath) => filePath === FILE_A,
+        isExternallyImportedCheck: () => false,
       })
     )
   );
@@ -518,6 +545,8 @@ it('Computes analyzed info for a project with a file that imports itself', () =>
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
+          isEntryPointCheck: () => false,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -541,6 +570,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
           ignorePatterns: [],
           ignoreOverridePatterns: [],
           isEntryPointCheck: (filePath) => filePath === fileA,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -562,6 +592,8 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
+          isEntryPointCheck: () => false,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -579,6 +611,8 @@ it('Computes analyzed info for a project with a single reexport of a firstPartyO
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
+          isEntryPointCheck: () => false,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -600,6 +634,8 @@ it('Computes analyzed info for a project with a named barrel reexport of a built
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
+          isEntryPointCheck: () => false,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -621,6 +657,8 @@ it('Computes analyzed info for a project with a named barrel reexport of a first
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
+          isEntryPointCheck: () => false,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -638,6 +676,8 @@ it('Computes analyzed info for a project with a dynamic import', () => {
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
+          isEntryPointCheck: () => false,
+          isExternallyImportedCheck: () => false,
         })
       )
     )
@@ -661,6 +701,7 @@ it('Computes analyzed info for a project with a barrel reexport that is an entry
           ignorePatterns: [],
           ignoreOverridePatterns: [],
           isEntryPointCheck: (filePath) => filePath === fileA,
+          isExternallyImportedCheck: () => false,
         })
       )
     )

@@ -46,8 +46,11 @@ it('Fetchings user supplied settings', () => {
   if (!packageSettings) {
     throw new Error('packageSettings should be defined');
   }
-  const { entryPoints, ...settings } = packageSettings;
-  const expected: Omit<ParsedPackageSettings, 'entryPoints'> = {
+  const { entryPoints, externallyImported, ...settings } = packageSettings;
+  const expected: Omit<
+    ParsedPackageSettings,
+    'entryPoints' | 'externallyImported'
+  > = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
     ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
@@ -61,11 +64,13 @@ it('Fetchings user supplied settings', () => {
     },
   };
   expect(settings).toEqual(expected);
-  expect(entryPoints).toHaveLength(3);
+  expect(entryPoints).toHaveLength(1);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
   expect(entryPoints[0].file.ignores('src/b.ts')).toBeFalsy();
-  expect(entryPoints[1].file.ignores('src/b.ts')).toBeTruthy();
-  expect(entryPoints[1].file.ignores('src/a.ts')).toBeFalsy();
+  expect(externallyImported).toHaveLength(2);
+  expect(externallyImported[0].file.ignores('eslint.config.mjs')).toBeTruthy();
+  expect(externallyImported[1].file.ignores('src/b.ts')).toBeTruthy();
+  expect(externallyImported[1].file.ignores('src/a.ts')).toBeFalsy();
 });
 
 it('Throws on missing settings', () => {
@@ -237,7 +242,7 @@ it('Supports { regexp: string } for entry point symbols', () => {
     throw new Error('packageSettings should be defined');
   }
   const { entryPoints } = packageSettings;
-  expect(entryPoints).toHaveLength(2);
+  expect(entryPoints).toHaveLength(1);
   expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
 });
 

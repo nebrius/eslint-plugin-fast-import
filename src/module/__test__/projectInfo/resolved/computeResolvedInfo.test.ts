@@ -31,6 +31,7 @@ const FILE_F_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'f', 'index.d.ts');
 
 const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [],
   fileType: 'code',
   singleImports: [
@@ -148,11 +149,13 @@ const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'index',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -166,11 +169,13 @@ const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'b1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -184,12 +189,14 @@ const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_C: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   exports: [
     {
       type: 'export',
       exportName: 'c1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -206,17 +213,20 @@ const EXPECTED_FILE_C_DATA: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'getD1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'D2',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: true,
     },
   ],
@@ -230,11 +240,13 @@ const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'getD1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -248,12 +260,14 @@ const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   exports: [
     {
       type: 'export',
       exportName: 'e1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -266,17 +280,20 @@ const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'F1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: true,
     },
     {
       type: 'export',
       exportName: 'getF1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -290,12 +307,14 @@ const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
 
 const EXPECTED_FILE_F: StrippedResolvedFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   fileType: 'code',
   exports: [
     {
       type: 'export',
       exportName: 'getF1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -338,6 +357,7 @@ function makeBaseInfo() {
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     isEntryPointCheck: () => false,
+    isExternallyImportedCheck: () => false,
   });
 }
 
@@ -356,6 +376,7 @@ it('Adds and updates resolved info for files', () => {
       filePath: NEW_FILE_PATH,
       fileContents: `import { b1 } from './one/b';\nexport const newThing = 1;`,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     baseInfo
   );
@@ -367,11 +388,13 @@ it('Adds and updates resolved info for files', () => {
     [NEW_FILE_PATH]: {
       fileType: 'code',
       hasEntryPoints: false,
+      hasExternallyImported: false,
       exports: [
         {
           type: 'export',
           exportName: 'newThing',
           isEntryPoint: false,
+          isExternallyImported: false,
           isTypeExport: false,
         },
       ],
@@ -405,6 +428,7 @@ it('Adds and updates resolved info for files', () => {
       filePath: NEW_FILE_PATH,
       fileContents: `import { c1 } from './one/c';\nexport const newThing = 1;`,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     baseInfo
   );
@@ -415,11 +439,13 @@ it('Adds and updates resolved info for files', () => {
     [NEW_FILE_PATH]: {
       fileType: 'code',
       hasEntryPoints: false,
+      hasExternallyImported: false,
       exports: [
         {
           type: 'export',
           exportName: 'newThing',
           isEntryPoint: false,
+          isExternallyImported: false,
           isTypeExport: false,
         },
       ],
@@ -470,6 +496,7 @@ it('Resolves Vite-style imports with query strings', () => {
       filePath: NEW_FILE_PATH,
       fileContents: `import { b1 } from './one/b?raw';`,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     baseInfo
   );
@@ -481,6 +508,7 @@ it('Resolves Vite-style imports with query strings', () => {
     [NEW_FILE_PATH]: {
       fileType: 'code',
       hasEntryPoints: false,
+      hasExternallyImported: false,
       exports: [],
       singleImports: [
         {
@@ -517,6 +545,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
       filePath: SHARED_TS,
       fileContents: `export const x = 1;`,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     baseInfo
   );
@@ -526,6 +555,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
       filePath: CONSUMER_PATH,
       fileContents: `import { x } from './sharedName';`,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     baseInfo
   );
@@ -537,6 +567,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
     [CONSUMER_PATH]: {
       fileType: 'code',
       hasEntryPoints: false,
+      hasExternallyImported: false,
       exports: [],
       singleImports: [
         {

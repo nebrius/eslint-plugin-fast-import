@@ -26,11 +26,13 @@ it('Recovers from an invalid tsconfig file', () => {
   // This contains the default entry point setting, which is an internal
   // representation that's difficult to represent here, so we just override it
   packageSettings.entryPoints = [];
+  packageSettings.externallyImported = [];
 
   const expected: ParsedPackageSettings = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
     entryPoints: [],
+    externallyImported: [],
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     testFilePatterns: [],

@@ -63,6 +63,17 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
           entryPointFiles: [FILE_A_ENTRY_POINT],
         },
       },
+    },{
+      code: FILE_B_CONTENTS,
+      filename: FILE_B,
+      errors: [{ messageId: 'noEntryPointImports' }],
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+          externallyImportedFiles: [FILE_A_ENTRY_POINT],
+        },
+      },
     },
     {
       code: FILE_C_CONTENTS,
@@ -73,6 +84,18 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
           packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
           entryPointFiles: [FILE_A_ENTRY_POINT],
+        },
+      },
+    },
+    {
+      code: FILE_C_CONTENTS,
+      filename: FILE_C,
+      errors: [{ messageId: 'noEntryPointImports' }],
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PROJECT_DIR,
+          mode: 'fix',
+          externallyImportedFiles: [FILE_A_ENTRY_POINT],
         },
       },
     },

@@ -33,7 +33,8 @@ export const noEntryPointImports = createRule({
     for (const importEntry of fileInfo.singleImports) {
       if (
         importEntry.rootModuleType === 'firstPartyCode' &&
-        importEntry.rootExportEntry.isEntryPoint
+        (importEntry.rootExportEntry.isEntryPoint ||
+          importEntry.rootExportEntry.isExternallyImported)
       ) {
         context.report({
           messageId: 'noEntryPointImports',
@@ -50,7 +51,7 @@ export const noEntryPointImports = createRule({
       if (fileDetails?.fileType !== 'code') {
         continue;
       }
-      if (fileDetails.hasEntryPoints) {
+      if (fileDetails.hasEntryPoints || fileDetails.hasExternallyImported) {
         context.report({
           messageId: 'noEntryPointImports',
           loc: getLocFromRange(context, importEntry.reportNodeRange),

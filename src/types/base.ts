@@ -134,11 +134,19 @@ export type BaseExport = BaseESMStatement & {
 
   /**
    * Indicates whether or not this rexport is an entry point for the app. For
-   * example, if we're running a Next.js app and this export is
-   * `getServerSideProps` in a page file, the we consider this an an entry point
-   * export since we'll never see the import itself
+   * example, if this is a src/index.ts file specified as an export in
+   * package.json, the we consider this an an entry point export since we'll
+   * never see the import itself
    */
   isEntryPoint: boolean;
+
+  /**
+   * Indicates whether or not this reexport is externally imported. For example,
+   * if we're running a Next.js app and this export is `getServerSideProps` in a
+   * page file, the we consider this an externally imported export since we'll
+   * never see the import itself
+   */
+  isExternallyImported: boolean;
 
   /**
    * If true, then this is a TypeScript type import, e.g.
@@ -199,12 +207,20 @@ export type BaseSingleReexport = BaseESMStatement & {
   isTypeReexport: boolean;
 
   /**
-   * Indicates whether or not this reexport is an entry point for the app. For
-   * example, if we're running a Next.js app and this reexport is
-   * `getServerSideProps` in a page file, the we consider this an an entry point
-   * reexport since we'll never see the import itself
+   * Indicates whether or not this rexport is an entry point for the app. For
+   * example, if this is a src/index.ts file specified as an export in
+   * package.json, the we consider this an an entry point export since we'll
+   * never see the import itself
    */
   isEntryPoint: boolean;
+
+  /**
+   * Indicates whether or not this reexport is externally imported. For example,
+   * if we're running a Next.js app and this export is `getServerSideProps` in a
+   * page file, the we consider this an externally imported export since we'll
+   * never see the import itself
+   */
+  isExternallyImported: boolean;
 };
 
 export type BaseBarrelReexport = BaseESMStatement & {
@@ -233,12 +249,20 @@ export type BaseBarrelReexport = BaseESMStatement & {
   exportName: string | undefined;
 
   /**
-   * Indicates whether or not this reexport is an entry point for the app. For
-   * example, if we're running a Next.js app and this reexport is
-   * `getServerSideProps` in a page file, the we consider this an an entry point
-   * reexport since we'll never see the import itself
+   * Indicates whether or not this rexport is an entry point for the app. For
+   * example, if this is a src/index.ts file specified as an export in
+   * package.json, the we consider this an an entry point export since we'll
+   * never see the import itself
    */
   isEntryPoint: boolean;
+
+  /**
+   * Indicates whether or not this reexport is externally imported. For example,
+   * if we're running a Next.js app and this export is `getServerSideProps` in a
+   * page file, the we consider this an externally imported export since we'll
+   * never see the import itself
+   */
+  isExternallyImported: boolean;
 };
 
 /* File Details */
@@ -268,6 +292,11 @@ export type BaseCodeFileDetails = {
    * Indicates whether or not any of this file's exports are entry points
    */
   hasEntryPoints: boolean;
+
+  /**
+   * Indicates whether or not any of this file's exports are externally imported
+   */
+  hasExternallyImported: boolean;
 
   exports: BaseExport[];
   singleImports: BaseSingleImport[];

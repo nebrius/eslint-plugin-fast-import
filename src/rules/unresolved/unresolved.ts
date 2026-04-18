@@ -150,7 +150,7 @@ export const noUnresolvedImports = createRule({
         reexportEntry.resolvedModuleType === 'firstPartyCode' &&
         reexportEntry.type === 'singleReexport' &&
         reexportEntry.rootModuleType === undefined &&
-        reexportEntry.isEntryPoint
+        (reexportEntry.isEntryPoint || reexportEntry.isExternallyImported)
       ) {
         context.report({
           loc: getLocFromRange(context, reexportEntry.reportNodeRange),

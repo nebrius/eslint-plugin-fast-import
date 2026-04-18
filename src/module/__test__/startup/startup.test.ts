@@ -20,6 +20,7 @@ it('Updates cache when a new file is added', () => {
     wildcardAliases: {},
     fixedAliases: {},
     entryPoints: [],
+    externallyImported: [],
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     testFilePatterns: [],
@@ -46,6 +47,7 @@ it('Updates cache when a new file is added', () => {
     [FILE_A]: {
       fileType: 'code',
       hasEntryPoints: false,
+      hasExternallyImported: false,
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
@@ -59,6 +61,7 @@ it('Updates cache when a new file is added', () => {
           importedBy: [],
           externallyImportedBy: [],
           isEntryPoint: false,
+          isExternallyImported: false,
           isTypeExport: false,
         },
       ],

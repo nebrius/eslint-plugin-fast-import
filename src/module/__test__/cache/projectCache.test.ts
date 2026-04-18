@@ -25,6 +25,7 @@ const packageSettings: ParsedPackageSettings = {
   wildcardAliases: {},
   fixedAliases: {},
   entryPoints: [],
+  externallyImported: [],
   ignorePatterns: [],
   ignoreOverridePatterns: [],
   testFilePatterns: [],
@@ -33,6 +34,7 @@ const packageSettings: ParsedPackageSettings = {
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -60,6 +62,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
       barrelImportedBy: [],
       externallyImportedBy: [],
       isEntryPoint: false,
+      isExternallyImported: false,
     },
   ],
   singleReexports: [],
@@ -69,6 +72,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   singleImports: [
     {
       type: 'singleImport',
@@ -85,6 +89,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
         exportName: 'One',
         isTypeExport: true,
         isEntryPoint: false,
+        isExternallyImported: false,
       },
     },
   ],
@@ -130,6 +135,7 @@ it('Updates project cache when a new file is added', () => {
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
+    hasExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -173,6 +179,7 @@ export type Two = string;
   const EXPECTED_FILE_A_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
+    hasExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -200,6 +207,7 @@ export type Two = string;
         barrelImportedBy: [],
         externallyImportedBy: [],
         isEntryPoint: false,
+        isExternallyImported: false,
       },
       {
         type: 'export',
@@ -209,6 +217,7 @@ export type Two = string;
         barrelImportedBy: [],
         externallyImportedBy: [],
         isEntryPoint: false,
+        isExternallyImported: false,
       },
     ],
     singleReexports: [],
@@ -217,6 +226,7 @@ export type Two = string;
   const EXPECTED_FILE_B_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
+    hasExternallyImported: false,
     singleImports: [
       {
         type: 'singleImport',
@@ -233,6 +243,7 @@ export type Two = string;
           exportName: 'One',
           isTypeExport: true,
           isEntryPoint: false,
+          isExternallyImported: false,
         },
       },
     ],
@@ -275,6 +286,7 @@ it('Updates project cache in bulk for a code file', () => {
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
+    hasExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -310,6 +322,7 @@ it('Updates project cache in bulk for a code file', () => {
   const EXPECTED_FILE_TS_NEW_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
+    hasExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],

@@ -39,6 +39,7 @@ export function computeAnalyzedInfo(
     const analyzedFileInfo: AnalyzedCodeFileDetails = {
       fileType: 'code',
       hasEntryPoints: fileDetails.hasEntryPoints,
+      hasExternallyImported: fileDetails.hasExternallyImported,
       lastUpdatedAt: fileDetails.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -147,7 +148,10 @@ export function computeAnalyzedInfo(
     // can mark the relevant exports they point to as being imported too (since
     // in reality they are)
     for (const reexportDetails of fileDetails.singleReexports) {
-      if (!reexportDetails.isEntryPoint) {
+      if (
+        !reexportDetails.isEntryPoint &&
+        !reexportDetails.isExternallyImported
+      ) {
         continue;
       }
       analyzeSingleImport({
@@ -160,7 +164,10 @@ export function computeAnalyzedInfo(
       });
     }
     for (const reexportDetails of fileDetails.barrelReexports) {
-      if (!reexportDetails.isEntryPoint) {
+      if (
+        !reexportDetails.isEntryPoint &&
+        !reexportDetails.isExternallyImported
+      ) {
         continue;
       }
       analyzeBarrelImport({
@@ -192,9 +199,13 @@ function linkImportToExport(
   }
 
   /* istanbul ignore if */
-  if (importEntry.type === 'singleReexport' && !importEntry.isEntryPoint) {
+  if (
+    importEntry.type === 'singleReexport' &&
+    !importEntry.isEntryPoint &&
+    !importEntry.isExternallyImported
+  ) {
     throw new InternalError(
-      `Attempted to link reexport that is not an entry point`
+      `Attempted to link reexport that is not an entry point or externally imported`
     );
   }
 

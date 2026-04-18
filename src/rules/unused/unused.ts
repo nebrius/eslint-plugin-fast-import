@@ -75,7 +75,7 @@ export const noUnusedExports = createRule<
       ...fileInfo.barrelReexports,
     ]) {
       // If this is an entry point, then it's being imported externally
-      if (exportEntry.isEntryPoint) {
+      if (exportEntry.isEntryPoint || exportEntry.isExternallyImported) {
         continue;
       }
 

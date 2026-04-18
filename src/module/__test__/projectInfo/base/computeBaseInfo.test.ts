@@ -20,161 +20,188 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 const EXPECTED_FILE_A: StrippedBaseFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'Foo',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: true,
     },
     {
       type: 'export',
       exportName: 'Bar',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: true,
     },
     {
       type: 'export',
       exportName: 'a1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a2',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a3',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a4',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a5',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a6',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'A7',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a8',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a9',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a10_1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a10_2alias',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a10_rest',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a11_1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a11_2',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a11_rest',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a twelve',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a13',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a14',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a15alias',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a16alias',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'default',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a18_1',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a18_2',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
     {
       type: 'export',
       exportName: 'a18_3',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -187,11 +214,13 @@ const EXPECTED_FILE_A: StrippedBaseFileDetails = {
 
 const EXPECTED_FILE_B: StrippedBaseFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'default',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -286,11 +315,13 @@ const EXPECTED_FILE_B: StrippedBaseFileDetails = {
 const EXPECTED_FILE_C: StrippedBaseFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'default',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -305,6 +336,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
       isTypeReexport: false,
       moduleSpecifier: './a',
       isEntryPoint: false,
+      isExternallyImported: false,
     },
     {
       type: 'singleReexport',
@@ -313,6 +345,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
       isTypeReexport: false,
       moduleSpecifier: './a',
       isEntryPoint: false,
+      isExternallyImported: false,
     },
     {
       type: 'singleReexport',
@@ -321,6 +354,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
       isTypeReexport: false,
       moduleSpecifier: './a',
       isEntryPoint: false,
+      isExternallyImported: false,
     },
     {
       type: 'singleReexport',
@@ -329,6 +363,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
       isTypeReexport: true,
       moduleSpecifier: './a',
       isEntryPoint: false,
+      isExternallyImported: false,
     },
   ],
   barrelReexports: [
@@ -337,29 +372,34 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
       exportName: undefined,
       moduleSpecifier: './a',
       isEntryPoint: false,
+      isExternallyImported: false,
     },
     {
       type: 'barrelReexport',
       exportName: 'c',
       moduleSpecifier: './a',
       isEntryPoint: false,
+      isExternallyImported: false,
     },
   ],
 };
 
 const EXPECTED_FILE_D: StrippedBaseFileDetails = {
   hasEntryPoints: false,
+  hasExternallyImported: false,
   exports: [
     {
       type: 'export',
       exportName: 'default',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: true,
     },
     {
       type: 'export',
       exportName: 'MyNamespace',
       isEntryPoint: false,
+      isExternallyImported: false,
 
       // Namespaces are like enums, and so are actually runtime things
       isTypeExport: false,
@@ -368,6 +408,7 @@ const EXPECTED_FILE_D: StrippedBaseFileDetails = {
       type: 'export',
       exportName: 'd',
       isEntryPoint: false,
+      isExternallyImported: false,
       isTypeExport: false,
     },
   ],
@@ -399,6 +440,7 @@ it('Computes base info', () => {
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     isEntryPointCheck: () => false,
+    isExternallyImportedCheck: () => false,
   });
   expect(info).toMatchBaseSpec(EXPECTED);
 });
@@ -422,6 +464,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     isEntryPointCheck: () => false,
+    isExternallyImportedCheck: () => false,
   });
 
   addBaseInfoForFile(
@@ -429,6 +472,7 @@ it('Adds, modifies, and deletes a new file', () => {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_ADD,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     info
   );
@@ -436,6 +480,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       hasEntryPoints: false,
+      hasExternallyImported: false,
       fileType: 'code',
       singleImports: [
         {
@@ -459,6 +504,7 @@ it('Adds, modifies, and deletes a new file', () => {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_MODIFY,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     info
   );
@@ -466,6 +512,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       hasEntryPoints: false,
+      hasExternallyImported: false,
       fileType: 'code',
       singleImports: [
         {
@@ -493,6 +540,7 @@ it('Adds, modifies, and deletes a new file', () => {
           isTypeReexport: false,
           moduleSpecifier: './a',
           isEntryPoint: false,
+          isExternallyImported: false,
         },
       ],
       barrelReexports: [],
@@ -501,6 +549,7 @@ it('Adds, modifies, and deletes a new file', () => {
           type: 'export',
           exportName: 'newFile1',
           isEntryPoint: false,
+          isExternallyImported: false,
           isTypeExport: false,
         },
       ],
@@ -511,6 +560,7 @@ it('Adds, modifies, and deletes a new file', () => {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_MODIFY_2,
       isEntryPointCheck: () => false,
+      isExternallyImportedCheck: () => false,
     },
     info
   );
@@ -518,6 +568,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       hasEntryPoints: false,
+      hasExternallyImported: false,
       fileType: 'code',
       singleImports: [
         {
@@ -543,6 +594,7 @@ it('Adds, modifies, and deletes a new file', () => {
           exportName: 'a1',
           importName: 'a1',
           isEntryPoint: false,
+          isExternallyImported: false,
           isTypeReexport: false,
           moduleSpecifier: './a',
         },
@@ -553,6 +605,7 @@ it('Adds, modifies, and deletes a new file', () => {
           type: 'export',
           exportName: 'newFile1',
           isEntryPoint: false,
+          isExternallyImported: false,
           isTypeExport: false,
         },
       ],
