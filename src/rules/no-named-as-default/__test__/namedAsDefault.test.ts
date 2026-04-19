@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { namedAsDefault } from '../rule.js';
+import { noNamedAsDefault } from '../rule.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
@@ -19,7 +19,7 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('no-named-as-default', namedAsDefault, {
+ruleTester.run('no-named-as-default', noNamedAsDefault, {
   valid: [
     {
       code: `import { b } from './b';

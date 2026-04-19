@@ -1,6 +1,6 @@
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
-export const namedAsDefault = createRule({
+export const noNamedAsDefault = createRule({
   name: 'no-named-as-default',
   meta: {
     docs: {

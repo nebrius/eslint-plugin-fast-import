@@ -3,13 +3,13 @@ import { join } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import { namedAsDefault } from './rules/no-named-as-default/rule.js';
+import { noNamedAsDefault } from './rules/no-named-as-default/rule.js';
 import { noCycle } from './rules/no-cycle/rule.js';
 import { noEntryPointImports } from './rules/no-entry-point-imports/rule.js';
 import { noExternalBarrelReexports } from './rules/no-external-barrel-reexports/rule.js';
 import { noNodeBuiltins } from './rules/no-node-builtins/rule.js';
 import { preferAliasImports } from './rules/prefer-alias-imports/rule.js';
-import { nodePrefix } from './rules/require-node-prefix/rule.js';
+import { requireNodePrefix } from './rules/require-node-prefix/rule.js';
 import { noRestrictedImports } from './rules/no-restricted-imports/rule.js';
 import { noTestImportsInProd } from './rules/no-test-imports-in-prod/rule.js';
 import { noUnresolvedImports } from './rules/no-unresolved-imports/rule.js';
@@ -41,9 +41,9 @@ const plugin = {
     'no-unresolved-imports': noUnresolvedImports,
     'no-external-barrel-reexports': noExternalBarrelReexports,
     'no-test-imports-in-prod': noTestImportsInProd,
-    'no-named-as-default': namedAsDefault,
+    'no-named-as-default': noNamedAsDefault,
     'no-node-builtins': noNodeBuiltins,
-    'require-node-prefix': nodePrefix,
+    'require-node-prefix': requireNodePrefix,
     'no-restricted-imports': noRestrictedImports,
     'prefer-alias-imports': preferAliasImports,
   },

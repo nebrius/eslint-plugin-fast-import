@@ -8,7 +8,7 @@ type ReexportDeclaration =
   | TSESTree.ExportNamedDeclarationWithSource
   | TSESTree.ExportAllDeclaration;
 
-export const nodePrefix = createRule({
+export const requireNodePrefix = createRule({
   name: 'require-node-prefix',
   meta: {
     docs: {

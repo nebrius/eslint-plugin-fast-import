@@ -1,6 +1,6 @@
 # fast-import/no-external-barrel-reexports
 
-Ensures that code does not barrel reexport built-in or third party modules. Barrel reexporting is unnecessary and can make code harder to read. In addition, this rule prevents a known edge case from slipping through the cracks of [the no-unresolved-imports rule](../unresolved/README.md#limitations).
+Ensures that code does not barrel reexport built-in or third party modules. Barrel reexporting is unnecessary and can make code harder to read. In addition, this rule prevents a known edge case from slipping through the cracks of [the no-unresolved-imports rule](../no-unresolved-imports/README.md#limitations).
 
 ## Rule Details
 

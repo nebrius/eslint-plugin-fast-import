@@ -57,19 +57,19 @@ npm install --save-dev eslint-plugin-fast-import
 ☑️ Set in the recommended configuration.<br />
 🧰 Set in the all configuration.
 
-| Name                                                                        | 💼    | 🔧  |
-| --------------------------------------------------------------------------- | ----- | --- |
-| [no-cycle](src/rules/cycle/README.md)                                       | 🧰 ☑️ |     |
-| [no-entry-point-imports](src/rules/entryPoint/README.md)                    | 🧰 ☑️ |     |
-| [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) | 🧰 ☑️ |     |
-| [no-named-as-default](src/rules/namedAsDefault/README.md)                   | 🧰 ☑️ |     |
-| [no-test-imports-in-prod](src/rules/testInProd/README.md)                   | 🧰 ☑️ |     |
-| [no-unresolved-imports](src/rules/unresolved/README.md)                     | 🧰 ☑️ |     |
-| [no-unused-exports](src/rules/unused/README.md)                             | 🧰 ☑️ |     |
-| [prefer-alias-imports](src/rules/alias/README.md)                           | 🧰 ☑️ | 🔧  |
-| [require-node-prefix](src/rules/nodePrefix/README.md)                       | 🧰    | 🔧  |
-| [no-node-builtins](src/rules/nodeBuiltins/README.md) \*                     |       |     |
-| [no-restricted-imports](src/rules/restricted/README.md) \*\*                |       |     |
+| Name                                                                             | 💼    | 🔧  |
+| -------------------------------------------------------------------------------- | ----- | --- |
+| [no-cycle](src/rules/no-cycle/README.md)                                         | 🧰 ☑️ |     |
+| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             | 🧰 ☑️ |     |
+| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) | 🧰 ☑️ |     |
+| [no-named-as-default](src/rules/no-named-as-default/README.md)                   | 🧰 ☑️ |     |
+| [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           | 🧰 ☑️ |     |
+| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               | 🧰 ☑️ |     |
+| [no-unused-exports](src/rules/no-unused-exports/README.md)                       | 🧰 ☑️ |     |
+| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 | 🧰 ☑️ | 🔧  |
+| [require-node-prefix](src/rules/require-node-prefix/README.md)                   | 🧰    | 🔧  |
+| [no-node-builtins](src/rules/no-node-builtins/README.md) \*                      |       |     |
+| [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*\*          |       |     |
 
 \* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any configuration.
 
@@ -223,7 +223,7 @@ In practice, this distinction only matters in monorepos. In the monorepo case, t
 
 For example, if you are building a Next.js application, then the `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
 
-Entry points/externally imported files allow you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/entryPoint/README.md) rule.
+Entry points/externally imported files allow you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/no-entry-point-imports/README.md) rule.
 
 Note: config files matching `/*.config.*` are always treated as externally imported, regardless of this setting.
 
@@ -607,7 +607,7 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ### All first party code must live inside `packageRootDir`
 
-If files exist outside of `packageRootDir` and are imported by files inside of `packageRootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-unresolved-imports](src/rules/unresolved/README.md) rule.
+If files exist outside of `packageRootDir` and are imported by files inside of `packageRootDir`, then these imports will be marked as third party imports. However, since these files are not listed as a dependency in `package.json`, they will be flagged by the [no-unresolved-imports](src/rules/no-unresolved-imports/README.md) rule.
 
 ### CommonJS is not supported
 
@@ -625,9 +625,9 @@ export * from 'node:path';
 import { fake } from './a';
 ```
 
-Fast Import will not flag this as an error. This level of indirection is discouraged anyways, and is why Fast Import ships with the [no-external-barrel-reexports](src/rules/externalBarrelReexports/README.md) rule.
+Fast Import will not flag this as an error. This level of indirection is discouraged anyways, and is why Fast Import ships with the [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) rule.
 
-For more details, see the limitations section of the [src/rules/unresolved/README.md#limitations](src/rules/unresolved/README.md)
+For more details, see the limitations section of the [src/rules/no-unresolved-imports/README.md#limitations](src/rules/no-unresolved-imports/README.md)
 
 ### Case insensitivity inconsistency in ESLint arguments
 
@@ -635,7 +635,7 @@ If you pass a file pattern or path to ESLint, ESLint inconsistently applies case
 
 ## Creating new rules
 
-Fast Import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/unused/unused.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/cycle/cycle.ts) rule for a more complex example. Fast Import exports a few helper functions used to write rules.
+Fast Import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/no-unused-exports/rule.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/no-cycle/rule.ts) rule for a more complex example. Fast Import exports a few helper functions used to write rules.
 
 ### getESMInfo(context)
 
