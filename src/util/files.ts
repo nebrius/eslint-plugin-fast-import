@@ -228,13 +228,32 @@ export function _reset() {
 }
 
 export function getDependenciesFromPackageJson(packageJsonPath: string) {
-  const packageJsonContents = readFileSync(packageJsonPath, 'utf-8');
-  const parsedPackageJson = JSON.parse(packageJsonContents) as {
+  let packageJsonContents: string;
+
+  // If a package.json file gets moved in just the right order, we sometimes
+  // get a race condition where the file is missing due to the move. As such
+  // we catch the error and return an empty array.
+  try {
+    packageJsonContents = readFileSync(packageJsonPath, 'utf-8');
+  } catch {
+    return [];
+  }
+
+  // If the package.json file is invalid JSON, we can't parse it but still need
+  // to recover gracefully
+  let parsedPackageJson: {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
     peerDependencies?: Record<string, string>;
     workspaces?: string[];
   };
+  try {
+    parsedPackageJson = JSON.parse(packageJsonContents);
+  } catch (e) {
+    console.warn('Failed to parse package.json', e);
+    return [];
+  }
+
   const dependencies: string[] = [];
   if (parsedPackageJson.dependencies) {
     dependencies.push(...Object.keys(parsedPackageJson.dependencies));
