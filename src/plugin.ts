@@ -3,17 +3,17 @@ import { join } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import { preferAliasImports } from './rules/alias/alias.js';
-import { noCycle } from './rules/cycle/cycle.js';
-import { noEntryPointImports } from './rules/entryPoint/entryPoint.js';
-import { noExternalBarrelReexports } from './rules/externalBarrelReexports/externalBarrelReexports.js';
-import { namedAsDefault } from './rules/namedAsDefault/namedAsDefault.js';
-import { noNodeBuiltins } from './rules/nodeBuiltins/nodeBuiltins.js';
-import { nodePrefix } from './rules/nodePrefix/nodePrefix.js';
-import { noRestrictedImports } from './rules/restricted/restricted.js';
-import { noTestImportsInProd } from './rules/testInProd/testInProd.js';
-import { noUnresolvedImports } from './rules/unresolved/unresolved.js';
-import { noUnusedExports } from './rules/unused/unused.js';
+import { namedAsDefault } from './rules/no-named-as-default/namedAsDefault.js';
+import { noCycle } from './rules/no-cycle/cycle.js';
+import { noEntryPointImports } from './rules/no-entry-point-imports/entryPoint.js';
+import { noExternalBarrelReexports } from './rules/no-external-barrel-reexports/externalBarrelReexports.js';
+import { noNodeBuiltins } from './rules/no-node-builtins/nodeBuiltins.js';
+import { preferAliasImports } from './rules/prefer-alias-imports/alias.js';
+import { nodePrefix } from './rules/require-node-prefix/nodePrefix.js';
+import { noRestrictedImports } from './rules/no-restricted-imports/restricted.js';
+import { noTestImportsInProd } from './rules/no-test-imports-in-prod/testInProd.js';
+import { noUnresolvedImports } from './rules/no-unresolved-imports/unresolved.js';
+import { noUnusedExports } from './rules/no-unused-exports/unused.js';
 
 // Helper exports
 export {
