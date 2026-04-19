@@ -7,7 +7,7 @@ import { getDirname } from 'cross-dirname';
 import { _resetProjectInfo } from '../../../module/module.js';
 import { _resetAllSettings } from '../../../settings/settings.js';
 import { getRelativePathFromRoot } from '../../../util/files.js';
-import { noEntryPointImports } from '../entryPoint.js';
+import { noEntryPointImports } from '../rule.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

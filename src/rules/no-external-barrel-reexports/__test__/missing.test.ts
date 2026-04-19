@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { noExternalBarrelReexports } from '../externalBarrelReexports.js';
+import { noExternalBarrelReexports } from '../rule.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

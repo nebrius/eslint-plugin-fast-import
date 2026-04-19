@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { noUnresolvedImports } from '../unresolved.js';
+import { noUnresolvedImports } from '../rule.js';
 
 const MONOREPO_ROOT_DIR = join(getDirname(), 'project');
 const TEST_PROJECT_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');

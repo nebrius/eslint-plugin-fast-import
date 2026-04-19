@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { preferAliasImports } from '../alias.js';
+import { preferAliasImports } from '../rule.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_INDEX = join(TEST_PROJECT_DIR, 'src', 'index.ts');
