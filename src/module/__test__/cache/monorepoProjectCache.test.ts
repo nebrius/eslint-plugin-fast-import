@@ -35,6 +35,7 @@ const EXPECTED_CONFIG_FILE: StrippedAnalyzedFileDetails = { fileType: 'other' };
 const packageOneSettings: ParsedPackageSettings = {
   repoRootDir: MONOREPO_PROJECT_DIR,
   packageRootDir: PACKAGE_ONE_DIR,
+  packageName: 'packageOne',
   wildcardAliases: {},
   fixedAliases: {},
   entryPoints: [],
@@ -47,6 +48,7 @@ const packageOneSettings: ParsedPackageSettings = {
 const packageTwoSettings: ParsedPackageSettings = {
   repoRootDir: MONOREPO_PROJECT_DIR,
   packageRootDir: PACKAGE_TWO_DIR,
+  packageName: 'packageTwo',
   wildcardAliases: {},
   fixedAliases: {},
   entryPoints: [],

@@ -53,6 +53,7 @@ it('Fetchings user supplied settings', () => {
   > = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
+    packageName: undefined,
     ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
     ignoreOverridePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/c*' }],
     testFilePatterns: [],

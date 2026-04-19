@@ -17,6 +17,7 @@ it('Updates cache when a new file is added', () => {
   const settings: ParsedPackageSettings = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
+    packageName: 'test',
     wildcardAliases: {},
     fixedAliases: {},
     entryPoints: [],

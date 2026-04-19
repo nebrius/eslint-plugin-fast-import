@@ -8,7 +8,7 @@ import { getAllPackageSettings } from '../../settings.js';
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
-it('Fetches settings from tsconfig with package path extends', () => {
+it('Fetchings settings from package.json', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
@@ -37,9 +37,7 @@ it('Fetches settings from tsconfig with package path extends', () => {
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     testFilePatterns: [],
-    wildcardAliases: {
-      '@pkg/': join(TEST_PROJECT_DIR, 'src/'),
-    },
+    wildcardAliases: {},
     fixedAliases: {},
   };
   expect(packageSettings).toEqual(expected);

@@ -1,0 +1,6 @@
+{
+  "name": "default-test-name",
+  "dependencies": {
+    "typescript": "*"
+  }
+}

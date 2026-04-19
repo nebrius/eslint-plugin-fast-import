@@ -435,6 +435,7 @@ const EXPECTED = {
 it('Computes base info', () => {
   const info = computeBaseInfo({
     packageRootDir: TEST_PROJECT_DIR,
+    packageName: 'test',
     wildcardAliases: {},
     fixedAliases: {},
     ignorePatterns: [],
@@ -459,6 +460,7 @@ export const newFile1 = 10;`;
 it('Adds, modifies, and deletes a new file', () => {
   const info = computeBaseInfo({
     packageRootDir: TEST_PROJECT_DIR,
+    packageName: 'test',
     wildcardAliases: {},
     fixedAliases: {},
     ignorePatterns: [],

@@ -116,6 +116,7 @@ export function initializeRepo(context: GenericContext) {
 // eslint-disable-next-line fast-import/no-unused-exports
 export function initializeProject({
   packageRootDir,
+  packageName,
   wildcardAliases,
   fixedAliases,
   ignorePatterns,
@@ -135,6 +136,7 @@ export function initializeProject({
   const baseStart = performance.now();
   const baseProjectInfo = computeBaseInfo({
     packageRootDir,
+    packageName,
     wildcardAliases,
     fixedAliases,
     ignorePatterns,

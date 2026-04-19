@@ -31,6 +31,7 @@ it('Recovers from an invalid tsconfig file', () => {
   const expected: ParsedPackageSettings = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
+    packageName: undefined,
     entryPoints: [],
     externallyImported: [],
     ignorePatterns: [],

@@ -315,9 +315,20 @@ export type BaseProjectInfo = {
   files: Map<string, BaseFileDetails>;
 
   /**
+   * The name of the package
+   */
+  packageName: string | undefined;
+
+  /**
    * The root path of the package
    */
   packageRootDir: string;
+
+  /**
+   * The entry point exports for this package, as defined in the package's
+   * fast import config file
+   */
+  packageEntryPointExports: string[];
 
   /**
    * An alias for referencing first party imports absolutely.

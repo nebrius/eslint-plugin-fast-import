@@ -11,6 +11,7 @@ import {
 } from '../util/files.js';
 import { getSubpathEntry } from '../util/getSubpathEntry.js';
 import { debug } from '../util/logging.js';
+import { getPackageJsonSettings } from './package.js';
 import { getTypeScriptSettings } from './typescript.js';
 import type { PackageSettings, RepoUserSettings } from './user.js';
 import {
@@ -39,6 +40,7 @@ export type ParsedPackageSettings = Omit<
   entryPoints: Array<{ file: Ignore }>;
   externallyImported: Array<{ file: Ignore }>;
   testFilePatterns: string[];
+  packageName: string | undefined;
 };
 
 export type ParsedRepoSettings = Exclude<RepoUserSettings, 'mode'> & {
@@ -211,9 +213,15 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     userPackageSettings.packageRootDir
   );
 
+  // Get package.json settings
+  const packageJsonSettings = getPackageJsonSettings(
+    userPackageSettings.packageRootDir
+  );
+
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
     ...typeScriptSettings,
+    ...packageJsonSettings,
     ...userPackageSettings,
   };
 
@@ -335,6 +343,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   // Apply defaults and save to the settings cache
   const newSettings: ParsedPackageSettings = {
     repoRootDir: mergedSettings.repoRootDir,
+    packageName: packageJsonSettings.packageName,
     packageRootDir,
     wildcardAliases,
     fixedAliases,

@@ -351,6 +351,7 @@ const EXPECTED = {
 function makeBaseInfo() {
   return computeBaseInfo({
     packageRootDir: TEST_PROJECT_DIR,
+    packageName: 'test',
     // This takes in the already formatted version, hence why we join() here
     wildcardAliases: { '@/': TEST_PROJECT_DIR },
     fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },

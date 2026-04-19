@@ -22,6 +22,7 @@ const FILE_JSON_NEW = join(TEST_PROJECT_DIR, 'new.json');
 const packageSettings: ParsedPackageSettings = {
   repoRootDir: TEST_PROJECT_DIR,
   packageRootDir: TEST_PROJECT_DIR,
+  packageName: 'singlerepo',
   wildcardAliases: {},
   fixedAliases: {},
   entryPoints: [],

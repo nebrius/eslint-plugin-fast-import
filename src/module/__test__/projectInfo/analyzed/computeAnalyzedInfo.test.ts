@@ -16,6 +16,7 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.ts');
 const FILE_F = join(TEST_PROJECT_DIR, 'f.ts');
 const FILE_G = join(TEST_PROJECT_DIR, 'g.ts');
 const FILE_H = join(TEST_PROJECT_DIR, 'h.json');
+const FILE_PACKAGE_JSON = join(TEST_PROJECT_DIR, 'package.json');
 
 const CYCLE_FILE_A = join(TEST_PROJECT_DIR, 'cycle-a.js');
 const CYCLE_FILE_B = join(TEST_PROJECT_DIR, 'cycle-b.js');
@@ -503,6 +504,10 @@ const EXPECTED_FILE_H: StrippedAnalyzedFileDetails = {
   fileType: 'other',
 };
 
+const EXPECTED_FILE_PACKAGE_JSON: StrippedAnalyzedFileDetails = {
+  fileType: 'other',
+};
+
 const EXPECTED = {
   [FILE_A]: EXPECTED_FILE_A,
   [FILE_B]: EXPECTED_FILE_B,
@@ -512,6 +517,7 @@ const EXPECTED = {
   [FILE_F]: EXPECTED_FILE_F,
   [FILE_G]: EXPECTED_FILE_G,
   [FILE_H]: EXPECTED_FILE_H,
+  [FILE_PACKAGE_JSON]: EXPECTED_FILE_PACKAGE_JSON,
   [CYCLE_FILE_A]: EXPECTED_CYCLE_FILE_A,
   [CYCLE_FILE_B]: EXPECTED_CYCLE_FILE_B,
   [CYCLE_FILE_C]: EXPECTED_CYCLE_FILE_C,
@@ -522,6 +528,7 @@ it('Computes analyzed info', () => {
     computeResolvedInfo(
       computeBaseInfo({
         packageRootDir: TEST_PROJECT_DIR,
+        packageName: 'test',
         wildcardAliases: {},
         fixedAliases: {},
         ignorePatterns: [],
@@ -531,6 +538,13 @@ it('Computes analyzed info', () => {
       })
     )
   );
+  // This lookup gets two package.json files: this test and the root fast-import
+  // package.json. We only look at the test project's dependencies in this test.
+  expect(info.availableThirdPartyDependencies.size).toBe(2);
+  expect(info.availableThirdPartyDependencies.get(TEST_PROJECT_DIR)).toEqual(['typescript']);
+  expect(info.packageEntryPointExports).toEqual(['ASourceCode']);
+  expect(info.packageName).toEqual('test');
+  expect(info.packageRootDir).toEqual(TEST_PROJECT_DIR);
   expect(info).toMatchAnalyzedSpec(EXPECTED);
 });
 
@@ -541,6 +555,7 @@ it('Computes analyzed info for a project with a file that imports itself', () =>
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: selfImportProjectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -565,6 +580,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: reexportCycleProjectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -588,6 +604,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: reexportCycleProjectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -607,6 +624,7 @@ it('Computes analyzed info for a project with a single reexport of a firstPartyO
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: projectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -630,6 +648,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a built
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: projectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -653,6 +672,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a first
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: projectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -672,6 +692,7 @@ it('Computes analyzed info for a project with a dynamic import', () => {
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: projectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
@@ -696,6 +717,7 @@ it('Computes analyzed info for a project with a barrel reexport that is an entry
       computeResolvedInfo(
         computeBaseInfo({
           packageRootDir: projectDir,
+          packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
           ignorePatterns: [],
