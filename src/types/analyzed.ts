@@ -217,4 +217,10 @@ export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
    * Mapping of _absolute_ file paths to file details
    */
   files: Map<string, AnalyzedFileDetails>;
+
+  /**
+   * The entry point exports for this package as computed from the entry points
+   * configured in settings/config files
+   */
+  packageEntryPointExports: Array<AnalyzedExport | AnalyzedSingleReexport | AnalyzedBarrelReexport>;
 };

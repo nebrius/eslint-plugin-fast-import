@@ -325,12 +325,6 @@ export type BaseProjectInfo = {
   packageRootDir: string;
 
   /**
-   * The entry point exports for this package, as defined in the package's
-   * fast import config file
-   */
-  packageEntryPointExports: string[];
-
-  /**
    * An alias for referencing first party imports absolutely.
    */
   fixedAliases: ParsedPackageSettings['fixedAliases'];

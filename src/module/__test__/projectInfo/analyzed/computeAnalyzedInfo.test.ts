@@ -542,7 +542,13 @@ it('Computes analyzed info', () => {
   // package.json. We only look at the test project's dependencies in this test.
   expect(info.availableThirdPartyDependencies.size).toBe(2);
   expect(info.availableThirdPartyDependencies.get(TEST_PROJECT_DIR)).toEqual(['typescript']);
-  expect(info.packageEntryPointExports).toEqual(['ASourceCode']);
+
+  const {
+    statementNodeRange: _statementNodeRange,
+    reportNodeRange: _reportNodeRange,
+    ...rest
+  } = info.packageEntryPointExports[0];
+  expect(rest).toEqual(EXPECTED_FILE_A.singleReexports[0]);
   expect(info.packageName).toEqual('test');
   expect(info.packageRootDir).toEqual(TEST_PROJECT_DIR);
   expect(info).toMatchAnalyzedSpec(EXPECTED);

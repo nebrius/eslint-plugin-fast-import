@@ -15,6 +15,7 @@ export function computeAnalyzedInfo(resolvedProjectInfo: ResolvedProjectInfo): A
   const analyzedProjectInfo: AnalyzedProjectInfo = {
     ...resolvedProjectInfo,
     files: new Map(),
+    packageEntryPointExports: [],
   };
 
   // First we initialize each detail with placeholder data, since we need a
@@ -168,6 +169,28 @@ export function computeAnalyzedInfo(resolvedProjectInfo: ResolvedProjectInfo): A
         pivotAnalyzedImport: reexportDetails,
         analyzedProjectInfo,
       });
+    }
+  }
+
+  // Populate the list of package entry point exports
+  for (const [, fileDetails] of analyzedProjectInfo.files) {
+    if (fileDetails.fileType !== 'code') {
+      continue;
+    }
+    for (const exportDetails of fileDetails.exports) {
+      if (exportDetails.isEntryPoint) {
+        analyzedProjectInfo.packageEntryPointExports.push(exportDetails);
+      }
+    }
+    for (const reexportDetails of fileDetails.singleReexports) {
+      if (reexportDetails.isEntryPoint) {
+        analyzedProjectInfo.packageEntryPointExports.push(reexportDetails);
+      }
+    }
+    for (const reexportDetails of fileDetails.barrelReexports) {
+      if (reexportDetails.isEntryPoint) {
+        analyzedProjectInfo.packageEntryPointExports.push(reexportDetails);
+      }
     }
   }
 

@@ -52,7 +52,6 @@ export function computeBaseInfo({
     packageName,
     fixedAliases,
     wildcardAliases,
-    packageEntryPointExports: [],
     availableThirdPartyDependencies: new Map(),
   };
 
@@ -80,18 +79,6 @@ export function computeBaseInfo({
       });
       if (fileDetails) {
         info.files.set(filePath, fileDetails);
-
-        // Save package entry point exports
-        for (const exportInfo of [...fileDetails.exports, ...fileDetails.singleReexports]) {
-          if (exportInfo.isEntryPoint) {
-            info.packageEntryPointExports.push(exportInfo.exportName);
-          }
-        }
-        for (const reexportInfo of fileDetails.barrelReexports) {
-          if (reexportInfo.isEntryPoint && reexportInfo.exportName) {
-            info.packageEntryPointExports.push(reexportInfo.exportName);
-          }
-        }
       }
     } else {
       info.files.set(filePath, {
