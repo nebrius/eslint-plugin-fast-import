@@ -4,11 +4,7 @@ import { parse } from '@typescript-eslint/typescript-estree';
 import { getDirname } from 'cross-dirname';
 
 import type { ParsedPackageSettings } from '../../../settings/settings.js';
-import {
-  getProjectInfo,
-  initializeProject,
-  updateCacheForFile,
-} from '../../module.js';
+import { getProjectInfo, initializeProject, updateCacheForFile } from '../../module.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');

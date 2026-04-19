@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "some/fake/path/*"
-      ]
+      "@/*": ["some/fake/path/*"]
     }
   }
 }

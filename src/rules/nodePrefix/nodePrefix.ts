@@ -12,15 +12,13 @@ export const nodePrefix = createRule({
   name: 'require-node-prefix',
   meta: {
     docs: {
-      description:
-        'Ensures that imports of Node.js modules use the `node:` prefix',
+      description: 'Ensures that imports of Node.js modules use the `node:` prefix',
     },
     schema: [],
     fixable: 'code',
     type: 'problem',
     messages: {
-      missingNodePrefix:
-        'Import of Node.js built-in modules must use the `node:` prefix',
+      missingNodePrefix: 'Import of Node.js built-in modules must use the `node:` prefix',
     },
   },
   defaultOptions: [],
@@ -58,21 +56,16 @@ export const nodePrefix = createRule({
           loc: getLocFromRange(context, statementNodeRange),
           messageId: 'missingNodePrefix',
           fix(fixer) {
-            const sourceNode = context.sourceCode.getNodeByRangeIndex(
-              statementNodeRange[0]
-            ) as ImportDeclaration | ReexportDeclaration;
+            const sourceNode = context.sourceCode.getNodeByRangeIndex(statementNodeRange[0]) as
+              | ImportDeclaration
+              | ReexportDeclaration;
             /* istanbul ignore if */
             if (!('raw' in sourceNode.source)) {
-              throw new InternalError(
-                `Property "raw" is missing in sourceNode.source`
-              );
+              throw new InternalError(`Property "raw" is missing in sourceNode.source`);
             }
             return fixer.replaceText(
               sourceNode.source,
-              sourceNode.source.raw.replace(
-                moduleSpecifier,
-                `node:${moduleSpecifier}`
-              )
+              sourceNode.source.raw.replace(moduleSpecifier, `node:${moduleSpecifier}`)
             );
           },
         });

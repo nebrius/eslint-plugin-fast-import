@@ -1,5 +1,3 @@
 {
-  "entryPointFiles": [
-    "src/plugin.ts"
-  ]
+  "entryPointFiles": ["src/plugin.ts"]
 }

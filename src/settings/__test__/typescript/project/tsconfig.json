@@ -3,9 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "paths": {
-      "@foo": [
-        "node_modules/foo/a.ts"
-      ]
+      "@foo": ["node_modules/foo/a.ts"]
     }
   }
 }

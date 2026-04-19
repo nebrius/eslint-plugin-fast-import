@@ -10,9 +10,7 @@ import type { PackageSettings } from './user.js';
 
 type TypeScriptSettings = Pick<PackageSettings, 'alias'>;
 
-export function getTypeScriptSettings(
-  packageRootDir: string
-): TypeScriptSettings {
+export function getTypeScriptSettings(packageRootDir: string): TypeScriptSettings {
   // Read in the file. Note: we don't support the full breadth of tsconfigs,
   // notably we don't support multiple nested configs and only look at the
   // config found in the eslint config file's directory
@@ -31,13 +29,8 @@ export function getTypeScriptSettings(
   return parseTsConfig(configPath);
 }
 
-function parseTsConfig(
-  configPath: string,
-  projectRootDir?: string
-): TypeScriptSettings {
-  const config = ts.readConfigFile(configPath, (file) =>
-    readFileSync(file, 'utf-8')
-  );
+function parseTsConfig(configPath: string, projectRootDir?: string): TypeScriptSettings {
+  const config = ts.readConfigFile(configPath, (file) => readFileSync(file, 'utf-8'));
 
   // Handle errors in reading the file
   if (config.error) {
@@ -48,9 +41,7 @@ function parseTsConfig(
       typeof config.error.messageText === 'string'
         ? config.error.messageText
         : config.error.messageText.messageText;
-    warn(
-      `Could not load TypeScript config, skipping settings analysis:\n  ${errorText}`
-    );
+    warn(`Could not load TypeScript config, skipping settings analysis:\n  ${errorText}`);
     return {};
   }
 
@@ -58,19 +49,14 @@ function parseTsConfig(
   // and the TS types for config are just too loose, but check just in case
   /* istanbul ignore if */
   if (!config.config) {
-    warn(
-      `Could not load TypeScript config, skipping settings analysis:\n  empty config`
-    );
+    warn(`Could not load TypeScript config, skipping settings analysis:\n  empty config`);
     return {};
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const packageRootDir = config.config?.compilerOptions?.rootDir as
-    | string
-    | undefined;
+  const packageRootDir = config.config?.compilerOptions?.rootDir as string | undefined;
   const absoluteRootDir =
-    projectRootDir ??
-    (packageRootDir && join(dirname(configPath), packageRootDir));
+    projectRootDir ?? (packageRootDir && join(dirname(configPath), packageRootDir));
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const configExtends = config.config?.extends as string | undefined;
@@ -78,10 +64,7 @@ function parseTsConfig(
   if (typeof configExtends === 'string') {
     // Check if this is a relative path or package path
     if (configExtends.startsWith('.')) {
-      baseConfig = parseTsConfig(
-        resolve(dirname(configPath), configExtends),
-        absoluteRootDir
-      );
+      baseConfig = parseTsConfig(resolve(dirname(configPath), configExtends), absoluteRootDir);
     } else {
       // Package path - resolve using Node.js module resolution
       const require = createRequire(configPath);
@@ -96,8 +79,7 @@ function parseTsConfig(
 
   let baseUrl =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (config.config?.compilerOptions?.baseUrl as string | undefined) ??
-    dirname(configPath);
+    (config.config?.compilerOptions?.baseUrl as string | undefined) ?? dirname(configPath);
 
   if (!isAbsolute(baseUrl)) {
     baseUrl = resolve(dirname(configPath), baseUrl);
@@ -105,9 +87,7 @@ function parseTsConfig(
 
   const paths =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    (config.config?.compilerOptions?.paths as
-      | Record<string, string[]>
-      | undefined) ?? {};
+    (config.config?.compilerOptions?.paths as Record<string, string[]> | undefined) ?? {};
 
   const parsedPaths: Record<string, string> = {};
   for (const [symbol, path] of Object.entries(paths)) {

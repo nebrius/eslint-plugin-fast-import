@@ -1,12 +1,7 @@
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema';
 import { z } from 'zod';
 
-import {
-  createRule,
-  getESMInfo,
-  getLocFromRange,
-  isNonTestFile,
-} from '../util.js';
+import { createRule, getESMInfo, getLocFromRange, isNonTestFile } from '../util.js';
 
 const schema = z
   .strictObject({
@@ -16,10 +11,7 @@ const schema = z
 
 type Options = z.infer<typeof schema>;
 
-export const noUnusedExports = createRule<
-  [Options],
-  'noUnusedExports' | 'noTestOnlyImports'
->({
+export const noUnusedExports = createRule<[Options], 'noUnusedExports' | 'noTestOnlyImports'>({
   name: 'no-unused-exports',
   meta: {
     docs: {

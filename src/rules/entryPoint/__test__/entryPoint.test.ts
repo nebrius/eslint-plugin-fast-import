@@ -63,7 +63,8 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
           entryPointFiles: [FILE_A_ENTRY_POINT],
         },
       },
-    },{
+    },
+    {
       code: FILE_B_CONTENTS,
       filename: FILE_B,
       errors: [{ messageId: 'noEntryPointImports' }],

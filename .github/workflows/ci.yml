@@ -10,21 +10,21 @@ jobs:
     name: Build, lint, and test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: 'npm'
-    - name: Install dependencies
-      run: npm ci
-    - name: Build source
-      run: npm run build
-    - name: Run lint
-      run: npm run lint
-    - name: Run Jest tests
-      run: npm test
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build source
+        run: npm run build
+      - name: Run lint
+        run: npm run lint
+      - name: Run Jest tests
+        run: npm test
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

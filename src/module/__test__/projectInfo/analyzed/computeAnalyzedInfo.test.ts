@@ -569,11 +569,7 @@ it('Computes analyzed info for a project with a file that imports itself', () =>
 });
 
 it('Computes analyzed info for a project with a reexport cycle triggered by an entry point', () => {
-  const reexportCycleProjectDir = join(
-    getDirname(),
-    'project',
-    'reexport-cycle'
-  );
+  const reexportCycleProjectDir = join(getDirname(), 'project', 'reexport-cycle');
   const fileA = join(reexportCycleProjectDir, 'a.ts');
   expect(() =>
     computeAnalyzedInfo(
@@ -594,11 +590,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
 });
 
 it('Computes analyzed info for a project with a reexport cycle triggered by an import', () => {
-  const reexportCycleProjectDir = join(
-    getDirname(),
-    'project',
-    'reexport-cycle-import'
-  );
+  const reexportCycleProjectDir = join(getDirname(), 'project', 'reexport-cycle-import');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
@@ -638,11 +630,7 @@ it('Computes analyzed info for a project with a single reexport of a firstPartyO
 });
 
 it('Computes analyzed info for a project with a named barrel reexport of a builtin module', () => {
-  const projectDir = join(
-    getDirname(),
-    'project',
-    'named-barrel-reexport-of-builtin'
-  );
+  const projectDir = join(getDirname(), 'project', 'named-barrel-reexport-of-builtin');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
@@ -662,11 +650,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a built
 });
 
 it('Computes analyzed info for a project with a named barrel reexport of a firstPartyOther module', () => {
-  const projectDir = join(
-    getDirname(),
-    'project',
-    'named-barrel-reexport-of-other'
-  );
+  const projectDir = join(getDirname(), 'project', 'named-barrel-reexport-of-other');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
@@ -706,11 +690,7 @@ it('Computes analyzed info for a project with a dynamic import', () => {
 });
 
 it('Computes analyzed info for a project with a barrel reexport that is an entry point and forms a cycle', () => {
-  const projectDir = join(
-    getDirname(),
-    'project',
-    'barrel-reexport-entry-point'
-  );
+  const projectDir = join(getDirname(), 'project', 'barrel-reexport-entry-point');
   const fileA = join(projectDir, 'a.ts');
   expect(() =>
     computeAnalyzedInfo(

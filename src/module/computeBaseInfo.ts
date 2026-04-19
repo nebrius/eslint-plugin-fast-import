@@ -12,11 +12,7 @@ import type {
 import { parseSync } from 'oxc-parser';
 
 import type { ParsedPackageSettings } from '../settings/settings.js';
-import type {
-  BaseCodeFileDetails,
-  BaseESMStatement,
-  BaseProjectInfo,
-} from '../types/base.js';
+import type { BaseCodeFileDetails, BaseESMStatement, BaseProjectInfo } from '../types/base.js';
 import { getTextForRange, isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
 import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
@@ -86,10 +82,7 @@ export function computeBaseInfo({
         info.files.set(filePath, fileDetails);
 
         // Save package entry point exports
-        for (const exportInfo of [
-          ...fileDetails.exports,
-          ...fileDetails.singleReexports,
-        ]) {
+        for (const exportInfo of [...fileDetails.exports, ...fileDetails.singleReexports]) {
           if (exportInfo.isEntryPoint) {
             info.packageEntryPointExports.push(exportInfo.exportName);
           }
@@ -141,18 +134,12 @@ export function addBaseInfoForFile(
   }
 }
 
-function hasEsmEntryChanged<T extends BaseESMStatement>(
-  previous: T,
-  updated: T
-) {
+function hasEsmEntryChanged<T extends BaseESMStatement>(previous: T, updated: T) {
   for (const key of Object.keys(previous)) {
     if (key === 'statementNodeRange' || key === 'reportNodeRange') {
       continue;
     }
-    if (
-      (previous as Record<string, unknown>)[key] !==
-      (updated as Record<string, unknown>)[key]
-    ) {
+    if ((previous as Record<string, unknown>)[key] !== (updated as Record<string, unknown>)[key]) {
       return true;
     }
   }
@@ -166,16 +153,11 @@ function hasFileChanged(
   // First, check if the number of esm statements have changed
   if (
     updatedFileDetails.exports.length !== previousFileDetails.exports.length ||
-    updatedFileDetails.singleImports.length !==
-      previousFileDetails.singleImports.length ||
-    updatedFileDetails.barrelImports.length !==
-      previousFileDetails.barrelImports.length ||
-    updatedFileDetails.dynamicImports.length !==
-      previousFileDetails.dynamicImports.length ||
-    updatedFileDetails.singleReexports.length !==
-      previousFileDetails.singleReexports.length ||
-    updatedFileDetails.barrelReexports.length !==
-      previousFileDetails.barrelReexports.length
+    updatedFileDetails.singleImports.length !== previousFileDetails.singleImports.length ||
+    updatedFileDetails.barrelImports.length !== previousFileDetails.barrelImports.length ||
+    updatedFileDetails.dynamicImports.length !== previousFileDetails.dynamicImports.length ||
+    updatedFileDetails.singleReexports.length !== previousFileDetails.singleReexports.length ||
+    updatedFileDetails.barrelReexports.length !== previousFileDetails.barrelReexports.length
   ) {
     return true;
   }
@@ -238,9 +220,7 @@ export function updateBaseInfoForFile(
   const previousFileDetails = baseProjectInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!isCodeFile(filePath)) {
-    throw new InternalError(
-      `updateBaseInfoForFile called for non-code file ${filePath}`
-    );
+    throw new InternalError(`updateBaseInfoForFile called for non-code file ${filePath}`);
   }
   /* istanbul ignore if */
   if (!previousFileDetails) {
@@ -250,9 +230,7 @@ export function updateBaseInfoForFile(
   }
   /* istanbul ignore if */
   if (previousFileDetails.fileType !== 'code') {
-    throw new InternalError(
-      `previous file type was not code for file ${filePath}`
-    );
+    throw new InternalError(`previous file type was not code for file ${filePath}`);
   }
   const updatedFileDetails = computeFileDetails({
     filePath,
@@ -264,26 +242,15 @@ export function updateBaseInfoForFile(
   if (updatedFileDetails) {
     baseProjectInfo.files.set(filePath, updatedFileDetails);
   }
-  return (
-    !!updatedFileDetails &&
-    hasFileChanged(previousFileDetails, updatedFileDetails)
-  );
+  return !!updatedFileDetails && hasFileChanged(previousFileDetails, updatedFileDetails);
 }
 
-export function deleteBaseInfoForFile(
-  filePath: string,
-  baseProjectInfo: BaseProjectInfo
-) {
+export function deleteBaseInfoForFile(filePath: string, baseProjectInfo: BaseProjectInfo) {
   baseProjectInfo.files.delete(filePath);
 }
 
 function getRange(
-  entry:
-    | StaticImport
-    | StaticImportEntry
-    | DynamicImport
-    | StaticExport
-    | StaticExportEntry,
+  entry: StaticImport | StaticImportEntry | DynamicImport | StaticExport | StaticExportEntry,
   fallBack?: [number, number]
 ): [number, number] {
   // Import entries are a little different
@@ -316,9 +283,7 @@ function computeFileDetails({
     sourceType: 'module',
   });
   if (result.errors.length) {
-    debug(
-      `${filePath} contains syntax errors and cannot be analyzed. File will be ignored`
-    );
+    debug(`${filePath} contains syntax errors and cannot be analyzed. File will be ignored`);
     return;
   }
 
@@ -355,10 +320,7 @@ function computeFileDetails({
           moduleSpecifier,
         });
       } else {
-        const importName =
-          entry.importName.kind === 'Default'
-            ? 'default'
-            : entry.importName.name;
+        const importName = entry.importName.kind === 'Default' ? 'default' : entry.importName.name;
         /* istanbul ignore if */
         if (!importName) {
           throw new InternalError(`importName is undefined`);
@@ -433,9 +395,7 @@ function computeFileDetails({
         if (isBarrel) {
           const exportName = entry.exportName.name;
           const isEntryPoint = exportName ? isEntryPointCheck(filePath) : false;
-          const isExternallyImported = exportName
-            ? isExternallyImportedCheck(filePath)
-            : false;
+          const isExternallyImported = exportName ? isExternallyImportedCheck(filePath) : false;
           if (isEntryPoint) {
             hasEntryPoints = true;
           }
@@ -486,10 +446,7 @@ function computeFileDetails({
 
       // Otherwise this is a standard export, not a reexport
       else {
-        const exportName =
-          entry.exportName.kind === 'Default'
-            ? 'default'
-            : entry.exportName.name;
+        const exportName = entry.exportName.kind === 'Default' ? 'default' : entry.exportName.name;
         /* istanbul ignore if */
         if (!exportName) {
           throw new InternalError(`exportName is undefined`);

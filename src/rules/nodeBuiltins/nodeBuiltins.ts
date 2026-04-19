@@ -9,8 +9,7 @@ export const noNodeBuiltins = createRule({
     schema: [],
     type: 'problem',
     messages: {
-      noNodeBuiltins:
-        'Import of Node.js built-in module "{{specifier}}" is not allowed',
+      noNodeBuiltins: 'Import of Node.js built-in module "{{specifier}}" is not allowed',
     },
   },
   defaultOptions: [],

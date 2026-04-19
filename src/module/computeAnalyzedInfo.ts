@@ -11,9 +11,7 @@ import type {
 import type { ResolvedProjectInfo } from '../types/resolved.js';
 import { InternalError } from '../util/error.js';
 
-export function computeAnalyzedInfo(
-  resolvedProjectInfo: ResolvedProjectInfo
-): AnalyzedProjectInfo {
+export function computeAnalyzedInfo(resolvedProjectInfo: ResolvedProjectInfo): AnalyzedProjectInfo {
   const analyzedProjectInfo: AnalyzedProjectInfo = {
     ...resolvedProjectInfo,
     files: new Map(),
@@ -129,10 +127,7 @@ export function computeAnalyzedInfo(
         analyzedProjectInfo,
       });
     }
-    for (const importDetails of [
-      ...fileDetails.barrelImports,
-      ...fileDetails.dynamicImports,
-    ]) {
+    for (const importDetails of [...fileDetails.barrelImports, ...fileDetails.dynamicImports]) {
       analyzeBarrelImport({
         originAnalyzedImport: {
           type: 'barrel',
@@ -148,10 +143,7 @@ export function computeAnalyzedInfo(
     // can mark the relevant exports they point to as being imported too (since
     // in reality they are)
     for (const reexportDetails of fileDetails.singleReexports) {
-      if (
-        !reexportDetails.isEntryPoint &&
-        !reexportDetails.isExternallyImported
-      ) {
+      if (!reexportDetails.isEntryPoint && !reexportDetails.isExternallyImported) {
         continue;
       }
       analyzeSingleImport({
@@ -164,10 +156,7 @@ export function computeAnalyzedInfo(
       });
     }
     for (const reexportDetails of fileDetails.barrelReexports) {
-      if (
-        !reexportDetails.isEntryPoint &&
-        !reexportDetails.isExternallyImported
-      ) {
+      if (!reexportDetails.isEntryPoint && !reexportDetails.isExternallyImported) {
         continue;
       }
       analyzeBarrelImport({
@@ -236,9 +225,7 @@ function analyzeSingleImport({
   originAnalyzedImport,
   analyzedProjectInfo,
 }: AnalyzeSingleImportProps) {
-  if (
-    originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode'
-  ) {
+  if (originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode') {
     return;
   }
 
@@ -254,13 +241,10 @@ function analyzeSingleImport({
 
     /* istanbul ignore if */
     if (!targetFileDetails) {
-      throw new InternalError(
-        `File ${currentFile} is missing in project info`,
-        {
-          filePath: originAnalyzedImport.filePath,
-          range: originAnalyzedImport.importEntry.statementNodeRange,
-        }
-      );
+      throw new InternalError(`File ${currentFile} is missing in project info`, {
+        filePath: originAnalyzedImport.filePath,
+        range: originAnalyzedImport.importEntry.statementNodeRange,
+      });
     }
 
     // Shouldn't happen in practice, but check anyways to make TypeScript happy,
@@ -277,9 +261,7 @@ function analyzeSingleImport({
     }
 
     // First, check if we've found the root export
-    const exportEntry = targetFileDetails.exports.find(
-      (e) => currentImportName === e.exportName
-    );
+    const exportEntry = targetFileDetails.exports.find((e) => currentImportName === e.exportName);
     if (exportEntry?.exportName === currentImportName) {
       linkImportToExport(
         originAnalyzedImport.filePath,
@@ -298,8 +280,7 @@ function analyzeSingleImport({
       switch (singleReexportEntry.resolvedModuleType) {
         case 'builtin':
         case 'thirdParty': {
-          originAnalyzedImport.importEntry.rootModuleType =
-            singleReexportEntry.resolvedModuleType;
+          originAnalyzedImport.importEntry.rootModuleType = singleReexportEntry.resolvedModuleType;
           return true;
         }
         case 'firstPartyOther': {
@@ -316,12 +297,7 @@ function analyzeSingleImport({
             filePath: originAnalyzedImport.filePath,
             importEntry: originAnalyzedImport.importEntry,
           });
-          if (
-            traverse(
-              singleReexportEntry.resolvedModulePath,
-              singleReexportEntry.importName
-            )
-          ) {
+          if (traverse(singleReexportEntry.resolvedModulePath, singleReexportEntry.importName)) {
             return true;
           }
           break;
@@ -423,15 +399,9 @@ type AnalyzeBarrelImportProps = {
     | {
         type: 'barrel';
         filePath: string;
-        importEntry:
-          | AnalyzedBarrelImport
-          | AnalyzedDynamicImport
-          | AnalyzedBarrelReexport;
+        importEntry: AnalyzedBarrelImport | AnalyzedDynamicImport | AnalyzedBarrelReexport;
       };
-  pivotAnalyzedImport:
-    | AnalyzedBarrelImport
-    | AnalyzedDynamicImport
-    | AnalyzedBarrelReexport;
+  pivotAnalyzedImport: AnalyzedBarrelImport | AnalyzedDynamicImport | AnalyzedBarrelReexport;
   analyzedProjectInfo: AnalyzedProjectInfo;
 };
 
@@ -440,9 +410,7 @@ function analyzeBarrelImport({
   pivotAnalyzedImport,
   analyzedProjectInfo,
 }: AnalyzeBarrelImportProps) {
-  if (
-    originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode'
-  ) {
+  if (originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode') {
     return;
   }
 
@@ -457,13 +425,10 @@ function analyzeBarrelImport({
 
     /* istanbul ignore if */
     if (!targetFileDetails) {
-      throw new InternalError(
-        `File ${currentFile} is missing in project info`,
-        {
-          filePath: originAnalyzedImport.filePath,
-          range: originAnalyzedImport.importEntry.statementNodeRange,
-        }
-      );
+      throw new InternalError(`File ${currentFile} is missing in project info`, {
+        filePath: originAnalyzedImport.filePath,
+        range: originAnalyzedImport.importEntry.statementNodeRange,
+      });
     }
 
     // Shouldn't happen in practice, but check anyways to make TypeScript happy,
@@ -502,13 +467,10 @@ function analyzeBarrelImport({
 
   /* istanbul ignore if */
   if (pivotAnalyzedImport.resolvedModuleType !== 'firstPartyCode') {
-    throw new InternalError(
-      `Attempted to traverse barrel import that is not first party code`,
-      {
-        filePath: originAnalyzedImport.filePath,
-        range: originAnalyzedImport.importEntry.statementNodeRange,
-      }
-    );
+    throw new InternalError(`Attempted to traverse barrel import that is not first party code`, {
+      filePath: originAnalyzedImport.filePath,
+      range: originAnalyzedImport.importEntry.statementNodeRange,
+    });
   }
   traverse(pivotAnalyzedImport.resolvedModulePath);
 }

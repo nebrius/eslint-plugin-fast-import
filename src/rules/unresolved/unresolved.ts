@@ -11,8 +11,7 @@ export const noUnresolvedImports = createRule({
     fixable: undefined,
     type: 'problem',
     messages: {
-      noUnresolvedImports:
-        'Import "{{name}}" does not point to a valid first party export',
+      noUnresolvedImports: 'Import "{{name}}" does not point to a valid first party export',
       noTransientDependencies:
         'Third party module specifier "{{specifier}}" is not listed in package.json.',
     },
@@ -43,10 +42,7 @@ export const noUnresolvedImports = createRule({
       // First, check if this is a third party dependency, and ensure that the dependency is listed
       // in a package.json
       if (importEntry.resolvedModuleType === 'thirdParty') {
-        for (const [
-          path,
-          deps,
-        ] of projectInfo.availableThirdPartyDependencies) {
+        for (const [path, deps] of projectInfo.availableThirdPartyDependencies) {
           if (
             context.filename.startsWith(path) &&
             deps.some(
@@ -124,10 +120,7 @@ export const noUnresolvedImports = createRule({
     }
 
     // Now check reexports
-    for (const reexportEntry of [
-      ...fileInfo.singleReexports,
-      ...fileInfo.barrelReexports,
-    ]) {
+    for (const reexportEntry of [...fileInfo.singleReexports, ...fileInfo.barrelReexports]) {
       // First check if we couldn't resolve the module specifier. If the module
       // couldn't be resolved, we mark the file type as first party other, so
       // we first have to check for that.

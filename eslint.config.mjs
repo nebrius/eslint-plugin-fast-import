@@ -5,7 +5,6 @@ import js from '@eslint/js';
 import { globalIgnores } from 'eslint/config';
 import { defineConfig } from 'eslint/config';
 import jest from 'eslint-plugin-jest';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -16,11 +15,7 @@ const ROOT_DIR = import.meta.dirname;
 
 export default defineConfig([
   includeIgnoreFile(join(ROOT_DIR, '.gitignore')),
-  globalIgnores([
-    'src/**/__test__/**/project/**/*',
-    'jest.config.ts',
-    'oxlint.config.ts',
-  ]),
+  globalIgnores(['src/**/__test__/**/project/**/*', 'jest.config.ts', 'oxlint.config.ts']),
   {
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {
@@ -45,7 +40,6 @@ export default defineConfig([
   },
 
   fastImportPlugin.configs.all,
-  eslintPluginPrettierRecommended,
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'
       ? {

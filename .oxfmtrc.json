@@ -1,0 +1,12 @@
+{
+  "trailingComma": "es5",
+  "tabWidth": 2,
+  "semi": true,
+  "singleQuote": true,
+  "ignorePatterns": [
+    "src/module/__test__/startup/project/a.ts",
+    "src/module/__test__/projectInfo/base/project/e.ts",
+    "src/settings/__test__/invalidTypeScriptConfig/project/tsconfig.json",
+    "src/settings/__test__/user/project/invalid.config.json"
+  ]
+}

@@ -38,9 +38,7 @@ export function getMonorepoPackageSettings(packageRootDir: string): string[] {
       continue;
     }
     const directoryContents = readdirSync(currentDir, { withFileTypes: true });
-    const hasConfigFile = directoryContents.some(
-      (item) => item.name === 'fast-import.config.json'
-    );
+    const hasConfigFile = directoryContents.some((item) => item.name === 'fast-import.config.json');
     if (hasConfigFile) {
       packages.push(join(currentDir, 'fast-import.config.json'));
     } else {
@@ -140,8 +138,7 @@ export async function getFiles(
     ignorePatterns,
     ignoreOverridePatterns,
     potentialFiles.filter(
-      ({ filePath }) =>
-        !isDefaultIgnoredPath(filePath) && basename(filePath) !== '.gitignore'
+      ({ filePath }) => !isDefaultIgnoredPath(filePath) && basename(filePath) !== '.gitignore'
     )
   );
 }
@@ -175,10 +172,7 @@ export function splitPathIntoSegments(path: string) {
     .filter((s) => s);
 }
 
-export function getRelativePathFromRoot(
-  packageRootDir: string,
-  filePath: string
-) {
+export function getRelativePathFromRoot(packageRootDir: string, filePath: string) {
   const relativePath = filePath.replace(packageRootDir, '');
   if (relativePath.startsWith('/') || relativePath.startsWith('\\')) {
     return relativePath.substring(1);
@@ -270,9 +264,7 @@ function getPotentialFilesList(packageRootDir: string): string[] {
     if (!content.isDirectory()) {
       potentialFilesList.push(join(packageRootDir, content.name));
     } else if (!DEFAULT_IGNORE_DIRECTORIES.includes(content.name)) {
-      potentialFilesList.push(
-        ...getPotentialFilesList(join(packageRootDir, content.name))
-      );
+      potentialFilesList.push(...getPotentialFilesList(join(packageRootDir, content.name)));
     }
   }
 
@@ -287,12 +279,7 @@ function buildFileList(
   potentialFiles: PotentialFile[]
 ) {
   // Create the ignore instances for use in filtering
-  initializeIgnores(
-    packageRootDir,
-    ignorePatterns,
-    ignoreOverridePatterns,
-    potentialFiles
-  );
+  initializeIgnores(packageRootDir, ignorePatterns, ignoreOverridePatterns, potentialFiles);
 
   // Filter out ignored files
   const files: Array<{

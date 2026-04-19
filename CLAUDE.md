@@ -14,7 +14,7 @@ npm run test
 # Run linting
 npm run lint
 
-# Format code with Prettier
+# Format code with Oxfmt
 npm run format
 ```
 

@@ -102,6 +102,7 @@ export default defineConfig([
 This will apply the recommended rules along with the default configuration.
 
 In monorepos with multiple packages, you can either:
+
 - Define separate configs per package using the single-repo setup described above.
 - Use `monorepoRootDir` instead of `packageRootDir` in a single root config and move package-specific settings into per-package `fast-import.config.json` files
 
@@ -335,7 +336,7 @@ export default defineConfig([
   {
     settings: {
       'fast-import': {
-        mode: 'editor'
+        mode: 'editor',
       },
     },
   },
@@ -397,6 +398,7 @@ Use this when you want one top-level ESLint or Oxlint config to cover the whole 
 Note that `fast-import.config.json` files cannot be nested inside one another. Once Fast Import finds a `fast-import.config.json` in a directory, that directory becomes the package root and nested config files beneath it are ignored by design.
 
 Example structure:
+
 ```text
 repo
 ├── eslint.config.mjs
@@ -466,9 +468,7 @@ Configuration is similar to ESLint, except that you spread `fastImportPlugin.con
 import fastImportPlugin from 'eslint-plugin-fast-import';
 
 export default {
-  jsPlugins: [
-    { name: 'fast-import', specifier: 'eslint-plugin-fast-import' },
-  ],
+  jsPlugins: [{ name: 'fast-import', specifier: 'eslint-plugin-fast-import' }],
   rules: {
     ...fastImportPlugin.configs.all.rules,
   },

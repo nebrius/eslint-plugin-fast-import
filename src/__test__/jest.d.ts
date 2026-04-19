@@ -17,22 +17,14 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R, T> {
       toMatchBaseSpec(baseSpec: Record<string, StrippedBaseFileDetails>): T;
-      toMatchResolvedSpec(
-        resolvedSpec: Record<string, StrippedResolvedFileDetails>
-      ): T;
-      toMatchAnalyzedSpec(
-        analyzedSpec: Record<string, StrippedAnalyzedFileDetails>
-      ): T;
+      toMatchResolvedSpec(resolvedSpec: Record<string, StrippedResolvedFileDetails>): T;
+      toMatchAnalyzedSpec(analyzedSpec: Record<string, StrippedAnalyzedFileDetails>): T;
     }
 
     interface ExpectExtendMap {
       toMatchBaseSpec: OwnMatcher<[Record<string, StrippedBaseFileDetails>]>;
-      toMatchResolvedSpec: OwnMatcher<
-        [Record<string, StrippedResolvedFileDetails>]
-      >;
-      toMatchAnalyzedSpec: OwnMatcher<
-        [Record<string, StrippedAnalyzedFileDetails>]
-      >;
+      toMatchResolvedSpec: OwnMatcher<[Record<string, StrippedResolvedFileDetails>]>;
+      toMatchAnalyzedSpec: OwnMatcher<[Record<string, StrippedAnalyzedFileDetails>]>;
     }
   }
 }

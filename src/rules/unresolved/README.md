@@ -9,7 +9,7 @@ Ensures that module specifiers in import statements (aka `foo` in `import { bar 
 1. The module specifier matches a built-in Node.js module specifier, as reported by `builtinModules` in the `node:module` module. Note that the symbol (aka `bar` in `import { bar } from 'foo'`) is _not_ checked for validity
 2. The module specifier resolves to another code file. Note that the symbol _is_ checked for validity
 3. The module specifier matches a module listed in `package.json`
-    - When resolving, each `package.json` is inspected in folders between the file in question and a folder containing a `.git` folder, or the root folder if there is no `.git` folder. Note that the symbol is _not_ checked for validity
+   - When resolving, each `package.json` is inspected in folders between the file in question and a folder containing a `.git` folder, or the root folder if there is no `.git` folder. Note that the symbol is _not_ checked for validity
 
 Examples of _incorrect_ code
 
@@ -86,7 +86,6 @@ import * as b from './b';
 ```
 
 In this case, we can see that `b` resolves to more than one file, which already makes analysis complicated. Now let's take a more complicated scenario:
-
 
 ```js
 /*

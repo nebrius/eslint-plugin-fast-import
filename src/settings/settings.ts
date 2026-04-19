@@ -5,19 +5,13 @@ import ignore from 'ignore';
 
 import type { GenericContext } from '../types/context.js';
 import { InternalError } from '../util/error.js';
-import {
-  getMonorepoPackageSettings,
-  trimTrailingPathSeparator,
-} from '../util/files.js';
+import { getMonorepoPackageSettings, trimTrailingPathSeparator } from '../util/files.js';
 import { getSubpathEntry } from '../util/getSubpathEntry.js';
 import { debug } from '../util/logging.js';
 import { getPackageJsonSettings } from './package.js';
 import { getTypeScriptSettings } from './typescript.js';
 import type { PackageSettings, RepoUserSettings } from './user.js';
-import {
-  getUserPackageSettingsFromConfigFile,
-  getUserRepoSettings,
-} from './user.js';
+import { getUserPackageSettingsFromConfigFile, getUserRepoSettings } from './user.js';
 
 export type IgnorePattern = {
   dir: string;
@@ -71,15 +65,9 @@ const DEFAULT_MODE =
       ? 'fix'
       : 'one-shot';
 
-const packageSettingsCache = new Map<
-  string,
-  { settings: ParsedPackageSettings }
->();
+const packageSettingsCache = new Map<string, { settings: ParsedPackageSettings }>();
 
-const repoSettingsCache = new Map<
-  string,
-  { settings: ParsedRepoSettings; refresh: boolean }
->();
+const repoSettingsCache = new Map<string, { settings: ParsedRepoSettings; refresh: boolean }>();
 
 // Used for tests
 // eslint-disable-next-line fast-import/no-unused-exports
@@ -92,14 +80,10 @@ export function _resetAllSettings() {
 export function markSettingsForRefresh(packageRootDir: string) {
   const packageCacheEntry = packageSettingsCache.get(packageRootDir);
   if (packageCacheEntry) {
-    const repoCacheEntry = repoSettingsCache.get(
-      packageCacheEntry.settings.repoRootDir
-    );
+    const repoCacheEntry = repoSettingsCache.get(packageCacheEntry.settings.repoRootDir);
     /* instanbul ignore next */
     if (!repoCacheEntry) {
-      throw new InternalError(
-        'Could not get repo cache settings from package cache settings'
-      );
+      throw new InternalError('Could not get repo cache settings from package cache settings');
     }
     repoSettingsCache.set(packageRootDir, {
       settings: repoCacheEntry.settings,
@@ -131,8 +115,7 @@ export function getRepoSettings(
 
   const { mode: rawMode, ...rest } = getUserRepoSettings(context.settings);
 
-  const mode =
-    rawMode === 'auto' || rawMode === undefined ? DEFAULT_MODE : rawMode;
+  const mode = rawMode === 'auto' || rawMode === undefined ? DEFAULT_MODE : rawMode;
   if (cachedSettings?.mode !== mode) {
     if (cachedSettings) {
       debug(`Mode change from ${cachedSettings.mode} to ${mode}`);
@@ -171,9 +154,7 @@ export function getRepoSettings(
 // Gets all known package settings. This takes into account the current file
 // being linted so that we can detect if we're in an editor and a new package
 // was just added. This also refreshes the cache after invalidation.
-export function getAllPackageSettings(
-  context: Pick<GenericContext, 'filename' | 'settings'>
-) {
+export function getAllPackageSettings(context: Pick<GenericContext, 'filename' | 'settings'>) {
   // First we check if this file has a cached entry or not
   const cachedRepoEntry = getRepoCacheEntryForFile(context.filename);
   if (cachedRepoEntry && !cachedRepoEntry.refresh) {
@@ -209,14 +190,10 @@ export function getAllPackageSettings(
 
 function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   // Get TypeScript supplied settings
-  const typeScriptSettings = getTypeScriptSettings(
-    userPackageSettings.packageRootDir
-  );
+  const typeScriptSettings = getTypeScriptSettings(userPackageSettings.packageRootDir);
 
   // Get package.json settings
-  const packageJsonSettings = getPackageJsonSettings(
-    userPackageSettings.packageRootDir
-  );
+  const packageJsonSettings = getPackageJsonSettings(userPackageSettings.packageRootDir);
 
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
@@ -225,11 +202,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     ...userPackageSettings,
   };
 
-  const {
-    alias = {},
-    entryPointFiles = [],
-    externallyImportedFiles = [],
-  } = mergedSettings;
+  const { alias = {}, entryPointFiles = [], externallyImportedFiles = [] } = mergedSettings;
 
   // Clean up any aliases
   const wildcardAliases: ParsedPackageSettings['wildcardAliases'] = {};
@@ -252,9 +225,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     // Determine if this is a wildcard or fixed alias, and validate consistency
     if (symbol.endsWith('*')) {
       if (!path.endsWith('*')) {
-        throw new Error(
-          `Alias path ${path} must end with "*" when ${symbol} ends with "*"`
-        );
+        throw new Error(`Alias path ${path} must end with "*" when ${symbol} ends with "*"`);
       }
       wildcardAliases[symbol.replace(/\*$/, '')] = path.replace(/\*$/, '');
     } else {
@@ -275,8 +246,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     });
   }
 
-  const parsedExternallyImported: ParsedPackageSettings['externallyImported'] =
-    [];
+  const parsedExternallyImported: ParsedPackageSettings['externallyImported'] = [];
   for (const filePattern of [
     // Always ignore config files in the root directory
     '/*.config.*',
@@ -290,17 +260,13 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   const cachedSettings = packageSettingsCache.get(packageRootDir)?.settings;
   if (cachedSettings?.packageRootDir !== packageRootDir) {
     if (cachedSettings) {
-      debug(
-        `Package root dir change from ${cachedSettings.packageRootDir} to ${packageRootDir}`
-      );
+      debug(`Package root dir change from ${cachedSettings.packageRootDir} to ${packageRootDir}`);
     } else {
       debug(`Setting package root dir to ${packageRootDir}`);
     }
   }
 
-  if (
-    !compareSettingsObjects(wildcardAliases, cachedSettings?.wildcardAliases)
-  ) {
+  if (!compareSettingsObjects(wildcardAliases, cachedSettings?.wildcardAliases)) {
     if (cachedSettings) {
       debug(`Wildcard aliases changed`);
     }
@@ -333,9 +299,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     contents: p,
   }));
 
-  const ignoreOverridePatterns = (
-    mergedSettings.ignoreOverridePatterns ?? []
-  ).map((p) => ({
+  const ignoreOverridePatterns = (mergedSettings.ignoreOverridePatterns ?? []).map((p) => ({
     dir: packageRootDir,
     contents: p,
   }));
@@ -374,7 +338,5 @@ export function getPackageCacheEntryForFile(filePath: string) {
 }
 
 function getAllPackageCacheEntries() {
-  return Array.from(
-    packageSettingsCache.entries().map(([, { settings }]) => settings)
-  );
+  return Array.from(packageSettingsCache.entries().map(([, { settings }]) => settings));
 }

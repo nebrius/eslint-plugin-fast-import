@@ -5,7 +5,5 @@
     "noEmit": true,
     "declaration": false
   },
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["**/*.ts"]
 }
