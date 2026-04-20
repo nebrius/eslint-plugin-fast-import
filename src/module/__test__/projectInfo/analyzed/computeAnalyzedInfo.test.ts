@@ -24,7 +24,7 @@ const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
 
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  hasEntryPoints: true,
   hasExternallyImported: false,
   singleImports: [
     {
@@ -544,10 +544,12 @@ it('Computes analyzed info', () => {
   expect(info.availableThirdPartyDependencies.get(TEST_PROJECT_DIR)).toEqual(['typescript']);
 
   const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     statementNodeRange: _statementNodeRange,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reportNodeRange: _reportNodeRange,
     ...rest
-  } = info.packageEntryPointExports[0];
+  } = Array.from(info.packageEntryPointExports.values())[0];
   expect(rest).toEqual(EXPECTED_FILE_A.singleReexports[0]);
   expect(info.packageName).toEqual('test');
   expect(info.packageRootDir).toEqual(TEST_PROJECT_DIR);

@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
@@ -94,12 +94,16 @@ export function _resetProjectInfo() {
   analyzedProjectInfos.clear();
 }
 
-export function initializeRepo(context: GenericContext) {
+export function initializeRepo(context: Pick<GenericContext, 'filename' | 'settings'>) {
   const { allPackageSettings } = getAllPackageSettings(context);
+  let hasChanges = false;
   for (const packageSettings of allPackageSettings) {
-    initializeProject(packageSettings);
+    const projectHasChanges = initializeProject(packageSettings);
+    hasChanges ||= projectHasChanges;
   }
-  // TODO: repo initialization for new rule here
+  if (hasChanges) {
+    initializePackageInfo();
+  }
 }
 
 // Testing this logic through initializeRepo would be more difficult than just
@@ -114,14 +118,14 @@ export function initializeProject({
   ignoreOverridePatterns,
   entryPoints,
   externallyImported,
-}: ParsedPackageSettings) {
+}: ParsedPackageSettings): boolean {
   // If we've already analyzed the project and settings haven't changed, bail
   if (
     getBaseProjectInfo(packageRootDir) &&
     getResolvedProjectInfo(packageRootDir) &&
     getAnalyzedProjectInfo(packageRootDir)
   ) {
-    return;
+    return false;
   }
 
   const baseStart = performance.now();
@@ -173,6 +177,95 @@ export function initializeProject({
   debug(`  ${numImports.toLocaleString()} imports`);
   debug(`  ${numExports.toLocaleString()} exports`);
   debug(`  ${numReexports.toLocaleString()} reexports`);
+
+  return true;
+}
+
+function initializePackageInfo() {
+  const analyzestart = performance.now();
+  const packageEntryPoints = new Map<string, AnalyzedProjectInfo['packageEntryPointExports']>();
+
+  // Initialize the package dependencies map
+  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
+    if (analyzedProjectInfo.packageName) {
+      packageEntryPoints.set(
+        analyzedProjectInfo.packageName,
+        analyzedProjectInfo.packageEntryPointExports
+      );
+    }
+  }
+
+  // Reset externallyImportedBy arrays. Since we don't do more intelligent cache
+  // updates for package info, we have to first reset externallyImportedBy
+  // arrays, otherwise we end up with duplicates.
+  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
+    for (const [, entryPoint] of analyzedProjectInfo.packageEntryPointExports) {
+      entryPoint.externallyImportedBy = [];
+    }
+  }
+
+  // Mark entry points as imported in the monorepo
+  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
+    for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
+      if (fileDetails.fileType !== 'code') {
+        continue;
+      }
+      for (const importEntry of [...fileDetails.singleImports, ...fileDetails.barrelImports]) {
+        if (!importEntry.resolvedModuleType || importEntry.resolvedModuleType !== 'thirdParty') {
+          continue;
+        }
+
+        // Get the package name without any possible subpaths
+        const packageParts = importEntry.moduleSpecifier.split('/');
+        let packageName: string;
+        if (packageParts[0].startsWith('@')) {
+          if (packageParts.length < 2) {
+            continue;
+          }
+          packageName = join(packageParts[0], packageParts[1]);
+        } else {
+          packageName = packageParts[0];
+        }
+
+        // Check if this is a known package in the monorepo or not
+        const packageEntryPointExports = packageEntryPoints.get(packageName);
+        if (!packageEntryPointExports) {
+          continue;
+        }
+        switch (importEntry.type) {
+          // For single imports, we need to find the specific export so we can
+          // mark it as externally imported
+          case 'singleImport': {
+            const exportEntry = packageEntryPointExports.get(importEntry.importName);
+            if (!exportEntry) {
+              debug(`Export ${importEntry.importName} not found in package ${packageName}`);
+              continue;
+            }
+            exportEntry.externallyImportedBy.push({
+              packageRootDir: analyzedProjectInfo.packageRootDir,
+              filePath,
+              importEntry,
+            });
+            break;
+          }
+          // For barrel imports, we mark all exports as externally imported
+          case 'barrelImport': {
+            for (const [, exportEntry] of packageEntryPointExports) {
+              exportEntry.externallyImportedBy.push({
+                packageRootDir: analyzedProjectInfo.packageRootDir,
+                filePath,
+                importEntry,
+              });
+            }
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const analyzeEnd = performance.now();
+  debug(`Initialized repository info in ${formatMilliseconds(analyzeEnd - analyzestart)}`);
 }
 
 export function getProjectInfo(packageRootDir: string) {
@@ -341,6 +434,14 @@ export function updateCacheFromFileSystem(
     analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
     const analyzeEnd = performance.now();
 
+    // Note: it's not the most efficient to recompute this here, since this can
+    // lead to multiple recomputations if multiple files across packages are
+    // modified at once. However, rearchitecting this would be complicated, and
+    // given how fast this operation is to begin with, it's not worth the effort.
+    const projectInfoStart = performance.now();
+    initializePackageInfo();
+    const projectInfoEnd = performance.now();
+
     debug(
       `Synchronized changes from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
     );
@@ -348,6 +449,7 @@ export function updateCacheFromFileSystem(
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
+    debug(`  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`);
 
     return true;
   }
@@ -395,11 +497,16 @@ export function updateCacheForFile(
       analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
       const analyzeEnd = performance.now();
 
+      const projectInfoStart = performance.now();
+      initializePackageInfo();
+      const projectInfoEnd = performance.now();
+
       debug(`Update for ${filePath.replace(packageRootDir, '')} complete:`);
       debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
       debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
       debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
       debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzeStart)}`);
+      debug(`  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`);
 
       return true;
     } else {
@@ -502,11 +609,16 @@ export function updateCacheForFile(
     analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
     const analyzeEnd = performance.now();
 
+    const projectInfoStart = performance.now();
+    initializePackageInfo();
+    const projectInfoEnd = performance.now();
+
     debug(`${filePath.replace(packageRootDir, '')} add complete:`);
     debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - anazlyzeStart)}`);
+    debug(`  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`);
 
     return true;
   }

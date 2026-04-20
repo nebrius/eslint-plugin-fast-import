@@ -66,6 +66,22 @@ function toMatchSpec<
       continue;
     }
 
+    if (expectedFileDetails.hasEntryPoints !== fileDetails.hasEntryPoints) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong hasEntryPoints: expected ${String(expectedFileDetails.hasEntryPoints)}, received ${String(fileDetails.hasEntryPoints)}`,
+        pass: false,
+      };
+    }
+
+    if (expectedFileDetails.hasExternallyImported !== fileDetails.hasExternallyImported) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong hasExternallyImported: expected ${String(expectedFileDetails.hasExternallyImported)}, received ${String(fileDetails.hasExternallyImported)}`,
+        pass: false,
+      };
+    }
+
     if (
       expectedFileDetails.exports.length !== fileDetails.exports.length ||
       expectedFileDetails.singleImports.length !== fileDetails.singleImports.length ||

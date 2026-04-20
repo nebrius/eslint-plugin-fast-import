@@ -629,6 +629,21 @@ Fast Import will not flag this as an error. This level of indirection is discour
 
 For more details, see the limitations section of the [src/rules/no-unresolved-imports/README.md#limitations](src/rules/no-unresolved-imports/README.md)
 
+### Non-named barrel export entry points are not considered in external dependency tracking
+
+If you have a barrel export without `* as foo`, then the entry point of that barrel export is not considered when analyzing cross-package imports. For example:
+
+```js
+// package-one/a.ts
+export * from 'some-package';
+
+// package-two/b.ts
+import { something } from 'package-one/a';
+```
+
+Fast Import will not know about the second import. This means that rules such as
+[no-unused-package-exports](src/rules/no-unused-package-exports/README.md) will not flag that this export is unused if package two stops importing it.
+
 ### Case insensitivity inconsistency in ESLint arguments
 
 If you pass a file pattern or path to ESLint, ESLint inconsistently applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`.

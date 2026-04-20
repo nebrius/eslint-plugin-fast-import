@@ -27,12 +27,12 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "Debug core-ts",
+      "name": "Debug Oxlint",
       "type": "node",
       "request": "launch",
-      "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/eslint"],
-      "cwd": "/Users/bryan/Projects/hive-kube/packages/core-ts",
-      "args": ["-c", "eslint.config.mjs", "src/**/*"],
+      "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/oxlint"],
+      "args": ["-c", "oxlint.config.ts", "--type-aware"],
+      "cwd": "/Users/bryan/Projects/specoro",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

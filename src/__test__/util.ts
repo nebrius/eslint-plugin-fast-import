@@ -123,8 +123,13 @@ type StrippedBarrelImportedBy = Array<{
   importEntry: StrippedAnalyzedBarrelImport;
 }>;
 type StrippedExternallyImportedBy = Array<{
+  packageRootDir: string;
   filePath: string;
-  importEntry: StrippedAnalyzedSingleImport;
+  importEntry:
+    | StrippedAnalyzedSingleImport
+    | StrippedAnalyzedSingleReexport
+    | StrippedAnalyzedBarrelImport
+    | StrippedAnalyzedBarrelReexport;
 }>;
 
 export type StrippedAnalyzedFileDetails = StrippedFileDetails<

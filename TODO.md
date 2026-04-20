@@ -1,0 +1,6 @@
+- Add new lint rule that forbids non-named barrel exports in entry point files
+- Split test part of no unused into `no-test-only-imports`
+- Warn/error when entry point/externally imported files have no exports
+- From Claude on a bug: for rootModuleType, I used undefined on the thirdParty singleImport because computeAnalyzedInfo.ts:95 sets it to undefined unconditionally and analyzeSingleImport bails early for non-firstPartyCode. singleReexports get 'thirdParty' there, but singleImports do not. Flagging in case that asymmetry is itself a bug you want fixed before these tests lock it in.
+- Add error checking for duplicate export names across entry point files, include lint rule
+- Rename "project" to "package" where appropriate

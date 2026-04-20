@@ -248,7 +248,12 @@ export function getDependenciesFromPackageJson(packageJsonPath: string) {
     workspaces?: string[];
   };
   try {
-    parsedPackageJson = JSON.parse(packageJsonContents);
+    parsedPackageJson = JSON.parse(packageJsonContents) as {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+      peerDependencies?: Record<string, string>;
+      workspaces?: string[];
+    };
   } catch (e) {
     console.warn('Failed to parse package.json', e);
     return [];

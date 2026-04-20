@@ -15,7 +15,7 @@ export function computeAnalyzedInfo(resolvedProjectInfo: ResolvedProjectInfo): A
   const analyzedProjectInfo: AnalyzedProjectInfo = {
     ...resolvedProjectInfo,
     files: new Map(),
-    packageEntryPointExports: [],
+    packageEntryPointExports: new Map(),
   };
 
   // First we initialize each detail with placeholder data, since we need a
@@ -179,17 +179,24 @@ export function computeAnalyzedInfo(resolvedProjectInfo: ResolvedProjectInfo): A
     }
     for (const exportDetails of fileDetails.exports) {
       if (exportDetails.isEntryPoint) {
-        analyzedProjectInfo.packageEntryPointExports.push(exportDetails);
+        analyzedProjectInfo.packageEntryPointExports.set(exportDetails.exportName, exportDetails);
       }
     }
     for (const reexportDetails of fileDetails.singleReexports) {
       if (reexportDetails.isEntryPoint) {
-        analyzedProjectInfo.packageEntryPointExports.push(reexportDetails);
+        analyzedProjectInfo.packageEntryPointExports.set(
+          reexportDetails.exportName,
+          reexportDetails
+        );
       }
     }
     for (const reexportDetails of fileDetails.barrelReexports) {
-      if (reexportDetails.isEntryPoint) {
-        analyzedProjectInfo.packageEntryPointExports.push(reexportDetails);
+      // If we don't have an export name, then we can't analyze it. Ideally
+      if (reexportDetails.isEntryPoint && reexportDetails.exportName) {
+        analyzedProjectInfo.packageEntryPointExports.set(
+          reexportDetails.exportName,
+          reexportDetails
+        );
       }
     }
   }

@@ -1,5 +1,4 @@
 // @ts-expect-error — cross-package import fixture; packageOne is not resolvable via tsconfig
-import type { One } from 'packageOne/a';
+import * as pkg from 'packageOne';
 
-const one: One = 'hi';
-console.log(one);
+console.log(pkg);

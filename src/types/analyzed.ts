@@ -219,8 +219,11 @@ export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
   files: Map<string, AnalyzedFileDetails>;
 
   /**
-   * The entry point exports for this package as computed from the entry points
-   * configured in settings/config files
+   * The entry point exports for this package as computed from the entry points.
+   * It maps from symbol name to export entry for quick lookup
    */
-  packageEntryPointExports: Array<AnalyzedExport | AnalyzedSingleReexport | AnalyzedBarrelReexport>;
+  packageEntryPointExports: Map<
+    string,
+    AnalyzedExport | AnalyzedSingleReexport | AnalyzedBarrelReexport
+  >;
 };

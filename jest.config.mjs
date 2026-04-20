@@ -6,4 +6,5 @@ export default {
   ...presetConfig,
   resolver: 'ts-jest-resolver',
   setupFilesAfterEnv: ['<rootDir>/src/__test__/setup.ts'],
+  testPathIgnorePatterns: ['/dist/'],
 };
