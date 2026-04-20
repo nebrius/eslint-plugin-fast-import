@@ -210,8 +210,18 @@ function initializePackageInfo() {
       if (fileDetails.fileType !== 'code') {
         continue;
       }
-      for (const importEntry of [...fileDetails.singleImports, ...fileDetails.barrelImports]) {
+      for (const importEntry of [
+        ...fileDetails.singleImports,
+        ...fileDetails.barrelImports,
+        ...fileDetails.dynamicImports,
+      ]) {
         if (importEntry.resolvedModuleType !== 'thirdParty') {
+          continue;
+        }
+
+        // We can't analyze dynamic import specifiers that can't be resolve
+        // statically (aka moduleSpecifier is undefined), so we skip them
+        if (!importEntry.moduleSpecifier) {
           continue;
         }
 
@@ -248,7 +258,8 @@ function initializePackageInfo() {
             });
             break;
           }
-          // For barrel imports, we mark all exports as externally imported
+          // For barrel imports and dynamic imports, we mark all exports as externally imported
+          case 'dynamicImport':
           case 'barrelImport': {
             for (const [, exportEntry] of packageEntryPointExports) {
               exportEntry.exportEntry.externallyImportedBy.push({

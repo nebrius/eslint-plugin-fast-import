@@ -5,3 +5,6 @@
 - Add error checking for duplicate export names across entry point files, include lint rule
 - Rename "project" to "package" where appropriate
 - Allow config files in single repo mode (useful for mixed package-level single-repo and repo-level monorepo configs)
+- Fix camelCase package names in test package.json files
+- Upgrade to TypeScript 6
+- Come up with cleaner answer to "multiple entry point files might have colliding export names" problem.
