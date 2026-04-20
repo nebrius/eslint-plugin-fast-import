@@ -211,7 +211,7 @@ function initializePackageInfo() {
         continue;
       }
       for (const importEntry of [...fileDetails.singleImports, ...fileDetails.barrelImports]) {
-        if (!importEntry.resolvedModuleType || importEntry.resolvedModuleType !== 'thirdParty') {
+        if (importEntry.resolvedModuleType !== 'thirdParty') {
           continue;
         }
 

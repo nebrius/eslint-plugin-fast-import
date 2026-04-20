@@ -118,12 +118,24 @@ const FILE_E_BARREL_IMPORT = {
   resolvedModuleType: 'thirdParty' as const,
 };
 
+type ExternalImporter = {
+  packageRootDir: string;
+  filePath: string;
+  importEntry: typeof FILE_D_SINGLE_IMPORT;
+};
+
 function buildExpectedFileA({
   withCrossPackage,
   additionalEntryPointExports = [],
+  extraAlsoOneSingleImporters = [],
 }: {
   withCrossPackage: boolean;
   additionalEntryPointExports?: string[];
+  // initializePackageInfo iterates packageTwo's files in insertion order
+  // (c → d → e) and within each file pushes singleImports then barrelImports.
+  // Extra single importers come from files iterated before e.ts, so they
+  // land before the e.ts barrel entry in externallyImportedBy.
+  extraAlsoOneSingleImporters?: ExternalImporter[];
 }): StrippedAnalyzedFileDetails {
   const oneExternallyImportedBy = withCrossPackage
     ? [
@@ -150,6 +162,9 @@ function buildExpectedFileA({
           importEntry: FILE_E_BARREL_IMPORT,
         },
       ]
+    : [];
+  const alsoOneExternallyImportedBy = withCrossPackage
+    ? [...extraAlsoOneSingleImporters, ...barrelOnlyExternallyImportedBy]
     : [];
 
   return {
@@ -191,7 +206,7 @@ function buildExpectedFileA({
         isTypeExport: true,
         importedBy: [],
         barrelImportedBy: [],
-        externallyImportedBy: barrelOnlyExternallyImportedBy,
+        externallyImportedBy: alsoOneExternallyImportedBy,
         isEntryPoint: true,
         isExternallyImported: false,
       },
@@ -709,6 +724,100 @@ console.log(n);
   const oneExport = fileA.exports.find((e) => e.exportName === 'One');
   assertDefined(oneExport, 'One export missing on FILE_A');
   expect(oneExport.externallyImportedBy).toHaveLength(2);
+  expectNoDuplicateExternalImporters(oneExport.externallyImportedBy);
+});
+
+it('Cache update on an existing file introduces a new cross-package singleImport', () => {
+  const { packageTwoSettings } = initialize();
+
+  // Before the update: full-shape check on both packages in their initial
+  // cross-package state (d.ts single + e.ts barrel importers already wired).
+  expect(getProjectInfo(PACKAGE_ONE_DIR)).toMatchAnalyzedSpec(
+    expectedPkg1({ withCrossPackage: true })
+  );
+  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
+
+  // Rewrite c.ts (packageTwo's entry point) to add a cross-package single
+  // import of AlsoOne, while keeping its Two export. This is the
+  // "edit existing file to introduce a cross-package import" case — distinct
+  // from the "add new file" path covered by the next test.
+  const NEW_C_CONTENTS = `// @ts-expect-error — cross-package import fixture
+import type { AlsoOne } from 'packageOne/a';
+export type Two = AlsoOne;
+`;
+  updateCacheForFile(FILE_C, NEW_C_CONTENTS, parseContents(NEW_C_CONTENTS), packageTwoSettings);
+
+  const FILE_C_SINGLE_IMPORT = {
+    type: 'singleImport' as const,
+    importAlias: 'AlsoOne',
+    importName: 'AlsoOne',
+    isTypeImport: true,
+    moduleSpecifier: 'packageOne/a',
+    resolvedModuleType: 'thirdParty' as const,
+    rootModuleType: undefined,
+  };
+
+  const EXPECTED_FILE_C_WITH_IMPORT: StrippedAnalyzedFileDetails = {
+    fileType: 'code',
+    hasEntryPoints: true,
+    hasExternallyImported: false,
+    singleImports: [FILE_C_SINGLE_IMPORT],
+    barrelImports: [],
+    dynamicImports: [],
+    exports: [
+      {
+        type: 'export',
+        exportName: 'Two',
+        isTypeExport: true,
+        importedBy: [],
+        barrelImportedBy: [],
+        externallyImportedBy: [],
+        isEntryPoint: true,
+        isExternallyImported: false,
+      },
+    ],
+    singleReexports: [],
+    barrelReexports: [],
+  };
+
+  const extraAlsoOneSingleImporters = [
+    {
+      packageRootDir: PACKAGE_TWO_DIR,
+      filePath: FILE_C,
+      importEntry: FILE_C_SINGLE_IMPORT,
+    },
+  ];
+
+  // After the update:
+  // - packageTwo's c.ts gains a singleImport of AlsoOne; the other packageTwo
+  //   files are unchanged.
+  // - packageOne's a.ts export of AlsoOne gains a new single importer alongside
+  //   the existing e.ts barrel importer; One is unchanged.
+  expect(getProjectInfo(PACKAGE_ONE_DIR)).toMatchAnalyzedSpec({
+    [FILE_A]: buildExpectedFileA({
+      withCrossPackage: true,
+      extraAlsoOneSingleImporters,
+    }),
+    [FILE_B]: EXPECTED_FILE_B,
+    [PKG1_CONFIG]: EXPECTED_OTHER_FILE,
+    [PKG1_PACKAGE_JSON]: EXPECTED_OTHER_FILE,
+  });
+  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec({
+    ...EXPECTED_PKG2,
+    [FILE_C]: EXPECTED_FILE_C_WITH_IMPORT,
+  });
+
+  // Regression guards for the initializePackageInfo duplication bug.
+  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const fileA = pkg1Info.files.get(FILE_A);
+  assertCodeFile(fileA, 'FILE_A missing or not a code file');
+
+  const alsoOneExport = fileA.exports.find((e) => e.exportName === 'AlsoOne');
+  assertDefined(alsoOneExport, 'AlsoOne export missing on FILE_A');
+  expectNoDuplicateExternalImporters(alsoOneExport.externallyImportedBy);
+
+  const oneExport = fileA.exports.find((e) => e.exportName === 'One');
+  assertDefined(oneExport, 'One export missing on FILE_A');
   expectNoDuplicateExternalImporters(oneExport.externallyImportedBy);
 });
 
