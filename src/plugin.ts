@@ -12,6 +12,7 @@ import { noRestrictedImports } from './rules/no-restricted-imports/rule.js';
 import { noTestImportsInProd } from './rules/no-test-imports-in-prod/rule.js';
 import { noUnresolvedImports } from './rules/no-unresolved-imports/rule.js';
 import { noUnusedExports } from './rules/no-unused-exports/rule.js';
+import { noUnusedPackageExports } from './rules/no-unused-package-exports/rule.js';
 import { preferAliasImports } from './rules/prefer-alias-imports/rule.js';
 import { requireNodePrefix } from './rules/require-node-prefix/rule.js';
 
@@ -46,6 +47,7 @@ const plugin = {
     'require-node-prefix': requireNodePrefix,
     'no-restricted-imports': noRestrictedImports,
     'prefer-alias-imports': preferAliasImports,
+    'no-unused-package-exports': noUnusedPackageExports,
   },
   processors: {},
 };

@@ -549,7 +549,7 @@ it('Computes analyzed info', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     reportNodeRange: _reportNodeRange,
     ...rest
-  } = Array.from(info.packageEntryPointExports.values())[0];
+  } = Array.from(info.packageEntryPointExports.values())[0].exportEntry;
   expect(rest).toEqual(EXPECTED_FILE_A.singleReexports[0]);
   expect(info.packageName).toEqual('test');
   expect(info.packageRootDir).toEqual(TEST_PROJECT_DIR);

@@ -49,7 +49,7 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
   const pkgAInfo = getProjectInfo(PACKAGE_A_DIR);
   const aExport = pkgAInfo.packageEntryPointExports.get('A');
   assertDefined(aExport, 'A export missing on packageA');
-  const aSingleImporters = aExport.externallyImportedBy.filter(
+  const aSingleImporters = aExport.exportEntry.externallyImportedBy.filter(
     (entry) => entry.importEntry.type === 'singleImport'
   );
   expect(aSingleImporters).toHaveLength(1);
@@ -62,13 +62,13 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
       moduleSpecifier: 'packageA/a',
     },
   });
-  expectNoDuplicateExternalImporters(aExport.externallyImportedBy);
+  expectNoDuplicateExternalImporters(aExport.exportEntry.externallyImportedBy);
 
   const pkgBInfo = getProjectInfo(PACKAGE_B_DIR);
   const bExport = pkgBInfo.packageEntryPointExports.get('B');
   assertDefined(bExport, 'B export missing on packageB');
-  expect(bExport.externallyImportedBy).toHaveLength(1);
-  expect(bExport.externallyImportedBy[0]).toMatchObject({
+  expect(bExport.exportEntry.externallyImportedBy).toHaveLength(1);
+  expect(bExport.exportEntry.externallyImportedBy[0]).toMatchObject({
     packageRootDir: PACKAGE_A_DIR,
     filePath: FILE_A,
     importEntry: {
@@ -77,7 +77,7 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
       moduleSpecifier: 'packageB/b',
     },
   });
-  expectNoDuplicateExternalImporters(bExport.externallyImportedBy);
+  expectNoDuplicateExternalImporters(bExport.exportEntry.externallyImportedBy);
 });
 
 it('Cross-package barrelImport populates externallyImportedBy on every entry-point export', () => {
@@ -87,7 +87,7 @@ it('Cross-package barrelImport populates externallyImportedBy on every entry-poi
   const aExport = pkgAInfo.packageEntryPointExports.get('A');
   assertDefined(aExport, 'A export missing on packageA');
 
-  const barrelImporters = aExport.externallyImportedBy.filter(
+  const barrelImporters = aExport.exportEntry.externallyImportedBy.filter(
     (entry) => entry.importEntry.type === 'barrelImport'
   );
   expect(barrelImporters).toHaveLength(1);
@@ -99,7 +99,7 @@ it('Cross-package barrelImport populates externallyImportedBy on every entry-poi
       moduleSpecifier: 'packageA',
     },
   });
-  expectNoDuplicateExternalImporters(aExport.externallyImportedBy);
+  expectNoDuplicateExternalImporters(aExport.exportEntry.externallyImportedBy);
 });
 
 it('Named barrel reexport entry point tracks cross-package importer', () => {
@@ -108,9 +108,9 @@ it('Named barrel reexport entry point tracks cross-package importer', () => {
   const pkgDInfo = getProjectInfo(PACKAGE_D_DIR);
   const utilsExport = pkgDInfo.packageEntryPointExports.get('utils');
   assertDefined(utilsExport, 'utils export missing on packageD');
-  expect(utilsExport.type).toBe('barrelReexport');
-  expect(utilsExport.externallyImportedBy).toHaveLength(1);
-  expect(utilsExport.externallyImportedBy[0]).toMatchObject({
+  expect(utilsExport.exportEntry.type).toBe('barrelReexport');
+  expect(utilsExport.exportEntry.externallyImportedBy).toHaveLength(1);
+  expect(utilsExport.exportEntry.externallyImportedBy[0]).toMatchObject({
     packageRootDir: PACKAGE_C_DIR,
     filePath: FILE_C,
     importEntry: {
@@ -119,7 +119,7 @@ it('Named barrel reexport entry point tracks cross-package importer', () => {
       moduleSpecifier: 'packageD/d',
     },
   });
-  expectNoDuplicateExternalImporters(utilsExport.externallyImportedBy);
+  expectNoDuplicateExternalImporters(utilsExport.exportEntry.externallyImportedBy);
 });
 
 it('Entry-point export that is not imported by any other package has empty externallyImportedBy', () => {
@@ -128,8 +128,8 @@ it('Entry-point export that is not imported by any other package has empty exter
   const pkgCInfo = getProjectInfo(PACKAGE_C_DIR);
   const cExport = pkgCInfo.packageEntryPointExports.get('C');
   assertDefined(cExport, 'C export missing on packageC');
-  expect(cExport.externallyImportedBy).toEqual([]);
-  expectNoDuplicateExternalImporters(cExport.externallyImportedBy);
+  expect(cExport.exportEntry.externallyImportedBy).toEqual([]);
+  expectNoDuplicateExternalImporters(cExport.exportEntry.externallyImportedBy);
 });
 
 it('Entry-point exports for all four packages appear in packageEntryPointExports', () => {

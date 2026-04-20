@@ -380,7 +380,10 @@ it('Cross-package singleImport populates externallyImportedBy on the matching en
   });
 
   // packageEntryPointExports should expose `One` by name.
-  expect(pkg1Info.packageEntryPointExports.get('One')).toBe(oneExport);
+  expect(pkg1Info.packageEntryPointExports.get('One')).toEqual({
+    filePath: FILE_A,
+    exportEntry: oneExport,
+  });
 });
 
 it('packageEntryPointExports iterates as a Map keyed by export name', () => {
@@ -391,7 +394,7 @@ it('packageEntryPointExports iterates as a Map keyed by export name', () => {
   const pkg1KeysSorted = pkg1Entries.map(([key]) => key).sort();
   expect(pkg1KeysSorted).toEqual(['AlsoOne', 'One']);
   for (const [key, entry] of pkg1Entries) {
-    expect(entry.exportName).toBe(key);
+    expect(entry.exportEntry.exportName).toBe(key);
   }
 
   const pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);

@@ -224,6 +224,9 @@ export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
    */
   packageEntryPointExports: Map<
     string,
-    AnalyzedExport | AnalyzedSingleReexport | AnalyzedBarrelReexport
+    {
+      filePath: string;
+      exportEntry: AnalyzedExport | AnalyzedSingleReexport | AnalyzedBarrelReexport;
+    }
   >;
 };

@@ -200,7 +200,7 @@ function initializePackageInfo() {
   // arrays, otherwise we end up with duplicates.
   for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
     for (const [, entryPoint] of analyzedProjectInfo.packageEntryPointExports) {
-      entryPoint.externallyImportedBy = [];
+      entryPoint.exportEntry.externallyImportedBy = [];
     }
   }
 
@@ -241,7 +241,7 @@ function initializePackageInfo() {
               debug(`Export ${importEntry.importName} not found in package ${packageName}`);
               continue;
             }
-            exportEntry.externallyImportedBy.push({
+            exportEntry.exportEntry.externallyImportedBy.push({
               packageRootDir: analyzedProjectInfo.packageRootDir,
               filePath,
               importEntry,
@@ -251,7 +251,7 @@ function initializePackageInfo() {
           // For barrel imports, we mark all exports as externally imported
           case 'barrelImport': {
             for (const [, exportEntry] of packageEntryPointExports) {
-              exportEntry.externallyImportedBy.push({
+              exportEntry.exportEntry.externallyImportedBy.push({
                 packageRootDir: analyzedProjectInfo.packageRootDir,
                 filePath,
                 importEntry,
