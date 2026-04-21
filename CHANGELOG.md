@@ -2,25 +2,26 @@
 
 ## 3.0.0
 
-Version 3 introduces a fairly large refactor of the plugin's configuration system. This refactor enables users to configure a single, root-level ESLint/Oxlint config in a monorepo that covers all packages, instead of requiring a separate ESLint/Oxlint config in each package.
+Version 3 introduces a fairly large refactor of the plugin's configuration system. This refactor enables users to configure a single, root-level ESLint/Oxlint config in a monorepo that covers all packages, instead of requiring a separate ESLint/Oxlint config in each package. As such, there are a variety of smaller breaking changes detailed below.
 
-- BREAKING CHANGE: `fast-import.config.json` is now only supported when specifying `repoRootDir` in the plugin settings
 - BREAKING CHANGE: Removed the `consistent-file-extensions` rule
-  - This rule papered over gaps in tooling that is no longer needed, and was difficult to use
+  - This rule papered over gaps in tooling that is no longer needed, and was difficult to use and maintain properly
 - BREAKING CHANGE: Removed `all()` and `recommended()` config helpers
-  - These helpers became less useful due to other changes, and given that they were a departure from standard plugin configuration mechanisms, I think the value they brought is now outweighed by the confusion they caused
-  - Use `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.all`, and `fastImportPlugin.configs.off` instead for rules
+  - These helpers became less useful due to other changes
+  - Given that they were a departure from standard plugin configuration mechanisms, I think the value they brought is now outweighed by the confusion they caused
+  - Use `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.all`, and `fastImportPlugin.configs.off`
   - Put plugin settings in `settings['fast-import']`
 - BREAKING CHANGE: Replaced `entryPoints` with `entryPointFiles` and `externallyImported` with `externallyImportedFiles`
   - Previously, `entryPoints`/`externallyImported` indicated a list of exports from a given file that were considered for analysis. In practice this has proven difficult for users to maintain, so basically everyone wrote `/.*/` to include all exports from that file.
-  - Regexes themselves are tricky, since they're not serializable, so we also added a change to allow `{ regexp: "..." }` objects to be used instead of strings.
-  - This complexity doesn't benefit us, so the new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
+  - Regexes themselves are tricky, since they're not serializable, so we also added a change to allow `{ regexp: "..." }` objects to be used instead of strings, further complicating configuration
+  - The new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
 - BREAKING CHANGE: `rootDir` was renamed to `packageRootDir` across all API surfaces
-  - The previous naming was a little confusing. In practice, it is meant to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause Fast Import to not parse `tsconfig.json` and automatically detect aliases, etc.
+  - The previous naming was a little confusing. It is intended to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause Fast Import to not parse `tsconfig.json` and automatically detect aliases, etc., even though tsconfig's `rootDir` option _is_ intended to point to `src`
 - BREAKING CHANGE: `getESMInfo` now returns `packageSettings` for the current package instead of `settings`, reflecting the new monorepo-aware settings model
   - In monorepo root-config mode, package settings are discovered recursively from `fast-import.config.json` files
   - The directory containing each `fast-import.config.json` becomes that package's `packageRootDir`, and nested `fast-import.config.json` files are not allowed
-- Config files matching `/*.config.*` are now automatically treated as externally imported
+- BREAKING CHANGE: Default ignore folder list expanded to include folders that start with a dot (e.g. `.git`, `.next`, etc.) and `out`
+- BREAKING CHANGE: Config files matching `/*.config.*` are now automatically treated as externally imported
   - If you previously specified these entries in your config, you can remove them
 - Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
 

@@ -129,7 +129,7 @@ In single-repo mode, you must set `packageRootDir` directly in `settings['fast-i
 
 In monorepo mode, every package still has a `packageRootDir` under the hood, but it is inferred automatically from the directory containing that package's `fast-import.config.json` file.
 
-Note: Fast Import automatically filters out folders named `node_modules`, `.git`, `build`, and `dist` regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze one of these folders, file an issue and we'll find a way to support your use case.
+Note: Fast Import automatically filters out folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze one of these folders, file an issue and we'll find a way to support your use case.
 
 `packageRootDir` _must_ be an absolute path!
 
@@ -189,7 +189,7 @@ Type: `Record<string, string>`
 
 Fast Import defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
 
-- Aliases that point to files outside of `packageRootDir`, or point to files inside of `node_modules`/`.git`/`dist`/`build`, are ignored
+- Aliases that point to files outside of `packageRootDir`, or point to files inside of `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, are ignored
 - Aliases with more than one file, e.g. `"@/": ["a.ts", "b.ts"]`, are ignored
 
 Example:

@@ -35,6 +35,8 @@ it('Fetches files asynchronously, respecting ignorePatterns', async () => {
     },
   ]);
 
+  // .ignored.ts is not included in this list, which means this expect also
+  // verifies that .ignored.ts is filtered out
   expect(files.packageJsons).toEqual([
     join(TEST_PROJECT_DIR, 'package.json'),
     join(ROOT_DIR, 'package.json'),

@@ -14,11 +14,16 @@ type PotentialFile = {
   stats: Stats;
 };
 
-const DEFAULT_IGNORE_DIRECTORIES = ['node_modules', 'dist', 'build', '.git'];
+// Remember to update the README when changing this list
+const DEFAULT_IGNORE_DIRECTORIES = ['node_modules', 'dist', 'build', 'out'];
 
+// Check if a path should be ignored by default, including if any path segment
+// starts with a dot (e.g. .git, .next, etc.)
 export function isDefaultIgnoredPath(path: string) {
-  return DEFAULT_IGNORE_DIRECTORIES.some(
-    (dir) => path.includes(sep + dir + sep) || path.endsWith(sep + dir)
+  return (
+    DEFAULT_IGNORE_DIRECTORIES.some(
+      (dir) => path.includes(sep + dir + sep) || path.endsWith(sep + dir)
+    ) || path.includes(sep + '.')
   );
 }
 
