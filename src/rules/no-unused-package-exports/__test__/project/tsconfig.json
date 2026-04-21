@@ -1,0 +1,23 @@
+// Fixture-scope tsconfig. The repo's root tsconfig excludes
+// `__test__/**/project/*` from its build, and a per-package tsconfig would
+// only cover one package's files at a time, so a fixture-root tsconfig is
+// the single place that can declare the cross-package path aliases used by
+// every consumer in this fixture monorepo.
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "incremental": false,
+    "paths": {
+      "one": ["./packages/one/entry.ts"],
+      "two": ["./packages/two/entry.ts"],
+      "three": ["./packages/three/entry.ts"],
+      "four": ["./packages/four/entry.ts"],
+      "filter": ["./packages/filter/entryA.ts"],
+      "filter/b": ["./packages/filter/entryB.ts"]
+    }
+  },
+  "include": ["packages/**/*.ts"]
+}

@@ -1,3 +1,4 @@
+import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noUnusedPackageExports = createRule({
@@ -29,7 +30,8 @@ export const noUnusedPackageExports = createRule({
       return {};
     }
 
-    // If this file doesn't have any entry points, then we don't need to check it
+    // If this file doesn't have any entry points, then we can bail early and
+    // avoid needing to do a more expensive filter.
     if (!fileInfo.hasEntryPoints) {
       return {};
     }
@@ -41,11 +43,19 @@ export const noUnusedPackageExports = createRule({
     // Check each export and reexport to make sure it's being used
     for (const { exportEntry } of fileEntryPointExports) {
       if (exportEntry.externallyImportedBy.length === 0) {
+        // Only AnalyzedBarrelReexport has an optional exportName, and
+        // computeAnalyzedInfo.ts gates its entry into
+        // packageEntryPointExports on exportName being truthy, so every
+        // entry here has a defined exportName.
+        /* istanbul ignore if */
+        if (!exportEntry.exportName) {
+          throw new InternalError('exportName unexpectedly undefined');
+        }
         context.report({
           messageId: 'noUnusedPackageExports',
           loc: getLocFromRange(context, exportEntry.reportNodeRange),
           data: {
-            name: exportEntry.exportName || '<unnamed>',
+            name: exportEntry.exportName,
           },
         });
       }

@@ -146,7 +146,8 @@ type AnalyzedExportBase = {
       | AnalyzedSingleImport
       | AnalyzedSingleReexport
       | AnalyzedBarrelImport
-      | AnalyzedBarrelReexport;
+      | AnalyzedBarrelReexport
+      | AnalyzedDynamicImport;
   }>;
 
   /**
