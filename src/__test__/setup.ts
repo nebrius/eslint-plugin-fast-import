@@ -74,10 +74,10 @@ function toMatchSpec<
       };
     }
 
-    if (expectedFileDetails.hasExternallyImported !== fileDetails.hasExternallyImported) {
+    if (expectedFileDetails.isExternallyImported !== fileDetails.isExternallyImported) {
       return {
         message: () =>
-          `file path ${filePath} has the wrong hasExternallyImported: expected ${String(expectedFileDetails.hasExternallyImported)}, received ${String(fileDetails.hasExternallyImported)}`,
+          `file path ${filePath} has the wrong hasExternallyImported: expected ${String(expectedFileDetails.isExternallyImported)}, received ${String(fileDetails.isExternallyImported)}`,
         pass: false,
       };
     }

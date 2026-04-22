@@ -35,7 +35,7 @@ const packageSettings: ParsedPackageSettings = {
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -73,7 +73,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [
     {
       type: 'singleImport',
@@ -136,7 +136,7 @@ it('Updates project cache when a new file is added', () => {
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -180,7 +180,7 @@ export type Two = string;
   const EXPECTED_FILE_A_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -227,7 +227,7 @@ export type Two = string;
   const EXPECTED_FILE_B_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [
       {
         type: 'singleImport',
@@ -287,7 +287,7 @@ it('Updates project cache in bulk for a code file', () => {
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -323,7 +323,7 @@ it('Updates project cache in bulk for a code file', () => {
   const EXPECTED_FILE_TS_NEW_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: false,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],

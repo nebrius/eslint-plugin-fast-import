@@ -70,7 +70,7 @@ const EXPECTED_OTHER_FILE: StrippedAnalyzedFileDetails = { fileType: 'other' };
 const EMPTY_CODE_FILE: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -170,7 +170,7 @@ function buildExpectedFileA({
   return {
     fileType: 'code',
     hasEntryPoints: true,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
@@ -229,7 +229,7 @@ function buildExpectedFileA({
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [
     {
       type: 'singleImport',
@@ -260,7 +260,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: true,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
@@ -283,7 +283,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [FILE_D_SINGLE_IMPORT],
   barrelImports: [],
   dynamicImports: [],
@@ -295,7 +295,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
 const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   singleImports: [],
   barrelImports: [FILE_E_BARREL_IMPORT],
   dynamicImports: [],
@@ -763,7 +763,7 @@ export type Two = AlsoOne;
   const EXPECTED_FILE_C_WITH_IMPORT: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     hasEntryPoints: true,
-    hasExternallyImported: false,
+    isExternallyImported: false,
     singleImports: [FILE_C_SINGLE_IMPORT],
     barrelImports: [],
     dynamicImports: [],

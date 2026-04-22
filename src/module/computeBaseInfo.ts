@@ -284,7 +284,7 @@ function computeFileDetails({
     barrelReexports: [],
     exports: [],
     hasEntryPoints: false,
-    hasExternallyImported: false,
+    isExternallyImported: false,
   };
 
   let hasEntryPoints = false;
@@ -463,7 +463,7 @@ function computeFileDetails({
     fileDetails.hasEntryPoints = true;
   }
   if (hasExternallyImported) {
-    fileDetails.hasExternallyImported = true;
+    fileDetails.isExternallyImported = true;
   }
 
   // De-dupe exports with the same name (e.g. TypeScript function overloads).

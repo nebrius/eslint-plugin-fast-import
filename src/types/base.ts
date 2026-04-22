@@ -296,7 +296,7 @@ export type BaseCodeFileDetails = {
   /**
    * Indicates whether or not any of this file's exports are externally imported
    */
-  hasExternallyImported: boolean;
+  isExternallyImported: boolean;
 
   exports: BaseExport[];
   singleImports: BaseSingleImport[];

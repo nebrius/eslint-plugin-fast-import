@@ -26,7 +26,7 @@ export function computeResolvedInfo(baseProjectInfo: BaseProjectInfo): ResolvedP
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       hasEntryPoints: baseFileDetails.hasEntryPoints,
-      hasExternallyImported: baseFileDetails.hasExternallyImported,
+      isExternallyImported: baseFileDetails.isExternallyImported,
       lastUpdatedAt: baseFileDetails.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -59,7 +59,7 @@ export function addResolvedInfoForFile(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       hasEntryPoints: baseFileInfo.hasEntryPoints,
-      hasExternallyImported: baseFileInfo.hasExternallyImported,
+      isExternallyImported: baseFileInfo.isExternallyImported,
       lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -96,7 +96,7 @@ export function updateResolvedInfoForFile(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       hasEntryPoints: baseFileInfo.hasEntryPoints,
-      hasExternallyImported: baseFileInfo.hasExternallyImported,
+      isExternallyImported: baseFileInfo.isExternallyImported,
       lastUpdatedAt: baseFileInfo.lastUpdatedAt,
       exports: [],
       singleImports: [],
@@ -144,7 +144,7 @@ export function deleteResolvedInfoForFile(
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
       hasEntryPoints: fileDetailsToUpdate.hasEntryPoints,
-      hasExternallyImported: fileDetailsToUpdate.hasExternallyImported,
+      isExternallyImported: fileDetailsToUpdate.isExternallyImported,
       lastUpdatedAt: fileDetailsToUpdate.lastUpdatedAt,
       exports: [],
       singleImports: [],

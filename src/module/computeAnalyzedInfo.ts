@@ -38,7 +38,7 @@ export function computeAnalyzedInfo(resolvedProjectInfo: ResolvedProjectInfo): A
     const analyzedFileInfo: AnalyzedCodeFileDetails = {
       fileType: 'code',
       hasEntryPoints: fileDetails.hasEntryPoints,
-      hasExternallyImported: fileDetails.hasExternallyImported,
+      isExternallyImported: fileDetails.isExternallyImported,
       lastUpdatedAt: fileDetails.lastUpdatedAt,
       exports: [],
       singleImports: [],

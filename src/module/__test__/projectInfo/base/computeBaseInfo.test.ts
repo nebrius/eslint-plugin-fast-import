@@ -20,7 +20,7 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 const EXPECTED_FILE_A: StrippedBaseFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   exports: [
     {
       type: 'export',
@@ -214,7 +214,7 @@ const EXPECTED_FILE_A: StrippedBaseFileDetails = {
 
 const EXPECTED_FILE_B: StrippedBaseFileDetails = {
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   exports: [
     {
       type: 'export',
@@ -315,7 +315,7 @@ const EXPECTED_FILE_B: StrippedBaseFileDetails = {
 const EXPECTED_FILE_C: StrippedBaseFileDetails = {
   fileType: 'code',
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   exports: [
     {
       type: 'export',
@@ -386,7 +386,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
 
 const EXPECTED_FILE_D: StrippedBaseFileDetails = {
   hasEntryPoints: false,
-  hasExternallyImported: false,
+  isExternallyImported: false,
   exports: [
     {
       type: 'export',
@@ -482,7 +482,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       hasEntryPoints: false,
-      hasExternallyImported: false,
+      isExternallyImported: false,
       fileType: 'code',
       singleImports: [
         {
@@ -514,7 +514,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       hasEntryPoints: false,
-      hasExternallyImported: false,
+      isExternallyImported: false,
       fileType: 'code',
       singleImports: [
         {
@@ -570,7 +570,7 @@ it('Adds, modifies, and deletes a new file', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       hasEntryPoints: false,
-      hasExternallyImported: false,
+      isExternallyImported: false,
       fileType: 'code',
       singleImports: [
         {

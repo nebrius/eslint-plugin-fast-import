@@ -54,7 +54,7 @@ it('Updates cache when a new file is added', () => {
     [SINGLEREPO_FILE_A]: {
       fileType: 'code',
       hasEntryPoints: false,
-      hasExternallyImported: false,
+      isExternallyImported: false,
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
