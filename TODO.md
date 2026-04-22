@@ -7,4 +7,5 @@
 - Allow config files in single repo mode (useful for mixed package-level single-repo and repo-level monorepo configs)
 - Fix camelCase package names in test package.json files
 - Upgrade to TypeScript 6
-- Come up with cleaner answer to "multiple entry point files might have colliding export names" problem.
+- Automatically infer entry point files from a combination of package.json and tsconfig.json (the latter creates the mapping for the former)
+- Support config files in JSON-C

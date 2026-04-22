@@ -97,7 +97,9 @@ export function getFilesSync(
     parentPackageJsons,
     ignorePatterns,
     ignoreOverridePatterns,
-    potentialFiles.filter(({ filePath }) => basename(filePath) !== '.gitignore')
+    potentialFiles.filter(
+      ({ filePath }) => !isDefaultIgnoredPath(filePath) && !basename(filePath).startsWith('.')
+    )
   );
 }
 
@@ -143,7 +145,7 @@ export async function getFiles(
     ignorePatterns,
     ignoreOverridePatterns,
     potentialFiles.filter(
-      ({ filePath }) => !isDefaultIgnoredPath(filePath) && basename(filePath) !== '.gitignore'
+      ({ filePath }) => !isDefaultIgnoredPath(filePath) && !basename(filePath).startsWith('.')
     )
   );
 }
