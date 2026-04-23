@@ -215,7 +215,9 @@ export const alsoScratch = 2;
       code: `export const Unused = 1;
 `,
       filename: FILE_ONE_ENTRY,
-      errors: [{ messageId: 'noUnusedPackageExports', data: { name: 'Unused' } }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'Unused' } },
+      ],
       settings: MONOREPO_SETTINGS,
     },
     // Mixed used/unused reports only the unused one.
@@ -224,7 +226,9 @@ export const alsoScratch = 2;
 export const Unused = 2;
 `,
       filename: FILE_ONE_ENTRY,
-      errors: [{ messageId: 'noUnusedPackageExports', data: { name: 'Unused' } }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'Unused' } },
+      ],
       settings: MONOREPO_SETTINGS,
     },
     // Each unused export gets its own report.
@@ -246,7 +250,9 @@ export const SecondUnused = 2;
       code: `export default 10;
 `,
       filename: FILE_ONE_ENTRY,
-      errors: [{ messageId: 'noUnusedPackageExports', data: { name: 'default' } }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'default' } },
+      ],
       settings: MONOREPO_SETTINGS,
     },
 
@@ -278,7 +284,9 @@ export const SecondUnused = 2;
       code: `export * as Namespace from './internal';
 `,
       filename: FILE_ONE_ENTRY,
-      errors: [{ messageId: 'noUnusedPackageExports', data: { name: 'Namespace' } }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'Namespace' } },
+      ],
       settings: MONOREPO_SETTINGS,
     },
 
@@ -291,7 +299,9 @@ export const SecondUnused = 2;
       code: `export const AlsoUnused = 1;
 `,
       filename: FILE_FILTER_ENTRY_B,
-      errors: [{ messageId: 'noUnusedPackageExports', data: { name: 'AlsoUnused' } }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'AlsoUnused' } },
+      ],
       settings: MONOREPO_SETTINGS,
     },
   ],

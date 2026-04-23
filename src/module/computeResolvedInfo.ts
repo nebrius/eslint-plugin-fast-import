@@ -2,12 +2,21 @@ import { builtinModules } from 'node:module';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 
 import type { BaseCodeFileDetails, BaseProjectInfo } from '../types/base.js';
-import type { Resolved, ResolvedCodeFileDetails, ResolvedProjectInfo } from '../types/resolved.js';
+import type {
+  Resolved,
+  ResolvedCodeFileDetails,
+  ResolvedProjectInfo,
+} from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
-import { getRelativePathFromRoot, splitPathIntoSegments } from '../util/files.js';
+import {
+  getRelativePathFromRoot,
+  splitPathIntoSegments,
+} from '../util/files.js';
 
-export function computeResolvedInfo(baseProjectInfo: BaseProjectInfo): ResolvedProjectInfo {
+export function computeResolvedInfo(
+  baseProjectInfo: BaseProjectInfo
+): ResolvedProjectInfo {
   // Always recompute the folder tree when we're starting from scratch
   computeFolderTree(baseProjectInfo);
 
@@ -36,7 +45,12 @@ export function computeResolvedInfo(baseProjectInfo: BaseProjectInfo): ResolvedP
       barrelReexports: [],
     };
     resolvedProjectInfo.files.set(filePath, resolvedCodeFileDetails);
-    populateFileDetails(baseProjectInfo, filePath, baseFileDetails, resolvedCodeFileDetails);
+    populateFileDetails(
+      baseProjectInfo,
+      filePath,
+      baseFileDetails,
+      resolvedCodeFileDetails
+    );
   }
   return resolvedProjectInfo;
 }
@@ -69,7 +83,12 @@ export function addResolvedInfoForFile(
       barrelReexports: [],
     };
     previousResolvedProjectInfo.files.set(filePath, resolvedCodeFileDetails);
-    populateFileDetails(newBaseProjectInfo, filePath, baseFileInfo, resolvedCodeFileDetails);
+    populateFileDetails(
+      newBaseProjectInfo,
+      filePath,
+      baseFileInfo,
+      resolvedCodeFileDetails
+    );
   } else {
     previousResolvedProjectInfo.files.set(filePath, {
       fileType: 'other',
@@ -82,12 +101,17 @@ export function updateResolvedInfoForFile(
   baseProjectInfo: BaseProjectInfo,
   resolvedProjectInfo: ResolvedProjectInfo
 ) {
-  const filePathsToUpdate = [filePath, ...getFileReferences(resolvedProjectInfo, filePath)];
+  const filePathsToUpdate = [
+    filePath,
+    ...getFileReferences(resolvedProjectInfo, filePath),
+  ];
   for (const filePathToUpdate of filePathsToUpdate) {
     const baseFileInfo = baseProjectInfo.files.get(filePathToUpdate);
     /* istanbul ignore if */
     if (!baseFileInfo) {
-      throw new InternalError(`Could not get base file info for ${filePathToUpdate}`);
+      throw new InternalError(
+        `Could not get base file info for ${filePathToUpdate}`
+      );
     }
     /* istanbul ignore if */
     if (baseFileInfo.fileType !== 'code') {
@@ -105,7 +129,12 @@ export function updateResolvedInfoForFile(
       singleReexports: [],
       barrelReexports: [],
     };
-    populateFileDetails(baseProjectInfo, filePathToUpdate, baseFileInfo, resolvedCodeFileDetails);
+    populateFileDetails(
+      baseProjectInfo,
+      filePathToUpdate,
+      baseFileInfo,
+      resolvedCodeFileDetails
+    );
     resolvedProjectInfo.files.set(filePathToUpdate, resolvedCodeFileDetails);
   }
 }
@@ -121,13 +150,19 @@ export function deleteResolvedInfoForFile(
     throw new InternalError(`Could not get base file info for ${filePath}`);
   }
 
-  const filePathsToUpdate = getFileReferences(previousResolvedProjectInfo, filePath);
+  const filePathsToUpdate = getFileReferences(
+    previousResolvedProjectInfo,
+    filePath
+  );
   for (const filePathToUpdate of filePathsToUpdate) {
-    const fileDetailsToUpdate = previousResolvedProjectInfo.files.get(filePathToUpdate);
+    const fileDetailsToUpdate =
+      previousResolvedProjectInfo.files.get(filePathToUpdate);
 
     /* istanbul ignore if */
     if (!fileDetailsToUpdate) {
-      throw new InternalError('filePathToUpdate missing in resolved project info');
+      throw new InternalError(
+        'filePathToUpdate missing in resolved project info'
+      );
     }
 
     /* istanbul ignore if */
@@ -153,7 +188,10 @@ export function deleteResolvedInfoForFile(
       singleReexports: [],
       barrelReexports: [],
     };
-    previousResolvedProjectInfo.files.set(filePathToUpdate, resolvedCodeFileDetails);
+    previousResolvedProjectInfo.files.set(
+      filePathToUpdate,
+      resolvedCodeFileDetails
+    );
     populateFileDetails(
       newBaseProjectInfo,
       filePathToUpdate,
@@ -172,7 +210,9 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
   };
   folderTrees.set(baseInfo.packageRootDir, folderTree);
   for (const [file] of baseInfo.files) {
-    const folders = splitPathIntoSegments(getRelativePathFromRoot(baseInfo.packageRootDir, file));
+    const folders = splitPathIntoSegments(
+      getRelativePathFromRoot(baseInfo.packageRootDir, file)
+    );
     const basefile = folders.pop();
     /* istanbul ignore if */
     if (!basefile) {
@@ -216,16 +256,28 @@ export function computeFolderTree(baseInfo: BaseProjectInfo) {
 }
 
 // Find all files that import/reexport from this file, or that this file is imported from
-function getFileReferences(previousResolvedProjectInfo: ResolvedProjectInfo, filePath: string) {
+function getFileReferences(
+  previousResolvedProjectInfo: ResolvedProjectInfo,
+  filePath: string
+) {
   const fileReferences = [];
-  const previousResolvedFileEntry = previousResolvedProjectInfo.files.get(filePath);
+  const previousResolvedFileEntry =
+    previousResolvedProjectInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!previousResolvedFileEntry) {
-    throw new InternalError(`Could not get previous resolved entry for ${filePath}`);
+    throw new InternalError(
+      `Could not get previous resolved entry for ${filePath}`
+    );
   }
 
-  for (const [candidateFilePath, candidateFileDetails] of previousResolvedProjectInfo.files) {
-    if (candidateFileDetails.fileType !== 'code' || candidateFilePath === filePath) {
+  for (const [
+    candidateFilePath,
+    candidateFileDetails,
+  ] of previousResolvedProjectInfo.files) {
+    if (
+      candidateFileDetails.fileType !== 'code' ||
+      candidateFilePath === filePath
+    ) {
       continue;
     }
 
@@ -236,7 +288,9 @@ function getFileReferences(previousResolvedProjectInfo: ResolvedProjectInfo, fil
       ...candidateFileDetails.dynamicImports,
       ...candidateFileDetails.singleReexports,
       ...candidateFileDetails.barrelReexports,
-    ].some((i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath);
+    ].some(
+      (i) => 'resolvedModulePath' in i && i.resolvedModulePath === filePath
+    );
 
     // If this file isn't a code file, then it can only be imported
     if (previousResolvedFileEntry.fileType === 'other') {
@@ -253,7 +307,11 @@ function getFileReferences(previousResolvedProjectInfo: ResolvedProjectInfo, fil
       ...previousResolvedFileEntry.dynamicImports,
       ...previousResolvedFileEntry.singleReexports,
       ...previousResolvedFileEntry.barrelReexports,
-    ].some((i) => i.resolvedModuleType === 'firstPartyCode' && i.resolvedModulePath === filePath);
+    ].some(
+      (i) =>
+        i.resolvedModuleType === 'firstPartyCode' &&
+        i.resolvedModulePath === filePath
+    );
 
     // If this file is a code file, we have to check both possibilities
     if (doesCandidateImportFile || doesFileImportCandidate) {
@@ -375,7 +433,9 @@ type FolderTreeNode = {
 // Map from packageRootDir to folder tree
 const folderTrees = new Map<string, FolderTreeNode>();
 
-const formattedBuiltinModules = builtinModules.filter((m) => !m.startsWith('_'));
+const formattedBuiltinModules = builtinModules.filter(
+  (m) => !m.startsWith('_')
+);
 for (let i = formattedBuiltinModules.length - 1; i >= 0; i--) {
   const builtinModule = formattedBuiltinModules[i];
   formattedBuiltinModules.push(`node:${builtinModule}`);
@@ -415,10 +475,14 @@ function resolveModuleSpecifier({
     const folderSegments = [...segments];
     /* istanbul ignore if */
     if (!lastSegment) {
-      throw new InternalError(`lastSegment for ${absolutishFilePath} is undefined`);
+      throw new InternalError(
+        `lastSegment for ${absolutishFilePath} is undefined`
+      );
     }
 
-    let currentFolderTreeNode = folderTrees.get(baseProjectInfo.packageRootDir) ?? {
+    let currentFolderTreeNode = folderTrees.get(
+      baseProjectInfo.packageRootDir
+    ) ?? {
       folders: {},
       files: {},
       filesAndExtensions: {},
@@ -428,7 +492,8 @@ function resolveModuleSpecifier({
       if (!currentFolderSegment) {
         break;
       }
-      currentFolderTreeNode = currentFolderTreeNode.folders[currentFolderSegment];
+      currentFolderTreeNode =
+        currentFolderTreeNode.folders[currentFolderSegment];
 
       // If there is no folder segment present, then that means this is an unresolved import
       if (!currentFolderTreeNode) {
@@ -526,7 +591,9 @@ function resolveModuleSpecifier({
     /* eslint-enable @typescript-eslint/no-unnecessary-condition */
   }
 
-  function formatResolvedEntry(resolvedModulePath: string | undefined): Resolved {
+  function formatResolvedEntry(
+    resolvedModulePath: string | undefined
+  ): Resolved {
     if (!resolvedModulePath) {
       return {
         resolvedModuleType: 'firstPartyOther',
@@ -534,7 +601,9 @@ function resolveModuleSpecifier({
       };
     }
     return {
-      resolvedModuleType: isCodeFile(resolvedModulePath) ? 'firstPartyCode' : 'firstPartyOther',
+      resolvedModuleType: isCodeFile(resolvedModulePath)
+        ? 'firstPartyCode'
+        : 'firstPartyOther',
       resolvedModulePath,
     };
   }
@@ -561,7 +630,10 @@ function resolveModuleSpecifier({
   // Check if this path starts with the a wildcard alias, which means its first party
   for (const [alias, path] of Object.entries(baseProjectInfo.wildcardAliases)) {
     if (moduleSpecifier.startsWith(alias)) {
-      const absolutishPath = getRelativePathFromRoot(baseProjectInfo.packageRootDir, path);
+      const absolutishPath = getRelativePathFromRoot(
+        baseProjectInfo.packageRootDir,
+        path
+      );
       const resolvedModulePath = resolveFirstPartyImport(
         join(moduleSpecifier.replace(alias, absolutishPath))
       );

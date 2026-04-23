@@ -1,6 +1,11 @@
 import type { AnalyzedProjectInfo } from '../../types/analyzed.js';
 import { InternalError } from '../../util/error.js';
-import { createRule, getESMInfo, getLocFromRange, registerUpdateListener } from '../util.js';
+import {
+  createRule,
+  getESMInfo,
+  getLocFromRange,
+  registerUpdateListener,
+} from '../util.js';
 
 type Options = [];
 type MessageIds = 'noCycles';
@@ -37,11 +42,14 @@ function checkFile(
     const filesInCycle = importStack.slice(firstInstanceIndex);
     for (let i = 0; i < filesInCycle.length; i++) {
       const currentFile = filesInCycle[i];
-      const nextFile = i === filesInCycle.length - 1 ? filesInCycle[0] : filesInCycle[i + 1];
+      const nextFile =
+        i === filesInCycle.length - 1 ? filesInCycle[0] : filesInCycle[i + 1];
 
       const currentCycleMapEntry = cycleMap.get(currentFile);
       if (!currentCycleMapEntry) {
-        throw new InternalError(`Cycle map entry is undefined for ${currentFile}`);
+        throw new InternalError(
+          `Cycle map entry is undefined for ${currentFile}`
+        );
       }
       currentCycleMapEntry.add(nextFile);
     }
@@ -137,7 +145,9 @@ export const noCycle = createRule<Options, MessageIds>({
 
     /* istanbul ignore if */
     if (!cycleImports) {
-      throw new InternalError(`Cycle list is undefined for ${context.filename}`);
+      throw new InternalError(
+        `Cycle list is undefined for ${context.filename}`
+      );
     }
 
     // Dedupe imports, since we mark cycle imports on a per-file basis, not on a

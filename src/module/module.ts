@@ -4,7 +4,10 @@ import { dirname, join } from 'node:path';
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
 
-import { getAllPackageSettings, type ParsedPackageSettings } from '../settings/settings.js';
+import {
+  getAllPackageSettings,
+  type ParsedPackageSettings,
+} from '../settings/settings.js';
 import type {
   AnalyzedBarrelImport,
   AnalyzedBarrelReexport,
@@ -78,7 +81,13 @@ function getEntryPointCheck(
       // identify when a file is _included_, not _excluded_. We also have to
       // be careful with Windows styled paths, since gitignores use unix paths
       // even on Windows.
-      if (file.ignores(convertToUnixishPath(getRelativePathFromRoot(packageRootDir, filePath)))) {
+      if (
+        file.ignores(
+          convertToUnixishPath(
+            getRelativePathFromRoot(packageRootDir, filePath)
+          )
+        )
+      ) {
         return true;
       }
     }
@@ -94,7 +103,9 @@ export function _resetProjectInfo() {
   analyzedProjectInfos.clear();
 }
 
-export function initializeRepo(context: Pick<GenericContext, 'filename' | 'settings'>) {
+export function initializeRepo(
+  context: Pick<GenericContext, 'filename' | 'settings'>
+) {
   const { allPackageSettings } = getAllPackageSettings(context);
   let hasChanges = false;
   for (const packageSettings of allPackageSettings) {
@@ -137,7 +148,10 @@ export function initializeProject({
     ignorePatterns,
     ignoreOverridePatterns,
     isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
-    isExternallyImportedCheck: getEntryPointCheck(packageRootDir, externallyImported),
+    isExternallyImportedCheck: getEntryPointCheck(
+      packageRootDir,
+      externallyImported
+    ),
   });
   baseProjectInfos.set(packageRootDir, baseProjectInfo);
   const baseEnd = performance.now();
@@ -173,7 +187,9 @@ export function initializeProject({
     numReexports += fileDetails.barrelReexports.length;
   }
 
-  debug(`Project contains ${analyzedProjectInfo.files.size.toLocaleString()} files with:`);
+  debug(
+    `Project contains ${analyzedProjectInfo.files.size.toLocaleString()} files with:`
+  );
   debug(`  ${numImports.toLocaleString()} imports`);
   debug(`  ${numExports.toLocaleString()} exports`);
   debug(`  ${numReexports.toLocaleString()} reexports`);
@@ -183,7 +199,10 @@ export function initializeProject({
 
 function initializePackageInfo() {
   const analyzestart = performance.now();
-  const packageEntryPoints = new Map<string, AnalyzedProjectInfo['packageEntryPointExports']>();
+  const packageEntryPoints = new Map<
+    string,
+    AnalyzedProjectInfo['packageEntryPointExports']
+  >();
 
   // Initialize the package dependencies map
   for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
@@ -246,9 +265,13 @@ function initializePackageInfo() {
           // For single imports, we need to find the specific export so we can
           // mark it as externally imported
           case 'singleImport': {
-            const exportEntry = packageEntryPointExports.get(importEntry.importName);
+            const exportEntry = packageEntryPointExports.get(
+              importEntry.importName
+            );
             if (!exportEntry) {
-              debug(`Export ${importEntry.importName} not found in package ${packageName}`);
+              debug(
+                `Export ${importEntry.importName} not found in package ${packageName}`
+              );
               continue;
             }
             exportEntry.exportEntry.externallyImportedBy.push({
@@ -276,7 +299,9 @@ function initializePackageInfo() {
   }
 
   const analyzeEnd = performance.now();
-  debug(`Initialized repository info in ${formatMilliseconds(analyzeEnd - analyzestart)}`);
+  debug(
+    `Initialized repository info in ${formatMilliseconds(analyzeEnd - analyzestart)}`
+  );
 }
 
 export function getProjectInfo(packageRootDir: string) {
@@ -405,7 +430,8 @@ export function updateCacheFromFileSystem(
     if (
       isCodeFile(filePath) &&
       (!previousFileInfo ||
-        (previousFileInfo.fileType === 'code' && previousFileInfo.lastUpdatedAt < latestUpdatedAt))
+        (previousFileInfo.fileType === 'code' &&
+          previousFileInfo.lastUpdatedAt < latestUpdatedAt))
     ) {
       numModified++;
       try {
@@ -456,11 +482,15 @@ export function updateCacheFromFileSystem(
     debug(
       `Synchronized changes from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
     );
-    debug(`  total:         ${formatMilliseconds(analyzeEnd - operationStart)}`);
+    debug(
+      `  total:         ${formatMilliseconds(analyzeEnd - operationStart)}`
+    );
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
-    debug(`  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`);
+    debug(
+      `  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`
+    );
 
     return true;
   }
@@ -488,13 +518,19 @@ export function updateCacheForFile(
     fileContents,
     ast,
     isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
-    isExternallyImportedCheck: getEntryPointCheck(packageRootDir, externallyImported),
+    isExternallyImportedCheck: getEntryPointCheck(
+      packageRootDir,
+      externallyImported
+    ),
   };
 
   // Check if we're updating file info or adding a new file
   if (analyzedProjectInfo.files.has(filePath)) {
     const baseStart = performance.now();
-    const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(baseOptions, baseProjectInfo);
+    const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
+      baseOptions,
+      baseProjectInfo
+    );
     const baseEnd = performance.now();
 
     // If we don't need to update
@@ -515,9 +551,15 @@ export function updateCacheForFile(
       debug(`Update for ${filePath.replace(packageRootDir, '')} complete:`);
       debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
       debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
-      debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
-      debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzeStart)}`);
-      debug(`  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`);
+      debug(
+        `  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`
+      );
+      debug(
+        `  analyzed info: ${formatMilliseconds(analyzeEnd - analyzeStart)}`
+      );
+      debug(
+        `  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`
+      );
 
       return true;
     } else {
@@ -629,7 +671,9 @@ export function updateCacheForFile(
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - anazlyzeStart)}`);
-    debug(`  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`);
+    debug(
+      `  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`
+    );
 
     return true;
   }

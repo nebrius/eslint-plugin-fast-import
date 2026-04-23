@@ -4,13 +4,15 @@ export const noNamedAsDefault = createRule({
   name: 'no-named-as-default',
   meta: {
     docs: {
-      description: 'Ensures that imports of Node.js modules use the `node:` prefix',
+      description:
+        'Ensures that imports of Node.js modules use the `node:` prefix',
     },
     schema: [],
     fixable: undefined,
     type: 'problem',
     messages: {
-      noNamedAsDefault: 'Default import alias must not have the same name as a named export',
+      noNamedAsDefault:
+        'Default import alias must not have the same name as a named export',
     },
   },
   defaultOptions: [],
@@ -31,10 +33,15 @@ export const noNamedAsDefault = createRule({
     }
 
     for (const importEntry of fileInfo.singleImports) {
-      if (importEntry.importName !== 'default' || !importEntry.resolvedModulePath) {
+      if (
+        importEntry.importName !== 'default' ||
+        !importEntry.resolvedModulePath
+      ) {
         continue;
       }
-      const fileDetails = esmInfo.projectInfo.files.get(importEntry.resolvedModulePath);
+      const fileDetails = esmInfo.projectInfo.files.get(
+        importEntry.resolvedModulePath
+      );
       /* istanbul ignore if */
       if (!fileDetails || fileDetails.fileType !== 'code') {
         continue;
@@ -55,10 +62,15 @@ export const noNamedAsDefault = createRule({
 
     for (const importEntry of fileInfo.singleReexports) {
       /* istanbul ignore else */
-      if (importEntry.importName !== 'default' || !importEntry.resolvedModulePath) {
+      if (
+        importEntry.importName !== 'default' ||
+        !importEntry.resolvedModulePath
+      ) {
         continue;
       }
-      const fileDetails = esmInfo.projectInfo.files.get(importEntry.resolvedModulePath);
+      const fileDetails = esmInfo.projectInfo.files.get(
+        importEntry.resolvedModulePath
+      );
       /* istanbul ignore if */
       if (!fileDetails || fileDetails.fileType !== 'code') {
         continue;

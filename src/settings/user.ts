@@ -88,14 +88,19 @@ export function getUserRepoSettings(
   }
 
   // Check if this is a monorepo configuration
-  if (typeof fastEsmSettings === 'object' && 'monorepoRootDir' in fastEsmSettings) {
-    const parseResult = monorepoPackageSettingsSchema.safeParse(fastEsmSettings);
+  if (
+    typeof fastEsmSettings === 'object' &&
+    'monorepoRootDir' in fastEsmSettings
+  ) {
+    const parseResult =
+      monorepoPackageSettingsSchema.safeParse(fastEsmSettings);
     if (!parseResult.success) {
       formatErrors(parseResult.error);
     }
 
     // Split props apart so we can recombine them in the standardized format
-    const { debugLogging, mode, editorUpdateRate, monorepoRootDir } = parseResult.data;
+    const { debugLogging, mode, editorUpdateRate, monorepoRootDir } =
+      parseResult.data;
 
     // Validate monorepoRootDir exists
     if (!isAbsolute(monorepoRootDir)) {
@@ -124,8 +129,13 @@ export function getUserRepoSettings(
     }
 
     // Split props apart so we can recombine them in the standardized format
-    const { debugLogging, mode, editorUpdateRate, packageRootDir, ...packageSettings } =
-      parseResult.data;
+    const {
+      debugLogging,
+      mode,
+      editorUpdateRate,
+      packageRootDir,
+      ...packageSettings
+    } = parseResult.data;
 
     // Validate packageRootDir exists
     if (!isAbsolute(packageRootDir)) {
@@ -172,9 +182,12 @@ export function getUserPackageSettingsFromConfigFile({
     // Throw a custom error message so we can include the config file with
     // the error in the user-facing message
     const message = e instanceof Error ? e.message : String(e);
-    throw new Error(`Failed to parse package config file ${configFilePath}: ${message}`, {
-      cause: e,
-    });
+    throw new Error(
+      `Failed to parse package config file ${configFilePath}: ${message}`,
+      {
+        cause: e,
+      }
+    );
   }
 
   // Parse and return the results

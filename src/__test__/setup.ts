@@ -23,7 +23,8 @@ function checkProjectObject(projectInfo: unknown) {
 
   if (!('files' in projectInfo) || !(projectInfo.files instanceof Map)) {
     return {
-      message: () => `Expected: an object of files\nReceived: not an object of files`,
+      message: () =>
+        `Expected: an object of files\nReceived: not an object of files`,
       pass: false,
     };
   }
@@ -62,7 +63,10 @@ function toMatchSpec<
       };
     }
 
-    if (expectedFileDetails.fileType === 'other' || fileDetails.fileType === 'other') {
+    if (
+      expectedFileDetails.fileType === 'other' ||
+      fileDetails.fileType === 'other'
+    ) {
       continue;
     }
 
@@ -74,7 +78,10 @@ function toMatchSpec<
       };
     }
 
-    if (expectedFileDetails.isExternallyImported !== fileDetails.isExternallyImported) {
+    if (
+      expectedFileDetails.isExternallyImported !==
+      fileDetails.isExternallyImported
+    ) {
       return {
         message: () =>
           `file path ${filePath} has the wrong hasExternallyImported: expected ${String(expectedFileDetails.isExternallyImported)}, received ${String(fileDetails.isExternallyImported)}`,
@@ -84,11 +91,16 @@ function toMatchSpec<
 
     if (
       expectedFileDetails.exports.length !== fileDetails.exports.length ||
-      expectedFileDetails.singleImports.length !== fileDetails.singleImports.length ||
-      expectedFileDetails.barrelImports.length !== fileDetails.barrelImports.length ||
-      expectedFileDetails.dynamicImports.length !== fileDetails.dynamicImports.length ||
-      expectedFileDetails.singleReexports.length !== fileDetails.singleReexports.length ||
-      expectedFileDetails.barrelReexports.length !== fileDetails.barrelReexports.length
+      expectedFileDetails.singleImports.length !==
+        fileDetails.singleImports.length ||
+      expectedFileDetails.barrelImports.length !==
+        fileDetails.barrelImports.length ||
+      expectedFileDetails.dynamicImports.length !==
+        fileDetails.dynamicImports.length ||
+      expectedFileDetails.singleReexports.length !==
+        fileDetails.singleReexports.length ||
+      expectedFileDetails.barrelReexports.length !==
+        fileDetails.barrelReexports.length
     ) {
       return {
         message: () =>
@@ -98,7 +110,10 @@ function toMatchSpec<
     }
 
     function compareSet(
-      expected: Omit<BaseESMStatement, 'statementNodeRange' | 'reportNodeRange'>[],
+      expected: Omit<
+        BaseESMStatement,
+        'statementNodeRange' | 'reportNodeRange'
+      >[],
       actual: BaseESMStatement[]
     ) {
       const actualStripped = actual.map(
@@ -141,7 +156,10 @@ function toMatchSpec<
 }
 
 expect.extend({
-  toMatchBaseSpec(baseProjectInfo: unknown, baseSpec: Record<string, StrippedBaseFileDetails>) {
+  toMatchBaseSpec(
+    baseProjectInfo: unknown,
+    baseSpec: Record<string, StrippedBaseFileDetails>
+  ) {
     return toMatchSpec(baseProjectInfo, baseSpec);
   },
   toMatchResolvedSpec(
@@ -160,7 +178,8 @@ expect.extend({
     }
 
     // Strip ranges and circular references from importedBy, barrelImportedBy, and rootExportEntry
-    for (const [, fileDetails] of (analyzedProjectInfo as AnalyzedProjectInfo).files) {
+    for (const [, fileDetails] of (analyzedProjectInfo as AnalyzedProjectInfo)
+      .files) {
       if (fileDetails.fileType !== 'code') {
         continue;
       }
@@ -176,7 +195,9 @@ expect.extend({
           for (let i = 0; i < exportEntry.importedBy.length; i++) {
             const importEntry = { ...exportEntry.importedBy[i].importEntry };
             exportEntry.importedBy[i].importEntry = importEntry;
-            const partialImportEntry = importEntry as Partial<typeof importEntry>;
+            const partialImportEntry = importEntry as Partial<
+              typeof importEntry
+            >;
             delete partialImportEntry.statementNodeRange;
             delete partialImportEntry.reportNodeRange;
             delete partialImportEntry.rootExportEntry;
@@ -188,7 +209,9 @@ expect.extend({
               ...exportEntry.barrelImportedBy[i].importEntry,
             };
             exportEntry.barrelImportedBy[i].importEntry = importEntry;
-            const partialImportEntry = importEntry as Partial<typeof importEntry>;
+            const partialImportEntry = importEntry as Partial<
+              typeof importEntry
+            >;
             delete partialImportEntry.statementNodeRange;
             delete partialImportEntry.reportNodeRange;
           }
@@ -199,7 +222,9 @@ expect.extend({
               ...exportEntry.externallyImportedBy[i].importEntry,
             };
             exportEntry.externallyImportedBy[i].importEntry = importEntry;
-            const partialImportEntry = importEntry as Partial<typeof importEntry>;
+            const partialImportEntry = importEntry as Partial<
+              typeof importEntry
+            >;
             delete partialImportEntry.statementNodeRange;
             delete partialImportEntry.reportNodeRange;
           }
@@ -209,7 +234,9 @@ expect.extend({
             ...exportEntry.rootExportEntry,
           };
           exportEntry.rootExportEntry = rootExportEntry;
-          const partialRootExportEntry = rootExportEntry as Partial<typeof rootExportEntry>;
+          const partialRootExportEntry = rootExportEntry as Partial<
+            typeof rootExportEntry
+          >;
           delete partialRootExportEntry.statementNodeRange;
           delete partialRootExportEntry.reportNodeRange;
           delete partialRootExportEntry.importedBy;

@@ -50,12 +50,22 @@ type StrippedFileDetails<
       | 'barrelReexports'
       | 'lastUpdatedAt'
     > & {
-      singleImports: Array<Omit<SingleImport, 'statementNodeRange' | 'reportNodeRange'>>;
-      barrelImports: Array<Omit<BarrelImport, 'statementNodeRange' | 'reportNodeRange'>>;
-      dynamicImports: Array<Omit<DynamicImport, 'statementNodeRange' | 'reportNodeRange'>>;
+      singleImports: Array<
+        Omit<SingleImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      barrelImports: Array<
+        Omit<BarrelImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      dynamicImports: Array<
+        Omit<DynamicImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
       exports: Array<Omit<Export, 'statementNodeRange' | 'reportNodeRange'>>;
-      singleReexports: Array<Omit<SingleReexport, 'statementNodeRange' | 'reportNodeRange'>>;
-      barrelReexports: Array<Omit<BarrelReexport, 'statementNodeRange' | 'reportNodeRange'>>;
+      singleReexports: Array<
+        Omit<SingleReexport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      barrelReexports: Array<
+        Omit<BarrelReexport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
     });
 
 export type StrippedBaseFileDetails = StrippedFileDetails<
@@ -140,14 +150,20 @@ export type StrippedAnalyzedFileDetails = StrippedFileDetails<
   },
   AnalyzedBarrelImport,
   AnalyzedDynamicImport,
-  Omit<AnalyzedExport, 'importedBy' | 'barrelImportedBy' | 'externallyImportedBy'> & {
+  Omit<
+    AnalyzedExport,
+    'importedBy' | 'barrelImportedBy' | 'externallyImportedBy'
+  > & {
     importedBy?: StrippedExportImportedBy;
     barrelImportedBy?: StrippedBarrelImportedBy;
     externallyImportedBy?: StrippedExternallyImportedBy;
   },
   Omit<
     AnalyzedSingleReexport,
-    'rootExportEntry' | 'importedBy' | 'barrelImportedBy' | 'externallyImportedBy'
+    | 'rootExportEntry'
+    | 'importedBy'
+    | 'barrelImportedBy'
+    | 'externallyImportedBy'
   > & {
     importedBy?: StrippedReexportImportedBy;
     barrelImportedBy?: StrippedBarrelImportedBy;
@@ -156,7 +172,10 @@ export type StrippedAnalyzedFileDetails = StrippedFileDetails<
   },
   Omit<
     AnalyzedBarrelReexport,
-    'rootExportEntry' | 'importedBy' | 'barrelImportedBy' | 'externallyImportedBy'
+    | 'rootExportEntry'
+    | 'importedBy'
+    | 'barrelImportedBy'
+    | 'externallyImportedBy'
   > & {
     rootExportEntry?: StrippedAnalyzedExport | StrippedAnalyzedBarrelReexport;
     importedBy?: StrippedExportImportedBy;

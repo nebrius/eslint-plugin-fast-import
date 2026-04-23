@@ -7,7 +7,10 @@ import {
   updateCacheForFile,
   updateCacheFromFileSystem,
 } from '../module/module.js';
-import type { ParsedPackageSettings, ParsedRepoSettings } from '../settings/settings.js';
+import type {
+  ParsedPackageSettings,
+  ParsedRepoSettings,
+} from '../settings/settings.js';
 import {
   getAllPackageSettings,
   getPackageCacheEntryForFile,
@@ -16,7 +19,11 @@ import {
 } from '../settings/settings.js';
 import type { GenericContext } from '../types/context.js';
 import { InternalError } from '../util/error.js';
-import { getFiles, getRelativePathFromRoot, isFileIgnored } from '../util/files.js';
+import {
+  getFiles,
+  getRelativePathFromRoot,
+  isFileIgnored,
+} from '../util/files.js';
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
@@ -109,7 +116,12 @@ async function initializeFileWatching(
       packageSettings.ignoreOverridePatterns
     );
     return {
-      files: new Map(files.map(({ filePath, latestUpdatedAt }) => [filePath, latestUpdatedAt])),
+      files: new Map(
+        files.map(({ filePath, latestUpdatedAt }) => [
+          filePath,
+          latestUpdatedAt,
+        ])
+      ),
       packageJsons,
     };
   }
@@ -198,8 +210,14 @@ export function isNonTestFile(filePath: string) {
   }
   // We want to ignore folders named __test__ outside of this project, in case
   // the entire project is itself a test (e.g. the unit tests for fast-import)
-  const relativeFilePath = getRelativePathFromRoot(packageSettings.packageRootDir, filePath);
-  for (const pattern of [...DEFAULT_TEST_FILE_PATTERNS, ...packageSettings.testFilePatterns]) {
+  const relativeFilePath = getRelativePathFromRoot(
+    packageSettings.packageRootDir,
+    filePath
+  );
+  for (const pattern of [
+    ...DEFAULT_TEST_FILE_PATTERNS,
+    ...packageSettings.testFilePatterns,
+  ]) {
     if (relativeFilePath.includes(pattern)) {
       return false;
     }

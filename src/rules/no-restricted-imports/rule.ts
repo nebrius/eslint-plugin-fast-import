@@ -43,11 +43,15 @@ function replaceMatchesInRegex(regex: RegExp, matches: string[] | null) {
   return new RegExp(source, regex.flags);
 }
 
-export const noRestrictedImports = createRule<[{ rules: Entry[] }], 'restrictedImport'>({
+export const noRestrictedImports = createRule<
+  [{ rules: Entry[] }],
+  'restrictedImport'
+>({
   name: 'no-restricted-imports',
   meta: {
     docs: {
-      description: 'Esnures restricted imports are only imported by allowed consumers',
+      description:
+        'Esnures restricted imports are only imported by allowed consumers',
     },
     schema: [schema.toJSONSchema({ unrepresentable: 'any' }) as JSONSchema4],
     fixable: undefined,
@@ -97,7 +101,10 @@ export const noRestrictedImports = createRule<[{ rules: Entry[] }], 'restrictedI
       if (entry.type === 'first-party') {
         // Normalize string paths to absolute
         if (typeof entry.filepath === 'string' && !isAbsolute(entry.filepath)) {
-          entry.filepath = resolve(esmInfo.projectInfo.packageRootDir, entry.filepath);
+          entry.filepath = resolve(
+            esmInfo.projectInfo.packageRootDir,
+            entry.filepath
+          );
         }
       }
     }
@@ -117,7 +124,11 @@ export const noRestrictedImports = createRule<[{ rules: Entry[] }], 'restrictedI
       }
 
       for (const entry of entries) {
-        if ('isTypeImport' in importEntry && importEntry.isTypeImport && entry.excludeTypeImports) {
+        if (
+          'isTypeImport' in importEntry &&
+          importEntry.isTypeImport &&
+          entry.excludeTypeImports
+        ) {
           continue;
         }
         // Check if this import applies to this entry
@@ -163,7 +174,9 @@ export const noRestrictedImports = createRule<[{ rules: Entry[] }], 'restrictedI
               if (allowed === context.filename) {
                 isAllowed = true;
               }
-            } else if (replaceMatchesInRegex(allowed, matches).test(context.filename)) {
+            } else if (
+              replaceMatchesInRegex(allowed, matches).test(context.filename)
+            ) {
               isAllowed = true;
             }
           }
@@ -189,7 +202,9 @@ export const noRestrictedImports = createRule<[{ rules: Entry[] }], 'restrictedI
               if (denied === context.filename) {
                 isDenied = true;
               }
-            } else if (replaceMatchesInRegex(denied, matches).test(context.filename)) {
+            } else if (
+              replaceMatchesInRegex(denied, matches).test(context.filename)
+            ) {
               isDenied = true;
             }
           }

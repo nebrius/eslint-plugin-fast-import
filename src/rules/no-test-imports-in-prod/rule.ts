@@ -1,4 +1,9 @@
-import { createRule, getESMInfo, getLocFromRange, isNonTestFile } from '../util.js';
+import {
+  createRule,
+  getESMInfo,
+  getLocFromRange,
+  isNonTestFile,
+} from '../util.js';
 
 export const noTestImportsInProd = createRule({
   name: 'no-test-imports-in-prod',
@@ -42,7 +47,10 @@ export const noTestImportsInProd = createRule({
       ) {
         continue;
       }
-      if (importEntry.resolvedModulePath && !isNonTestFile(importEntry.resolvedModulePath)) {
+      if (
+        importEntry.resolvedModulePath &&
+        !isNonTestFile(importEntry.resolvedModulePath)
+      ) {
         context.report({
           loc: getLocFromRange(context, importEntry.reportNodeRange),
           messageId: 'noTestImports',

@@ -1,6 +1,12 @@
 import { splitPathIntoSegments } from './files.js';
 
-export function getSubpathEntry<T>({ filePath, data }: { filePath: string; data: Map<string, T> }) {
+export function getSubpathEntry<T>({
+  filePath,
+  data,
+}: {
+  filePath: string;
+  data: Map<string, T>;
+}) {
   const filePathSegments = splitPathIntoSegments(filePath);
   let longestCommonPath: { path: string; value: T } | undefined;
   for (const [path, value] of data) {

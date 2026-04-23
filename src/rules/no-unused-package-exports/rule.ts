@@ -5,13 +5,15 @@ export const noUnusedPackageExports = createRule({
   name: 'no-unused-package-exports',
   meta: {
     docs: {
-      description: 'Ensure entry point exports are imported elsewhere in the monorepo',
+      description:
+        'Ensure entry point exports are imported elsewhere in the monorepo',
     },
     schema: [],
     fixable: undefined,
     type: 'problem',
     messages: {
-      noUnusedPackageExports: 'Export point export "{{name}}" must be imported in another package',
+      noUnusedPackageExports:
+        'Export point export "{{name}}" must be imported in another package',
     },
   },
   create(context) {

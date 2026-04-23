@@ -5,6 +5,7 @@ import js from '@eslint/js';
 import { globalIgnores } from 'eslint/config';
 import { defineConfig } from 'eslint/config';
 import jest from 'eslint-plugin-jest';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -15,7 +16,11 @@ const ROOT_DIR = import.meta.dirname;
 
 export default defineConfig([
   includeIgnoreFile(join(ROOT_DIR, '.gitignore')),
-  globalIgnores(['src/**/__test__/**/project/**/*', 'jest.config.ts', 'oxlint.config.ts']),
+  globalIgnores([
+    'src/**/__test__/**/project/**/*',
+    'jest.config.ts',
+    'oxlint.config.ts',
+  ]),
   {
     files: ['**/*.{js,mjs,jsx,ts,tsx,mts}'],
     languageOptions: {
@@ -26,6 +31,7 @@ export default defineConfig([
     rules: {
       'object-shorthand': 'error',
       'simple-import-sort/imports': 'error',
+      eqeqeq: 'error',
 
       // Handled by TypeScript eslint
       'no-unused-vars': 'off',
@@ -33,7 +39,7 @@ export default defineConfig([
     settings: {
       'fast-import': {
         packageRootDir: import.meta.dirname,
-        entryPointFiles: ['src/plugin.ts'],
+        entryPointFiles: { '.': './src/plugin.ts' },
         debugLogging: true,
       },
     },
@@ -73,4 +79,5 @@ export default defineConfig([
     files: ['**/*..jsx,mjs}'],
     extends: [tseslint.configs.disableTypeChecked],
   },
+  eslintPluginPrettierRecommended,
 ]);

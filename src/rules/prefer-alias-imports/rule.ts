@@ -33,7 +33,10 @@ function findBestWildcardAlias(
 ): { symbol: string; path: string } | undefined {
   let best: { symbol: string; path: string } | undefined;
   for (const [symbol, path] of Object.entries(wildcardAliases)) {
-    if (absolutePath.startsWith(path) && (!best || path.length > best.path.length)) {
+    if (
+      absolutePath.startsWith(path) &&
+      (!best || path.length > best.path.length)
+    ) {
       best = { symbol, path };
     }
   }
@@ -51,7 +54,11 @@ function getAliasInternalPathSegments(absolutePath: string, aliasPath: string) {
     .filter(Boolean);
 }
 
-function getSharedPathDepth(sourcePath: string, targetPath: string, aliasPath: string) {
+function getSharedPathDepth(
+  sourcePath: string,
+  targetPath: string,
+  aliasPath: string
+) {
   const sourceSegments = getAliasInternalPathSegments(sourcePath, aliasPath);
   const targetSegments = getAliasInternalPathSegments(targetPath, aliasPath);
 
@@ -71,7 +78,10 @@ function getSharedPathDepth(sourcePath: string, targetPath: string, aliasPath: s
   return sharedPathDepth;
 }
 
-export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferRelative'>({
+export const preferAliasImports = createRule<
+  [Options],
+  'preferAlias' | 'preferRelative'
+>({
   name: 'prefer-alias-imports',
   meta: {
     docs: {
@@ -82,7 +92,8 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
     fixable: 'code',
     type: 'suggestion',
     messages: {
-      preferAlias: 'Use alias import "{{alias}}" instead of relative path "{{relative}}"',
+      preferAlias:
+        'Use alias import "{{alias}}" instead of relative path "{{relative}}"',
       preferRelative:
         'Use relative import "{{relative}}" instead of alias "{{alias}}" for local files under the same alias',
     },
@@ -105,12 +116,17 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
     const { wildcardAliases, fixedAliases } = packageSettings;
 
     // No aliases configured — nothing to enforce
-    if (Object.keys(wildcardAliases).length === 0 && Object.keys(fixedAliases).length === 0) {
+    if (
+      Object.keys(wildcardAliases).length === 0 &&
+      Object.keys(fixedAliases).length === 0
+    ) {
       return {};
     }
 
-    const { mode = MODE_DEFAULT, minSharedPathDepth = MIN_SHARED_PATH_DEPTH_DEFAULT } =
-      context.options[0] ?? {};
+    const {
+      mode = MODE_DEFAULT,
+      minSharedPathDepth = MIN_SHARED_PATH_DEPTH_DEFAULT,
+    } = context.options[0] ?? {};
 
     // Pre-compute the current file's "home alias" for relative-if-local mode
     const homeAlias = findBestWildcardAlias(context.filename, wildcardAliases);
@@ -122,11 +138,13 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {
-      const { moduleSpecifier, resolvedModuleType, statementNodeRange } = importEntry;
+      const { moduleSpecifier, resolvedModuleType, statementNodeRange } =
+        importEntry;
 
       if (
         !moduleSpecifier ||
-        (resolvedModuleType !== 'firstPartyCode' && resolvedModuleType !== 'firstPartyOther')
+        (resolvedModuleType !== 'firstPartyCode' &&
+          resolvedModuleType !== 'firstPartyOther')
       ) {
         continue;
       }
@@ -151,7 +169,10 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
 
         // Check wildcard aliases
         if (!matchedAliasName && resolvedModulePath) {
-          const match = findBestWildcardAlias(resolvedModulePath, wildcardAliases);
+          const match = findBestWildcardAlias(
+            resolvedModulePath,
+            wildcardAliases
+          );
           if (match) {
             matchedAliasSymbol = match.symbol;
             matchedAliasPath = match.path;
@@ -167,7 +188,11 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
           resolvedModulePath &&
           matchedAliasSymbol === homeAlias.symbol &&
           matchedAliasPath === homeAlias.path
-            ? getSharedPathDepth(context.filename, resolvedModulePath, homeAlias.path)
+            ? getSharedPathDepth(
+                context.filename,
+                resolvedModulePath,
+                homeAlias.path
+              )
             : undefined;
 
         // In relative-if-local mode, skip if the files are local enough
@@ -191,7 +216,9 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
         } else if (matchedAliasSymbol && matchedAliasPath) {
           newSpecifier =
             matchedAliasSymbol +
-            resolve(dirname(context.filename), moduleSpecifier).slice(matchedAliasPath.length);
+            resolve(dirname(context.filename), moduleSpecifier).slice(
+              matchedAliasPath.length
+            );
         } else {
           continue;
         }
@@ -201,12 +228,14 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
           loc: getLocFromRange(context, importEntry.reportNodeRange),
           data: { alias: newSpecifier, relative: moduleSpecifier },
           fix(fixer) {
-            const sourceNode = context.sourceCode.getNodeByRangeIndex(statementNodeRange[0]) as
-              | ImportDeclaration
-              | ReexportDeclaration;
+            const sourceNode = context.sourceCode.getNodeByRangeIndex(
+              statementNodeRange[0]
+            ) as ImportDeclaration | ReexportDeclaration;
             /* istanbul ignore if */
             if (!('raw' in sourceNode.source)) {
-              throw new InternalError(`Property "raw" is missing in sourceNode.source`);
+              throw new InternalError(
+                `Property "raw" is missing in sourceNode.source`
+              );
             }
             return fixer.replaceText(
               sourceNode.source,
@@ -225,11 +254,18 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
           continue;
         }
 
-        const matchedAlias = findBestWildcardAlias(importEntry.resolvedModulePath, wildcardAliases);
+        const matchedAlias = findBestWildcardAlias(
+          importEntry.resolvedModulePath,
+          wildcardAliases
+        );
 
         const sharedPathDepth =
           homeAlias && matchedAlias && matchedAlias.path === homeAlias.path
-            ? getSharedPathDepth(context.filename, importEntry.resolvedModulePath, homeAlias.path)
+            ? getSharedPathDepth(
+                context.filename,
+                importEntry.resolvedModulePath,
+                homeAlias.path
+              )
             : undefined;
 
         if (
@@ -242,7 +278,10 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
         ) {
           let newSpecifier = relative(
             dirname(context.filename),
-            resolve(matchedAlias.path, moduleSpecifier.slice(matchedAlias.symbol.length))
+            resolve(
+              matchedAlias.path,
+              moduleSpecifier.slice(matchedAlias.symbol.length)
+            )
           );
           if (!newSpecifier.startsWith('.')) {
             newSpecifier = './' + newSpecifier;
@@ -253,12 +292,14 @@ export const preferAliasImports = createRule<[Options], 'preferAlias' | 'preferR
             loc: getLocFromRange(context, importEntry.reportNodeRange),
             data: { relative: newSpecifier, alias: moduleSpecifier },
             fix(fixer) {
-              const sourceNode = context.sourceCode.getNodeByRangeIndex(statementNodeRange[0]) as
-                | ImportDeclaration
-                | ReexportDeclaration;
+              const sourceNode = context.sourceCode.getNodeByRangeIndex(
+                statementNodeRange[0]
+              ) as ImportDeclaration | ReexportDeclaration;
               /* istanbul ignore if */
               if (!('raw' in sourceNode.source)) {
-                throw new InternalError(`Property "raw" is missing in sourceNode.source`);
+                throw new InternalError(
+                  `Property "raw" is missing in sourceNode.source`
+                );
               }
               return fixer.replaceText(
                 sourceNode.source,

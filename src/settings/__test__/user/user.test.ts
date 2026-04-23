@@ -2,14 +2,24 @@ import { join, sep } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
-import type { ParsedPackageSettings, ParsedRepoSettings } from '../../settings.js';
-import { getAllPackageSettings, getRepoSettings, markSettingsForRefresh } from '../../settings.js';
+import type {
+  ParsedPackageSettings,
+  ParsedRepoSettings,
+} from '../../settings.js';
+import {
+  getAllPackageSettings,
+  getRepoSettings,
+  markSettingsForRefresh,
+} from '../../settings.js';
 import { getUserPackageSettingsFromConfigFile } from '../../user.js';
 
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
 
-const MONOREPO_PROJECT_DIR = join(getDirname(), '../../../module/__test__/cache/project/monorepo');
+const MONOREPO_PROJECT_DIR = join(
+  getDirname(),
+  '../../../module/__test__/cache/project/monorepo'
+);
 const MONOREPO_PKG_ONE = join(MONOREPO_PROJECT_DIR, 'packages', 'packageOne');
 const MONOREPO_PKG_TWO = join(MONOREPO_PROJECT_DIR, 'packages', 'packageTwo');
 const MONOREPO_FILE_A = join(MONOREPO_PKG_ONE, 'a.ts');
@@ -37,7 +47,10 @@ it('Fetchings user supplied settings', () => {
     throw new Error('packageSettings should be defined');
   }
   const { entryPoints, externallyImported, ...settings } = packageSettings;
-  const expected: Omit<ParsedPackageSettings, 'entryPoints' | 'externallyImported'> = {
+  const expected: Omit<
+    ParsedPackageSettings,
+    'entryPoints' | 'externallyImported'
+  > = {
     repoRootDir: TEST_PROJECT_DIR,
     packageRootDir: TEST_PROJECT_DIR,
     packageName: undefined,
@@ -67,7 +80,9 @@ it('Throws on missing settings', () => {
       filename: FILE_A,
       settings: {},
     })
-  ).toThrow(`eslint-plugin-fast-import settings are required in your ESLint/Oxlint config file`);
+  ).toThrow(
+    `eslint-plugin-fast-import settings are required in your ESLint/Oxlint config file`
+  );
 });
 
 it('Throws on missing packageRootDir in settings', () => {
@@ -108,7 +123,9 @@ it("Throws on packageRootDir that doesn't exist in settings", () => {
         },
       },
     })
-  ).toThrow(`packageRootDir "${join(TEST_PROJECT_DIR, 'fake')}" does not exist`);
+  ).toThrow(
+    `packageRootDir "${join(TEST_PROJECT_DIR, 'fake')}" does not exist`
+  );
 });
 
 it('Throws on invalid user supplied mode', () => {
@@ -407,7 +424,9 @@ it("Throws on monorepoRootDir that doesn't exist", () => {
         },
       },
     })
-  ).toThrow(`monorepoRootDir "${join(MONOREPO_PROJECT_DIR, 'fake')}" does not exist`);
+  ).toThrow(
+    `monorepoRootDir "${join(MONOREPO_PROJECT_DIR, 'fake')}" does not exist`
+  );
 });
 
 it('Throws when mixing monorepoRootDir and packageRootDir in settings', () => {

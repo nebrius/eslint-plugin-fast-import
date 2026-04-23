@@ -4,7 +4,10 @@ import { getDirname } from 'cross-dirname';
 
 import { getProjectInfo, initializeRepo } from '../../../module.js';
 
-function assertDefined<T>(value: T, message: string): asserts value is NonNullable<T> {
+function assertDefined<T>(
+  value: T,
+  message: string
+): asserts value is NonNullable<T> {
   if (value === undefined || value === null) {
     throw new Error(message);
   }
@@ -119,7 +122,9 @@ it('Named barrel reexport entry point tracks cross-package importer', () => {
       moduleSpecifier: 'packageD/d',
     },
   });
-  expectNoDuplicateExternalImporters(utilsExport.exportEntry.externallyImportedBy);
+  expectNoDuplicateExternalImporters(
+    utilsExport.exportEntry.externallyImportedBy
+  );
 });
 
 it('Entry-point export that is not imported by any other package has empty externallyImportedBy', () => {
@@ -135,10 +140,18 @@ it('Entry-point export that is not imported by any other package has empty exter
 it('Entry-point exports for all four packages appear in packageEntryPointExports', () => {
   initialize();
 
-  expect([...getProjectInfo(PACKAGE_A_DIR).packageEntryPointExports.keys()]).toEqual(['A']);
-  expect([...getProjectInfo(PACKAGE_B_DIR).packageEntryPointExports.keys()]).toEqual(['B']);
-  expect([...getProjectInfo(PACKAGE_C_DIR).packageEntryPointExports.keys()]).toEqual(['C']);
-  expect([...getProjectInfo(PACKAGE_D_DIR).packageEntryPointExports.keys()]).toEqual(['utils']);
+  expect([
+    ...getProjectInfo(PACKAGE_A_DIR).packageEntryPointExports.keys(),
+  ]).toEqual(['A']);
+  expect([
+    ...getProjectInfo(PACKAGE_B_DIR).packageEntryPointExports.keys(),
+  ]).toEqual(['B']);
+  expect([
+    ...getProjectInfo(PACKAGE_C_DIR).packageEntryPointExports.keys(),
+  ]).toEqual(['C']);
+  expect([
+    ...getProjectInfo(PACKAGE_D_DIR).packageEntryPointExports.keys(),
+  ]).toEqual(['utils']);
 });
 
 it('Files inside packageD beyond the entry point are reachable via getProjectInfo', () => {

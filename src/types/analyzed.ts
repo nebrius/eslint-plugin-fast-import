@@ -188,7 +188,8 @@ export type AnalyzedExport = ResolvedExport & AnalyzedExportBase;
 export type AnalyzedSingleReexport = ResolvedSingleReexport &
   AnalyzedImportBase &
   AnalyzedExportBase;
-export type AnalyzedBarrelReexport = ResolvedBarrelReexport & AnalyzedExportBase;
+export type AnalyzedBarrelReexport = ResolvedBarrelReexport &
+  AnalyzedExportBase;
 
 /* File Details */
 
@@ -227,7 +228,10 @@ export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
     string,
     {
       filePath: string;
-      exportEntry: AnalyzedExport | AnalyzedSingleReexport | AnalyzedBarrelReexport;
+      exportEntry:
+        | AnalyzedExport
+        | AnalyzedSingleReexport
+        | AnalyzedBarrelReexport;
     }
   >;
 };

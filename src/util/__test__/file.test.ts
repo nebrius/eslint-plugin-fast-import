@@ -51,9 +51,9 @@ it('ignoreOverridePatterns overrides .gitignore patterns', async () => {
     [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
     []
   );
-  expect(filesWithoutOverride.files.map(({ filePath }) => filePath)).not.toContain(
-    join(TEST_PROJECT_DIR, 'src/c.ts')
-  );
+  expect(
+    filesWithoutOverride.files.map(({ filePath }) => filePath)
+  ).not.toContain(join(TEST_PROJECT_DIR, 'src/c.ts'));
 
   // Reset to clear the cached ignore data
   _reset();
@@ -127,7 +127,9 @@ it('Can trim trailing path separators', () => {
 });
 
 it('Can get relative path to root', () => {
-  expect(getRelativePathFromRoot(`/base`, '/base/src/a.ts')).toEqual('src/a.ts');
+  expect(getRelativePathFromRoot(`/base`, '/base/src/a.ts')).toEqual(
+    'src/a.ts'
+  );
   expect(getRelativePathFromRoot(`/base`, '/base')).toEqual('');
   expect(getRelativePathFromRoot(`/base`, '/src/a.ts')).toEqual('src/a.ts');
   expect(getRelativePathFromRoot(`/base`, 'src/a.ts')).toEqual('src/a.ts');
@@ -136,5 +138,7 @@ it('Can get relative path to root', () => {
 it('Does not find fast-import.config.json files inside node_modules', () => {
   const fixtureDir = join(TEST_PROJECT_DIR, 'nodeModules');
   const result = getMonorepoPackageSettings(fixtureDir);
-  expect(result).toEqual([join(fixtureDir, 'packages', 'foo', 'fast-import.config.json')]);
+  expect(result).toEqual([
+    join(fixtureDir, 'packages', 'foo', 'fast-import.config.json'),
+  ]);
 });

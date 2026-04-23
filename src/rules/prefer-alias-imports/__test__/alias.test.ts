@@ -8,7 +8,13 @@ import { preferAliasImports } from '../rule.js';
 const TEST_PROJECT_DIR = join(getDirname(), 'project');
 const FILE_INDEX = join(TEST_PROJECT_DIR, 'src', 'index.ts');
 const FILE_BUTTON = join(TEST_PROJECT_DIR, 'src', 'components', 'Button.ts');
-const FILE_LABEL = join(TEST_PROJECT_DIR, 'src', 'components', 'internal', 'Label.ts');
+const FILE_LABEL = join(
+  TEST_PROJECT_DIR,
+  'src',
+  'components',
+  'internal',
+  'Label.ts'
+);
 const FILE_STANDALONE = join(TEST_PROJECT_DIR, 'standalone.ts');
 
 const ruleTester = new RuleTester({
