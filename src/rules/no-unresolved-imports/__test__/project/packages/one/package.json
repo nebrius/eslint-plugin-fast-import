@@ -1,4 +1,5 @@
 {
+  "name": "@test/one",
   "dependencies": {
     "@test/two": "*",
     "@types/react": "*"

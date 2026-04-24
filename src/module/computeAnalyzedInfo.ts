@@ -39,7 +39,7 @@ export function computeAnalyzedInfo(
 
     const analyzedFileInfo: AnalyzedCodeFileDetails = {
       fileType: 'code',
-      hasEntryPoints: fileDetails.hasEntryPoints,
+      entryPointSpecifier: fileDetails.entryPointSpecifier,
       isExternallyImported: fileDetails.isExternallyImported,
       lastUpdatedAt: fileDetails.lastUpdatedAt,
       exports: [],
@@ -184,44 +184,14 @@ export function computeAnalyzedInfo(
   }
 
   // Populate the list of package entry point exports
-  for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
-    if (fileDetails.fileType !== 'code') {
+  for (const [, fileDetails] of analyzedProjectInfo.files) {
+    if (fileDetails.fileType !== 'code' || !fileDetails.entryPointSpecifier) {
       continue;
     }
-    for (const exportDetails of fileDetails.exports) {
-      if (exportDetails.isEntryPoint) {
-        analyzedProjectInfo.packageEntryPointExports.set(
-          exportDetails.exportName,
-          {
-            filePath,
-            exportEntry: exportDetails,
-          }
-        );
-      }
-    }
-    for (const reexportDetails of fileDetails.singleReexports) {
-      if (reexportDetails.isEntryPoint) {
-        analyzedProjectInfo.packageEntryPointExports.set(
-          reexportDetails.exportName,
-          {
-            filePath,
-            exportEntry: reexportDetails,
-          }
-        );
-      }
-    }
-    for (const reexportDetails of fileDetails.barrelReexports) {
-      // If we don't have an export name, then we can't analyze it. Ideally
-      if (reexportDetails.isEntryPoint && reexportDetails.exportName) {
-        analyzedProjectInfo.packageEntryPointExports.set(
-          reexportDetails.exportName,
-          {
-            filePath,
-            exportEntry: reexportDetails,
-          }
-        );
-      }
-    }
+    analyzedProjectInfo.packageEntryPointExports.set(
+      fileDetails.entryPointSpecifier,
+      fileDetails
+    );
   }
 
   return analyzedProjectInfo;

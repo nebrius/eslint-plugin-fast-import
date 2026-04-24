@@ -15,7 +15,7 @@ const globalSettingsSchema = z.strictObject({
 
 const packageSettingsSchema = z.strictObject({
   alias: z.record(z.string(), z.string()).optional(),
-  entryPointFiles: z.array(z.string()).optional(),
+  entryPointFiles: z.record(z.string(), z.string()).optional(),
   externallyImportedFiles: z.array(z.string()).optional(),
   ignorePatterns: z.array(z.string()).optional(),
   ignoreOverridePatterns: z.array(z.string()).optional(),

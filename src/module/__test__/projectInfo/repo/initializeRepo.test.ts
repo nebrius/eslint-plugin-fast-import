@@ -2,6 +2,7 @@ import { join } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
 
+import type { AnalyzedCodeFileDetails } from '../../../../types/analyzed.js';
 import { getProjectInfo, initializeRepo } from '../../../module.js';
 
 function assertDefined<T>(
@@ -13,11 +14,28 @@ function assertDefined<T>(
   }
 }
 
+// Regression guard for the `initializePackageInfo` duplication bug: the bug
+// pushed the same `importEntry` object reference into `externallyImportedBy`
+// more than once. Track object identity directly so this guard stays accurate
+// even when fixtures legitimately contain multiple imports of the same type
+// from the same file (which would share `(filePath, importEntry.type)` but not
+// object identity).
 function expectNoDuplicateExternalImporters(
-  entries: ReadonlyArray<{ filePath: string; importEntry: { type: string } }>
+  entries: ReadonlyArray<{ importEntry: object }>
 ) {
-  const keys = entries.map((e) => `${e.filePath}|${e.importEntry.type}`);
-  expect(new Set(keys).size).toBe(keys.length);
+  const seen = new WeakSet<object>();
+  for (const entry of entries) {
+    expect(seen.has(entry.importEntry)).toBe(false);
+    seen.add(entry.importEntry);
+  }
+}
+
+function findExport(fileDetails: AnalyzedCodeFileDetails, exportName: string) {
+  return [
+    ...fileDetails.exports,
+    ...fileDetails.singleReexports,
+    ...fileDetails.barrelReexports,
+  ].find((entry) => entry.exportName === exportName);
 }
 
 const MONOREPO_PROJECT_DIR = join(getDirname(), 'project', 'monorepo');
@@ -50,9 +68,18 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
   // check the single importer from packageB here. The barrel importer from
   // packageE is checked in the dedicated barrel-import test.
   const pkgAInfo = getProjectInfo(PACKAGE_A_DIR);
-  const aExport = pkgAInfo.packageEntryPointExports.get('A');
-  assertDefined(aExport, 'A export missing on packageA');
-  const aSingleImporters = aExport.exportEntry.externallyImportedBy.filter(
+  const fileA = pkgAInfo.packageEntryPointExports.get('@test/package-a');
+  assertDefined(fileA, '@test/package-a entry point missing on packageA');
+  const aExport = findExport(fileA, 'A');
+  assertDefined(aExport, 'A export missing on @test/package-a');
+  expect(aExport).toMatchObject({
+    type: 'export',
+    exportName: 'A',
+    isTypeExport: true,
+    isEntryPoint: true,
+    isExternallyImported: false,
+  });
+  const aSingleImporters = aExport.externallyImportedBy.filter(
     (entry) => entry.importEntry.type === 'singleImport'
   );
   expect(aSingleImporters).toHaveLength(1);
@@ -62,35 +89,46 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
     importEntry: {
       type: 'singleImport',
       importName: 'A',
-      moduleSpecifier: 'packageA/a',
+      moduleSpecifier: '@test/package-a',
     },
   });
-  expectNoDuplicateExternalImporters(aExport.exportEntry.externallyImportedBy);
+  expectNoDuplicateExternalImporters(aExport.externallyImportedBy);
 
   const pkgBInfo = getProjectInfo(PACKAGE_B_DIR);
-  const bExport = pkgBInfo.packageEntryPointExports.get('B');
-  assertDefined(bExport, 'B export missing on packageB');
-  expect(bExport.exportEntry.externallyImportedBy).toHaveLength(1);
-  expect(bExport.exportEntry.externallyImportedBy[0]).toMatchObject({
+  const fileB = pkgBInfo.packageEntryPointExports.get('@test/package-b/b');
+  assertDefined(fileB, '@test/package-b/b entry point missing on packageB');
+  const bExport = findExport(fileB, 'B');
+  assertDefined(bExport, 'B export missing on @test/package-b/b');
+  expect(bExport).toMatchObject({
+    type: 'export',
+    exportName: 'B',
+    isTypeExport: true,
+    isEntryPoint: true,
+    isExternallyImported: false,
+  });
+  expect(bExport.externallyImportedBy).toHaveLength(1);
+  expect(bExport.externallyImportedBy[0]).toMatchObject({
     packageRootDir: PACKAGE_A_DIR,
     filePath: FILE_A,
     importEntry: {
       type: 'singleImport',
       importName: 'B',
-      moduleSpecifier: 'packageB/b',
+      moduleSpecifier: '@test/package-b/b',
     },
   });
-  expectNoDuplicateExternalImporters(bExport.exportEntry.externallyImportedBy);
+  expectNoDuplicateExternalImporters(bExport.externallyImportedBy);
 });
 
 it('Cross-package barrelImport populates externallyImportedBy on every entry-point export', () => {
   initialize();
 
   const pkgAInfo = getProjectInfo(PACKAGE_A_DIR);
-  const aExport = pkgAInfo.packageEntryPointExports.get('A');
-  assertDefined(aExport, 'A export missing on packageA');
+  const fileA = pkgAInfo.packageEntryPointExports.get('@test/package-a');
+  assertDefined(fileA, '@test/package-a entry point missing on packageA');
+  const aExport = findExport(fileA, 'A');
+  assertDefined(aExport, 'A export missing on @test/package-a');
 
-  const barrelImporters = aExport.exportEntry.externallyImportedBy.filter(
+  const barrelImporters = aExport.externallyImportedBy.filter(
     (entry) => entry.importEntry.type === 'barrelImport'
   );
   expect(barrelImporters).toHaveLength(1);
@@ -99,59 +137,126 @@ it('Cross-package barrelImport populates externallyImportedBy on every entry-poi
     filePath: FILE_E,
     importEntry: {
       type: 'barrelImport',
-      moduleSpecifier: 'packageA',
+      moduleSpecifier: '@test/package-a',
     },
   });
-  expectNoDuplicateExternalImporters(aExport.exportEntry.externallyImportedBy);
+  expectNoDuplicateExternalImporters(aExport.externallyImportedBy);
 });
 
 it('Named barrel reexport entry point tracks cross-package importer', () => {
   initialize();
 
   const pkgDInfo = getProjectInfo(PACKAGE_D_DIR);
-  const utilsExport = pkgDInfo.packageEntryPointExports.get('utils');
-  assertDefined(utilsExport, 'utils export missing on packageD');
-  expect(utilsExport.exportEntry.type).toBe('barrelReexport');
-  expect(utilsExport.exportEntry.externallyImportedBy).toHaveLength(1);
-  expect(utilsExport.exportEntry.externallyImportedBy[0]).toMatchObject({
+  const fileD = pkgDInfo.packageEntryPointExports.get('@test/package-d/d');
+  assertDefined(fileD, '@test/package-d/d entry point missing on packageD');
+  const utilsExport = findExport(fileD, 'utils');
+  assertDefined(utilsExport, 'utils export missing on @test/package-d/d');
+  expect(utilsExport).toMatchObject({
+    type: 'barrelReexport',
+    exportName: 'utils',
+    isEntryPoint: true,
+    isExternallyImported: false,
+  });
+  expect(utilsExport.externallyImportedBy).toHaveLength(1);
+  expect(utilsExport.externallyImportedBy[0]).toMatchObject({
     packageRootDir: PACKAGE_C_DIR,
     filePath: FILE_C,
     importEntry: {
       type: 'singleImport',
       importName: 'utils',
-      moduleSpecifier: 'packageD/d',
+      moduleSpecifier: '@test/package-d/d',
     },
   });
-  expectNoDuplicateExternalImporters(
-    utilsExport.exportEntry.externallyImportedBy
-  );
+  expectNoDuplicateExternalImporters(utilsExport.externallyImportedBy);
 });
 
 it('Entry-point export that is not imported by any other package has empty externallyImportedBy', () => {
   initialize();
 
   const pkgCInfo = getProjectInfo(PACKAGE_C_DIR);
-  const cExport = pkgCInfo.packageEntryPointExports.get('C');
-  assertDefined(cExport, 'C export missing on packageC');
-  expect(cExport.exportEntry.externallyImportedBy).toEqual([]);
-  expectNoDuplicateExternalImporters(cExport.exportEntry.externallyImportedBy);
+  const fileC = pkgCInfo.packageEntryPointExports.get('@test/package-c');
+  assertDefined(fileC, '@test/package-c entry point missing on packageC');
+  const cExport = findExport(fileC, 'C');
+  assertDefined(cExport, 'C export missing on @test/package-c');
+  expect(cExport).toMatchObject({
+    type: 'export',
+    exportName: 'C',
+    isTypeExport: false,
+    isEntryPoint: true,
+    isExternallyImported: false,
+  });
+  expect(cExport.externallyImportedBy).toEqual([]);
+  expectNoDuplicateExternalImporters(cExport.externallyImportedBy);
 });
 
-it('Entry-point exports for all four packages appear in packageEntryPointExports', () => {
+it('Entry-point files for all four packages appear in packageEntryPointExports keyed by specifier', () => {
   initialize();
 
-  expect([
-    ...getProjectInfo(PACKAGE_A_DIR).packageEntryPointExports.keys(),
-  ]).toEqual(['A']);
-  expect([
-    ...getProjectInfo(PACKAGE_B_DIR).packageEntryPointExports.keys(),
-  ]).toEqual(['B']);
-  expect([
-    ...getProjectInfo(PACKAGE_C_DIR).packageEntryPointExports.keys(),
-  ]).toEqual(['C']);
-  expect([
-    ...getProjectInfo(PACKAGE_D_DIR).packageEntryPointExports.keys(),
-  ]).toEqual(['utils']);
+  // For each package, pin three invariants at once:
+  //   1. The map is keyed by the expected specifier.
+  //   2. The file registered under that specifier is the exact same object in
+  //      `files`, and its own `entryPointSpecifier` round-trips back to the
+  //      map key.
+  //   3. Every named export/reexport on that file is marked
+  //      `isEntryPoint: true`, which is the per-export fidelity the pre-
+  //      refactor `Map<exportName, exportEntry>` test used to provide.
+  const cases: Array<{
+    dir: string;
+    filePath: string;
+    specifier: string;
+    expectedExportNames: string[];
+  }> = [
+    {
+      dir: PACKAGE_A_DIR,
+      filePath: FILE_A,
+      specifier: '@test/package-a',
+      expectedExportNames: ['A'],
+    },
+    {
+      dir: PACKAGE_B_DIR,
+      filePath: FILE_B,
+      specifier: '@test/package-b/b',
+      expectedExportNames: ['B'],
+    },
+    {
+      dir: PACKAGE_C_DIR,
+      filePath: FILE_C,
+      specifier: '@test/package-c',
+      expectedExportNames: ['C'],
+    },
+    {
+      dir: PACKAGE_D_DIR,
+      filePath: FILE_D,
+      specifier: '@test/package-d/d',
+      // `d.ts` has exactly one named barrel reexport: `export * as utils from
+      // './internal.js'`. That entry must be marked as an entry-point export.
+      expectedExportNames: ['utils'],
+    },
+  ];
+
+  for (const { dir, filePath, specifier, expectedExportNames } of cases) {
+    const info = getProjectInfo(dir);
+    expect([...info.packageEntryPointExports.keys()]).toEqual([specifier]);
+    const registeredFile = info.packageEntryPointExports.get(specifier);
+    expect(registeredFile).toBe(info.files.get(filePath));
+    expect(registeredFile?.entryPointSpecifier).toBe(specifier);
+
+    assertDefined(registeredFile, `${specifier} entry point missing`);
+    const allExportEntries = [
+      ...registeredFile.exports,
+      ...registeredFile.singleReexports,
+      ...registeredFile.barrelReexports,
+    ];
+    for (const entry of allExportEntries) {
+      expect(entry.isEntryPoint).toBe(true);
+    }
+    expect(
+      allExportEntries
+        .map((entry) => entry.exportName)
+        .filter((name): name is string => name !== undefined)
+        .sort()
+    ).toEqual([...expectedExportNames].sort());
+  }
 });
 
 it('Files inside packageD beyond the entry point are reachable via getProjectInfo', () => {

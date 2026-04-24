@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
@@ -35,6 +35,7 @@ import {
   deleteBaseInfoForFile,
   updateBaseInfoForFile,
 } from './computeBaseInfo.js';
+import { computeRepoInfo } from './computeRepoInfo.js';
 import {
   addResolvedInfoForFile,
   computeFolderTree,
@@ -71,12 +72,66 @@ function getAnalyzedProjectInfo(filename: string) {
   });
 }
 
-function getEntryPointCheck(
+function getGetEntryPointSpecifier({
+  packageRootDir,
+  packageName,
+  entryPoints,
+}: {
+  packageRootDir: string;
+  packageName: string | undefined;
+  entryPoints: ParsedPackageSettings['entryPoints'];
+}) {
+  if (!packageName) {
+    return () => undefined;
+  }
+  return (filePath: string) => {
+    const relativePath =
+      './' +
+      convertToUnixishPath(getRelativePathFromRoot(packageRootDir, filePath));
+    let entryPointSpecifier: string | undefined;
+    for (const entryPoint of entryPoints) {
+      if (entryPoint.type === 'dynamic') {
+        // First we run the regex to see if it matches. If it does match, then
+        // the wildcard pattern is the lone matched group
+        const filePatternMatch = entryPoint.filePattern.exec(relativePath);
+        if (!filePatternMatch) {
+          continue;
+        }
+
+        if (entryPointSpecifier) {
+          throw new Error(
+            `Multiple entry points matched for file "${filePath}". Entry points must not be ambiguous.`
+          );
+        }
+
+        // Now we replace the wildcard pattern with the matched group from the
+        // file pattern. Technically speaking
+        const subPath = entryPoint.subPathPattern.replace(
+          '*',
+          filePatternMatch[1]
+        );
+        entryPointSpecifier = `${packageName}${subPath.slice(1)}`;
+      } else {
+        if (entryPoint.filePath === relativePath) {
+          if (entryPointSpecifier) {
+            throw new Error(
+              `Multiple entry points matched for file "${filePath}". Entry points must not be ambiguous.`
+            );
+          }
+          entryPointSpecifier = `${packageName}${entryPoint.subPath.slice(1)}`;
+        }
+      }
+    }
+    return entryPointSpecifier;
+  };
+}
+
+function getIsExternallyImportedCheck(
   packageRootDir: string,
-  entryPoints: ParsedPackageSettings['entryPoints']
+  externallyImported: ParsedPackageSettings['externallyImported']
 ) {
   return (filePath: string) => {
-    for (const { file } of entryPoints) {
+    for (const { file } of externallyImported) {
       // We're using the ignore library in reverse fashion: we're using it to
       // identify when a file is _included_, not _excluded_. We also have to
       // be careful with Windows styled paths, since gitignores use unix paths
@@ -147,8 +202,12 @@ export function initializeProject({
     fixedAliases,
     ignorePatterns,
     ignoreOverridePatterns,
-    isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
-    isExternallyImportedCheck: getEntryPointCheck(
+    getEntryPointSpecifier: getGetEntryPointSpecifier({
+      packageRootDir,
+      packageName,
+      entryPoints,
+    }),
+    isExternallyImportedCheck: getIsExternallyImportedCheck(
       packageRootDir,
       externallyImported
     ),
@@ -199,105 +258,7 @@ export function initializeProject({
 
 function initializePackageInfo() {
   const analyzestart = performance.now();
-  const packageEntryPoints = new Map<
-    string,
-    AnalyzedProjectInfo['packageEntryPointExports']
-  >();
-
-  // Initialize the package dependencies map
-  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
-    if (analyzedProjectInfo.packageName) {
-      packageEntryPoints.set(
-        analyzedProjectInfo.packageName,
-        analyzedProjectInfo.packageEntryPointExports
-      );
-    }
-  }
-
-  // Reset externallyImportedBy arrays. Since we don't do more intelligent cache
-  // updates for package info, we have to first reset externallyImportedBy
-  // arrays, otherwise we end up with duplicates.
-  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
-    for (const [, entryPoint] of analyzedProjectInfo.packageEntryPointExports) {
-      entryPoint.exportEntry.externallyImportedBy = [];
-    }
-  }
-
-  // Mark entry points as imported in the monorepo
-  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
-    for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
-      if (fileDetails.fileType !== 'code') {
-        continue;
-      }
-      for (const importEntry of [
-        ...fileDetails.singleImports,
-        ...fileDetails.barrelImports,
-        ...fileDetails.dynamicImports,
-      ]) {
-        if (importEntry.resolvedModuleType !== 'thirdParty') {
-          continue;
-        }
-
-        // We can't analyze dynamic import specifiers that can't be resolve
-        // statically (aka moduleSpecifier is undefined), so we skip them
-        if (!importEntry.moduleSpecifier) {
-          continue;
-        }
-
-        // Get the package name without any possible subpaths
-        const packageParts = importEntry.moduleSpecifier.split('/');
-        let packageName: string;
-        if (packageParts[0].startsWith('@')) {
-          if (packageParts.length < 2) {
-            continue;
-          }
-          packageName = join(packageParts[0], packageParts[1]);
-        } else {
-          packageName = packageParts[0];
-        }
-
-        // Check if this is a known package in the monorepo or not
-        const packageEntryPointExports = packageEntryPoints.get(packageName);
-        if (!packageEntryPointExports) {
-          continue;
-        }
-        switch (importEntry.type) {
-          // For single imports, we need to find the specific export so we can
-          // mark it as externally imported
-          case 'singleImport': {
-            const exportEntry = packageEntryPointExports.get(
-              importEntry.importName
-            );
-            if (!exportEntry) {
-              debug(
-                `Export ${importEntry.importName} not found in package ${packageName}`
-              );
-              continue;
-            }
-            exportEntry.exportEntry.externallyImportedBy.push({
-              packageRootDir: analyzedProjectInfo.packageRootDir,
-              filePath,
-              importEntry,
-            });
-            break;
-          }
-          // For barrel imports and dynamic imports, we mark all exports as externally imported
-          case 'dynamicImport':
-          case 'barrelImport': {
-            for (const [, exportEntry] of packageEntryPointExports) {
-              exportEntry.exportEntry.externallyImportedBy.push({
-                packageRootDir: analyzedProjectInfo.packageRootDir,
-                filePath,
-                importEntry,
-              });
-            }
-            break;
-          }
-        }
-      }
-    }
-  }
-
+  computeRepoInfo(analyzedProjectInfos);
   const analyzeEnd = performance.now();
   debug(
     `Initialized repository info in ${formatMilliseconds(analyzeEnd - analyzestart)}`
@@ -384,11 +345,12 @@ export function updateCacheFromFileSystem(
             {
               filePath,
               fileContents,
-              isEntryPointCheck: getEntryPointCheck(
-                packageSettings.packageRootDir,
-                packageSettings.entryPoints
-              ),
-              isExternallyImportedCheck: getEntryPointCheck(
+              getEntryPointSpecifier: getGetEntryPointSpecifier({
+                packageRootDir: packageSettings.packageRootDir,
+                packageName: packageSettings.packageName,
+                entryPoints: packageSettings.entryPoints,
+              }),
+              isExternallyImportedCheck: getIsExternallyImportedCheck(
                 packageSettings.packageRootDir,
                 packageSettings.externallyImported
               ),
@@ -440,11 +402,12 @@ export function updateCacheFromFileSystem(
           {
             filePath,
             fileContents,
-            isEntryPointCheck: getEntryPointCheck(
-              packageSettings.packageRootDir,
-              packageSettings.entryPoints
-            ),
-            isExternallyImportedCheck: getEntryPointCheck(
+            getEntryPointSpecifier: getGetEntryPointSpecifier({
+              packageRootDir: packageSettings.packageRootDir,
+              packageName: packageSettings.packageName,
+              entryPoints: packageSettings.entryPoints,
+            }),
+            isExternallyImportedCheck: getIsExternallyImportedCheck(
               packageSettings.packageRootDir,
               packageSettings.externallyImported
             ),
@@ -501,7 +464,12 @@ export function updateCacheForFile(
   filePath: string,
   fileContents: string,
   ast: TSESTree.Program,
-  { entryPoints, externallyImported, packageRootDir }: ParsedPackageSettings
+  {
+    entryPoints,
+    externallyImported,
+    packageRootDir,
+    packageName,
+  }: ParsedPackageSettings
 ) {
   const baseProjectInfo = getBaseProjectInfo(filePath);
   const resolvedProjectInfo = getResolvedProjectInfo(filePath);
@@ -517,8 +485,12 @@ export function updateCacheForFile(
     filePath,
     fileContents,
     ast,
-    isEntryPointCheck: getEntryPointCheck(packageRootDir, entryPoints),
-    isExternallyImportedCheck: getEntryPointCheck(
+    getEntryPointSpecifier: getGetEntryPointSpecifier({
+      packageRootDir,
+      packageName,
+      entryPoints,
+    }),
+    isExternallyImportedCheck: getIsExternallyImportedCheck(
       packageRootDir,
       externallyImported
     ),

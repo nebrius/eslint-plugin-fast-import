@@ -51,7 +51,7 @@ export const noEntryPointImports = createRule({
       if (fileDetails?.fileType !== 'code') {
         continue;
       }
-      if (fileDetails.hasEntryPoints || fileDetails.isExternallyImported) {
+      if (fileDetails.entryPointSpecifier || fileDetails.isExternallyImported) {
         context.report({
           messageId: 'noEntryPointImports',
           loc: getLocFromRange(context, importEntry.reportNodeRange),

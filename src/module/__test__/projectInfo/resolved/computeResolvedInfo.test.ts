@@ -30,7 +30,7 @@ const FILE_F = join(TEST_PROJECT_DIR, 'two', 'f', 'index.js');
 const FILE_F_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'f', 'index.d.ts');
 
 const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [],
   fileType: 'code',
@@ -148,7 +148,7 @@ const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -168,7 +168,7 @@ const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -188,7 +188,7 @@ const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_C: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   exports: [
@@ -212,7 +212,7 @@ const EXPECTED_FILE_C_DATA: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -239,7 +239,7 @@ const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -259,7 +259,7 @@ const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   exports: [
@@ -279,7 +279,7 @@ const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -306,7 +306,7 @@ const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
 };
 
 const EXPECTED_FILE_F: StrippedResolvedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   exports: [
@@ -357,7 +357,7 @@ function makeBaseInfo() {
     fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
     ignorePatterns: [],
     ignoreOverridePatterns: [],
-    isEntryPointCheck: () => false,
+    getEntryPointSpecifier: () => undefined,
     isExternallyImportedCheck: () => false,
   });
 }
@@ -376,7 +376,7 @@ it('Adds and updates resolved info for files', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: `import { b1 } from './one/b';\nexport const newThing = 1;`,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     baseInfo
@@ -388,7 +388,7 @@ it('Adds and updates resolved info for files', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       fileType: 'code',
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       exports: [
         {
@@ -428,7 +428,7 @@ it('Adds and updates resolved info for files', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: `import { c1 } from './one/c';\nexport const newThing = 1;`,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     baseInfo
@@ -439,7 +439,7 @@ it('Adds and updates resolved info for files', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       fileType: 'code',
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       exports: [
         {
@@ -496,7 +496,7 @@ it('Resolves Vite-style imports with query strings', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: `import { b1 } from './one/b?raw';`,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     baseInfo
@@ -508,7 +508,7 @@ it('Resolves Vite-style imports with query strings', () => {
     ...EXPECTED,
     [NEW_FILE_PATH]: {
       fileType: 'code',
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       exports: [],
       singleImports: [
@@ -545,7 +545,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
     {
       filePath: SHARED_TS,
       fileContents: `export const x = 1;`,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     baseInfo
@@ -555,7 +555,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
     {
       filePath: CONSUMER_PATH,
       fileContents: `import { x } from './sharedName';`,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     baseInfo
@@ -567,7 +567,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
     ...EXPECTED,
     [CONSUMER_PATH]: {
       fileType: 'code',
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       exports: [],
       singleImports: [

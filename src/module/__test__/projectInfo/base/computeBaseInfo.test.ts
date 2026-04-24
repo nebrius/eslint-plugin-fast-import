@@ -19,7 +19,7 @@ const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
 
 const EXPECTED_FILE_A: StrippedBaseFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -213,7 +213,7 @@ const EXPECTED_FILE_A: StrippedBaseFileDetails = {
 };
 
 const EXPECTED_FILE_B: StrippedBaseFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -314,7 +314,7 @@ const EXPECTED_FILE_B: StrippedBaseFileDetails = {
 
 const EXPECTED_FILE_C: StrippedBaseFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -385,7 +385,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
 };
 
 const EXPECTED_FILE_D: StrippedBaseFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [
     {
@@ -440,7 +440,7 @@ it('Computes base info', () => {
     fixedAliases: {},
     ignorePatterns: [],
     ignoreOverridePatterns: [],
-    isEntryPointCheck: () => false,
+    getEntryPointSpecifier: () => undefined,
     isExternallyImportedCheck: () => false,
   });
   expect(info).toMatchBaseSpec(EXPECTED);
@@ -465,7 +465,7 @@ it('Adds, modifies, and deletes a new file', () => {
     fixedAliases: {},
     ignorePatterns: [],
     ignoreOverridePatterns: [],
-    isEntryPointCheck: () => false,
+    getEntryPointSpecifier: () => undefined,
     isExternallyImportedCheck: () => false,
   });
 
@@ -473,7 +473,7 @@ it('Adds, modifies, and deletes a new file', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_ADD,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     info
@@ -481,7 +481,7 @@ it('Adds, modifies, and deletes a new file', () => {
   expect(info).toMatchBaseSpec({
     ...EXPECTED,
     [NEW_FILE_PATH]: {
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       fileType: 'code',
       singleImports: [
@@ -505,7 +505,7 @@ it('Adds, modifies, and deletes a new file', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_MODIFY,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     info
@@ -513,7 +513,7 @@ it('Adds, modifies, and deletes a new file', () => {
   expect(info).toMatchBaseSpec({
     ...EXPECTED,
     [NEW_FILE_PATH]: {
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       fileType: 'code',
       singleImports: [
@@ -561,7 +561,7 @@ it('Adds, modifies, and deletes a new file', () => {
     {
       filePath: NEW_FILE_PATH,
       fileContents: NEW_FILE_CONTENTS_MODIFY_2,
-      isEntryPointCheck: () => false,
+      getEntryPointSpecifier: () => undefined,
       isExternallyImportedCheck: () => false,
     },
     info
@@ -569,7 +569,7 @@ it('Adds, modifies, and deletes a new file', () => {
   expect(info).toMatchBaseSpec({
     ...EXPECTED,
     [NEW_FILE_PATH]: {
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       fileType: 'code',
       singleImports: [

@@ -289,9 +289,15 @@ export type BaseCodeFileDetails = {
   lastUpdatedAt: number;
 
   /**
-   * Indicates whether or not any of this file's exports are entry points
+   * If this file is an entry point file, `entryPointSpecifier` will be the
+   * module specifier used to import it externally. If this file is not an entry
+   * point, `entryPointSpecifier` will be undefined.
+   *
+   * For example, if this file is `src/foo.ts`, the package name is
+   * `my-package`, and package.json "exports" is `{ "./foo": "./dist/foo.js" }`,
+   * then `entryPointSpecifier` will be `my-package/foo`.
    */
-  hasEntryPoints: boolean;
+  entryPointSpecifier: string | undefined;
 
   /**
    * Indicates whether or not any of this file's exports are externally imported

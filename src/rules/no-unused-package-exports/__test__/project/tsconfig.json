@@ -14,9 +14,7 @@
       "one": ["./packages/one/entry.ts"],
       "two": ["./packages/two/entry.ts"],
       "three": ["./packages/three/entry.ts"],
-      "four": ["./packages/four/entry.ts"],
-      "filter": ["./packages/filter/entryA.ts"],
-      "filter/b": ["./packages/filter/entryB.ts"]
+      "four": ["./packages/four/entry.ts"]
     }
   },
   "include": ["packages/**/*.ts"]

@@ -22,7 +22,8 @@ import { InternalError } from '../util/error.js';
 import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
 import { debug } from '../util/logging.js';
 
-type IsEntryPointCheck = (filePath: string) => boolean;
+type GetEntryPointSpecifier = (filePath: string) => string | undefined;
+type IsExternallyImportedCheck = (filePath: string) => boolean;
 
 type ComputeBaseInfoOptions = Pick<
   ParsedPackageSettings,
@@ -33,8 +34,8 @@ type ComputeBaseInfoOptions = Pick<
   | 'ignoreOverridePatterns'
   | 'packageName'
 > & {
-  isEntryPointCheck: IsEntryPointCheck;
-  isExternallyImportedCheck: IsEntryPointCheck;
+  getEntryPointSpecifier: GetEntryPointSpecifier;
+  isExternallyImportedCheck: IsExternallyImportedCheck;
 };
 
 /**
@@ -47,7 +48,7 @@ export function computeBaseInfo({
   ignorePatterns,
   ignoreOverridePatterns,
   packageName,
-  isEntryPointCheck,
+  getEntryPointSpecifier,
   isExternallyImportedCheck,
 }: ComputeBaseInfoOptions): BaseProjectInfo {
   const info: BaseProjectInfo = {
@@ -78,7 +79,7 @@ export function computeBaseInfo({
       const fileDetails = computeFileDetails({
         filePath,
         fileContents,
-        isEntryPointCheck,
+        getEntryPointSpecifier,
         isExternallyImportedCheck,
       });
       if (fileDetails) {
@@ -97,15 +98,15 @@ export function computeBaseInfo({
 type ComputeFileDetailsOptions = {
   filePath: string;
   fileContents: string;
-  isEntryPointCheck: IsEntryPointCheck;
-  isExternallyImportedCheck: IsEntryPointCheck;
+  getEntryPointSpecifier: GetEntryPointSpecifier;
+  isExternallyImportedCheck: IsExternallyImportedCheck;
 };
 
 export function addBaseInfoForFile(
   {
     filePath,
     fileContents,
-    isEntryPointCheck,
+    getEntryPointSpecifier,
     isExternallyImportedCheck,
   }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
@@ -114,7 +115,7 @@ export function addBaseInfoForFile(
     const fileDetails = computeFileDetails({
       filePath,
       fileContents,
-      isEntryPointCheck,
+      getEntryPointSpecifier,
       isExternallyImportedCheck,
     });
     if (fileDetails) {
@@ -214,7 +215,7 @@ export function updateBaseInfoForFile(
   {
     filePath,
     fileContents,
-    isEntryPointCheck,
+    getEntryPointSpecifier,
     isExternallyImportedCheck,
   }: ComputeFileDetailsOptions,
   baseProjectInfo: BaseProjectInfo
@@ -241,7 +242,7 @@ export function updateBaseInfoForFile(
   const updatedFileDetails = computeFileDetails({
     filePath,
     fileContents,
-    isEntryPointCheck,
+    getEntryPointSpecifier,
     isExternallyImportedCheck,
   });
 
@@ -293,7 +294,7 @@ function getRange(
 function computeFileDetails({
   filePath,
   fileContents,
-  isEntryPointCheck,
+  getEntryPointSpecifier,
   isExternallyImportedCheck,
 }: ComputeFileDetailsOptions): BaseCodeFileDetails | undefined {
   const result = parseSync(filePath, fileContents, {
@@ -315,12 +316,12 @@ function computeFileDetails({
     singleReexports: [],
     barrelReexports: [],
     exports: [],
-    hasEntryPoints: false,
-    isExternallyImported: false,
+    entryPointSpecifier: getEntryPointSpecifier(filePath),
+    isExternallyImported: isExternallyImportedCheck(filePath),
   };
 
-  let hasEntryPoints = false;
-  let hasExternallyImported = false;
+  const isEntryPoint = fileDetails.entryPointSpecifier !== undefined;
+  const isExternallyImported = fileDetails.isExternallyImported;
 
   for (const importEntry of result.module.staticImports) {
     const statementNodeRange = getRange(importEntry);
@@ -416,16 +417,6 @@ function computeFileDetails({
 
         if (isBarrel) {
           const exportName = entry.exportName.name;
-          const isEntryPoint = exportName ? isEntryPointCheck(filePath) : false;
-          const isExternallyImported = exportName
-            ? isExternallyImportedCheck(filePath)
-            : false;
-          if (isEntryPoint) {
-            hasEntryPoints = true;
-          }
-          if (isExternallyImported) {
-            hasExternallyImported = true;
-          }
           fileDetails.barrelReexports.push({
             type: 'barrelReexport',
             moduleSpecifier,
@@ -445,14 +436,6 @@ function computeFileDetails({
           /* istanbul ignore if */
           if (!exportName) {
             throw new InternalError(`exportName is undefined`);
-          }
-          const isEntryPoint = isEntryPointCheck(filePath);
-          const isExternallyImported = isExternallyImportedCheck(filePath);
-          if (isEntryPoint) {
-            hasEntryPoints = true;
-          }
-          if (isExternallyImported) {
-            hasExternallyImported = true;
           }
           fileDetails.singleReexports.push({
             type: 'singleReexport',
@@ -478,14 +461,6 @@ function computeFileDetails({
         if (!exportName) {
           throw new InternalError(`exportName is undefined`);
         }
-        const isEntryPoint = isEntryPointCheck(filePath);
-        const isExternallyImported = isExternallyImportedCheck(filePath);
-        if (isEntryPoint) {
-          hasEntryPoints = true;
-        }
-        if (isExternallyImported) {
-          hasExternallyImported = true;
-        }
         fileDetails.exports.push({
           type: 'export',
           exportName,
@@ -497,13 +472,6 @@ function computeFileDetails({
         });
       }
     }
-  }
-
-  if (hasEntryPoints) {
-    fileDetails.hasEntryPoints = true;
-  }
-  if (hasExternallyImported) {
-    fileDetails.isExternallyImported = true;
   }
 
   // De-dupe exports with the same name (e.g. TypeScript function overloads).

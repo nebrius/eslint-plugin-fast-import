@@ -17,7 +17,7 @@ Examples of _incorrect_ code, with `a.ts` configured in `entryPointFiles`
 ├── b.ts
 └── c.ts
 
-entryPointFiles: ['./a.ts']
+entryPointFiles: { '.': './a.ts' }
 */
 
 // a.ts
@@ -39,7 +39,7 @@ Examples of _correct_ code
 ├── b.ts
 └── c.ts
 
-entryPointFiles: ['./a.ts']
+entryPointFiles: { '.': './a.ts' }
 */
 
 // a.ts

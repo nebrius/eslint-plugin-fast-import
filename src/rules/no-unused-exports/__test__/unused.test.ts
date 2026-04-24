@@ -60,7 +60,7 @@ export function a1(arg: number | string): void {
         'fast-import': {
           packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPointFiles: ['f.ts'],
+          entryPointFiles: { '.': './f.ts' },
         },
       },
     },
@@ -81,7 +81,7 @@ export function a1(arg: number | string): void {
         'fast-import': {
           packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPointFiles: ['e.ts'],
+          entryPointFiles: { '.': './e.ts' },
         },
       },
     },

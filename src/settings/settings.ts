@@ -37,7 +37,10 @@ export type ParsedPackageSettings = Omit<
   ignoreOverridePatterns: IgnorePattern[];
   wildcardAliases: Record<string, string>;
   fixedAliases: Record<string, string>;
-  entryPoints: Array<{ file: Ignore }>;
+  entryPoints: Array<
+    | { type: 'dynamic'; subPathPattern: string; filePattern: RegExp }
+    | { type: 'static'; subPath: string; filePath: string }
+  >;
   externallyImported: Array<{ file: Ignore }>;
   testFilePatterns: string[];
   packageName: string | undefined;
@@ -113,6 +116,10 @@ function compareSettingsObjects(
   b: Record<string, unknown> | undefined
 ) {
   return !!b && JSON.stringify(a) === JSON.stringify(b);
+}
+
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export function getRepoSettings(
@@ -269,10 +276,52 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
 
   // Clean up any entry points
   const parsedEntryPoints: ParsedPackageSettings['entryPoints'] = [];
-  for (const filePattern of entryPointFiles) {
-    parsedEntryPoints.push({
-      file: ignore().add(filePattern),
-    });
+  for (const [subPathPattern, filePattern] of Object.entries(entryPointFiles)) {
+    if (subPathPattern !== '.' && !subPathPattern.startsWith('./')) {
+      throw new Error(
+        `Entry point subpath pattern ${subPathPattern} must equal "." or start with "./"`
+      );
+    }
+    if (!filePattern.startsWith('./')) {
+      throw new Error(
+        `Entry point file pattern ${filePattern} must start with "./"`
+      );
+    }
+    if (subPathPattern.includes('*')) {
+      // Node.js requires that subpaths only contain 1 wildcard, so this is just
+      // a sanity check in practice.
+      if (subPathPattern.split('*').length > 2) {
+        throw new Error(
+          `Entry point subpath pattern ${subPathPattern} must not contain more than one wildcard`
+        );
+      }
+      // Technically speaking, file patterns can be repeated, but supporting
+      // them is intractible, because the process is not fully reversible
+      // and would require a significant rearchitect that would hurt performance
+      if (filePattern.split('*').length > 2 || !filePattern.includes('*')) {
+        throw new Error(
+          `Entry point file pattern ${filePattern} must contain exactly one wildcard`
+        );
+      }
+      parsedEntryPoints.push({
+        type: 'dynamic',
+        // Node.js only supports a single wildcard in the subpath pattern, so we
+        // can split on '*' and join back on the capture group. Escape each side
+        // of the split so regex metacharacters in the path (most commonly `.`
+        // in directory names and file extensions, but also `()`, `+`, `$`,
+        // etc.) match literally instead of being interpreted as regex syntax.
+        subPathPattern,
+        filePattern: new RegExp(
+          `^${filePattern.split('*').map(escapeRegExp).join('(.*)')}$`
+        ),
+      });
+    } else {
+      parsedEntryPoints.push({
+        type: 'static',
+        subPath: subPathPattern,
+        filePath: filePattern,
+      });
+    }
   }
 
   const parsedExternallyImported: ParsedPackageSettings['externallyImported'] =

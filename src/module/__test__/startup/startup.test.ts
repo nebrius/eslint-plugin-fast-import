@@ -57,7 +57,7 @@ it('Updates cache when a new file is added', () => {
   expect(projectInfo).toMatchAnalyzedSpec({
     [SINGLEREPO_FILE_A]: {
       fileType: 'code',
-      hasEntryPoints: false,
+      entryPointSpecifier: undefined,
       isExternallyImported: false,
       singleImports: [],
       barrelImports: [],

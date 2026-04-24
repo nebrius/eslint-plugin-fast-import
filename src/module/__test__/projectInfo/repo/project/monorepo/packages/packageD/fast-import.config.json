@@ -1,1 +1,5 @@
-{ "entryPointFiles": ["d.ts"] }
+{
+  "entryPointFiles": {
+    "./d": "./d.ts"
+  }
+}

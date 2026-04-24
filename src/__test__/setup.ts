@@ -70,10 +70,13 @@ function toMatchSpec<
       continue;
     }
 
-    if (expectedFileDetails.hasEntryPoints !== fileDetails.hasEntryPoints) {
+    if (
+      expectedFileDetails.entryPointSpecifier !==
+      fileDetails.entryPointSpecifier
+    ) {
       return {
         message: () =>
-          `file path ${filePath} has the wrong hasEntryPoints: expected ${String(expectedFileDetails.hasEntryPoints)}, received ${String(fileDetails.hasEntryPoints)}`,
+          `file path ${filePath} has the wrong entryPointSpecifier: expected ${String(expectedFileDetails.entryPointSpecifier)}, received ${String(fileDetails.entryPointSpecifier)}`,
         pass: false,
       };
     }

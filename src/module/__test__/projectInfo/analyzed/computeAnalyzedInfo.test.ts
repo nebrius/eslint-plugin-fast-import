@@ -24,7 +24,7 @@ const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
 
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: true,
+  entryPointSpecifier: 'test',
   isExternallyImported: false,
   singleImports: [
     {
@@ -147,7 +147,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
@@ -184,7 +184,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
@@ -232,7 +232,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [],
   fileType: 'code',
@@ -260,7 +260,7 @@ const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [],
   fileType: 'code',
@@ -288,7 +288,7 @@ const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   exports: [],
   fileType: 'code',
@@ -316,7 +316,7 @@ const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   singleImports: [],
@@ -365,7 +365,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   singleImports: [],
@@ -436,7 +436,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   singleImports: [],
@@ -477,7 +477,7 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
 };
 
 const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   fileType: 'code',
   singleImports: [],
@@ -533,7 +533,8 @@ it('Computes analyzed info', () => {
         fixedAliases: {},
         ignorePatterns: [],
         ignoreOverridePatterns: [],
-        isEntryPointCheck: (filePath) => filePath === FILE_A,
+        getEntryPointSpecifier: (filePath) =>
+          filePath === FILE_A ? 'test' : undefined,
         isExternallyImportedCheck: () => false,
       })
     )
@@ -545,14 +546,14 @@ it('Computes analyzed info', () => {
     'typescript',
   ]);
 
-  const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    statementNodeRange: _statementNodeRange,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    reportNodeRange: _reportNodeRange,
-    ...rest
-  } = Array.from(info.packageEntryPointExports.values())[0].exportEntry;
-  expect(rest).toEqual(EXPECTED_FILE_A.singleReexports[0]);
+  // The map is keyed by the entry point's module specifier, holds the exact
+  // same AnalyzedCodeFileDetails instance that appears in `files`, and that
+  // instance's `entryPointSpecifier` must round-trip back to the map key.
+  expect([...info.packageEntryPointExports.keys()]).toEqual(['test']);
+  const registeredFileA = info.packageEntryPointExports.get('test');
+  expect(registeredFileA).toBe(info.files.get(FILE_A));
+  expect(registeredFileA?.entryPointSpecifier).toBe('test');
+
   expect(info.packageName).toEqual('test');
   expect(info.packageRootDir).toEqual(TEST_PROJECT_DIR);
   expect(info).toMatchAnalyzedSpec(EXPECTED);
@@ -570,7 +571,7 @@ it('Computes analyzed info for a project with a file that imports itself', () =>
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: () => false,
+          getEntryPointSpecifier: () => undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -595,7 +596,8 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: (filePath) => filePath === fileA,
+          getEntryPointSpecifier: (filePath) =>
+            filePath === fileA ? 'test' : undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -619,7 +621,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: () => false,
+          getEntryPointSpecifier: () => undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -639,7 +641,7 @@ it('Computes analyzed info for a project with a single reexport of a firstPartyO
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: () => false,
+          getEntryPointSpecifier: () => undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -663,7 +665,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a built
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: () => false,
+          getEntryPointSpecifier: () => undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -687,7 +689,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a first
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: () => false,
+          getEntryPointSpecifier: () => undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -707,7 +709,7 @@ it('Computes analyzed info for a project with a dynamic import', () => {
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: () => false,
+          getEntryPointSpecifier: () => undefined,
           isExternallyImportedCheck: () => false,
         })
       )
@@ -732,7 +734,8 @@ it('Computes analyzed info for a project with a barrel reexport that is an entry
           fixedAliases: {},
           ignorePatterns: [],
           ignoreOverridePatterns: [],
-          isEntryPointCheck: (filePath) => filePath === fileA,
+          getEntryPointSpecifier: (filePath) =>
+            filePath === fileA ? 'test' : undefined,
           isExternallyImportedCheck: () => false,
         })
       )

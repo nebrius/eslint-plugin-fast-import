@@ -1,4 +1,3 @@
-import { InternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noUnusedPackageExports = createRule({
@@ -26,7 +25,7 @@ export const noUnusedPackageExports = createRule({
       return {};
     }
 
-    const { fileInfo, projectInfo } = esmInfo;
+    const { fileInfo } = esmInfo;
     /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
       return {};
@@ -34,25 +33,22 @@ export const noUnusedPackageExports = createRule({
 
     // If this file doesn't have any entry points, then we can bail early and
     // avoid needing to do a more expensive filter.
-    if (!fileInfo.hasEntryPoints) {
+    if (!fileInfo.entryPointSpecifier) {
       return {};
     }
 
-    const fileEntryPointExports = projectInfo.packageEntryPointExports
-      .values()
-      .filter((e) => e.filePath === context.filename);
-
     // Check each export and reexport to make sure it's being used
-    for (const { exportEntry } of fileEntryPointExports) {
+    for (const exportEntry of [
+      ...fileInfo.exports,
+      ...fileInfo.barrelReexports,
+      ...fileInfo.singleReexports,
+    ]) {
+      // Barrel reexports that don't have a name aren't really resolvable (and
+      // are disallowed by lint rule anyways), so they're ignored here
+      if (!exportEntry.exportName) {
+        continue;
+      }
       if (exportEntry.externallyImportedBy.length === 0) {
-        // Only AnalyzedBarrelReexport has an optional exportName, and
-        // computeAnalyzedInfo.ts gates its entry into
-        // packageEntryPointExports on exportName being truthy, so every
-        // entry here has a defined exportName.
-        /* istanbul ignore if */
-        if (!exportEntry.exportName) {
-          throw new InternalError('exportName unexpectedly undefined');
-        }
         context.report({
           messageId: 'noUnusedPackageExports',
           loc: getLocFromRange(context, exportEntry.reportNodeRange),

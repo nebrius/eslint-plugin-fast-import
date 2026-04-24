@@ -35,14 +35,20 @@ function assertCodeFile(
   }
 }
 
-// Regression guard for the `initializePackageInfo` duplication bug: each
-// (filePath, importEntry.type) pair must appear at most once in an
-// externallyImportedBy list.
+// Regression guard for the `initializePackageInfo` duplication bug: the bug
+// pushed the same `importEntry` object reference into `externallyImportedBy`
+// more than once. Track object identity directly so this guard stays accurate
+// even when fixtures legitimately contain multiple imports of the same type
+// from the same file (which would share `(filePath, importEntry.type)` but not
+// object identity).
 function expectNoDuplicateExternalImporters(
-  entries: ReadonlyArray<{ filePath: string; importEntry: { type: string } }>
+  entries: ReadonlyArray<{ importEntry: object }>
 ) {
-  const keys = entries.map((e) => `${e.filePath}|${e.importEntry.type}`);
-  expect(new Set(keys).size).toBe(keys.length);
+  const seen = new WeakSet<object>();
+  for (const entry of entries) {
+    expect(seen.has(entry.importEntry)).toBe(false);
+    seen.add(entry.importEntry);
+  }
 }
 
 const MONOREPO_PROJECT_DIR = join(getDirname(), 'project', 'monorepo');
@@ -75,7 +81,7 @@ const EXPECTED_OTHER_FILE: StrippedAnalyzedFileDetails = { fileType: 'other' };
 
 const EMPTY_CODE_FILE: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
@@ -108,25 +114,26 @@ function initialize() {
   return { packageOneSettings, packageTwoSettings };
 }
 
-// The d.ts cross-package single import of `One` from `packageOne/a` shows up
-// as a thirdParty single import since `packageOne` is a bare specifier.
+// The d.ts cross-package single import of `One` from `@test/package-one/a`
+// shows up as a thirdParty single import since the specifier matches a known
+// subpath entry point of a first-party package name.
 const FILE_D_SINGLE_IMPORT = {
   type: 'singleImport' as const,
   importAlias: 'One',
   importName: 'One',
   isTypeImport: true,
-  moduleSpecifier: 'packageOne/a',
+  moduleSpecifier: '@test/package-one/a',
   resolvedModuleType: 'thirdParty' as const,
   rootModuleType: undefined,
 };
 
-// The e.ts cross-package barrel import of `packageOne` shows up as a thirdParty
-// barrel import, which lights up externallyImportedBy on every entry-point
-// export of the target package.
+// The e.ts cross-package barrel import of `@test/package-one/a` shows up as a
+// thirdParty barrel import, which lights up externallyImportedBy on every
+// entry-point export of the target package's subpath file.
 const FILE_E_BARREL_IMPORT = {
   type: 'barrelImport' as const,
   importAlias: 'pkg',
-  moduleSpecifier: 'packageOne',
+  moduleSpecifier: '@test/package-one/a',
   resolvedModuleType: 'thirdParty' as const,
 };
 
@@ -164,8 +171,8 @@ function buildExpectedFileA({
       ]
     : [];
   // Any entry-point export in a.ts is picked up by e.ts's
-  // `import * as pkg from 'packageOne'` barrel, so AlsoOne and each additional
-  // entry-point export share the same externallyImportedBy shape.
+  // `import * as pkg from '@test/package-one/a'` barrel, so AlsoOne and each
+  // additional entry-point export share the same externallyImportedBy shape.
   const barrelOnlyExternallyImportedBy = withCrossPackage
     ? [
         {
@@ -181,7 +188,7 @@ function buildExpectedFileA({
 
   return {
     fileType: 'code',
-    hasEntryPoints: true,
+    entryPointSpecifier: '@test/package-one/a',
     isExternallyImported: false,
     singleImports: [],
     barrelImports: [],
@@ -240,7 +247,7 @@ function buildExpectedFileA({
 
 const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   singleImports: [
     {
@@ -271,7 +278,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: true,
+  entryPointSpecifier: '@test/package-two',
   isExternallyImported: false,
   singleImports: [],
   barrelImports: [],
@@ -294,7 +301,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   singleImports: [FILE_D_SINGLE_IMPORT],
   barrelImports: [],
@@ -306,7 +313,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
 
 const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
   fileType: 'code',
-  hasEntryPoints: false,
+  entryPointSpecifier: undefined,
   isExternallyImported: false,
   singleImports: [],
   barrelImports: [FILE_E_BARREL_IMPORT],
@@ -393,27 +400,60 @@ it('Cross-package singleImport populates externallyImportedBy on the matching en
     importEntry: { type: 'singleImport', importName: 'One' },
   });
 
-  // packageEntryPointExports should expose `One` by name.
-  expect(pkg1Info.packageEntryPointExports.get('One')).toEqual({
-    filePath: FILE_A,
-    exportEntry: oneExport,
-  });
+  // packageEntryPointExports should expose the entry-point file by specifier.
+  expect(pkg1Info.packageEntryPointExports.get('@test/package-one/a')).toBe(
+    fileA
+  );
 });
 
-it('packageEntryPointExports iterates as a Map keyed by export name', () => {
+it('packageEntryPointExports is a Map keyed by import specifier', () => {
   initialize();
 
+  // packageOne registers `./a` under `@test/package-one/a`, and the registered
+  // file must be the exact same object stored in `files`. The file's own
+  // `entryPointSpecifier` must round-trip back to the map key, and every named
+  // export on that file must be marked as an entry-point export (pinning the
+  // per-export fidelity that the pre-refactor `Map<exportName, exportEntry>`
+  // test provided by construction).
   const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
-  const pkg1Entries = [...pkg1Info.packageEntryPointExports.entries()];
-  const pkg1KeysSorted = pkg1Entries.map(([key]) => key).sort();
-  expect(pkg1KeysSorted).toEqual(['AlsoOne', 'One']);
-  for (const [key, entry] of pkg1Entries) {
-    expect(entry.exportEntry.exportName).toBe(key);
-  }
+  const fileA = pkg1Info.files.get(FILE_A);
+  assertCodeFile(fileA, 'FILE_A missing or not a code file');
+  expect([...pkg1Info.packageEntryPointExports.keys()]).toEqual([
+    '@test/package-one/a',
+  ]);
+  const registeredFileA = pkg1Info.packageEntryPointExports.get(
+    '@test/package-one/a'
+  );
+  expect(registeredFileA).toBe(fileA);
+  expect(registeredFileA?.entryPointSpecifier).toBe('@test/package-one/a');
+  expect(
+    fileA.exports
+      .map((entry) => ({
+        exportName: entry.exportName,
+        isEntryPoint: entry.isEntryPoint,
+      }))
+      .sort((a, b) => a.exportName.localeCompare(b.exportName))
+  ).toEqual([
+    { exportName: 'AlsoOne', isEntryPoint: true },
+    { exportName: 'One', isEntryPoint: true },
+  ]);
 
   const pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
-  const pkg2KeysSorted = [...pkg2Info.packageEntryPointExports.keys()].sort();
-  expect(pkg2KeysSorted).toEqual(['Two']);
+  const fileC = pkg2Info.files.get(FILE_C);
+  assertCodeFile(fileC, 'FILE_C missing or not a code file');
+  expect([...pkg2Info.packageEntryPointExports.keys()]).toEqual([
+    '@test/package-two',
+  ]);
+  const registeredFileC =
+    pkg2Info.packageEntryPointExports.get('@test/package-two');
+  expect(registeredFileC).toBe(fileC);
+  expect(registeredFileC?.entryPointSpecifier).toBe('@test/package-two');
+  expect(
+    fileC.exports.map((entry) => ({
+      exportName: entry.exportName,
+      isEntryPoint: entry.isEntryPoint,
+    }))
+  ).toEqual([{ exportName: 'Two', isEntryPoint: true }]);
 });
 
 it('Cross-package barrelImport populates externallyImportedBy on every entry-point export', () => {
@@ -439,7 +479,10 @@ it('Cross-package barrelImport populates externallyImportedBy on every entry-poi
     expect(barrelImporters[0]).toMatchObject({
       packageRootDir: PACKAGE_TWO_DIR,
       filePath: FILE_E,
-      importEntry: { type: 'barrelImport', moduleSpecifier: 'packageOne' },
+      importEntry: {
+        type: 'barrelImport',
+        moduleSpecifier: '@test/package-one/a',
+      },
     });
   }
 });
@@ -718,7 +761,7 @@ it('Cache update adds new cross-package singleImport', () => {
   // import of `AlsoOne`. After initializeRepo, packageOne/a.ts's `AlsoOne`
   // export has zero single importers (only a barrel importer from e.ts);
   // cache-update propagation should bring the count to one.
-  const NEW_FILE_CONTENTS = `import type { AlsoOne } from 'packageOne/a';
+  const NEW_FILE_CONTENTS = `import type { AlsoOne } from '@test/package-one/a';
 
 const n: AlsoOne = 1;
 console.log(n);
@@ -773,7 +816,7 @@ it('Cache update on an existing file introduces a new cross-package singleImport
   // "edit existing file to introduce a cross-package import" case — distinct
   // from the "add new file" path covered by the next test.
   const NEW_C_CONTENTS = `// @ts-expect-error — cross-package import fixture
-import type { AlsoOne } from 'packageOne/a';
+import type { AlsoOne } from '@test/package-one/a';
 export type Two = AlsoOne;
 `;
   updateCacheForFile(
@@ -788,14 +831,14 @@ export type Two = AlsoOne;
     importAlias: 'AlsoOne',
     importName: 'AlsoOne',
     isTypeImport: true,
-    moduleSpecifier: 'packageOne/a',
+    moduleSpecifier: '@test/package-one/a',
     resolvedModuleType: 'thirdParty' as const,
     rootModuleType: undefined,
   };
 
   const EXPECTED_FILE_C_WITH_IMPORT: StrippedAnalyzedFileDetails = {
     fileType: 'code',
-    hasEntryPoints: true,
+    entryPointSpecifier: '@test/package-two',
     isExternallyImported: false,
     singleImports: [FILE_C_SINGLE_IMPORT],
     barrelImports: [],

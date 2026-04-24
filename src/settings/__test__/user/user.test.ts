@@ -38,7 +38,7 @@ it('Fetchings user supplied settings', () => {
         },
         ignorePatterns: ['src/b*'],
         ignoreOverridePatterns: ['src/c*'],
-        entryPointFiles: ['src/a.ts'],
+        entryPointFiles: { '.': './src/a.ts' },
         externallyImportedFiles: ['src/b.ts'],
       },
     },
@@ -65,13 +65,194 @@ it('Fetchings user supplied settings', () => {
     },
   };
   expect(settings).toEqual(expected);
-  expect(entryPoints).toHaveLength(1);
-  expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
-  expect(entryPoints[0].file.ignores('src/b.ts')).toBeFalsy();
+  expect(entryPoints).toEqual([
+    {
+      type: 'static',
+      subPath: '.',
+      filePath: './src/a.ts',
+    },
+  ]);
   expect(externallyImported).toHaveLength(2);
   expect(externallyImported[0].file.ignores('eslint.config.mjs')).toBeTruthy();
   expect(externallyImported[1].file.ignores('src/b.ts')).toBeTruthy();
   expect(externallyImported[1].file.ignores('src/a.ts')).toBeFalsy();
+});
+
+// ─── entryPointFiles: static multi-entry-point ──────────────────────────────
+
+it('Parses multiple static entry points', () => {
+  const { packageSettings } = getAllPackageSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'one-shot',
+        packageRootDir: TEST_PROJECT_DIR,
+        entryPointFiles: { '.': './src/a.ts', './b': './src/b.ts' },
+      },
+    },
+  });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+  expect(packageSettings.entryPoints).toEqual([
+    { type: 'static', subPath: '.', filePath: './src/a.ts' },
+    { type: 'static', subPath: './b', filePath: './src/b.ts' },
+  ]);
+});
+
+// ─── entryPointFiles: dynamic/wildcard ──────────────────────────────────────
+
+it('Parses a dynamic (wildcard) entry point', () => {
+  const { packageSettings } = getAllPackageSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'one-shot',
+        packageRootDir: TEST_PROJECT_DIR,
+        entryPointFiles: { './lib/*': './src/lib/*.ts' },
+      },
+    },
+  });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+  const entry = packageSettings.entryPoints[0];
+  if (entry.type !== 'dynamic') {
+    throw new Error(`expected dynamic entry point, got ${entry.type}`);
+  }
+  expect(entry.subPathPattern).toBe('./lib/*');
+  expect(entry.filePattern).toBeInstanceOf(RegExp);
+  // Regex should match the file pattern with the wildcard filled in and
+  // capture the wildcard substitution as group 1.
+  expect(entry.filePattern.test('./src/lib/foo.ts')).toBe(true);
+  expect(entry.filePattern.exec('./src/lib/foo.ts')?.[1]).toBe('foo');
+  expect(entry.filePattern.test('./src/otherlib/foo.ts')).toBe(false);
+
+  // Regression guard: the `.` characters surrounding the wildcard must be
+  // treated literally, not as the regex "any character" class. Before
+  // escaping was added, both inputs incorrectly matched because the leading
+  // `.` in `./src` and the `.` in `.ts` were each treated as "any single
+  // character".
+  expect(entry.filePattern.test('Z/src/lib/foo.ts')).toBe(false);
+  expect(entry.filePattern.test('./src/lib/fooZts')).toBe(false);
+});
+
+it('Escapes regex metacharacters around the wildcard in a dynamic entry point', () => {
+  // Directory and file names can legitimately contain regex metacharacters
+  // like `()`, `+`, `$`, etc. The resulting `filePattern` must treat them as
+  // literals, and the wildcard capture group must remain group 1 (a pre-
+  // escaping bug would have inserted additional capture groups for the
+  // literal parentheses in the path, shifting group 1 to contain `lib`
+  // instead of the actual wildcard substitution).
+  const { packageSettings } = getAllPackageSettings({
+    filename: FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'one-shot',
+        packageRootDir: TEST_PROJECT_DIR,
+        entryPointFiles: { './(lib)/*': './src/(lib)/*.ts' },
+      },
+    },
+  });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+  const entry = packageSettings.entryPoints[0];
+  if (entry.type !== 'dynamic') {
+    throw new Error(`expected dynamic entry point, got ${entry.type}`);
+  }
+  expect(entry.filePattern.test('./src/(lib)/foo.ts')).toBe(true);
+  expect(entry.filePattern.exec('./src/(lib)/foo.ts')?.[1]).toBe('foo');
+  // Before escaping, `./src/lib/foo.ts` (without the literal parentheses)
+  // would have matched because `(lib)` was treated as a capture group around
+  // the literal characters `l`, `i`, `b` rather than as the literal text
+  // `(lib)`.
+  expect(entry.filePattern.test('./src/lib/foo.ts')).toBe(false);
+});
+
+// ─── entryPointFiles: validation errors ─────────────────────────────────────
+
+it('Throws when entry point subpath pattern does not start with "." or "./"', () => {
+  expect(() =>
+    getAllPackageSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: TEST_PROJECT_DIR,
+          entryPointFiles: { foo: './a.ts' },
+        },
+      },
+    })
+  ).toThrow(
+    'Entry point subpath pattern foo must equal "." or start with "./"'
+  );
+});
+
+it('Throws when entry point file pattern does not start with "./"', () => {
+  expect(() =>
+    getAllPackageSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: TEST_PROJECT_DIR,
+          entryPointFiles: { '.': 'a.ts' },
+        },
+      },
+    })
+  ).toThrow('Entry point file pattern a.ts must start with "./"');
+});
+
+it('Throws when entry point subpath pattern contains more than one wildcard', () => {
+  expect(() =>
+    getAllPackageSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: TEST_PROJECT_DIR,
+          entryPointFiles: { './*/*': './src/*.ts' },
+        },
+      },
+    })
+  ).toThrow(
+    'Entry point subpath pattern ./*/* must not contain more than one wildcard'
+  );
+});
+
+it('Throws when entry point file pattern contains more than one wildcard', () => {
+  expect(() =>
+    getAllPackageSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: TEST_PROJECT_DIR,
+          entryPointFiles: { './*': './src/*/*.ts' },
+        },
+      },
+    })
+  ).toThrow(
+    'Entry point file pattern ./src/*/*.ts must contain exactly one wildcard'
+  );
+});
+
+it('Throws when entry point file pattern has no wildcard but subpath pattern does', () => {
+  expect(() =>
+    getAllPackageSettings({
+      filename: FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: TEST_PROJECT_DIR,
+          entryPointFiles: { './*': './src/index.ts' },
+        },
+      },
+    })
+  ).toThrow(
+    'Entry point file pattern ./src/index.ts must contain exactly one wildcard'
+  );
 });
 
 it('Throws on missing settings', () => {
@@ -226,25 +407,6 @@ it('Ignores aliases that point outside of packageRootDir', () => {
   }
   expect(packageSettings.fixedAliases).toEqual({});
   expect(packageSettings.wildcardAliases).toEqual({});
-});
-
-it('Supports { regexp: string } for entry point symbols', () => {
-  const { packageSettings } = getAllPackageSettings({
-    filename: FILE_A,
-    settings: {
-      'fast-import': {
-        mode: 'one-shot',
-        packageRootDir: TEST_PROJECT_DIR,
-        entryPointFiles: ['src/a.ts'],
-      },
-    },
-  });
-  if (!packageSettings) {
-    throw new Error('packageSettings should be defined');
-  }
-  const { entryPoints } = packageSettings;
-  expect(entryPoints).toHaveLength(1);
-  expect(entryPoints[0].file.ignores('src/a.ts')).toBeTruthy();
 });
 
 // ─── getRepoSettings: single-repo ───────────────────────────────────────────

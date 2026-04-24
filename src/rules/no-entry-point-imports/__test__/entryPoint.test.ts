@@ -60,7 +60,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
         'fast-import': {
           packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPointFiles: [FILE_A_ENTRY_POINT],
+          entryPointFiles: { '.': `./${FILE_A_ENTRY_POINT}` },
         },
       },
     },
@@ -84,7 +84,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
         'fast-import': {
           packageRootDir: TEST_PROJECT_DIR,
           mode: 'fix',
-          entryPointFiles: [FILE_A_ENTRY_POINT],
+          entryPointFiles: { '.': `./${FILE_A_ENTRY_POINT}` },
         },
       },
     },

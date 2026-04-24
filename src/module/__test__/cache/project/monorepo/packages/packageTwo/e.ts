@@ -1,4 +1,4 @@
-// @ts-expect-error — cross-package import fixture; packageOne is not resolvable via tsconfig
-import * as pkg from 'packageOne';
+// @ts-expect-error — cross-package import fixture; @test/package-one is not resolvable via tsconfig
+import * as pkg from '@test/package-one/a';
 
 console.log(pkg);

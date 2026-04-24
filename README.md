@@ -234,8 +234,8 @@ Example:
   settings: {
     'fast-import': {
       packageRootDir: import.meta.dirname,
-      entryPointFiles: ['./src/app/**/page.tsx', './src/app/**/layout.tsx'],
-      externallyImportedFiles: ['./src/index.ts'],
+      externallyImportedFiles: ['./src/app/**/page.tsx', './src/app/**/layout.tsx'],
+      entryPointFiles: { '.': './src/index.ts' },
     },
   },
 }
@@ -427,7 +427,7 @@ Package config:
 
 ```json
 {
-  "entryPointFiles": ["src/index.ts"],
+  "entryPointFiles": { ".": "src/index.ts" },
   "alias": {
     "@/*": "src/*"
   }
@@ -647,6 +647,20 @@ Fast Import will not know about the second import. This means that rules such as
 ### Case insensitivity inconsistency in ESLint arguments
 
 If you pass a file pattern or path to ESLint, ESLint inconsistently applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`.
+
+### Entrypoint file patterns with more than one wildcard are not supported
+
+According to the Node.js spec, it's legal to define an export like:
+
+```json
+{
+  "exports": {
+    "./utils/*": "./src/*/utils/*/something/*.ts"
+  }
+}*
+```
+
+In this case, the single \* from the subpath gets repeated in the file path.
 
 ## Creating new rules
 
