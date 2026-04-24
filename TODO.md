@@ -1,10 +1,9 @@
 - Add new lint rule that forbids non-named barrel reexports in entry point files
-- Split test part of no unused into `no-test-only-imports`
+- Split test part of no unused into `no-test-only-exports`
 - Create lint rule prohibiting entry point/externally imported files from having no exports
 - From Claude on a bug: for rootModuleType, I used undefined on the thirdParty singleImport because computeAnalyzedInfo.ts:95 sets it to undefined unconditionally and analyzeSingleImport bails early for non-firstPartyCode. singleReexports get 'thirdParty' there, but singleImports do not. Flagging in case that asymmetry is itself a bug you want fixed before these tests lock it in.
 - Rename "project" to "package" where appropriate
 - Allow config files in single repo mode (useful for mixed package-level single-repo and repo-level monorepo configs)
-- Upgrade to TypeScript 6
 - Automatically infer entry point files from a combination of package.json and tsconfig.json (the latter creates the mapping for the former)
 - Support config files in JSON-C
 - no-unresolved-package-imports rule?
