@@ -142,3 +142,16 @@ it('Does not find fast-import.config.json files inside node_modules', () => {
     join(fixtureDir, 'packages', 'foo', 'fast-import.config.json'),
   ]);
 });
+
+it('Discovers fast-import.config.jsonc files', () => {
+  const fixtureDir = join(TEST_PROJECT_DIR, 'jsoncDiscovery');
+  const result = getMonorepoPackageSettings(fixtureDir);
+  expect(result).toEqual([join(fixtureDir, 'foo', 'fast-import.config.jsonc')]);
+});
+
+it('Throws when both fast-import.config.json and .jsonc exist in the same directory', () => {
+  const fixtureDir = join(TEST_PROJECT_DIR, 'jsoncMultiple');
+  expect(() => getMonorepoPackageSettings(fixtureDir)).toThrow(
+    `Multiple fast-import.config.json(c) files found in ${join(fixtureDir, 'foo')}`
+  );
+});

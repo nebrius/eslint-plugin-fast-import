@@ -675,3 +675,16 @@ it('Throws a formatted error when the config file contains invalid JSON', () => 
     })
   ).toThrow(`Failed to parse package config file ${configFilePath}:`);
 });
+
+it('Parses a JSONC config file with comments and trailing commas', () => {
+  const configFilePath = join(TEST_PROJECT_DIR, 'jsonc.config.jsonc');
+  const settings = getUserPackageSettingsFromConfigFile({
+    configFilePath,
+    repoRootDir: TEST_PROJECT_DIR,
+  });
+  expect(settings).toEqual({
+    entryPointFiles: { '.': './src/a.ts' },
+    repoRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PROJECT_DIR,
+  });
+});

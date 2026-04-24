@@ -1,0 +1,7 @@
+// a line comment
+{
+  /* a block comment */
+  "entryPointFiles": {
+    ".": "./src/a.ts",
+  },
+}

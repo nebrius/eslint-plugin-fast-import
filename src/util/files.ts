@@ -43,11 +43,18 @@ export function getMonorepoPackageSettings(packageRootDir: string): string[] {
       continue;
     }
     const directoryContents = readdirSync(currentDir, { withFileTypes: true });
-    const hasConfigFile = directoryContents.some(
-      (item) => item.name === 'fast-import.config.json'
+    const configFiles = directoryContents.filter(
+      (item) =>
+        item.name === 'fast-import.config.json' ||
+        item.name === 'fast-import.config.jsonc'
     );
-    if (hasConfigFile) {
-      packages.push(join(currentDir, 'fast-import.config.json'));
+    if (configFiles.length === 1) {
+      packages.push(join(currentDir, configFiles[0].name));
+    } else if (configFiles.length > 1) {
+      // Multiple config files found, which is an error
+      throw new Error(
+        `Multiple fast-import.config.json(c) files found in ${currentDir}`
+      );
     } else {
       // Only continue recursing if we didn't find a config file, since we don't
       // support nested config files by design

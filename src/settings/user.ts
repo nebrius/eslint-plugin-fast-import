@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, isAbsolute } from 'node:path';
 
+import { parse, printParseErrorCode } from 'jsonc-parser';
 import { z, type ZodError } from 'zod';
 
 import type { GenericContext } from '../types/context.js';
@@ -174,19 +175,21 @@ export function getUserPackageSettingsFromConfigFile({
 }): PackageSettings {
   const configContent = readFileSync(configFilePath, 'utf-8');
 
-  // Read the config file
-  let config: unknown;
-  try {
-    config = JSON.parse(configContent);
-  } catch (e) {
-    // Throw a custom error message so we can include the config file with
-    // the error in the user-facing message
-    const message = e instanceof Error ? e.message : String(e);
+  // Read the config file. jsonc-parser's parse() does not throw on malformed
+  // input — it returns a best-effort partial result and reports issues via
+  // the errors out-parameter, so we surface those manually.
+  const errors: Array<{ error: number; offset: number; length: number }> = [];
+  const config: unknown = parse(configContent, errors, {
+    allowTrailingComma: true,
+  });
+  if (errors.length > 0) {
+    const formatted = errors
+      .map(
+        (e) => `${printParseErrorCode(e.error)} at offset ${String(e.offset)}`
+      )
+      .join(', ');
     throw new Error(
-      `Failed to parse package config file ${configFilePath}: ${message}`,
-      {
-        cause: e,
-      }
+      `Failed to parse package config file ${configFilePath}: ${formatted}`
     );
   }
 
