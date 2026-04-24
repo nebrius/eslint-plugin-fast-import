@@ -1,0 +1,5 @@
+{
+  "entryPointFiles": {
+    "./lib/*": "./lib/*.ts"
+  }
+}

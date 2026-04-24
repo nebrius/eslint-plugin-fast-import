@@ -1,0 +1,6 @@
+{
+  "entryPointFiles": {
+    "./a": "./a.ts",
+    "./b": "./b.ts"
+  }
+}
