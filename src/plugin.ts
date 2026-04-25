@@ -11,6 +11,7 @@ import { noNodeBuiltins } from './rules/no-node-builtins/rule.js';
 import { noRestrictedImports } from './rules/no-restricted-imports/rule.js';
 import { noTestImportsInProd } from './rules/no-test-imports-in-prod/rule.js';
 import { noTestOnlyImports } from './rules/no-test-only-imports/rule.js';
+import { noUnnamedEntryPointExports } from './rules/no-unnamed-entry-point-exports/rule.js';
 import { noUnresolvedImports } from './rules/no-unresolved-imports/rule.js';
 import { noUnusedExports } from './rules/no-unused-exports/rule.js';
 import { noUnusedPackageExports } from './rules/no-unused-package-exports/rule.js';
@@ -45,6 +46,7 @@ const plugin = {
     'no-restricted-imports': noRestrictedImports,
     'no-test-imports-in-prod': noTestImportsInProd,
     'no-test-only-imports': noTestOnlyImports,
+    'no-unnamed-entry-point-exports': noUnnamedEntryPointExports,
     'no-unresolved-imports': noUnresolvedImports,
     'no-unused-exports': noUnusedExports,
     'no-unused-package-exports': noUnusedPackageExports,
@@ -65,6 +67,7 @@ const recommendedConfig = {
     'fast-import/no-named-as-default': 'error',
     'fast-import/no-test-imports-in-prod': 'error',
     'fast-import/no-test-only-imports': 'error',
+    'fast-import/no-unnamed-entry-point-exports': 'error',
     'fast-import/no-unresolved-imports': 'error',
     'fast-import/no-unused-exports': 'error',
     'fast-import/prefer-alias-imports': 'error',

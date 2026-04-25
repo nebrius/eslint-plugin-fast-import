@@ -104,6 +104,7 @@ These rules are designed to prevent certain types of imports/exports that can le
 | [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             | 🧰 ☑️ |     |
 | [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) | 🧰 ☑️ |     |
 | [no-named-as-default](src/rules/no-named-as-default/README.md)                   | 🧰 ☑️ |     |
+| [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) | 🧰 ☑️ |     |
 | [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               | 🧰 ☑️ |     |
 
 ## Configuration
@@ -692,6 +693,8 @@ import { something } from 'package-one/a';
 
 Fast Import will not know about the second import. This means that rules such as
 [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) will not flag that this export is unused if package two stops importing it.
+
+Fast Import includes the [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) rule that addresses this limitation.
 
 ### Case insensitivity inconsistency in ESLint arguments
 
