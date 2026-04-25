@@ -52,7 +52,7 @@
 
 Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
 
-Fast Import uses a novel algorithm combined with the [OXC Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
+Fast Import uses a novel algorithm combined with the [Oxc Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
 
 ## Installation
 
@@ -67,25 +67,44 @@ npm install --save-dev eslint-plugin-fast-import
 ☑️ Set in the recommended configuration.<br />
 🧰 Set in the all configuration.
 
+There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
+
+## Usage
+
+These rules inspect how you're using imports/exports to look for semantic issues.
+
 | Name                                                                             | 💼    | 🔧  |
 | -------------------------------------------------------------------------------- | ----- | --- |
 | [no-cycle](src/rules/no-cycle/README.md)                                         | 🧰 ☑️ |     |
-| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             | 🧰 ☑️ |     |
-| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) | 🧰 ☑️ |     |
-| [no-named-as-default](src/rules/no-named-as-default/README.md)                   | 🧰 ☑️ |     |
 | [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           | 🧰 ☑️ |     |
-| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               | 🧰 ☑️ |     |
 | [no-unused-exports](src/rules/no-unused-exports/README.md)                       | 🧰 ☑️ |     |
-| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 | 🧰 ☑️ | 🔧  |
-| [require-node-prefix](src/rules/require-node-prefix/README.md)                   | 🧰    | 🔧  |
 | [no-node-builtins](src/rules/no-node-builtins/README.md) \*                      |       |     |
 | [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*\*          |       |     |
 
-\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any configuration.
+\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any default configuration.
 
-\*\* No restricted imports requires rule-specific options for use, and so is not enabled in any configuration.
+\*\* No restricted imports requires rule-specific options for use, and so is not enabled in any default configuration.
 
-There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
+## Style
+
+These rules govern the style of imports/exports.
+
+| Name                                                                             | 💼    | 🔧  |
+| -------------------------------------------------------------------------------- | ----- | --- |
+| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 | 🧰 ☑️ | 🔧  |
+| [require-node-prefix](src/rules/require-node-prefix/README.md)                   | 🧰    | 🔧  |
+
+
+### Footguns
+
+These rules are designed to prevent certain types of imports/exports that can lead to issues.
+
+| Name                                                                             | 💼    | 🔧  |
+| -------------------------------------------------------------------------------- | ----- | --- |
+| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             | 🧰 ☑️ |     |
+| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) | 🧰 ☑️ |     |
+| [no-named-as-default](src/rules/no-named-as-default/README.md)                   | 🧰 ☑️ |     |
+| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               | 🧰 ☑️ |     |
 
 ## Configuration
 
@@ -542,7 +561,7 @@ And here's the raw data:
 
 If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/fast-import-perf/compare.ts).
 
-Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of OXC, which you can see [here](https://github.com/nebrius/eslint-plugin-fast-import/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Fast Import took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvements between this plugin and others is split almost exactly 50/50 between the switch to OXC and the [algorithm described below](#algorithm).
+Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of Oxc, which you can see [here](https://github.com/nebrius/eslint-plugin-fast-import/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Fast Import took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvements between this plugin and others is split almost exactly 50/50 between the switch to Oxc and the [algorithm described below](#algorithm).
 
 ### Accuracy
 
