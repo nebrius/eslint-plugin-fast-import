@@ -48,15 +48,10 @@ export const Used = 1;
 import { Used } from 'one';
 ```
 
-## Options
-
-This rule has no options.
-
 ## Limitations
 
 ### Barrel imports
-
-If an entry point export is later imported as a barrel import from another package, then this rule will not flag if that export is referenced from the barrel import object or not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition _is_ referenced. Take the following example:
+If an entry point export is later imported as a barrel import, then this rule may report a false negative and claim the export is being used when it is not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition _is_ referenced. Take the following example:
 
 ```js
 // packages/one/entry.ts

@@ -10,6 +10,7 @@ import { noNamedAsDefault } from './rules/no-named-as-default/rule.js';
 import { noNodeBuiltins } from './rules/no-node-builtins/rule.js';
 import { noRestrictedImports } from './rules/no-restricted-imports/rule.js';
 import { noTestImportsInProd } from './rules/no-test-imports-in-prod/rule.js';
+import { noTestOnlyImports } from './rules/no-test-only-imports/rule.js';
 import { noUnresolvedImports } from './rules/no-unresolved-imports/rule.js';
 import { noUnusedExports } from './rules/no-unused-exports/rule.js';
 import { noUnusedPackageExports } from './rules/no-unused-package-exports/rule.js';
@@ -36,18 +37,19 @@ const plugin = {
   },
   configs: {},
   rules: {
-    'no-unused-exports': noUnusedExports,
     'no-cycle': noCycle,
     'no-entry-point-imports': noEntryPointImports,
-    'no-unresolved-imports': noUnresolvedImports,
     'no-external-barrel-reexports': noExternalBarrelReexports,
-    'no-test-imports-in-prod': noTestImportsInProd,
     'no-named-as-default': noNamedAsDefault,
     'no-node-builtins': noNodeBuiltins,
-    'require-node-prefix': requireNodePrefix,
     'no-restricted-imports': noRestrictedImports,
-    'prefer-alias-imports': preferAliasImports,
+    'no-test-imports-in-prod': noTestImportsInProd,
+    'no-test-only-imports': noTestOnlyImports,
+    'no-unresolved-imports': noUnresolvedImports,
+    'no-unused-exports': noUnusedExports,
     'no-unused-package-exports': noUnusedPackageExports,
+    'prefer-alias-imports': preferAliasImports,
+    'require-node-prefix': requireNodePrefix,
   },
   processors: {},
 };
@@ -57,32 +59,25 @@ const recommendedConfig = {
     'fast-import': plugin,
   },
   rules: {
-    'fast-import/no-unused-exports': 'error',
     'fast-import/no-cycle': 'error',
     'fast-import/no-entry-point-imports': 'error',
-    'fast-import/no-unresolved-imports': 'error',
     'fast-import/no-external-barrel-reexports': 'error',
-    'fast-import/no-test-imports-in-prod': 'error',
     'fast-import/no-named-as-default': 'error',
+    'fast-import/no-test-imports-in-prod': 'error',
+    'fast-import/no-test-only-imports': 'error',
+    'fast-import/no-unresolved-imports': 'error',
+    'fast-import/no-unused-exports': 'error',
     'fast-import/prefer-alias-imports': 'error',
     'fast-import/require-node-prefix': 'off',
   },
 } as const;
 
-const allConfig = {
+const monorepoRecommendedConfig = {
   plugins: {
     'fast-import': plugin,
   },
   rules: {
-    'fast-import/no-unused-exports': 'error',
-    'fast-import/no-cycle': 'error',
-    'fast-import/no-entry-point-imports': 'error',
-    'fast-import/no-unresolved-imports': 'error',
-    'fast-import/no-external-barrel-reexports': 'error',
-    'fast-import/no-test-imports-in-prod': 'error',
-    'fast-import/no-named-as-default': 'error',
-    'fast-import/require-node-prefix': 'error',
-    'fast-import/prefer-alias-imports': 'error',
+    'no-unused-package-exports': noUnusedPackageExports,
   },
 } as const;
 
@@ -92,6 +87,7 @@ const offConfig = {
   },
   rules: {
     'fast-import/no-unused-exports': 'off',
+    'fast-import/no-test-only-imports': 'off',
     'fast-import/no-cycle': 'off',
     'fast-import/no-entry-point-imports': 'off',
     'fast-import/no-unresolved-imports': 'off',
@@ -107,14 +103,14 @@ const offConfig = {
 
 Object.assign(plugin.configs, {
   recommended: recommendedConfig,
-  all: allConfig,
+  monorepoRecommended: monorepoRecommendedConfig,
   off: offConfig,
 });
 
 export default plugin as typeof plugin & {
   configs: {
     recommended: typeof recommendedConfig;
-    all: typeof allConfig;
+    monorepoRecommended: typeof monorepoRecommendedConfig;
     off: typeof offConfig;
   };
 };

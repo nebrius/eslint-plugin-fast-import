@@ -4,14 +4,7 @@ Ensures exports are imported elsewhere, taking into account whether files are te
 
 ## Rule Details
 
-`no-unused-exports` looks at all exports and analyzes who imports the export, if any. An export is considered used if any of the following are true:
-
-1. The export is [in an entry point file or externally imported file](../../../README.md#externallyimportedfiles--entrypointfiles)
-2. The export is a non-test file and is imported by another non-test file
-3. The export is a test file (exports in test files are not analyzed by this rule)
-4. The export is a type export and is imported in a test or non-test file
-
-Types are often useful in test code, and so are not flagged as unused if imported in test files by default unless the `allowNonTestTypeExports` rule option is disabled.
+`no-unused-exports` looks at all exports and analyzes who imports the export, if any. An export is considered used if the export is [in an entry point file or externally imported file](../../../README.md#externallyimportedfiles--entrypointfiles) or the export is imported by another file in the package.
 
 Examples of _incorrect_ code
 
@@ -83,21 +76,15 @@ export interface Foo {
 import type { Foo } from '../a';
 ```
 
-## Options
-
-This rule takes an options object with the following property:
-
-- `allowNonTestTypeExports` - When set to `true`, type exports in non-test files are allowed to be imported in test files. Defaults to `true`
-
 ## Limitations
 
 ### .d.ts exports
 
-Exports listed in `.d.ts` files are not checked. This behavior is desired when `.d.ts` files declare ambient types, aka types for third party modules. However, if a `.d.ts` file is used to declare types for a neighboring `.js` file and exports types not present in the `.js` file, then these exports are not checked for usage.
+Exports listed in `.d.ts` files are not checked. This behavior is desired when `.d.ts` files declare ambient types, aka types for third party modules. However, if a `.d.ts` file is a) used to declare types for a neighboring `.js` file and b) exports types not present in the `.js` file, then these exports are not checked for usage.
 
 ### Barrel imports
 
-If an export is later imported as a barrel import, then this rule will not flag if that export is unused or not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition _is_ referenced. Take the following example:
+If an export is later imported as a barrel import, then this rule may report a false negative and claim the export is being used when it is not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition _is_ referenced. Take the following example:
 
 ```js
 // a.ts

@@ -1,16 +1,22 @@
-import { createRule, getESMInfo, getLocFromRange } from '../util.js';
+import {
+  createRule,
+  getESMInfo,
+  getLocFromRange,
+  isNonTestFile,
+} from '../util.js';
 
-export const noUnusedExports = createRule({
-  name: 'no-unused-exports',
+export const noTestOnlyImports = createRule({
+  name: 'no-test-only-imports',
   meta: {
     docs: {
-      description: 'Ensure exports are imported elsewhere in the package',
+      description:
+        'Flags exports in production code that are only imported by test code',
     },
     schema: [],
     fixable: undefined,
     type: 'problem',
     messages: {
-      noUnusedExports: 'Export "{{name}}" must be imported in another file',
+      noTestOnlyImports: 'Export "{{name}}" must be imported by non-test files',
     },
   },
   defaultOptions: [],
@@ -50,14 +56,19 @@ export const noUnusedExports = createRule({
       }
 
       // If imported by is empty, then this isn't used anywhere
-      if (exportEntry.importedBy.length === 0) {
-        context.report({
-          messageId: 'noUnusedExports',
-          loc: getLocFromRange(context, exportEntry.reportNodeRange),
-          data: {
-            name: exportEntry.exportName || '<unnamed>',
-          },
-        });
+      if (
+        isNonTestFile(context.filename) &&
+        !exportEntry.importedBy.some((i) => isNonTestFile(i.filePath))
+      ) {
+        if (!(`isTypeExport` in exportEntry) || !exportEntry.isTypeExport) {
+          context.report({
+            messageId: 'noTestOnlyImports',
+            loc: getLocFromRange(context, exportEntry.reportNodeRange),
+            data: {
+              name: exportEntry.exportName || '<unnamed>',
+            },
+          });
+        }
       }
     }
 

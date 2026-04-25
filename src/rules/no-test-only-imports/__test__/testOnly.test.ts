@@ -4,13 +4,15 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { noUnusedExports } from '../rule.js';
+import { noTestOnlyImports } from '../rule.js';
 
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
+const FILE_C_TEST = join(TEST_PACKAGE_DIR, '__fixture__', 'c-test.ts');
 const FILE_D_DTS = join(TEST_PACKAGE_DIR, 'd.d.ts');
 const FILE_E = join(TEST_PACKAGE_DIR, 'e.ts');
+const FILE_G = join(TEST_PACKAGE_DIR, 'g.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -23,26 +25,11 @@ const ruleTester = new RuleTester({
   },
 });
 
-ruleTester.run('no-unused-exports', noUnusedExports, {
+ruleTester.run('no-test-only-imports', noTestOnlyImports, {
   valid: [
     {
       code: `export const a1 = 10;
 export const a2 = 10;
-`,
-      filename: FILE_A,
-      settings: {
-        'fast-import': {
-          packageRootDir: TEST_PACKAGE_DIR,
-          mode: 'fix',
-        },
-      },
-    },
-    {
-      code: `export function a1(arg: number): void;
-export function a1(arg: string): void;
-export function a1(arg: number | string): void {
-  console.log(arg);
-}
 `,
       filename: FILE_A,
       settings: {
@@ -84,17 +71,55 @@ export function a1(arg: number | string): void {
         },
       },
     },
+    // __fixture__ is added to testFilePatterns, so c-test.ts is a test file
+    // and its exports only being used by other test files is valid
+    {
+      code: readFileSync(FILE_C_TEST, 'utf8'),
+      filename: FILE_C_TEST,
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+          testFilePatterns: ['__fixture__'],
+        },
+      },
+    },
+    // g.ts exports a type that is only imported by a test file. Type exports
+    // are exempt from this rule, so this is valid.
+    {
+      code: readFileSync(FILE_G, 'utf8'),
+      filename: FILE_G,
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 
   invalid: [
     {
       code: `export const a1 = 10;
     export const a2 = 10;
-    // This one is not imported, thus a lint error
-    export default 10;
+    // This one is only imported in tests, thus a lint error
+    export const a3 = 10;
     `,
       filename: FILE_A,
-      errors: [{ messageId: 'noUnusedExports' }],
+      errors: [{ messageId: 'noTestOnlyImports' }],
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    // __fixture__ is NOT in testFilePatterns, so c-test.ts is a prod file
+    // and its exports only being used by test files is an error
+    {
+      code: readFileSync(FILE_C_TEST, 'utf8'),
+      filename: FILE_C_TEST,
+      errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
           packageRootDir: TEST_PACKAGE_DIR,

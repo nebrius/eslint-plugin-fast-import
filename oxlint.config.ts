@@ -40,7 +40,7 @@ export default {
     'typescript/consistent-type-imports': 'error',
     'typescript/no-unsafe-enum-comparison': 'off',
 
-    ...fastImportPlugin.configs.all.rules,
+    ...fastImportPlugin.configs.recommended.rules,
   },
   settings: {
     'fast-import': {
