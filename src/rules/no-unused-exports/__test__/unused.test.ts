@@ -6,12 +6,12 @@ import { getDirname } from 'cross-dirname';
 
 import { noUnusedExports } from '../rule.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
-const FILE_C_TEST = join(TEST_PROJECT_DIR, '__fixture__', 'c-test.ts');
-const FILE_D_DTS = join(TEST_PROJECT_DIR, 'd.d.ts');
-const FILE_E = join(TEST_PROJECT_DIR, 'e.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
+const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
+const FILE_C_TEST = join(TEST_PACKAGE_DIR, '__fixture__', 'c-test.ts');
+const FILE_D_DTS = join(TEST_PACKAGE_DIR, 'd.d.ts');
+const FILE_E = join(TEST_PACKAGE_DIR, 'e.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -19,7 +19,7 @@ const ruleTester = new RuleTester({
       projectService: {
         allowDefaultProject: ['*.ts*', '__fixture__/*.ts*', '__test__/*.ts*'],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });
@@ -33,7 +33,7 @@ export const a2 = 10;
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -48,7 +48,7 @@ export function a1(arg: number | string): void {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -58,7 +58,7 @@ export function a1(arg: number | string): void {
       filename: FILE_B,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': './f.ts' },
         },
@@ -69,7 +69,7 @@ export function a1(arg: number | string): void {
       filename: FILE_D_DTS,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -79,7 +79,7 @@ export function a1(arg: number | string): void {
       filename: FILE_E,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': './e.ts' },
         },
@@ -92,7 +92,7 @@ export function a1(arg: number | string): void {
       filename: FILE_C_TEST,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           testFilePatterns: ['__fixture__'],
         },
@@ -111,7 +111,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noUnusedExports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -126,7 +126,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -142,7 +142,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -155,7 +155,7 @@ export function a1(arg: number | string): void {
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },

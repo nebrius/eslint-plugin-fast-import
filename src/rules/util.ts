@@ -2,7 +2,7 @@ import type { TSESTree } from '@typescript-eslint/utils';
 import { ESLintUtils } from '@typescript-eslint/utils';
 
 import {
-  getProjectInfo,
+  getPackageInfo,
   initializeRepo,
   updateCacheForFile,
   updateCacheFromFileSystem,
@@ -46,8 +46,8 @@ export function getESMInfo(context: GenericContext) {
     return;
   }
 
-  // We have to call initializeProject first before we can check if this file
-  // is ignored, because initializeProject initializes the ignore cache
+  // We have to call initializePackage first before we can check if this file
+  // is ignored, because initializePackage initializes the ignore cache
   if (isFileIgnored(packageSettings.packageRootDir, context.filename)) {
     return;
   }
@@ -68,7 +68,7 @@ export function getESMInfo(context: GenericContext) {
     }
   }
 
-  const projectInfo = getProjectInfo(packageSettings.packageRootDir);
+  const packageInfo = getPackageInfo(packageSettings.packageRootDir);
 
   // Initialize file watching if we're in editor mode
   if (repoSettings.mode === 'editor') {
@@ -76,13 +76,13 @@ export function getESMInfo(context: GenericContext) {
   }
 
   // Format and return the ESM info
-  const fileInfo = projectInfo.files.get(context.filename);
+  const fileInfo = packageInfo.files.get(context.filename);
   if (!fileInfo) {
     return;
   }
   return {
     fileInfo,
-    projectInfo,
+    packageInfo,
     packageSettings,
   };
 }
@@ -109,9 +109,9 @@ async function initializeFileWatching(
   fileWatchingInitialized.add(packageSettings.packageRootDir);
 
   async function getUpdatedAtTimes() {
-    const projectInfo = getProjectInfo(packageSettings.packageRootDir);
+    const packageInfo = getPackageInfo(packageSettings.packageRootDir);
     const { files, packageJsons } = await getFiles(
-      projectInfo.packageRootDir,
+      packageInfo.packageRootDir,
       packageSettings.ignorePatterns,
       packageSettings.ignoreOverridePatterns
     );
@@ -208,8 +208,8 @@ export function isNonTestFile(filePath: string) {
   if (!packageSettings) {
     throw new InternalError('package settings are unexpectedly undefined');
   }
-  // We want to ignore folders named __test__ outside of this project, in case
-  // the entire project is itself a test (e.g. the unit tests for fast-import)
+  // We want to ignore folders named __test__ outside of this package, in case
+  // the entire package is itself a test (e.g. the unit tests for fast-import)
   const relativeFilePath = getRelativePathFromRoot(
     packageSettings.packageRootDir,
     filePath

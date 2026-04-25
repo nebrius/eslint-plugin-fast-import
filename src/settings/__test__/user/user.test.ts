@@ -13,15 +13,15 @@ import {
 } from '../../settings.js';
 import { getUserPackageSettingsFromConfigFile } from '../../user.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
-const MONOREPO_PROJECT_DIR = join(
+const MONOREPO_DIR = join(
   getDirname(),
   '../../../module/__test__/cache/project/monorepo'
 );
-const MONOREPO_PKG_ONE = join(MONOREPO_PROJECT_DIR, 'packages', 'packageOne');
-const MONOREPO_PKG_TWO = join(MONOREPO_PROJECT_DIR, 'packages', 'packageTwo');
+const MONOREPO_PKG_ONE = join(MONOREPO_DIR, 'packages', 'packageOne');
+const MONOREPO_PKG_TWO = join(MONOREPO_DIR, 'packages', 'packageTwo');
 const MONOREPO_FILE_A = join(MONOREPO_PKG_ONE, 'a.ts');
 const MONOREPO_FILE_C = join(MONOREPO_PKG_TWO, 'c.ts');
 
@@ -31,7 +31,7 @@ it('Fetchings user supplied settings', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         alias: {
           '@/*': 'src/*',
           '@a': 'src/a.ts',
@@ -51,14 +51,14 @@ it('Fetchings user supplied settings', () => {
     ParsedPackageSettings,
     'entryPoints' | 'externallyImported'
   > = {
-    repoRootDir: TEST_PROJECT_DIR,
-    packageRootDir: TEST_PROJECT_DIR,
+    repoRootDir: TEST_PACKAGE_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     packageName: undefined,
-    ignorePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/b*' }],
-    ignoreOverridePatterns: [{ dir: TEST_PROJECT_DIR, contents: 'src/c*' }],
+    ignorePatterns: [{ dir: TEST_PACKAGE_DIR, contents: 'src/b*' }],
+    ignoreOverridePatterns: [{ dir: TEST_PACKAGE_DIR, contents: 'src/c*' }],
     testFilePatterns: [],
     wildcardAliases: {
-      '@/': join(TEST_PROJECT_DIR, 'src' + sep),
+      '@/': join(TEST_PACKAGE_DIR, 'src' + sep),
     },
     fixedAliases: {
       '@a': FILE_A,
@@ -86,7 +86,7 @@ it('Parses multiple static entry points', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: { '.': './src/a.ts', './b': './src/b.ts' },
       },
     },
@@ -108,7 +108,7 @@ it('Parses a dynamic (wildcard) entry point', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: { './lib/*': './src/lib/*.ts' },
       },
     },
@@ -149,7 +149,7 @@ it('Escapes regex metacharacters around the wildcard in a dynamic entry point', 
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: { './(lib)/*': './src/(lib)/*.ts' },
       },
     },
@@ -179,7 +179,7 @@ it('Throws when entry point subpath pattern does not start with "." or "./"', ()
       settings: {
         'fast-import': {
           mode: 'one-shot',
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { foo: './a.ts' },
         },
       },
@@ -196,7 +196,7 @@ it('Throws when entry point file pattern does not start with "./"', () => {
       settings: {
         'fast-import': {
           mode: 'one-shot',
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { '.': 'a.ts' },
         },
       },
@@ -211,7 +211,7 @@ it('Throws when entry point subpath pattern contains more than one wildcard', ()
       settings: {
         'fast-import': {
           mode: 'one-shot',
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { './*/*': './src/*.ts' },
         },
       },
@@ -228,7 +228,7 @@ it('Throws when entry point file pattern contains more than one wildcard', () =>
       settings: {
         'fast-import': {
           mode: 'one-shot',
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { './*': './src/*/*.ts' },
         },
       },
@@ -245,7 +245,7 @@ it('Throws when entry point file pattern has no wildcard but subpath pattern doe
       settings: {
         'fast-import': {
           mode: 'one-shot',
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { './*': './src/index.ts' },
         },
       },
@@ -300,12 +300,12 @@ it("Throws on packageRootDir that doesn't exist in settings", () => {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: join(TEST_PROJECT_DIR, 'fake'),
+          packageRootDir: join(TEST_PACKAGE_DIR, 'fake'),
         },
       },
     })
   ).toThrow(
-    `packageRootDir "${join(TEST_PROJECT_DIR, 'fake')}" does not exist`
+    `packageRootDir "${join(TEST_PACKAGE_DIR, 'fake')}" does not exist`
   );
 });
 
@@ -316,7 +316,7 @@ it('Throws on invalid user supplied mode', () => {
       settings: {
         'fast-import': {
           mode: 'fake',
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
         },
       },
     })
@@ -333,7 +333,7 @@ it('Throws on mismatched wildcard aliases', () => {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           alias: {
             '@/*': 'src/a.ts',
           },
@@ -341,7 +341,7 @@ it('Throws on mismatched wildcard aliases', () => {
       },
     })
   ).toThrow(
-    `Alias path ${join(TEST_PROJECT_DIR, 'src', 'a.ts')} must end with "*" when @/* ends with "*"`
+    `Alias path ${join(TEST_PACKAGE_DIR, 'src', 'a.ts')} must end with "*" when @/* ends with "*"`
   );
 });
 
@@ -351,7 +351,7 @@ it('Throws on mismatched fixed aliases', () => {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           alias: {
             '@a': 'src/a.ts*',
           },
@@ -359,7 +359,7 @@ it('Throws on mismatched fixed aliases', () => {
       },
     })
   ).toThrow(
-    `Alias path ${join(TEST_PROJECT_DIR, 'src', 'a.ts*')} must not end with "*" when @a does not end with "*"`
+    `Alias path ${join(TEST_PACKAGE_DIR, 'src', 'a.ts*')} must not end with "*" when @a does not end with "*"`
   );
 });
 
@@ -369,7 +369,7 @@ it('Can set mode to editor', () => {
     settings: {
       'fast-import': {
         mode: 'editor',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
       },
     },
   });
@@ -382,7 +382,7 @@ it('Can set mode to fix', () => {
     settings: {
       'fast-import': {
         mode: 'fix',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
       },
     },
   });
@@ -394,7 +394,7 @@ it('Ignores aliases that point outside of packageRootDir', () => {
     filename: FILE_A,
     settings: {
       'fast-import': {
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         alias: {
           '@foo': '../foo',
           '@bar/*': '../bar/*',
@@ -416,7 +416,7 @@ it('Returns full single-repo structure from getRepoSettings', () => {
     filename: FILE_A,
     settings: {
       'fast-import': {
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         mode: 'one-shot',
       },
     },
@@ -426,10 +426,10 @@ it('Returns full single-repo structure from getRepoSettings', () => {
     type: 'singlerepo',
     mode: 'one-shot',
     editorUpdateRate: undefined,
-    repoRootDir: TEST_PROJECT_DIR,
+    repoRootDir: TEST_PACKAGE_DIR,
     packageSettings: {
-      repoRootDir: TEST_PROJECT_DIR,
-      packageRootDir: TEST_PROJECT_DIR,
+      repoRootDir: TEST_PACKAGE_DIR,
+      packageRootDir: TEST_PACKAGE_DIR,
     },
   };
   expect(repoSettings).toEqual(expected);
@@ -441,7 +441,7 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
     filename: FILE_A,
     settings: {
       'fast-import': {
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         mode: 'one-shot',
       },
     },
@@ -452,7 +452,7 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
     filename: FILE_A,
     settings: {
       'fast-import': {
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         mode: 'one-shot',
       },
     },
@@ -461,8 +461,8 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
   if (!packageSettings) {
     throw new Error('packageSettings should be defined');
   }
-  expect(packageSettings.packageRootDir).toBe(TEST_PROJECT_DIR);
-  expect(packageSettings.repoRootDir).toBe(TEST_PROJECT_DIR);
+  expect(packageSettings.packageRootDir).toBe(TEST_PACKAGE_DIR);
+  expect(packageSettings.repoRootDir).toBe(TEST_PACKAGE_DIR);
 });
 
 // ─── getRepoSettings: monorepo ───────────────────────────────────────────────
@@ -472,7 +472,7 @@ it('Returns monorepo structure and discovers packages from getRepoSettings', () 
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
@@ -480,7 +480,7 @@ it('Returns monorepo structure and discovers packages from getRepoSettings', () 
 
   expect(repoSettings.type).toBe('monorepo');
   expect(repoSettings.mode).toBe('fix');
-  expect(repoSettings.repoRootDir).toBe(MONOREPO_PROJECT_DIR);
+  expect(repoSettings.repoRootDir).toBe(MONOREPO_DIR);
 });
 
 it('Populates package settings cache for packageOne after monorepo getRepoSettings', () => {
@@ -488,7 +488,7 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
@@ -498,7 +498,7 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
@@ -508,7 +508,7 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
     throw new Error('packageSettings should be defined');
   }
   expect(packageSettings.packageRootDir).toBe(MONOREPO_PKG_ONE);
-  expect(packageSettings.repoRootDir).toBe(MONOREPO_PROJECT_DIR);
+  expect(packageSettings.repoRootDir).toBe(MONOREPO_DIR);
 });
 
 it('Returns correct package settings for packageTwo via longest-prefix match', () => {
@@ -516,7 +516,7 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
@@ -526,7 +526,7 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
     filename: MONOREPO_FILE_C,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
@@ -536,7 +536,7 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
     throw new Error('packageSettings should be defined');
   }
   expect(packageSettings.packageRootDir).toBe(MONOREPO_PKG_TWO);
-  expect(packageSettings.repoRootDir).toBe(MONOREPO_PROJECT_DIR);
+  expect(packageSettings.repoRootDir).toBe(MONOREPO_DIR);
 });
 
 it('Returns undefined packageSettings for a file outside any known package', () => {
@@ -544,17 +544,17 @@ it('Returns undefined packageSettings for a file outside any known package', () 
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
   });
 
   const { packageSettings } = getAllPackageSettings({
-    filename: join(MONOREPO_PROJECT_DIR, 'eslint.config.js'),
+    filename: join(MONOREPO_DIR, 'eslint.config.js'),
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
     },
@@ -582,13 +582,11 @@ it("Throws on monorepoRootDir that doesn't exist", () => {
       filename: MONOREPO_FILE_A,
       settings: {
         'fast-import': {
-          monorepoRootDir: join(MONOREPO_PROJECT_DIR, 'fake'),
+          monorepoRootDir: join(MONOREPO_DIR, 'fake'),
         },
       },
     })
-  ).toThrow(
-    `monorepoRootDir "${join(MONOREPO_PROJECT_DIR, 'fake')}" does not exist`
-  );
+  ).toThrow(`monorepoRootDir "${join(MONOREPO_DIR, 'fake')}" does not exist`);
 });
 
 it('Throws when mixing monorepoRootDir and packageRootDir in settings', () => {
@@ -597,8 +595,8 @@ it('Throws when mixing monorepoRootDir and packageRootDir in settings', () => {
       filename: MONOREPO_FILE_A,
       settings: {
         'fast-import': {
-          monorepoRootDir: MONOREPO_PROJECT_DIR,
-          packageRootDir: TEST_PROJECT_DIR,
+          monorepoRootDir: MONOREPO_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
         },
       },
     })
@@ -612,7 +610,7 @@ it('markSettingsForRefresh forces a re-read of user settings (single-repo)', () 
     filename: FILE_A,
     settings: {
       'fast-import': {
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         mode: 'fix' as string,
       },
     },
@@ -631,7 +629,7 @@ it('markSettingsForRefresh forces a re-read of user settings (single-repo)', () 
 
   // markSettingsForRefresh forces the next call to re-read from context.settings,
   // which still has mode: 'fix', overwriting our in-memory mutation
-  markSettingsForRefresh(TEST_PROJECT_DIR);
+  markSettingsForRefresh(TEST_PACKAGE_DIR);
 
   expect(getRepoSettings(context).mode).toBe('fix');
 });
@@ -641,7 +639,7 @@ it('markSettingsForRefresh forces a re-read of user settings (monorepo)', () => 
     filename: MONOREPO_FILE_A,
     settings: {
       'fast-import': {
-        monorepoRootDir: MONOREPO_PROJECT_DIR,
+        monorepoRootDir: MONOREPO_DIR,
         mode: 'fix' as string,
       },
     },
@@ -667,24 +665,24 @@ it('markSettingsForRefresh forces a re-read of user settings (monorepo)', () => 
 // ─── getUserPackageSettingsFromConfigFile ────────────────────────────────────
 
 it('Throws a formatted error when the config file contains invalid JSON', () => {
-  const configFilePath = join(TEST_PROJECT_DIR, 'invalid.config.json');
+  const configFilePath = join(TEST_PACKAGE_DIR, 'invalid.config.json');
   expect(() =>
     getUserPackageSettingsFromConfigFile({
       configFilePath,
-      repoRootDir: TEST_PROJECT_DIR,
+      repoRootDir: TEST_PACKAGE_DIR,
     })
   ).toThrow(`Failed to parse package config file ${configFilePath}:`);
 });
 
 it('Parses a JSONC config file with comments and trailing commas', () => {
-  const configFilePath = join(TEST_PROJECT_DIR, 'jsonc.config.jsonc');
+  const configFilePath = join(TEST_PACKAGE_DIR, 'jsonc.config.jsonc');
   const settings = getUserPackageSettingsFromConfigFile({
     configFilePath,
-    repoRootDir: TEST_PROJECT_DIR,
+    repoRootDir: TEST_PACKAGE_DIR,
   });
   expect(settings).toEqual({
     entryPointFiles: { '.': './src/a.ts' },
-    repoRootDir: TEST_PROJECT_DIR,
-    packageRootDir: TEST_PROJECT_DIR,
+    repoRootDir: TEST_PACKAGE_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
   });
 });

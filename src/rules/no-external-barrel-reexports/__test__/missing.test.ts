@@ -5,8 +5,8 @@ import { getDirname } from 'cross-dirname';
 
 import { noExternalBarrelReexports } from '../rule.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -14,7 +14,7 @@ const ruleTester = new RuleTester({
       projectService: {
         allowDefaultProject: ['*.ts*'],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });
@@ -26,7 +26,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -40,7 +40,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       errors: [{ messageId: 'noExternalBarrelReexports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -51,7 +51,7 @@ ruleTester.run('no-external-barrel-reexports', noExternalBarrelReexports, {
       errors: [{ messageId: 'noExternalBarrelReexports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },

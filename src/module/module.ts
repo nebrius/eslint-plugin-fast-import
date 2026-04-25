@@ -12,13 +12,13 @@ import type {
   AnalyzedBarrelImport,
   AnalyzedBarrelReexport,
   AnalyzedDynamicImport,
-  AnalyzedProjectInfo,
+  AnalyzedPackageInfo,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
-import type { BaseProjectInfo } from '../types/base.js';
+import type { BasePackageInfo } from '../types/base.js';
 import type { GenericContext } from '../types/context.js';
-import type { ResolvedProjectInfo } from '../types/resolved.js';
+import type { ResolvedPackageInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
 import {
@@ -44,31 +44,31 @@ import {
   updateResolvedInfoForFile,
 } from './computeResolvedInfo.js';
 
-// When running in monorepos, we need to track project info for each root dir
+// When running in monorepos, we need to track package info for each root dir
 // separately, since they have different root dirs, entry points, etc. To
-// support this, we use a map from root dir to project info.
+// support this, we use a map from root dir to package info.
 
-const baseProjectInfos = new Map<string, BaseProjectInfo>();
-function getBaseProjectInfo(filename: string) {
+const basePackageInfos = new Map<string, BasePackageInfo>();
+function getBasePackageInfo(filename: string) {
   return getSubpathEntry({
     filePath: filename,
-    data: baseProjectInfos,
+    data: basePackageInfos,
   });
 }
 
-const resolvedProjectInfos = new Map<string, ResolvedProjectInfo>();
-function getResolvedProjectInfo(filename: string) {
+const resolvedPackageInfos = new Map<string, ResolvedPackageInfo>();
+function getResolvedPackageInfo(filename: string) {
   return getSubpathEntry({
     filePath: filename,
-    data: resolvedProjectInfos,
+    data: resolvedPackageInfos,
   });
 }
 
-const analyzedProjectInfos = new Map<string, AnalyzedProjectInfo>();
-function getAnalyzedProjectInfo(filename: string) {
+const analyzedPackageInfos = new Map<string, AnalyzedPackageInfo>();
+function getAnalyzedPackageInfo(filename: string) {
   return getSubpathEntry({
     filePath: filename,
-    data: analyzedProjectInfos,
+    data: analyzedPackageInfos,
   });
 }
 
@@ -152,10 +152,10 @@ function getIsExternallyImportedCheck(
 
 // We need to reset settings between runs, since some tests try different settings
 // eslint-disable-next-line fast-import/no-unused-exports
-export function _resetProjectInfo() {
-  baseProjectInfos.clear();
-  resolvedProjectInfos.clear();
-  analyzedProjectInfos.clear();
+export function _resetPackageInfo() {
+  basePackageInfos.clear();
+  resolvedPackageInfos.clear();
+  analyzedPackageInfos.clear();
 }
 
 export function initializeRepo(
@@ -164,18 +164,18 @@ export function initializeRepo(
   const { allPackageSettings } = getAllPackageSettings(context);
   let hasChanges = false;
   for (const packageSettings of allPackageSettings) {
-    const projectHasChanges = initializeProject(packageSettings);
-    hasChanges ||= projectHasChanges;
+    const packageHasChanges = initializePackage(packageSettings);
+    hasChanges ||= packageHasChanges;
   }
   if (hasChanges) {
-    initializePackageInfo();
+    initializeRepoInfo();
   }
 }
 
 // Testing this logic through initializeRepo would be more difficult than just
-// testing this function directly, since we'd have to create full projects
+// testing this function directly, since we'd have to create full packages
 // eslint-disable-next-line fast-import/no-unused-exports
-export function initializeProject({
+export function initializePackage({
   packageRootDir,
   packageName,
   wildcardAliases,
@@ -185,17 +185,17 @@ export function initializeProject({
   entryPoints,
   externallyImported,
 }: ParsedPackageSettings): boolean {
-  // If we've already analyzed the project and settings haven't changed, bail
+  // If we've already analyzed the package and settings haven't changed, bail
   if (
-    getBaseProjectInfo(packageRootDir) &&
-    getResolvedProjectInfo(packageRootDir) &&
-    getAnalyzedProjectInfo(packageRootDir)
+    getBasePackageInfo(packageRootDir) &&
+    getResolvedPackageInfo(packageRootDir) &&
+    getAnalyzedPackageInfo(packageRootDir)
   ) {
     return false;
   }
 
   const baseStart = performance.now();
-  const baseProjectInfo = computeBaseInfo({
+  const basePackageInfo = computeBaseInfo({
     packageRootDir,
     packageName,
     wildcardAliases,
@@ -212,17 +212,17 @@ export function initializeProject({
       externallyImported
     ),
   });
-  baseProjectInfos.set(packageRootDir, baseProjectInfo);
+  basePackageInfos.set(packageRootDir, basePackageInfo);
   const baseEnd = performance.now();
 
   const resolveStart = performance.now();
-  const resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
-  resolvedProjectInfos.set(packageRootDir, resolvedProjectInfo);
+  const resolvedPackageInfo = computeResolvedInfo(basePackageInfo);
+  resolvedPackageInfos.set(packageRootDir, resolvedPackageInfo);
   const resolveEnd = performance.now();
 
   const analyzestart = performance.now();
-  const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-  analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
+  const analyzedPackageInfo = computeAnalyzedInfo(resolvedPackageInfo);
+  analyzedPackageInfos.set(packageRootDir, analyzedPackageInfo);
   const analyzeEnd = performance.now();
 
   debug(`Initial computation files complete :`);
@@ -234,7 +234,7 @@ export function initializeProject({
   let numImports = 0;
   let numExports = 0;
   let numReexports = 0;
-  for (const [, fileDetails] of analyzedProjectInfo.files) {
+  for (const [, fileDetails] of analyzedPackageInfo.files) {
     if (fileDetails.fileType !== 'code') {
       continue;
     }
@@ -247,7 +247,7 @@ export function initializeProject({
   }
 
   debug(
-    `Project contains ${analyzedProjectInfo.files.size.toLocaleString()} files with:`
+    `Package contains ${analyzedPackageInfo.files.size.toLocaleString()} files with:`
   );
   debug(`  ${numImports.toLocaleString()} imports`);
   debug(`  ${numExports.toLocaleString()} exports`);
@@ -256,22 +256,22 @@ export function initializeProject({
   return true;
 }
 
-function initializePackageInfo() {
+function initializeRepoInfo() {
   const analyzestart = performance.now();
-  computeRepoInfo(analyzedProjectInfos);
+  computeRepoInfo(analyzedPackageInfos);
   const analyzeEnd = performance.now();
   debug(
     `Initialized repository info in ${formatMilliseconds(analyzeEnd - analyzestart)}`
   );
 }
 
-export function getProjectInfo(packageRootDir: string) {
-  const analyzedProjectInfo = getAnalyzedProjectInfo(packageRootDir);
+export function getPackageInfo(packageRootDir: string) {
+  const analyzedPackageInfo = getAnalyzedPackageInfo(packageRootDir);
   /* istanbul ignore if */
-  if (!analyzedProjectInfo) {
-    throw new InternalError('Project info requested before initialization');
+  if (!analyzedPackageInfo) {
+    throw new InternalError('Package info requested before initialization');
   }
-  return analyzedProjectInfo;
+  return analyzedPackageInfo;
 }
 
 type Changes = {
@@ -295,19 +295,19 @@ export function updateCacheFromFileSystem(
   packageSettings: ParsedPackageSettings,
   operationStart: number
 ) {
-  const baseProjectInfo = getBaseProjectInfo(packageRootDir);
-  let resolvedProjectInfo = getResolvedProjectInfo(packageRootDir);
-  let analyzedProjectInfo = getAnalyzedProjectInfo(packageRootDir);
+  const basePackageInfo = getBasePackageInfo(packageRootDir);
+  let resolvedPackageInfo = getResolvedPackageInfo(packageRootDir);
+  let analyzedPackageInfo = getAnalyzedPackageInfo(packageRootDir);
 
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
-  if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
-    throw new InternalError('Project info not initialized');
+  if (!basePackageInfo || !resolvedPackageInfo || !analyzedPackageInfo) {
+    throw new InternalError('Package info not initialized');
   }
 
   // First update the dependencies list
   for (const packageJson of packageJsons) {
-    analyzedProjectInfo.availableThirdPartyDependencies.set(
+    analyzedPackageInfo.availableThirdPartyDependencies.set(
       dirname(packageJson),
       getDependenciesFromPackageJson(packageJson)
     );
@@ -324,10 +324,10 @@ export function updateCacheFromFileSystem(
   // First, process any file deletes
   const baseStart = performance.now();
   for (const filePath of changes.deleted) {
-    if (baseProjectInfo.files.has(filePath)) {
+    if (basePackageInfo.files.has(filePath)) {
       numDeletes++;
-      deleteResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
-      deleteBaseInfoForFile(filePath, baseProjectInfo);
+      deleteResolvedInfoForFile(filePath, basePackageInfo, resolvedPackageInfo);
+      deleteBaseInfoForFile(filePath, basePackageInfo);
     }
   }
   const baseEnd = performance.now();
@@ -337,7 +337,7 @@ export function updateCacheFromFileSystem(
   for (const { filePath } of changes.added) {
     // We might already have this new file in memory if it was created in editor
     // and previously linted while it was only in memory
-    if (!baseProjectInfo.files.has(filePath)) {
+    if (!basePackageInfo.files.has(filePath)) {
       try {
         if (isCodeFile(filePath)) {
           const fileContents = readFileSync(filePath, 'utf-8');
@@ -355,10 +355,10 @@ export function updateCacheFromFileSystem(
                 packageSettings.externallyImported
               ),
             },
-            baseProjectInfo
+            basePackageInfo
           );
         } else {
-          baseProjectInfo.files.set(filePath, {
+          basePackageInfo.files.set(filePath, {
             fileType: 'other',
           });
         }
@@ -381,14 +381,14 @@ export function updateCacheFromFileSystem(
   // we might have already seen the new .ts file in a previous update.
   // TODO: it's probably possible to do a more performant+surgical recomputation
   if (numDeletes || numAdditions) {
-    resolvedProjectInfo = computeResolvedInfo(baseProjectInfo);
-    resolvedProjectInfos.set(packageRootDir, resolvedProjectInfo);
+    resolvedPackageInfo = computeResolvedInfo(basePackageInfo);
+    resolvedPackageInfos.set(packageRootDir, resolvedPackageInfo);
   }
   const resolveEnd = performance.now();
 
   // Next, process any modified files
   for (const { filePath, latestUpdatedAt } of changes.modified) {
-    const previousFileInfo = baseProjectInfo.files.get(filePath);
+    const previousFileInfo = basePackageInfo.files.get(filePath);
     if (
       isCodeFile(filePath) &&
       (!previousFileInfo ||
@@ -412,7 +412,7 @@ export function updateCacheFromFileSystem(
               packageSettings.externallyImported
             ),
           },
-          baseProjectInfo
+          basePackageInfo
         );
       } catch (e) {
         // If we failed to parse due to a syntax error, bail silently since this
@@ -423,24 +423,24 @@ export function updateCacheFromFileSystem(
         }
         throw e;
       }
-      updateResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+      updateResolvedInfoForFile(filePath, basePackageInfo, resolvedPackageInfo);
     }
   }
 
   // Finally, recompute analyzed info
   if (numDeletes || numAdditions | numModified) {
     const analyzestart = performance.now();
-    analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-    analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
+    analyzedPackageInfo = computeAnalyzedInfo(resolvedPackageInfo);
+    analyzedPackageInfos.set(packageRootDir, analyzedPackageInfo);
     const analyzeEnd = performance.now();
 
     // Note: it's not the most efficient to recompute this here, since this can
     // lead to multiple recomputations if multiple files across packages are
     // modified at once. However, rearchitecting this would be complicated, and
     // given how fast this operation is to begin with, it's not worth the effort.
-    const projectInfoStart = performance.now();
-    initializePackageInfo();
-    const projectInfoEnd = performance.now();
+    const packageInfoStart = performance.now();
+    initializeRepoInfo();
+    const packageInfoEnd = performance.now();
 
     debug(
       `Synchronized changes from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
@@ -452,7 +452,7 @@ export function updateCacheFromFileSystem(
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - analyzestart)}`);
     debug(
-      `  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`
+      `  package info:  ${formatMilliseconds(packageInfoEnd - packageInfoStart)}`
     );
 
     return true;
@@ -471,14 +471,14 @@ export function updateCacheForFile(
     packageName,
   }: ParsedPackageSettings
 ) {
-  const baseProjectInfo = getBaseProjectInfo(filePath);
-  const resolvedProjectInfo = getResolvedProjectInfo(filePath);
-  const analyzedProjectInfo = getAnalyzedProjectInfo(filePath);
+  const basePackageInfo = getBasePackageInfo(filePath);
+  const resolvedPackageInfo = getResolvedPackageInfo(filePath);
+  const analyzedPackageInfo = getAnalyzedPackageInfo(filePath);
 
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
-  if (!baseProjectInfo || !resolvedProjectInfo || !analyzedProjectInfo) {
-    throw new InternalError('Project info not initialized');
+  if (!basePackageInfo || !resolvedPackageInfo || !analyzedPackageInfo) {
+    throw new InternalError('Package info not initialized');
   }
 
   const baseOptions = {
@@ -497,28 +497,28 @@ export function updateCacheForFile(
   };
 
   // Check if we're updating file info or adding a new file
-  if (analyzedProjectInfo.files.has(filePath)) {
+  if (analyzedPackageInfo.files.has(filePath)) {
     const baseStart = performance.now();
-    const shouldUpdateDerivedProjectInfo = updateBaseInfoForFile(
+    const shouldUpdateDerivedPackageInfo = updateBaseInfoForFile(
       baseOptions,
-      baseProjectInfo
+      basePackageInfo
     );
     const baseEnd = performance.now();
 
     // If we don't need to update
-    if (shouldUpdateDerivedProjectInfo) {
+    if (shouldUpdateDerivedPackageInfo) {
       const resolveStart = performance.now();
-      updateResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+      updateResolvedInfoForFile(filePath, basePackageInfo, resolvedPackageInfo);
       const resolveEnd = performance.now();
 
       const analyzeStart = performance.now();
-      const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-      analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
+      const analyzedPackageInfo = computeAnalyzedInfo(resolvedPackageInfo);
+      analyzedPackageInfos.set(packageRootDir, analyzedPackageInfo);
       const analyzeEnd = performance.now();
 
-      const projectInfoStart = performance.now();
-      initializePackageInfo();
-      const projectInfoEnd = performance.now();
+      const packageInfoStart = performance.now();
+      initializeRepoInfo();
+      const packageInfoEnd = performance.now();
 
       debug(`Update for ${filePath.replace(packageRootDir, '')} complete:`);
       debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
@@ -530,16 +530,16 @@ export function updateCacheForFile(
         `  analyzed info: ${formatMilliseconds(analyzeEnd - analyzeStart)}`
       );
       debug(
-        `  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`
+        `  package info:  ${formatMilliseconds(packageInfoEnd - packageInfoStart)}`
       );
 
       return true;
     } else {
       // Even if we don't need to update information we compute, we still need
       // to update the AST nodes to take into account potentially changed locs
-      const baseFileInfo = baseProjectInfo.files.get(filePath);
-      const resolvedFileInfo = resolvedProjectInfo.files.get(filePath);
-      const analyzedFileInfo = analyzedProjectInfo.files.get(filePath);
+      const baseFileInfo = basePackageInfo.files.get(filePath);
+      const resolvedFileInfo = resolvedPackageInfo.files.get(filePath);
+      const analyzedFileInfo = analyzedPackageInfo.files.get(filePath);
       /* istanbul ignore if */
       if (
         !baseFileInfo ||
@@ -621,22 +621,22 @@ export function updateCacheForFile(
     }
   } else {
     const baseStart = performance.now();
-    addBaseInfoForFile(baseOptions, baseProjectInfo);
+    addBaseInfoForFile(baseOptions, basePackageInfo);
     const baseEnd = performance.now();
 
     const resolveStart = performance.now();
-    computeFolderTree(baseProjectInfo);
-    addResolvedInfoForFile(filePath, baseProjectInfo, resolvedProjectInfo);
+    computeFolderTree(basePackageInfo);
+    addResolvedInfoForFile(filePath, basePackageInfo, resolvedPackageInfo);
     const resolveEnd = performance.now();
 
     const anazlyzeStart = performance.now();
-    const analyzedProjectInfo = computeAnalyzedInfo(resolvedProjectInfo);
-    analyzedProjectInfos.set(packageRootDir, analyzedProjectInfo);
+    const analyzedPackageInfo = computeAnalyzedInfo(resolvedPackageInfo);
+    analyzedPackageInfos.set(packageRootDir, analyzedPackageInfo);
     const analyzeEnd = performance.now();
 
-    const projectInfoStart = performance.now();
-    initializePackageInfo();
-    const projectInfoEnd = performance.now();
+    const packageInfoStart = performance.now();
+    initializeRepoInfo();
+    const packageInfoEnd = performance.now();
 
     debug(`${filePath.replace(packageRootDir, '')} add complete:`);
     debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
@@ -644,7 +644,7 @@ export function updateCacheForFile(
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
     debug(`  analyzed info: ${formatMilliseconds(analyzeEnd - anazlyzeStart)}`);
     debug(
-      `  project info:  ${formatMilliseconds(projectInfoEnd - projectInfoStart)}`
+      `  package info:  ${formatMilliseconds(packageInfoEnd - packageInfoStart)}`
     );
 
     return true;

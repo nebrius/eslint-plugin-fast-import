@@ -5,8 +5,8 @@ import { getDirname } from 'cross-dirname';
 import type { ParsedPackageSettings } from '../../settings.js';
 import { getAllPackageSettings } from '../../settings.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
 it('Fetches settings from tsconfig with package path extends', () => {
   const { packageSettings } = getAllPackageSettings({
@@ -14,7 +14,7 @@ it('Fetches settings from tsconfig with package path extends', () => {
     settings: {
       'fast-import': {
         mode: 'one-shot',
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
       },
     },
   });
@@ -29,8 +29,8 @@ it('Fetches settings from tsconfig with package path extends', () => {
   packageSettings.externallyImported = [];
 
   const expected: ParsedPackageSettings = {
-    repoRootDir: TEST_PROJECT_DIR,
-    packageRootDir: TEST_PROJECT_DIR,
+    repoRootDir: TEST_PACKAGE_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     packageName: undefined,
     entryPoints: [],
     externallyImported: [],
@@ -38,7 +38,7 @@ it('Fetches settings from tsconfig with package path extends', () => {
     ignoreOverridePatterns: [],
     testFilePatterns: [],
     wildcardAliases: {
-      '@pkg/': join(TEST_PROJECT_DIR, 'src/'),
+      '@pkg/': join(TEST_PACKAGE_DIR, 'src/'),
     },
     fixedAliases: {},
   };

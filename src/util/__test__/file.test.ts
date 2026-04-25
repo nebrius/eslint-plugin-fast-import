@@ -12,7 +12,7 @@ import {
   trimTrailingPathSeparator,
 } from '../files.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const ROOT_DIR = resolve(join(getDirname(), '..', '..', '..'));
 
 beforeEach(() => {
@@ -21,63 +21,63 @@ beforeEach(() => {
 
 it('Fetches files asynchronously, respecting ignorePatterns', async () => {
   const files = await getFiles(
-    join(TEST_PROJECT_DIR, 'src'),
-    [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
+    join(TEST_PACKAGE_DIR, 'src'),
+    [{ dir: join(TEST_PACKAGE_DIR, 'src'), contents: 'src/c.ts' }],
     []
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   expect(files.files.map(({ latestUpdatedAt, ...rest }) => rest)).toEqual([
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/a.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/a.ts'),
     },
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/b.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/b.ts'),
     },
   ]);
 
   // .ignored.ts is not included in this list, which means this expect also
   // verifies that .ignored.ts is filtered out
   expect(files.packageJsons).toEqual([
-    join(TEST_PROJECT_DIR, 'package.json'),
+    join(TEST_PACKAGE_DIR, 'package.json'),
     join(ROOT_DIR, 'package.json'),
   ]);
 });
 
 it('ignoreOverridePatterns overrides .gitignore patterns', async () => {
-  // The test project's .gitignore contains 'src/c.ts', so c.ts is ignored by default.
+  // The test package's .gitignore contains 'src/c.ts', so c.ts is ignored by default.
   // First verify that without override, src/c.ts is ignored
   const filesWithoutOverride = await getFiles(
-    join(TEST_PROJECT_DIR, 'src'),
-    [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
+    join(TEST_PACKAGE_DIR, 'src'),
+    [{ dir: join(TEST_PACKAGE_DIR, 'src'), contents: 'src/c.ts' }],
     []
   );
   expect(
     filesWithoutOverride.files.map(({ filePath }) => filePath)
-  ).not.toContain(join(TEST_PROJECT_DIR, 'src/c.ts'));
+  ).not.toContain(join(TEST_PACKAGE_DIR, 'src/c.ts'));
 
   // Reset to clear the cached ignore data
   _reset();
 
   // Now verify that ignoreOverridePatterns brings back the ignored file.
-  // The override pattern 'src/c.ts' is relative to TEST_PROJECT_DIR (the project root)
+  // The override pattern 'src/c.ts' is relative to TEST_PACKAGE_DIR (the package root)
   // to match the .gitignore pattern structure
   const filesWithOverride = await getFiles(
-    join(TEST_PROJECT_DIR, 'src'),
-    [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
-    [{ dir: TEST_PROJECT_DIR, contents: 'src/c.ts' }]
+    join(TEST_PACKAGE_DIR, 'src'),
+    [{ dir: join(TEST_PACKAGE_DIR, 'src'), contents: 'src/c.ts' }],
+    [{ dir: TEST_PACKAGE_DIR, contents: 'src/c.ts' }]
   );
   expect(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     filesWithOverride.files.map(({ latestUpdatedAt, ...rest }) => rest)
   ).toEqual([
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/a.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/a.ts'),
     },
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/b.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/b.ts'),
     },
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/c.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/c.ts'),
     },
   ]);
 });
@@ -86,20 +86,20 @@ it('ignoreOverridePatterns works with glob patterns', async () => {
   // Verify that a glob pattern in ignoreOverridePatterns works.
   // The .gitignore pattern 'src/c.ts' is overridden by 'src/*.ts' glob
   const files = await getFiles(
-    join(TEST_PROJECT_DIR, 'src'),
-    [{ dir: join(TEST_PROJECT_DIR, 'src'), contents: 'src/c.ts' }],
-    [{ dir: TEST_PROJECT_DIR, contents: 'src/*.ts' }]
+    join(TEST_PACKAGE_DIR, 'src'),
+    [{ dir: join(TEST_PACKAGE_DIR, 'src'), contents: 'src/c.ts' }],
+    [{ dir: TEST_PACKAGE_DIR, contents: 'src/*.ts' }]
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   expect(files.files.map(({ latestUpdatedAt, ...rest }) => rest)).toEqual([
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/a.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/a.ts'),
     },
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/b.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/b.ts'),
     },
     {
-      filePath: join(TEST_PROJECT_DIR, 'src/c.ts'),
+      filePath: join(TEST_PACKAGE_DIR, 'src/c.ts'),
     },
   ]);
 });
@@ -136,7 +136,7 @@ it('Can get relative path to root', () => {
 });
 
 it('Does not find fast-import.config.json files inside node_modules', () => {
-  const fixtureDir = join(TEST_PROJECT_DIR, 'nodeModules');
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'nodeModules');
   const result = getMonorepoPackageSettings(fixtureDir);
   expect(result).toEqual([
     join(fixtureDir, 'packages', 'foo', 'fast-import.config.json'),
@@ -144,13 +144,13 @@ it('Does not find fast-import.config.json files inside node_modules', () => {
 });
 
 it('Discovers fast-import.config.jsonc files', () => {
-  const fixtureDir = join(TEST_PROJECT_DIR, 'jsoncDiscovery');
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'jsoncDiscovery');
   const result = getMonorepoPackageSettings(fixtureDir);
   expect(result).toEqual([join(fixtureDir, 'foo', 'fast-import.config.jsonc')]);
 });
 
 it('Throws when both fast-import.config.json and .jsonc exist in the same directory', () => {
-  const fixtureDir = join(TEST_PROJECT_DIR, 'jsoncMultiple');
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'jsoncMultiple');
   expect(() => getMonorepoPackageSettings(fixtureDir)).toThrow(
     `Multiple fast-import.config.json(c) files found in ${join(fixtureDir, 'foo')}`
   );

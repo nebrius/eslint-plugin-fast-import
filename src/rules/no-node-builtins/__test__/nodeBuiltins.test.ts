@@ -5,8 +5,8 @@ import { getDirname } from 'cross-dirname';
 
 import { noNodeBuiltins } from '../rule.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -14,7 +14,7 @@ const ruleTester = new RuleTester({
       projectService: {
         allowDefaultProject: ['*.ts*'],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });
@@ -27,7 +27,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -38,7 +38,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -53,7 +53,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -65,7 +65,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -77,7 +77,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -89,7 +89,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -101,7 +101,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },

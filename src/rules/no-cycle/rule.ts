@@ -1,4 +1,4 @@
-import type { AnalyzedProjectInfo } from '../../types/analyzed.js';
+import type { AnalyzedPackageInfo } from '../../types/analyzed.js';
 import { InternalError } from '../../util/error.js';
 import {
   createRule,
@@ -16,10 +16,10 @@ const cycleMaps = new Map<string, Map<string, Set<string>>>();
 function checkFile(
   originalFilePath: string,
   currentFilePath: string,
-  projectInfo: AnalyzedProjectInfo,
+  packageInfo: AnalyzedPackageInfo,
   importStack: string[]
 ) {
-  const fileDetails = projectInfo.files.get(currentFilePath);
+  const fileDetails = packageInfo.files.get(currentFilePath);
   /* istanbul ignore if */
   if (!fileDetails) {
     throw new InternalError(`Could not get file info for "${currentFilePath}"`);
@@ -30,10 +30,10 @@ function checkFile(
     return;
   }
 
-  let cycleMap = cycleMaps.get(projectInfo.packageRootDir);
+  let cycleMap = cycleMaps.get(packageInfo.packageRootDir);
   if (!cycleMap) {
     cycleMap = new Map<string, Set<string>>();
-    cycleMaps.set(projectInfo.packageRootDir, cycleMap);
+    cycleMaps.set(packageInfo.packageRootDir, cycleMap);
   }
 
   // Now check if this file is part of a cycle
@@ -82,7 +82,7 @@ function checkFile(
     ) {
       continue;
     }
-    checkFile(originalFilePath, importEntry.resolvedModulePath, projectInfo, [
+    checkFile(originalFilePath, importEntry.resolvedModulePath, packageInfo, [
       ...importStack,
       currentFilePath,
     ]);
@@ -119,27 +119,27 @@ export const noCycle = createRule<Options, MessageIds>({
   create(context) {
     const esmInfo = getESMInfo(context);
 
-    // No project info means this file wasn't found as part of the project, e.g.
+    // No package info means this file wasn't found as part of the package, e.g.
     // because it's ignored
     /* istanbul ignore if */
     if (!esmInfo) {
       return {};
     }
 
-    const { fileInfo, projectInfo } = esmInfo;
+    const { fileInfo, packageInfo } = esmInfo;
     /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
       return {};
     }
 
-    let cycleMap = cycleMaps.get(projectInfo.packageRootDir);
+    let cycleMap = cycleMaps.get(packageInfo.packageRootDir);
     if (!cycleMap) {
       cycleMap = new Map<string, Set<string>>();
-      cycleMaps.set(projectInfo.packageRootDir, cycleMap);
+      cycleMaps.set(packageInfo.packageRootDir, cycleMap);
     }
     let cycleImports = cycleMap.get(context.filename);
     if (!cycleImports) {
-      checkFile(context.filename, context.filename, projectInfo, []);
+      checkFile(context.filename, context.filename, packageInfo, []);
       cycleImports = cycleMap.get(context.filename);
     }
 

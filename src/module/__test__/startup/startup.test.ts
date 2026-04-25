@@ -5,8 +5,8 @@ import { getDirname } from 'cross-dirname';
 
 import type { ParsedPackageSettings } from '../../../settings/settings.js';
 import {
-  getProjectInfo,
-  initializeProject,
+  getPackageInfo,
+  initializePackage,
   updateCacheForFile,
 } from '../../module.js';
 
@@ -19,13 +19,13 @@ function parseContents(contents: string) {
   });
 }
 
-const SINGLEREPO_PROJECT_DIR = join(getDirname(), 'project');
-const SINGLEREPO_FILE_A = join(SINGLEREPO_PROJECT_DIR, 'a.ts');
+const SINGLEREPO_DIR = join(getDirname(), 'project');
+const SINGLEREPO_FILE_A = join(SINGLEREPO_DIR, 'a.ts');
 
 it('Updates cache when a new file is added', () => {
   const settings: ParsedPackageSettings = {
-    repoRootDir: SINGLEREPO_PROJECT_DIR,
-    packageRootDir: SINGLEREPO_PROJECT_DIR,
+    repoRootDir: SINGLEREPO_DIR,
+    packageRootDir: SINGLEREPO_DIR,
     packageName: 'test',
     wildcardAliases: {},
     fixedAliases: {},
@@ -35,16 +35,16 @@ it('Updates cache when a new file is added', () => {
     ignoreOverridePatterns: [],
     testFilePatterns: [],
   };
-  initializeProject(settings);
+  initializePackage(settings);
 
-  let projectInfo = getProjectInfo(SINGLEREPO_PROJECT_DIR);
+  let packageInfo = getPackageInfo(SINGLEREPO_DIR);
   // a.ts on disk contains intentionally invalid syntax; it must be skipped
-  // during startup and must not leak into projectInfo.files. This guards
+  // during startup and must not leak into packageInfo.files. This guards
   // against a past regression where a parse failure on startup would crash
   // the plugin or leave a half-populated entry behind.
-  expect(projectInfo.files.has(SINGLEREPO_FILE_A)).toBe(false);
-  expect(projectInfo.files.size).toBe(0);
-  expect(projectInfo).toMatchAnalyzedSpec({});
+  expect(packageInfo.files.has(SINGLEREPO_FILE_A)).toBe(false);
+  expect(packageInfo.files.size).toBe(0);
+  expect(packageInfo).toMatchAnalyzedSpec({});
 
   updateCacheForFile(
     SINGLEREPO_FILE_A,
@@ -53,8 +53,8 @@ it('Updates cache when a new file is added', () => {
     settings
   );
 
-  projectInfo = getProjectInfo(SINGLEREPO_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(SINGLEREPO_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [SINGLEREPO_FILE_A]: {
       fileType: 'code',
       entryPointSpecifier: undefined,

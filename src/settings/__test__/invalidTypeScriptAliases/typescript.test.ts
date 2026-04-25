@@ -4,8 +4,8 @@ import { getDirname } from 'cross-dirname';
 
 import { getAllPackageSettings } from '../../settings.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'src', 'a.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
 it('Throws on invalid tsconfig.compilerOptions.paths', () => {
   expect(() =>
@@ -13,11 +13,11 @@ it('Throws on invalid tsconfig.compilerOptions.paths', () => {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
         },
       },
     })
   ).toThrow(
-    `tsconfig path "some/fake/path/*", resolved as "${join(TEST_PROJECT_DIR, 'some', 'fake', 'path')}/*", does not exist`
+    `tsconfig path "some/fake/path/*", resolved as "${join(TEST_PACKAGE_DIR, 'some', 'fake', 'path')}/*", does not exist`
   );
 });

@@ -3,12 +3,12 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { _resetProjectInfo } from '../../../module/module.js';
+import { _resetPackageInfo } from '../../../module/module.js';
 import { _resetAllSettings } from '../../../settings/settings.js';
 import { noTestImportsInProd } from '../rule.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -16,14 +16,14 @@ const ruleTester = new RuleTester({
       projectService: {
         allowDefaultProject: ['*.ts*'],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });
 
 beforeEach(() => {
   _resetAllSettings();
-  _resetProjectInfo();
+  _resetPackageInfo();
 });
 
 ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
@@ -33,7 +33,7 @@ ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
       filename: FILE_A,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -49,7 +49,7 @@ console.log(bTest);
       errors: [{ messageId: 'noTestImports' }],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },

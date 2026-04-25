@@ -6,8 +6,8 @@ import { getDirname } from 'cross-dirname';
 import { noUnresolvedImports } from '../rule.js';
 
 const MONOREPO_ROOT_DIR = join(getDirname(), 'project');
-const TEST_PROJECT_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
+const TEST_PACKAGE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_D = join(MONOREPO_ROOT_DIR, 'packages', 'two', 'd.ts');
 
 const ruleTester = new RuleTester({
@@ -16,7 +16,7 @@ const ruleTester = new RuleTester({
       projectService: {
         allowDefaultProject: ['*.ts*', '../two/*.ts*'],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });

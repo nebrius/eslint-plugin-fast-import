@@ -366,7 +366,7 @@ function initializeIgnores(
   }
 
   // First, we need to traverse up the folder tree until we find the git root
-  // folder. We're often operating in a project where `packageRootDir` is a `src`
+  // folder. We're often operating in a package where `packageRootDir` is a `src`
   // folder, or even in a monorepo. In these cases, there is likely a gitignore
   // file(s) futher up the tree
   const extraIgnoreFiles: string[] = [];

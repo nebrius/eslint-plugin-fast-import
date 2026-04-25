@@ -19,7 +19,7 @@ export const noNamedAsDefault = createRule({
   create(context) {
     const esmInfo = getESMInfo(context);
 
-    // No project info means this file wasn't found as part of the project, e.g.
+    // No package info means this file wasn't found as part of the package, e.g.
     // because it's ignored
     /* istanbul ignore if */
     if (!esmInfo) {
@@ -39,7 +39,7 @@ export const noNamedAsDefault = createRule({
       ) {
         continue;
       }
-      const fileDetails = esmInfo.projectInfo.files.get(
+      const fileDetails = esmInfo.packageInfo.files.get(
         importEntry.resolvedModulePath
       );
       /* istanbul ignore if */
@@ -68,7 +68,7 @@ export const noNamedAsDefault = createRule({
       ) {
         continue;
       }
-      const fileDetails = esmInfo.projectInfo.files.get(
+      const fileDetails = esmInfo.packageInfo.files.get(
         importEntry.resolvedModulePath
       );
       /* istanbul ignore if */

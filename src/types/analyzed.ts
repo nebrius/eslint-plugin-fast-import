@@ -5,7 +5,7 @@ import type {
   ResolvedDynamicImport,
   ResolvedExport,
   ResolvedOtherFileDetails,
-  ResolvedProjectInfo,
+  ResolvedPackageInfo,
   ResolvedSingleImport,
   ResolvedSingleReexport,
 } from './resolved.js';
@@ -214,7 +214,7 @@ export type AnalyzedCodeFileDetails = Omit<
 
 type AnalyzedFileDetails = AnalyzedOtherFileDetails | AnalyzedCodeFileDetails;
 
-export type AnalyzedProjectInfo = Omit<ResolvedProjectInfo, 'files'> & {
+export type AnalyzedPackageInfo = Omit<ResolvedPackageInfo, 'files'> & {
   /**
    * Mapping of _absolute_ file paths to file details
    */

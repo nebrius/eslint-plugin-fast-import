@@ -4,18 +4,18 @@ import type {
   AnalyzedCodeFileDetails,
   AnalyzedDynamicImport,
   AnalyzedExport,
-  AnalyzedProjectInfo,
+  AnalyzedPackageInfo,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
-import type { ResolvedProjectInfo } from '../types/resolved.js';
+import type { ResolvedPackageInfo } from '../types/resolved.js';
 import { InternalError } from '../util/error.js';
 
 export function computeAnalyzedInfo(
-  resolvedProjectInfo: ResolvedProjectInfo
-): AnalyzedProjectInfo {
-  const analyzedProjectInfo: AnalyzedProjectInfo = {
-    ...resolvedProjectInfo,
+  resolvedPackageInfo: ResolvedPackageInfo
+): AnalyzedPackageInfo {
+  const analyzedPackageInfo: AnalyzedPackageInfo = {
+    ...resolvedPackageInfo,
     files: new Map(),
     packageEntryPointExports: new Map(),
   };
@@ -25,13 +25,13 @@ export function computeAnalyzedInfo(
   // traversing/populating analyzed info.
   //
   // Note: externallyImportedBy is not initialized in this phase directly
-  // because we need the entire project to be fully analyzed before we can
+  // because we need the entire package to be fully analyzed before we can
   // populate it. This will happen in the computePackageInfo phase. We define
   // the types as part of the analyzed phase for simplicity, and having a split
   // phase as more of an implementation detail.
-  for (const [filePath, fileDetails] of resolvedProjectInfo.files) {
+  for (const [filePath, fileDetails] of resolvedPackageInfo.files) {
     if (fileDetails.fileType !== 'code') {
-      analyzedProjectInfo.files.set(filePath, {
+      analyzedPackageInfo.files.set(filePath, {
         fileType: 'other',
       });
       continue;
@@ -49,7 +49,7 @@ export function computeAnalyzedInfo(
       singleReexports: [],
       barrelReexports: [],
     };
-    analyzedProjectInfo.files.set(filePath, analyzedFileInfo);
+    analyzedPackageInfo.files.set(filePath, analyzedFileInfo);
 
     for (const exportDetails of fileDetails.exports) {
       analyzedFileInfo.exports.push({
@@ -113,7 +113,7 @@ export function computeAnalyzedInfo(
 
   // Now that we have placeholder values for each entry, we're ready to
   // analyze/traverse the tree
-  for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
+  for (const [filePath, fileDetails] of analyzedPackageInfo.files) {
     // Nothing to do if this isn't a code file
     if (fileDetails.fileType !== 'code') {
       continue;
@@ -127,7 +127,7 @@ export function computeAnalyzedInfo(
           filePath,
           importEntry: importDetails,
         },
-        analyzedProjectInfo,
+        analyzedPackageInfo,
       });
     }
     for (const importDetails of [
@@ -141,7 +141,7 @@ export function computeAnalyzedInfo(
           importEntry: importDetails,
         },
         pivotAnalyzedImport: importDetails,
-        analyzedProjectInfo,
+        analyzedPackageInfo,
       });
     }
 
@@ -161,7 +161,7 @@ export function computeAnalyzedInfo(
           filePath,
           importEntry: reexportDetails,
         },
-        analyzedProjectInfo,
+        analyzedPackageInfo,
       });
     }
     for (const reexportDetails of fileDetails.barrelReexports) {
@@ -178,23 +178,23 @@ export function computeAnalyzedInfo(
           importEntry: reexportDetails,
         },
         pivotAnalyzedImport: reexportDetails,
-        analyzedProjectInfo,
+        analyzedPackageInfo,
       });
     }
   }
 
   // Populate the list of package entry point exports
-  for (const [, fileDetails] of analyzedProjectInfo.files) {
+  for (const [, fileDetails] of analyzedPackageInfo.files) {
     if (fileDetails.fileType !== 'code' || !fileDetails.entryPointSpecifier) {
       continue;
     }
-    analyzedProjectInfo.packageEntryPointExports.set(
+    analyzedPackageInfo.packageEntryPointExports.set(
       fileDetails.entryPointSpecifier,
       fileDetails
     );
   }
 
-  return analyzedProjectInfo;
+  return analyzedPackageInfo;
 }
 
 function linkImportToExport(
@@ -241,12 +241,12 @@ type AnalyzeSingleImportProps = {
     filePath: string;
     importEntry: AnalyzedSingleImport | AnalyzedSingleReexport;
   };
-  analyzedProjectInfo: AnalyzedProjectInfo;
+  analyzedPackageInfo: AnalyzedPackageInfo;
 };
 
 function analyzeSingleImport({
   originAnalyzedImport,
-  analyzedProjectInfo,
+  analyzedPackageInfo,
 }: AnalyzeSingleImportProps) {
   if (
     originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode'
@@ -261,13 +261,13 @@ function analyzeSingleImport({
       return false;
     }
     visited.add(currentFile);
-    // Get the file from the project info
-    const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
+    // Get the file from the package info
+    const targetFileDetails = analyzedPackageInfo.files.get(currentFile);
 
     /* istanbul ignore if */
     if (!targetFileDetails) {
       throw new InternalError(
-        `File ${currentFile} is missing in project info`,
+        `File ${currentFile} is missing in package info`,
         {
           filePath: originAnalyzedImport.filePath,
           range: originAnalyzedImport.importEntry.statementNodeRange,
@@ -362,7 +362,7 @@ function analyzeSingleImport({
         analyzeBarrelImport({
           originAnalyzedImport,
           pivotAnalyzedImport: barrelReexportEntry,
-          analyzedProjectInfo,
+          analyzedPackageInfo,
         });
 
         // Regardless of what happened when further traversing the barrel
@@ -444,13 +444,13 @@ type AnalyzeBarrelImportProps = {
     | AnalyzedBarrelImport
     | AnalyzedDynamicImport
     | AnalyzedBarrelReexport;
-  analyzedProjectInfo: AnalyzedProjectInfo;
+  analyzedPackageInfo: AnalyzedPackageInfo;
 };
 
 function analyzeBarrelImport({
   originAnalyzedImport,
   pivotAnalyzedImport,
-  analyzedProjectInfo,
+  analyzedPackageInfo,
 }: AnalyzeBarrelImportProps) {
   if (
     originAnalyzedImport.importEntry.resolvedModuleType !== 'firstPartyCode'
@@ -464,13 +464,13 @@ function analyzeBarrelImport({
       return;
     }
     visited.add(currentFile);
-    // Get the file from the project info
-    const targetFileDetails = analyzedProjectInfo.files.get(currentFile);
+    // Get the file from the package info
+    const targetFileDetails = analyzedPackageInfo.files.get(currentFile);
 
     /* istanbul ignore if */
     if (!targetFileDetails) {
       throw new InternalError(
-        `File ${currentFile} is missing in project info`,
+        `File ${currentFile} is missing in package info`,
         {
           filePath: originAnalyzedImport.filePath,
           range: originAnalyzedImport.importEntry.statementNodeRange,

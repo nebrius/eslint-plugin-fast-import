@@ -314,7 +314,7 @@ export type BaseCodeFileDetails = {
 
 type BaseFileDetails = BaseOtherFileDetails | BaseCodeFileDetails;
 
-export type BaseProjectInfo = {
+export type BasePackageInfo = {
   /**
    * Mapping of _absolute_ file paths to file details
    */

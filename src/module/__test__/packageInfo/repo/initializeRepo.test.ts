@@ -5,8 +5,8 @@ import { getDirname } from 'cross-dirname';
 import type { ParsedPackageSettings } from '../../../../settings/settings.js';
 import type { AnalyzedCodeFileDetails } from '../../../../types/analyzed.js';
 import {
-  getProjectInfo,
-  initializeProject,
+  getPackageInfo,
+  initializePackage,
   initializeRepo,
 } from '../../../module.js';
 
@@ -43,8 +43,8 @@ function findExport(fileDetails: AnalyzedCodeFileDetails, exportName: string) {
   ].find((entry) => entry.exportName === exportName);
 }
 
-const MONOREPO_PROJECT_DIR = join(getDirname(), 'project', 'monorepo');
-const PACKAGES_DIR = join(MONOREPO_PROJECT_DIR, 'packages');
+const MONOREPO_DIR = join(getDirname(), 'project', 'monorepo');
+const PACKAGES_DIR = join(MONOREPO_DIR, 'packages');
 const PACKAGE_A_DIR = join(PACKAGES_DIR, 'packageA');
 const PACKAGE_B_DIR = join(PACKAGES_DIR, 'packageB');
 const PACKAGE_C_DIR = join(PACKAGES_DIR, 'packageC');
@@ -69,7 +69,7 @@ function initialize() {
   initializeRepo({
     filename: FILE_A,
     settings: {
-      'fast-import': { monorepoRootDir: MONOREPO_PROJECT_DIR },
+      'fast-import': { monorepoRootDir: MONOREPO_DIR },
     },
   });
 }
@@ -80,7 +80,7 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
   // packageA's A is imported by both packageB (single) and packageE (barrel);
   // check the single importer from packageB here. The barrel importer from
   // packageE is checked in the dedicated barrel-import test.
-  const pkgAInfo = getProjectInfo(PACKAGE_A_DIR);
+  const pkgAInfo = getPackageInfo(PACKAGE_A_DIR);
   const fileA = pkgAInfo.packageEntryPointExports.get('@test/package-a');
   assertDefined(fileA, '@test/package-a entry point missing on packageA');
   const aExport = findExport(fileA, 'A');
@@ -107,7 +107,7 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
   });
   expectNoDuplicateExternalImporters(aExport.externallyImportedBy);
 
-  const pkgBInfo = getProjectInfo(PACKAGE_B_DIR);
+  const pkgBInfo = getPackageInfo(PACKAGE_B_DIR);
   const fileB = pkgBInfo.packageEntryPointExports.get('@test/package-b/b');
   assertDefined(fileB, '@test/package-b/b entry point missing on packageB');
   const bExport = findExport(fileB, 'B');
@@ -135,7 +135,7 @@ it('Cross-package import cycle populates externallyImportedBy on both sides', ()
 it('Cross-package barrelImport populates externallyImportedBy on every entry-point export', () => {
   initialize();
 
-  const pkgAInfo = getProjectInfo(PACKAGE_A_DIR);
+  const pkgAInfo = getPackageInfo(PACKAGE_A_DIR);
   const fileA = pkgAInfo.packageEntryPointExports.get('@test/package-a');
   assertDefined(fileA, '@test/package-a entry point missing on packageA');
   const aExport = findExport(fileA, 'A');
@@ -159,7 +159,7 @@ it('Cross-package barrelImport populates externallyImportedBy on every entry-poi
 it('Named barrel reexport entry point tracks cross-package importer', () => {
   initialize();
 
-  const pkgDInfo = getProjectInfo(PACKAGE_D_DIR);
+  const pkgDInfo = getPackageInfo(PACKAGE_D_DIR);
   const fileD = pkgDInfo.packageEntryPointExports.get('@test/package-d/d');
   assertDefined(fileD, '@test/package-d/d entry point missing on packageD');
   const utilsExport = findExport(fileD, 'utils');
@@ -186,7 +186,7 @@ it('Named barrel reexport entry point tracks cross-package importer', () => {
 it('Entry-point export that is not imported by any other package has empty externallyImportedBy', () => {
   initialize();
 
-  const pkgCInfo = getProjectInfo(PACKAGE_C_DIR);
+  const pkgCInfo = getPackageInfo(PACKAGE_C_DIR);
   const fileC = pkgCInfo.packageEntryPointExports.get('@test/package-c');
   assertDefined(fileC, '@test/package-c entry point missing on packageC');
   const cExport = findExport(fileC, 'C');
@@ -248,7 +248,7 @@ it('Entry-point files for all four packages appear in packageEntryPointExports k
   ];
 
   for (const { dir, filePath, specifier, expectedExportNames } of cases) {
-    const info = getProjectInfo(dir);
+    const info = getPackageInfo(dir);
     expect([...info.packageEntryPointExports.keys()]).toEqual([specifier]);
     const registeredFile = info.packageEntryPointExports.get(specifier);
     expect(registeredFile).toBe(info.files.get(filePath));
@@ -272,10 +272,10 @@ it('Entry-point files for all four packages appear in packageEntryPointExports k
   }
 });
 
-it('Files inside packageD beyond the entry point are reachable via getProjectInfo', () => {
+it('Files inside packageD beyond the entry point are reachable via getPackageInfo', () => {
   initialize();
 
-  const pkgDInfo = getProjectInfo(PACKAGE_D_DIR);
+  const pkgDInfo = getPackageInfo(PACKAGE_D_DIR);
   // d.ts, internal.ts, internal2.ts, package.json, fast-import.config.json = 5
   expect(pkgDInfo.files.size).toBe(5);
   expect(pkgDInfo.files.has(FILE_D)).toBe(true);
@@ -295,7 +295,7 @@ it('Files inside packageD beyond the entry point are reachable via getProjectInf
 it('Multi-subpath package: each subpath registers as its own packageEntryPointExports key', () => {
   initialize();
 
-  const pkgFInfo = getProjectInfo(PACKAGE_F_DIR);
+  const pkgFInfo = getPackageInfo(PACKAGE_F_DIR);
   expect([...pkgFInfo.packageEntryPointExports.keys()].sort()).toEqual([
     '@test/package-f/a',
     '@test/package-f/b',
@@ -312,7 +312,7 @@ it('Multi-subpath package: each subpath registers as its own packageEntryPointEx
 it('Multi-subpath package: cross-package singleImport lights up only the imported subpath', () => {
   initialize();
 
-  const pkgFInfo = getProjectInfo(PACKAGE_F_DIR);
+  const pkgFInfo = getPackageInfo(PACKAGE_F_DIR);
   const fileFA = pkgFInfo.packageEntryPointExports.get('@test/package-f/a');
   assertDefined(fileFA, '@test/package-f/a entry point missing on packageF');
   const faExport = findExport(fileFA, 'Fa');
@@ -353,7 +353,7 @@ it('Bare package-name specifier does not match any registered subpath entry poin
   // computeRepoInfo is skipped. If the lookup were still keyed by package
   // name, every entry-point export on Fa and Fb would pick up a barrelImport
   // entry here.
-  const pkgFInfo = getProjectInfo(PACKAGE_F_DIR);
+  const pkgFInfo = getPackageInfo(PACKAGE_F_DIR);
 
   for (const specifier of ['@test/package-f/a', '@test/package-f/b']) {
     const entryFile = pkgFInfo.packageEntryPointExports.get(specifier);
@@ -379,7 +379,7 @@ it('Bare package-name specifier does not match any registered subpath entry poin
 it('Dynamic entry point: wildcard expands to one specifier per matching file', () => {
   initialize();
 
-  const pkgGInfo = getProjectInfo(PACKAGE_G_DIR);
+  const pkgGInfo = getPackageInfo(PACKAGE_G_DIR);
   expect([...pkgGInfo.packageEntryPointExports.keys()].sort()).toEqual([
     '@test/package-g/lib/bar',
     '@test/package-g/lib/foo',
@@ -400,7 +400,7 @@ it('Dynamic entry point: wildcard expands to one specifier per matching file', (
 it('Dynamic entry point: cross-package singleImport lights up only the matching wildcard expansion', () => {
   initialize();
 
-  const pkgGInfo = getProjectInfo(PACKAGE_G_DIR);
+  const pkgGInfo = getPackageInfo(PACKAGE_G_DIR);
   const fooFile = pkgGInfo.packageEntryPointExports.get(
     '@test/package-g/lib/foo'
   );
@@ -444,9 +444,9 @@ it('Dynamic entry point: cross-package singleImport lights up only the matching 
 // `ParsedPackageSettings` with a static `.` → `./a.ts` entry AND a dynamic
 // `./*` → `./*.ts` entry. `a.ts` matches both, producing the throw.
 
-it('Ambiguous static + dynamic entry points throw during project initialization', () => {
+it('Ambiguous static + dynamic entry points throw during package initialization', () => {
   const settings: ParsedPackageSettings = {
-    repoRootDir: MONOREPO_PROJECT_DIR,
+    repoRootDir: MONOREPO_DIR,
     packageRootDir: PACKAGE_F_DIR,
     packageName: '@test/package-f',
     wildcardAliases: {},
@@ -465,18 +465,18 @@ it('Ambiguous static + dynamic entry points throw during project initialization'
     testFilePatterns: [],
   };
 
-  expect(() => initializeProject(settings)).toThrow(
+  expect(() => initializePackage(settings)).toThrow(
     /Multiple entry points matched for file ".*a\.ts"\. Entry points must not be ambiguous\./
   );
 });
 
-it('Ambiguous dynamic + dynamic entry points throw during project initialization', () => {
+it('Ambiguous dynamic + dynamic entry points throw during package initialization', () => {
   // Two wildcard patterns that both match the same file. Regardless of which
   // subpath prefixes they use (`./*` vs. `./alt/*`), the underlying file
   // pattern collides on `a.ts`, so the factory must throw before settling on
   // a specifier.
   const settings: ParsedPackageSettings = {
-    repoRootDir: MONOREPO_PROJECT_DIR,
+    repoRootDir: MONOREPO_DIR,
     packageRootDir: PACKAGE_F_DIR,
     packageName: '@test/package-f',
     wildcardAliases: {},
@@ -499,7 +499,7 @@ it('Ambiguous dynamic + dynamic entry points throw during project initialization
     testFilePatterns: [],
   };
 
-  expect(() => initializeProject(settings)).toThrow(
+  expect(() => initializePackage(settings)).toThrow(
     /Multiple entry points matched for file ".*\.ts"\. Entry points must not be ambiguous\./
   );
 });

@@ -4,7 +4,7 @@ Enforces the use of alias imports instead of relative paths when an alias is ava
 
 ## Rule Details
 
-When a project configures import aliases (e.g. `@/*` mapping to `src/*`), it can be inconsistent whether developers use relative paths or alias paths for imports. This rule enforces a consistent style.
+When a package configures import aliases (e.g. `@/*` mapping to `src/*`), it can be inconsistent whether developers use relative paths or alias paths for imports. This rule enforces a consistent style.
 
 In `relative-if-local` mode (default), the rule enforces that:
 

@@ -671,7 +671,7 @@ Fast Import is designed to be extended. For a complete example, check out the so
 This is the most important of the four functions. If the file represented by the ESLint context has been analyzed by Fast Import, an object with the following properties is returned, otherwise `undefined` is returned:
 
 - `fileInfo`: analyzed ESM info for the current file
-- `projectInfo`: analyzed ESM info for the current package
+- `packageInfo`: analyzed ESM info for the current package
 - `packageSettings`: the computed package settings, with defaults applied, used by Fast Import for the current file
 
 In monorepos, `packageSettings` may come from a package-local Fast Import config file file while repo-level settings such as `mode` still come from the root ESLint or Oxlint config.

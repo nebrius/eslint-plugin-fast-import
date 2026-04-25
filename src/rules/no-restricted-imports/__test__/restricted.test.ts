@@ -3,14 +3,14 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { _resetProjectInfo } from '../../../module/module.js';
+import { _resetPackageInfo } from '../../../module/module.js';
 import { _resetAllSettings } from '../../../settings/settings.js';
 import { noRestrictedImports } from '../rule.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_D = join(TEST_PROJECT_DIR, 'd/d.ts');
-const FILE_E2 = join(TEST_PROJECT_DIR, 'e/e2.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
+const FILE_D = join(TEST_PACKAGE_DIR, 'd/d.ts');
+const FILE_E2 = join(TEST_PACKAGE_DIR, 'e/e2.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -18,14 +18,14 @@ const ruleTester = new RuleTester({
       projectService: {
         allowDefaultProject: ['*.ts*', 'd/*.ts*', 'e/*.ts*'],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });
 
 beforeEach(() => {
   _resetAllSettings();
-  _resetProjectInfo();
+  _resetPackageInfo();
 });
 
 ruleTester.run('no-restricted-imports', noRestrictedImports, {
@@ -34,7 +34,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -57,7 +57,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -80,7 +80,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -103,7 +103,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -126,7 +126,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -149,7 +149,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { e1 } from './e1';`,
       filename: FILE_E2,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -167,7 +167,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { e1 } from './e1';`,
       filename: FILE_E2,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -185,7 +185,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import type { e1 } from '../e/e1';`,
       filename: FILE_D,
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -217,7 +217,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -253,7 +253,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -289,7 +289,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -325,7 +325,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       ],
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },
@@ -356,7 +356,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -380,7 +380,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': { packageRootDir: TEST_PROJECT_DIR, mode: 'fix' },
+        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {

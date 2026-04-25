@@ -5,17 +5,17 @@ import { getDirname } from 'cross-dirname';
 
 import { preferAliasImports } from '../rule.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_INDEX = join(TEST_PROJECT_DIR, 'src', 'index.ts');
-const FILE_BUTTON = join(TEST_PROJECT_DIR, 'src', 'components', 'Button.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_INDEX = join(TEST_PACKAGE_DIR, 'src', 'index.ts');
+const FILE_BUTTON = join(TEST_PACKAGE_DIR, 'src', 'components', 'Button.ts');
 const FILE_LABEL = join(
-  TEST_PROJECT_DIR,
+  TEST_PACKAGE_DIR,
   'src',
   'components',
   'internal',
   'Label.ts'
 );
-const FILE_STANDALONE = join(TEST_PROJECT_DIR, 'standalone.ts');
+const FILE_STANDALONE = join(TEST_PACKAGE_DIR, 'standalone.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -29,14 +29,14 @@ const ruleTester = new RuleTester({
           'src/components/internal/*.ts*',
         ],
       },
-      tsconfigRootDir: TEST_PROJECT_DIR,
+      tsconfigRootDir: TEST_PACKAGE_DIR,
     },
   },
 });
 
 const WILDCARD_SETTINGS = {
   'fast-import': {
-    packageRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     alias: {
       '@/*': './src/*',
     },
@@ -46,7 +46,7 @@ const WILDCARD_SETTINGS = {
 
 const WILDCARD_AND_FIXED_SETTINGS = {
   'fast-import': {
-    packageRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     alias: {
       '@/*': './src/*',
       '@standalone': './standalone.ts',
@@ -81,7 +81,7 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       filename: FILE_INDEX,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           alias: {
             '@/*': './src/*',
           },
@@ -96,7 +96,7 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       filename: FILE_INDEX,
       settings: {
         'fast-import': {
-          packageRootDir: TEST_PROJECT_DIR,
+          packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
       },

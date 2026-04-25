@@ -10,7 +10,5 @@ Config:
 
 Misc:
 - From Claude on a bug: for rootModuleType, I used undefined on the thirdParty singleImport because computeAnalyzedInfo.ts:95 sets it to undefined unconditionally and analyzeSingleImport bails early for non-firstPartyCode. singleReexports get 'thirdParty' there, but singleImports do not. Flagging in case that asymmetry is itself a bug you want fixed before these tests lock it in.
-- Rename "project" to "package" where appropriate
-- Support config files in JSON-C
 - Enable type-checking on tests
 - Rename plugin

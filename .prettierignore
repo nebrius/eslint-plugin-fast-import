@@ -1,4 +1,4 @@
 src/module/__test__/startup/project/a.ts
-src/module/__test__/projectInfo/base/project/e.ts
+src/module/__test__/packageInfo/base/project/e.ts
 src/settings/__test__/invalidTypeScriptConfig/project/tsconfig.json
 src/settings/__test__/user/project/invalid.config.json

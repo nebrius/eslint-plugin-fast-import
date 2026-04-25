@@ -17,14 +17,14 @@ export const noEntryPointImports = createRule({
   create(context) {
     const esmInfo = getESMInfo(context);
 
-    // No project info means this file wasn't found as part of the project, e.g.
+    // No package info means this file wasn't found as part of the package, e.g.
     // because it's ignored
     /* istanbul ignore if */
     if (!esmInfo) {
       return {};
     }
 
-    const { fileInfo, projectInfo } = esmInfo;
+    const { fileInfo, packageInfo } = esmInfo;
     /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
       return {};
@@ -47,7 +47,7 @@ export const noEntryPointImports = createRule({
       if (!importEntry.resolvedModulePath) {
         continue;
       }
-      const fileDetails = projectInfo.files.get(importEntry.resolvedModulePath);
+      const fileDetails = packageInfo.files.get(importEntry.resolvedModulePath);
       if (fileDetails?.fileType !== 'code') {
         continue;
       }

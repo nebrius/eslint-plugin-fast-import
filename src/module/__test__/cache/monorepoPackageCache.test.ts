@@ -11,7 +11,7 @@ import type {
   AnalyzedOtherFileDetails,
 } from '../../../types/analyzed.js';
 import {
-  getProjectInfo,
+  getPackageInfo,
   initializeRepo,
   updateCacheForFile,
   updateCacheFromFileSystem,
@@ -51,9 +51,9 @@ function expectNoDuplicateExternalImporters(
   }
 }
 
-const MONOREPO_PROJECT_DIR = join(getDirname(), 'project', 'monorepo');
-const PACKAGE_ONE_DIR = join(MONOREPO_PROJECT_DIR, 'packages', 'packageOne');
-const PACKAGE_TWO_DIR = join(MONOREPO_PROJECT_DIR, 'packages', 'packageTwo');
+const MONOREPO_DIR = join(getDirname(), 'project', 'monorepo');
+const PACKAGE_ONE_DIR = join(MONOREPO_DIR, 'packages', 'packageOne');
+const PACKAGE_TWO_DIR = join(MONOREPO_DIR, 'packages', 'packageTwo');
 
 const FILE_A = join(PACKAGE_ONE_DIR, 'a.ts');
 const FILE_B = join(PACKAGE_ONE_DIR, 'b.ts');
@@ -65,7 +65,7 @@ const FILE_TS_NEW_PKG2 = join(PACKAGE_TWO_DIR, 'new.ts');
 const FILE_JSON_NEW = join(PACKAGE_ONE_DIR, 'new.json');
 
 // fast-import.config.json and package.json files live inside each
-// packageRootDir and are picked up by the project scanner as non-code files.
+// packageRootDir and are picked up by the package scanner as non-code files.
 //
 // The package.json files are load-bearing for these tests: initializePackageInfo
 // identifies first-party packages by the `name` field in each package.json and
@@ -98,7 +98,7 @@ function initialize() {
   initializeRepo({
     filename: FILE_A,
     settings: {
-      'fast-import': { monorepoRootDir: MONOREPO_PROJECT_DIR },
+      'fast-import': { monorepoRootDir: MONOREPO_DIR },
     },
   });
   const packageOneSettings = getPackageCacheEntryForFile(FILE_A);
@@ -366,22 +366,22 @@ afterEach(() => {
   }
 });
 
-it('Initializes both packages and returns correct project info per package', () => {
+it('Initializes both packages and returns correct package info per package', () => {
   initialize();
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
 
-  const pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
+  const pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec(EXPECTED_PKG2);
 });
 
 it('Cross-package singleImport populates externallyImportedBy on the matching entry-point export', () => {
   initialize();
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
   assertCodeFile(fileA, 'FILE_A missing or not a code file');
 
@@ -415,7 +415,7 @@ it('packageEntryPointExports is a Map keyed by import specifier', () => {
   // export on that file must be marked as an entry-point export (pinning the
   // per-export fidelity that the pre-refactor `Map<exportName, exportEntry>`
   // test provided by construction).
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
   assertCodeFile(fileA, 'FILE_A missing or not a code file');
   expect([...pkg1Info.packageEntryPointExports.keys()]).toEqual([
@@ -438,7 +438,7 @@ it('packageEntryPointExports is a Map keyed by import specifier', () => {
     { exportName: 'One', isEntryPoint: true },
   ]);
 
-  const pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
+  const pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   const fileC = pkg2Info.files.get(FILE_C);
   assertCodeFile(fileC, 'FILE_C missing or not a code file');
   expect([...pkg2Info.packageEntryPointExports.keys()]).toEqual([
@@ -459,7 +459,7 @@ it('packageEntryPointExports is a Map keyed by import specifier', () => {
 it('Cross-package barrelImport populates externallyImportedBy on every entry-point export', () => {
   initialize();
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
   assertCodeFile(fileA, 'FILE_A missing or not a code file');
 
@@ -492,7 +492,7 @@ it('Package isolation: adding a file to packageOne does not affect packageTwo', 
 
   updateCacheForFile(FILE_TS_NEW_PKG1, '', EMPTY_AST, packageOneSettings);
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -501,21 +501,21 @@ it('Package isolation: adding a file to packageOne does not affect packageTwo', 
   );
 
   // packageTwo is unaffected
-  const pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
+  const pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec(EXPECTED_PKG2);
 });
 
 it('Updates packageOne cache when a new file is added via updateCacheForFile', () => {
   const { packageOneSettings } = initialize();
 
-  let pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  let pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
 
   updateCacheForFile(FILE_TS_NEW_PKG1, '', EMPTY_AST, packageOneSettings);
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -527,19 +527,19 @@ it('Updates packageOne cache when a new file is added via updateCacheForFile', (
 it('Updates packageTwo cache when a new file is added via updateCacheForFile', () => {
   const { packageTwoSettings } = initialize();
 
-  let pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
+  let pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec(EXPECTED_PKG2);
 
   updateCacheForFile(FILE_TS_NEW_PKG2, '', EMPTY_AST, packageTwoSettings);
 
-  pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
+  pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec({
     ...EXPECTED_PKG2,
     [FILE_TS_NEW_PKG2]: EMPTY_CODE_FILE,
   });
 
   // packageOne is unaffected by cache updates scoped to packageTwo.
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
@@ -566,7 +566,7 @@ export type Another = string;
     additionalEntryPointExports: ['Another'],
   });
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A_UPDATED,
     [FILE_B]: EXPECTED_FILE_B,
@@ -575,14 +575,14 @@ export type Another = string;
   });
 
   // packageTwo is unaffected
-  const pkg2Info = getProjectInfo(PACKAGE_TWO_DIR);
+  const pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec(EXPECTED_PKG2);
 });
 
-it('Updates packageOne project cache in bulk for a code file', () => {
+it('Updates packageOne package cache in bulk for a code file', () => {
   const { packageOneSettings } = initialize();
 
-  let pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  let pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
@@ -601,7 +601,7 @@ it('Updates packageOne project cache in bulk for a code file', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -610,7 +610,7 @@ it('Updates packageOne project cache in bulk for a code file', () => {
   );
 
   // packageTwo unchanged
-  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
+  expect(getPackageInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
 
   // Modify the new file
   writeFileSync(FILE_TS_NEW_PKG1, `console.log()`);
@@ -626,7 +626,7 @@ it('Updates packageOne project cache in bulk for a code file', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -648,7 +648,7 @@ it('Updates packageOne project cache in bulk for a code file', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -670,19 +670,19 @@ it('Updates packageOne project cache in bulk for a code file', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
 
   // packageTwo still unchanged throughout
-  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
+  expect(getPackageInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
 });
 
-it('Updates project cache in bulk for a non-code file in packageOne', () => {
+it('Updates package cache in bulk for a non-code file in packageOne', () => {
   const { packageOneSettings } = initialize();
 
-  let pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  let pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
@@ -701,7 +701,7 @@ it('Updates project cache in bulk for a non-code file in packageOne', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -710,7 +710,7 @@ it('Updates project cache in bulk for a non-code file in packageOne', () => {
   );
 
   // packageTwo unchanged
-  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
+  expect(getPackageInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
 
   // Modify the JSON file
   writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
@@ -726,7 +726,7 @@ it('Updates project cache in bulk for a non-code file in packageOne', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({
       withCrossPackage: true,
@@ -748,7 +748,7 @@ it('Updates project cache in bulk for a non-code file in packageOne', () => {
     Date.now()
   );
 
-  pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
@@ -773,7 +773,7 @@ console.log(n);
     packageTwoSettings
   );
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
   assertCodeFile(fileA, 'FILE_A missing or not a code file');
 
@@ -806,10 +806,10 @@ it('Cache update on an existing file introduces a new cross-package singleImport
 
   // Before the update: full-shape check on both packages in their initial
   // cross-package state (d.ts single + e.ts barrel importers already wired).
-  expect(getProjectInfo(PACKAGE_ONE_DIR)).toMatchAnalyzedSpec(
+  expect(getPackageInfo(PACKAGE_ONE_DIR)).toMatchAnalyzedSpec(
     expectedPkg1({ withCrossPackage: true })
   );
-  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
+  expect(getPackageInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec(EXPECTED_PKG2);
 
   // Rewrite c.ts (packageTwo's entry point) to add a cross-package single
   // import of AlsoOne, while keeping its Two export. This is the
@@ -872,7 +872,7 @@ export type Two = AlsoOne;
   //   files are unchanged.
   // - packageOne's a.ts export of AlsoOne gains a new single importer alongside
   //   the existing e.ts barrel importer; One is unchanged.
-  expect(getProjectInfo(PACKAGE_ONE_DIR)).toMatchAnalyzedSpec({
+  expect(getPackageInfo(PACKAGE_ONE_DIR)).toMatchAnalyzedSpec({
     [FILE_A]: buildExpectedFileA({
       withCrossPackage: true,
       extraAlsoOneSingleImporters,
@@ -881,13 +881,13 @@ export type Two = AlsoOne;
     [PKG1_CONFIG]: EXPECTED_OTHER_FILE,
     [PKG1_PACKAGE_JSON]: EXPECTED_OTHER_FILE,
   });
-  expect(getProjectInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec({
+  expect(getPackageInfo(PACKAGE_TWO_DIR)).toMatchAnalyzedSpec({
     ...EXPECTED_PKG2,
     [FILE_C]: EXPECTED_FILE_C_WITH_IMPORT,
   });
 
   // Regression guards for the initializePackageInfo duplication bug.
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
   assertCodeFile(fileA, 'FILE_A missing or not a code file');
 
@@ -917,7 +917,7 @@ console.log(one);
     packageTwoSettings
   );
 
-  const pkg1Info = getProjectInfo(PACKAGE_ONE_DIR);
+  const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
   assertCodeFile(fileA, 'FILE_A missing or not a code file');
   const oneExport = fileA.exports.find((e) => e.exportName === 'One');

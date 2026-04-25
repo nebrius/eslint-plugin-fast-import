@@ -5,7 +5,7 @@ import type {
   BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
-  BaseProjectInfo,
+  BasePackageInfo,
   BaseSingleImport,
   BaseSingleReexport,
 } from './base.js';
@@ -101,7 +101,7 @@ export type ResolvedCodeFileDetails = Omit<
 
 type ResolvedFileDetails = ResolvedOtherFileDetails | ResolvedCodeFileDetails;
 
-export type ResolvedProjectInfo = Omit<BaseProjectInfo, 'files'> & {
+export type ResolvedPackageInfo = Omit<BasePackageInfo, 'files'> & {
   /**
    * Mapping of _absolute_ file paths to file details
    */

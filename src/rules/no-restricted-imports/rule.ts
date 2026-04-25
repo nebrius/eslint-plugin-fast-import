@@ -64,7 +64,7 @@ export const noRestrictedImports = createRule<
   create(context) {
     const esmInfo = getESMInfo(context);
 
-    // No project info means this file wasn't found as part of the project, e.g.
+    // No package info means this file wasn't found as part of the package, e.g.
     // because it's ignored
     /* istanbul ignore if */
     if (!esmInfo) {
@@ -85,7 +85,7 @@ export const noRestrictedImports = createRule<
       if (entry.allowed) {
         entry.allowed = entry.allowed.map((allowed) => {
           if (typeof allowed === 'string' && !isAbsolute(allowed)) {
-            return resolve(esmInfo.projectInfo.packageRootDir, allowed);
+            return resolve(esmInfo.packageInfo.packageRootDir, allowed);
           }
           return allowed;
         });
@@ -93,7 +93,7 @@ export const noRestrictedImports = createRule<
       if (entry.denied) {
         entry.denied = entry.denied.map((denied) => {
           if (typeof denied === 'string' && !isAbsolute(denied)) {
-            return resolve(esmInfo.projectInfo.packageRootDir, denied);
+            return resolve(esmInfo.packageInfo.packageRootDir, denied);
           }
           return denied;
         });
@@ -102,7 +102,7 @@ export const noRestrictedImports = createRule<
         // Normalize string paths to absolute
         if (typeof entry.filepath === 'string' && !isAbsolute(entry.filepath)) {
           entry.filepath = resolve(
-            esmInfo.projectInfo.packageRootDir,
+            esmInfo.packageInfo.packageRootDir,
             entry.filepath
           );
         }

@@ -7,21 +7,21 @@ import { getDirname } from 'cross-dirname';
 import type { StrippedAnalyzedFileDetails } from '../../../__test__/util.js';
 import type { ParsedPackageSettings } from '../../../settings/settings.js';
 import {
-  getProjectInfo,
-  initializeProject,
+  getPackageInfo,
+  initializePackage,
   updateCacheForFile,
   updateCacheFromFileSystem,
 } from '../../module.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project', 'singlerepo');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
-const FILE_TS_NEW = join(TEST_PROJECT_DIR, 'new.ts');
-const FILE_JSON_NEW = join(TEST_PROJECT_DIR, 'new.json');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project', 'singlerepo');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
+const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
+const FILE_TS_NEW = join(TEST_PACKAGE_DIR, 'new.ts');
+const FILE_JSON_NEW = join(TEST_PACKAGE_DIR, 'new.json');
 
 const packageSettings: ParsedPackageSettings = {
-  repoRootDir: TEST_PROJECT_DIR,
-  packageRootDir: TEST_PROJECT_DIR,
+  repoRootDir: TEST_PACKAGE_DIR,
+  packageRootDir: TEST_PACKAGE_DIR,
   packageName: 'singlerepo',
   wildcardAliases: {},
   fixedAliases: {},
@@ -115,11 +115,11 @@ afterEach(() => {
   }
 });
 
-it('Updates project cache when a new file is added', () => {
-  initializeProject(packageSettings);
+it('Updates package cache when a new file is added', () => {
+  initializePackage(packageSettings);
 
-  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+  let packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 
   updateCacheForFile(
     FILE_TS_NEW,
@@ -145,19 +145,19 @@ it('Updates project cache when a new file is added', () => {
     barrelReexports: [],
   };
 
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
     [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW,
   });
 });
 
-it('Updates project cache when an unused export is added to an existing file', () => {
-  initializeProject(packageSettings);
+it('Updates package cache when an unused export is added to an existing file', () => {
+  initializePackage(packageSettings);
 
-  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+  let packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 
   const FILE_A_UPDATED_CONTENTS = `export type One = string;
 export type Two = string;
@@ -175,7 +175,7 @@ export type Two = string;
     packageSettings
   );
 
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
 
   const EXPECTED_FILE_A_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
@@ -254,17 +254,17 @@ export type Two = string;
     singleReexports: [],
     barrelReexports: [],
   };
-  expect(projectInfo).toMatchAnalyzedSpec({
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A_UPDATED,
     [FILE_B]: EXPECTED_FILE_B_UPDATED,
   });
 });
 
-it('Updates project cache in bulk for a code file', () => {
-  initializeProject(packageSettings);
+it('Updates package cache in bulk for a code file', () => {
+  initializePackage(packageSettings);
 
-  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+  let packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 
   // Add a new file
   writeFileSync(FILE_TS_NEW, '');
@@ -295,8 +295,8 @@ it('Updates project cache in bulk for a code file', () => {
     singleReexports: [],
     barrelReexports: [],
   };
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
     [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW,
@@ -331,14 +331,14 @@ it('Updates project cache in bulk for a code file', () => {
     singleReexports: [],
     barrelReexports: [],
   };
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
     [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW_UPDATED,
   });
 
-  // Modify the new file with invalid code (testing fallback to ensure project
+  // Modify the new file with invalid code (testing fallback to ensure package
   // info isn't changed in any way)
   writeFileSync(FILE_TS_NEW, `+_)(*&^%$%)`);
   updateCacheFromFileSystem(
@@ -357,8 +357,8 @@ it('Updates project cache in bulk for a code file', () => {
     packageSettings,
     Date.now()
   );
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
     [FILE_TS_NEW]: EXPECTED_FILE_TS_NEW_UPDATED,
@@ -377,15 +377,15 @@ it('Updates project cache in bulk for a code file', () => {
     packageSettings,
     Date.now()
   );
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 });
 
-it('Updates project cache in bulk for a non-code file', () => {
-  initializeProject(packageSettings);
+it('Updates package cache in bulk for a non-code file', () => {
+  initializePackage(packageSettings);
 
-  let projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+  let packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 
   // Add a new file
   writeFileSync(FILE_JSON_NEW, '{}');
@@ -408,8 +408,8 @@ it('Updates project cache in bulk for a non-code file', () => {
   const EXPECTED_FILE_JSON_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'other',
   };
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
     [FILE_JSON_NEW]: EXPECTED_FILE_JSON_NEW,
@@ -436,8 +436,8 @@ it('Updates project cache in bulk for a non-code file', () => {
   const EXPECTED_FILE_JSON_NEW_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'other',
   };
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec({
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
     [FILE_B]: EXPECTED_FILE_B,
     [FILE_JSON_NEW]: EXPECTED_FILE_JSON_NEW_UPDATED,
@@ -456,6 +456,6 @@ it('Updates project cache in bulk for a non-code file', () => {
     packageSettings,
     Date.now()
   );
-  projectInfo = getProjectInfo(TEST_PROJECT_DIR);
-  expect(projectInfo).toMatchAnalyzedSpec(EXPECTED);
+  packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
+  expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 });

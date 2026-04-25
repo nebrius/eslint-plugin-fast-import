@@ -16,18 +16,18 @@ import {
   updateResolvedInfoForFile,
 } from '../../../computeResolvedInfo.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const NEW_FILE_PATH = join(TEST_PROJECT_DIR, 'newFile.ts');
-const FILE_INDEX = join(TEST_PROJECT_DIR, 'index.ts');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_B = join(TEST_PROJECT_DIR, 'one', 'b.ts');
-const FILE_C = join(TEST_PROJECT_DIR, 'one', 'c', 'index.ts');
-const FILE_C_DATA = join(TEST_PROJECT_DIR, 'one', 'c', 'data.json');
-const FILE_D = join(TEST_PROJECT_DIR, 'two', 'd.js');
-const FILE_D_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'd.d.ts');
-const FILE_E = join(TEST_PROJECT_DIR, 'two', 'e.js');
-const FILE_F = join(TEST_PROJECT_DIR, 'two', 'f', 'index.js');
-const FILE_F_DECLARATION = join(TEST_PROJECT_DIR, 'two', 'f', 'index.d.ts');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const NEW_FILE_PATH = join(TEST_PACKAGE_DIR, 'newFile.ts');
+const FILE_INDEX = join(TEST_PACKAGE_DIR, 'index.ts');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
+const FILE_B = join(TEST_PACKAGE_DIR, 'one', 'b.ts');
+const FILE_C = join(TEST_PACKAGE_DIR, 'one', 'c', 'index.ts');
+const FILE_C_DATA = join(TEST_PACKAGE_DIR, 'one', 'c', 'data.json');
+const FILE_D = join(TEST_PACKAGE_DIR, 'two', 'd.js');
+const FILE_D_DECLARATION = join(TEST_PACKAGE_DIR, 'two', 'd.d.ts');
+const FILE_E = join(TEST_PACKAGE_DIR, 'two', 'e.js');
+const FILE_F = join(TEST_PACKAGE_DIR, 'two', 'f', 'index.js');
+const FILE_F_DECLARATION = join(TEST_PACKAGE_DIR, 'two', 'f', 'index.d.ts');
 
 const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
   entryPointSpecifier: undefined,
@@ -350,11 +350,11 @@ const EXPECTED = {
 
 function makeBaseInfo() {
   return computeBaseInfo({
-    packageRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     packageName: 'test',
     // This takes in the already formatted version, hence why we join() here
-    wildcardAliases: { '@/': TEST_PROJECT_DIR },
-    fixedAliases: { '@alias': join(TEST_PROJECT_DIR, 'one/b.ts') },
+    wildcardAliases: { '@/': TEST_PACKAGE_DIR },
+    fixedAliases: { '@alias': join(TEST_PACKAGE_DIR, 'one/b.ts') },
     ignorePatterns: [],
     ignoreOverridePatterns: [],
     getEntryPointSpecifier: () => undefined,
@@ -418,7 +418,7 @@ it('Adds and updates resolved info for files', () => {
   });
 
   // Adding a non-code file goes through the else branch of addResolvedInfoForFile
-  const NEW_JSON_PATH = join(TEST_PROJECT_DIR, 'newData.json');
+  const NEW_JSON_PATH = join(TEST_PACKAGE_DIR, 'newData.json');
   baseInfo.files.set(NEW_JSON_PATH, { fileType: 'other' });
   addResolvedInfoForFile(NEW_JSON_PATH, baseInfo, resolvedInfo);
   expect(resolvedInfo.files.get(NEW_JSON_PATH)).toEqual({ fileType: 'other' });
@@ -534,9 +534,9 @@ it('Resolves an extensionless import when one code file shares a basename with a
   // This exercises the `default` case in findFileWithExtension: two files with
   // the same basename but extensions that aren't a .js/.d.ts pair.  The
   // resolver should pick the single code file.
-  const SHARED_TS = join(TEST_PROJECT_DIR, 'sharedName.ts');
-  const SHARED_JSON = join(TEST_PROJECT_DIR, 'sharedName.json');
-  const CONSUMER_PATH = join(TEST_PROJECT_DIR, 'consumer.ts');
+  const SHARED_TS = join(TEST_PACKAGE_DIR, 'sharedName.ts');
+  const SHARED_JSON = join(TEST_PACKAGE_DIR, 'sharedName.json');
+  const CONSUMER_PATH = join(TEST_PACKAGE_DIR, 'consumer.ts');
 
   const baseInfo = makeBaseInfo();
   const resolvedInfo = computeResolvedInfo(baseInfo);

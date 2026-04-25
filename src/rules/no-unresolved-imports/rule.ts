@@ -21,14 +21,14 @@ export const noUnresolvedImports = createRule({
   create(context) {
     const esmInfo = getESMInfo(context);
 
-    // No project info means this file wasn't found as part of the project, e.g.
+    // No package info means this file wasn't found as part of the package, e.g.
     // because it's ignored
     /* istanbul ignore if */
     if (!esmInfo) {
       return {};
     }
 
-    const { fileInfo, projectInfo } = esmInfo;
+    const { fileInfo, packageInfo } = esmInfo;
     /* istanbul ignore if */
     if (fileInfo.fileType !== 'code') {
       return {};
@@ -46,7 +46,7 @@ export const noUnresolvedImports = createRule({
         for (const [
           path,
           deps,
-        ] of projectInfo.availableThirdPartyDependencies) {
+        ] of packageInfo.availableThirdPartyDependencies) {
           if (
             context.filename.startsWith(path) &&
             deps.some(

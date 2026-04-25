@@ -10,12 +10,12 @@ import {
   updateBaseInfoForFile,
 } from '../../../computeBaseInfo.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
-const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
-const FILE_D = join(TEST_PROJECT_DIR, 'd.ts');
-const FILE_E = join(TEST_PROJECT_DIR, 'e.json');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
+const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
+const FILE_C = join(TEST_PACKAGE_DIR, 'c.ts');
+const FILE_D = join(TEST_PACKAGE_DIR, 'd.ts');
+const FILE_E = join(TEST_PACKAGE_DIR, 'e.json');
 
 const EXPECTED_FILE_A: StrippedBaseFileDetails = {
   fileType: 'code',
@@ -434,7 +434,7 @@ const EXPECTED = {
 
 it('Computes base info', () => {
   const info = computeBaseInfo({
-    packageRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     packageName: 'test',
     wildcardAliases: {},
     fixedAliases: {},
@@ -446,7 +446,7 @@ it('Computes base info', () => {
   expect(info).toMatchBaseSpec(EXPECTED);
 });
 
-const NEW_FILE_PATH = join(TEST_PROJECT_DIR, 'newFile.ts');
+const NEW_FILE_PATH = join(TEST_PACKAGE_DIR, 'newFile.ts');
 const NEW_FILE_CONTENTS_ADD = `import { a1 } from './a'`;
 const NEW_FILE_CONTENTS_MODIFY = `import { a2 } from './a';
 import { a1 } from './a';
@@ -459,7 +459,7 @@ export const newFile1 = 10;`;
 
 it('Adds, modifies, and deletes a new file', () => {
   const info = computeBaseInfo({
-    packageRootDir: TEST_PROJECT_DIR,
+    packageRootDir: TEST_PACKAGE_DIR,
     packageName: 'test',
     wildcardAliases: {},
     fixedAliases: {},

@@ -7,20 +7,20 @@ import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 
-const TEST_PROJECT_DIR = join(getDirname(), 'project', 'default');
-const FILE_A = join(TEST_PROJECT_DIR, 'a.ts');
-const FILE_B = join(TEST_PROJECT_DIR, 'b.ts');
-const FILE_C = join(TEST_PROJECT_DIR, 'c.ts');
-const FILE_D = join(TEST_PROJECT_DIR, 'd.ts');
-const FILE_E = join(TEST_PROJECT_DIR, 'e.ts');
-const FILE_F = join(TEST_PROJECT_DIR, 'f.ts');
-const FILE_G = join(TEST_PROJECT_DIR, 'g.ts');
-const FILE_H = join(TEST_PROJECT_DIR, 'h.json');
-const FILE_PACKAGE_JSON = join(TEST_PROJECT_DIR, 'package.json');
+const TEST_PACKAGE_DIR = join(getDirname(), 'project', 'default');
+const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
+const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
+const FILE_C = join(TEST_PACKAGE_DIR, 'c.ts');
+const FILE_D = join(TEST_PACKAGE_DIR, 'd.ts');
+const FILE_E = join(TEST_PACKAGE_DIR, 'e.ts');
+const FILE_F = join(TEST_PACKAGE_DIR, 'f.ts');
+const FILE_G = join(TEST_PACKAGE_DIR, 'g.ts');
+const FILE_H = join(TEST_PACKAGE_DIR, 'h.json');
+const FILE_PACKAGE_JSON = join(TEST_PACKAGE_DIR, 'package.json');
 
-const CYCLE_FILE_A = join(TEST_PROJECT_DIR, 'cycle-a.js');
-const CYCLE_FILE_B = join(TEST_PROJECT_DIR, 'cycle-b.js');
-const CYCLE_FILE_C = join(TEST_PROJECT_DIR, 'cycle-c.js');
+const CYCLE_FILE_A = join(TEST_PACKAGE_DIR, 'cycle-a.js');
+const CYCLE_FILE_B = join(TEST_PACKAGE_DIR, 'cycle-b.js');
+const CYCLE_FILE_C = join(TEST_PACKAGE_DIR, 'cycle-c.js');
 
 const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   fileType: 'code',
@@ -527,7 +527,7 @@ it('Computes analyzed info', () => {
   const info = computeAnalyzedInfo(
     computeResolvedInfo(
       computeBaseInfo({
-        packageRootDir: TEST_PROJECT_DIR,
+        packageRootDir: TEST_PACKAGE_DIR,
         packageName: 'test',
         wildcardAliases: {},
         fixedAliases: {},
@@ -540,9 +540,9 @@ it('Computes analyzed info', () => {
     )
   );
   // This lookup gets two package.json files: this test and the root fast-import
-  // package.json. We only look at the test project's dependencies in this test.
+  // package.json. We only look at the test package's dependencies in this test.
   expect(info.availableThirdPartyDependencies.size).toBe(2);
-  expect(info.availableThirdPartyDependencies.get(TEST_PROJECT_DIR)).toEqual([
+  expect(info.availableThirdPartyDependencies.get(TEST_PACKAGE_DIR)).toEqual([
     'typescript',
   ]);
 
@@ -555,17 +555,17 @@ it('Computes analyzed info', () => {
   expect(registeredFileA?.entryPointSpecifier).toBe('test');
 
   expect(info.packageName).toEqual('test');
-  expect(info.packageRootDir).toEqual(TEST_PROJECT_DIR);
+  expect(info.packageRootDir).toEqual(TEST_PACKAGE_DIR);
   expect(info).toMatchAnalyzedSpec(EXPECTED);
 });
 
-it('Computes analyzed info for a project with a file that imports itself', () => {
-  const selfImportProjectDir = join(getDirname(), 'project', 'self-import');
+it('Computes analyzed info for a package with a file that imports itself', () => {
+  const selfImportPackageDir = join(getDirname(), 'project', 'self-import');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: selfImportProjectDir,
+          packageRootDir: selfImportPackageDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -579,18 +579,18 @@ it('Computes analyzed info for a project with a file that imports itself', () =>
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a reexport cycle triggered by an entry point', () => {
-  const reexportCycleProjectDir = join(
+it('Computes analyzed info for a package with a reexport cycle triggered by an entry point', () => {
+  const reexportCyclePackageDir = join(
     getDirname(),
     'project',
     'reexport-cycle'
   );
-  const fileA = join(reexportCycleProjectDir, 'a.ts');
+  const fileA = join(reexportCyclePackageDir, 'a.ts');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: reexportCycleProjectDir,
+          packageRootDir: reexportCyclePackageDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -605,8 +605,8 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an e
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a reexport cycle triggered by an import', () => {
-  const reexportCycleProjectDir = join(
+it('Computes analyzed info for a package with a reexport cycle triggered by an import', () => {
+  const reexportCyclePackageDir = join(
     getDirname(),
     'project',
     'reexport-cycle-import'
@@ -615,7 +615,7 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: reexportCycleProjectDir,
+          packageRootDir: reexportCyclePackageDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -629,13 +629,17 @@ it('Computes analyzed info for a project with a reexport cycle triggered by an i
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a single reexport of a firstPartyOther module', () => {
-  const projectDir = join(getDirname(), 'project', 'single-reexport-of-other');
+it('Computes analyzed info for a package with a single reexport of a firstPartyOther module', () => {
+  const packageRootDir = join(
+    getDirname(),
+    'project',
+    'single-reexport-of-other'
+  );
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: projectDir,
+          packageRootDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -649,8 +653,8 @@ it('Computes analyzed info for a project with a single reexport of a firstPartyO
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a named barrel reexport of a builtin module', () => {
-  const projectDir = join(
+it('Computes analyzed info for a package with a named barrel reexport of a builtin module', () => {
+  const packageRootDir = join(
     getDirname(),
     'project',
     'named-barrel-reexport-of-builtin'
@@ -659,7 +663,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a built
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: projectDir,
+          packageRootDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -673,8 +677,8 @@ it('Computes analyzed info for a project with a named barrel reexport of a built
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a named barrel reexport of a firstPartyOther module', () => {
-  const projectDir = join(
+it('Computes analyzed info for a package with a named barrel reexport of a firstPartyOther module', () => {
+  const packageRootDir = join(
     getDirname(),
     'project',
     'named-barrel-reexport-of-other'
@@ -683,7 +687,7 @@ it('Computes analyzed info for a project with a named barrel reexport of a first
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: projectDir,
+          packageRootDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -697,13 +701,13 @@ it('Computes analyzed info for a project with a named barrel reexport of a first
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a dynamic import', () => {
-  const projectDir = join(getDirname(), 'project', 'dynamic-import');
+it('Computes analyzed info for a package with a dynamic import', () => {
+  const packageRootDir = join(getDirname(), 'project', 'dynamic-import');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: projectDir,
+          packageRootDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},
@@ -717,18 +721,18 @@ it('Computes analyzed info for a project with a dynamic import', () => {
   ).not.toThrow();
 });
 
-it('Computes analyzed info for a project with a barrel reexport that is an entry point and forms a cycle', () => {
-  const projectDir = join(
+it('Computes analyzed info for a package with a barrel reexport that is an entry point and forms a cycle', () => {
+  const packageRootDir = join(
     getDirname(),
     'project',
     'barrel-reexport-entry-point'
   );
-  const fileA = join(projectDir, 'a.ts');
+  const fileA = join(packageRootDir, 'a.ts');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
         computeBaseInfo({
-          packageRootDir: projectDir,
+          packageRootDir,
           packageName: 'test',
           wildcardAliases: {},
           fixedAliases: {},

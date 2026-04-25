@@ -15,7 +15,7 @@ import type { ParsedPackageSettings } from '../settings/settings.js';
 import type {
   BaseCodeFileDetails,
   BaseESMStatement,
-  BaseProjectInfo,
+  BasePackageInfo,
 } from '../types/base.js';
 import { getTextForRange, isCodeFile } from '../util/code.js';
 import { InternalError } from '../util/error.js';
@@ -50,8 +50,8 @@ export function computeBaseInfo({
   packageName,
   getEntryPointSpecifier,
   isExternallyImportedCheck,
-}: ComputeBaseInfoOptions): BaseProjectInfo {
-  const info: BaseProjectInfo = {
+}: ComputeBaseInfoOptions): BasePackageInfo {
+  const info: BasePackageInfo = {
     files: new Map(),
     packageRootDir,
     packageName,
@@ -109,7 +109,7 @@ export function addBaseInfoForFile(
     getEntryPointSpecifier,
     isExternallyImportedCheck,
   }: ComputeFileDetailsOptions,
-  baseProjectInfo: BaseProjectInfo
+  basePackageInfo: BasePackageInfo
 ) {
   if (isCodeFile(filePath)) {
     const fileDetails = computeFileDetails({
@@ -119,10 +119,10 @@ export function addBaseInfoForFile(
       isExternallyImportedCheck,
     });
     if (fileDetails) {
-      baseProjectInfo.files.set(filePath, fileDetails);
+      basePackageInfo.files.set(filePath, fileDetails);
     }
   } else {
-    baseProjectInfo.files.set(filePath, { fileType: 'other' });
+    basePackageInfo.files.set(filePath, { fileType: 'other' });
   }
 }
 
@@ -218,9 +218,9 @@ export function updateBaseInfoForFile(
     getEntryPointSpecifier,
     isExternallyImportedCheck,
   }: ComputeFileDetailsOptions,
-  baseProjectInfo: BaseProjectInfo
+  basePackageInfo: BasePackageInfo
 ): boolean {
-  const previousFileDetails = baseProjectInfo.files.get(filePath);
+  const previousFileDetails = basePackageInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!isCodeFile(filePath)) {
     throw new InternalError(
@@ -247,7 +247,7 @@ export function updateBaseInfoForFile(
   });
 
   if (updatedFileDetails) {
-    baseProjectInfo.files.set(filePath, updatedFileDetails);
+    basePackageInfo.files.set(filePath, updatedFileDetails);
   }
   return (
     !!updatedFileDetails &&
@@ -257,9 +257,9 @@ export function updateBaseInfoForFile(
 
 export function deleteBaseInfoForFile(
   filePath: string,
-  baseProjectInfo: BaseProjectInfo
+  basePackageInfo: BasePackageInfo
 ) {
-  baseProjectInfo.files.delete(filePath);
+  basePackageInfo.files.delete(filePath);
 }
 
 function getRange(

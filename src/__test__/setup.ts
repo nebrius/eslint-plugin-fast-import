@@ -1,10 +1,10 @@
 import deepEqual from 'fast-deep-equal';
 import { diff } from 'jest-diff';
 
-import { _resetProjectInfo } from '../module/module.js';
+import { _resetPackageInfo } from '../module/module.js';
 import { _resetAllSettings } from '../settings/settings.js';
-import type { AnalyzedProjectInfo } from '../types/analyzed.js';
-import type { BaseESMStatement, BaseProjectInfo } from '../types/base.js';
+import type { AnalyzedPackageInfo } from '../types/analyzed.js';
+import type { BaseESMStatement, BasePackageInfo } from '../types/base.js';
 import { InternalError } from '../util/error.js';
 import { _reset } from '../util/files.js';
 import type {
@@ -13,15 +13,15 @@ import type {
   StrippedResolvedFileDetails,
 } from './util.js';
 
-function checkProjectObject(projectInfo: unknown) {
-  if (typeof projectInfo !== 'object' || projectInfo === null) {
+function checkPackageObject(packageInfo: unknown) {
+  if (typeof packageInfo !== 'object' || packageInfo === null) {
     return {
       message: () => `Expected: an object\nReceived: not an object`,
       pass: false,
     };
   }
 
-  if (!('files' in projectInfo) || !(projectInfo.files instanceof Map)) {
+  if (!('files' in packageInfo) || !(packageInfo.files instanceof Map)) {
     return {
       message: () =>
         `Expected: an object of files\nReceived: not an object of files`,
@@ -37,13 +37,13 @@ function toMatchSpec<
     | StrippedBaseFileDetails
     | StrippedResolvedFileDetails
     | StrippedAnalyzedFileDetails,
->(baseProjectInfo: unknown, baseSpec: Record<string, FileDetails>) {
-  const result = checkProjectObject(baseProjectInfo);
+>(basePackageInfo: unknown, baseSpec: Record<string, FileDetails>) {
+  const result = checkPackageObject(basePackageInfo);
   if (result) {
     return result;
   }
 
-  const files = (baseProjectInfo as BaseProjectInfo).files;
+  const files = (basePackageInfo as BasePackageInfo).files;
 
   for (const [filePath, fileDetails] of files.entries()) {
     const expectedFileDetails = baseSpec[filePath];
@@ -160,28 +160,28 @@ function toMatchSpec<
 
 expect.extend({
   toMatchBaseSpec(
-    baseProjectInfo: unknown,
+    basePackageInfo: unknown,
     baseSpec: Record<string, StrippedBaseFileDetails>
   ) {
-    return toMatchSpec(baseProjectInfo, baseSpec);
+    return toMatchSpec(basePackageInfo, baseSpec);
   },
   toMatchResolvedSpec(
-    resolvedProjectInfo: unknown,
+    resolvedPackageInfo: unknown,
     resolvedSpec: Record<string, StrippedResolvedFileDetails>
   ) {
-    return toMatchSpec(resolvedProjectInfo, resolvedSpec);
+    return toMatchSpec(resolvedPackageInfo, resolvedSpec);
   },
   toMatchAnalyzedSpec(
-    analyzedProjectInfo: unknown,
+    analyzedPackageInfo: unknown,
     analyzedSpec: Record<string, StrippedAnalyzedFileDetails>
   ) {
-    const result = checkProjectObject(analyzedProjectInfo);
+    const result = checkPackageObject(analyzedPackageInfo);
     if (result) {
       return result;
     }
 
     // Strip ranges and circular references from importedBy, barrelImportedBy, and rootExportEntry
-    for (const [, fileDetails] of (analyzedProjectInfo as AnalyzedProjectInfo)
+    for (const [, fileDetails] of (analyzedPackageInfo as AnalyzedPackageInfo)
       .files) {
       if (fileDetails.fileType !== 'code') {
         continue;
@@ -248,12 +248,12 @@ expect.extend({
         }
       }
     }
-    return toMatchSpec(analyzedProjectInfo, analyzedSpec);
+    return toMatchSpec(analyzedPackageInfo, analyzedSpec);
   },
 });
 
 beforeEach(() => {
   _resetAllSettings();
-  _resetProjectInfo();
+  _resetPackageInfo();
   _reset();
 });

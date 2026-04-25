@@ -1,23 +1,23 @@
 import type {
   AnalyzedCodeFileDetails,
-  AnalyzedProjectInfo,
+  AnalyzedPackageInfo,
 } from '../types/analyzed.js';
 
 /**
  * Computes cross-package import info.
  */
 export function computeRepoInfo(
-  analyzedProjectInfos: Map<string, AnalyzedProjectInfo>
+  analyzedPackageInfos: Map<string, AnalyzedPackageInfo>
 ) {
   const packageImportMap = new Map<string, AnalyzedCodeFileDetails>();
 
   // Initialize the package dependencies map
-  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
-    if (analyzedProjectInfo.packageName) {
+  for (const [, analyzedPackageInfo] of analyzedPackageInfos) {
+    if (analyzedPackageInfo.packageName) {
       for (const [
         ,
         fileDetails,
-      ] of analyzedProjectInfo.packageEntryPointExports) {
+      ] of analyzedPackageInfo.packageEntryPointExports) {
         if (fileDetails.entryPointSpecifier) {
           packageImportMap.set(fileDetails.entryPointSpecifier, fileDetails);
         }
@@ -28,8 +28,8 @@ export function computeRepoInfo(
   // Reset externallyImportedBy arrays. Since we don't do more intelligent cache
   // updates for package info, we have to first reset externallyImportedBy
   // arrays, otherwise we end up with duplicates.
-  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
-    for (const [, fileDetails] of analyzedProjectInfo.files) {
+  for (const [, analyzedPackageInfo] of analyzedPackageInfos) {
+    for (const [, fileDetails] of analyzedPackageInfo.files) {
       if (fileDetails.fileType !== 'code') {
         continue;
       }
@@ -40,8 +40,8 @@ export function computeRepoInfo(
   }
 
   // Mark entry points as imported in the monorepo
-  for (const [, analyzedProjectInfo] of analyzedProjectInfos) {
-    for (const [filePath, fileDetails] of analyzedProjectInfo.files) {
+  for (const [, analyzedPackageInfo] of analyzedPackageInfos) {
+    for (const [filePath, fileDetails] of analyzedPackageInfo.files) {
       if (fileDetails.fileType !== 'code') {
         continue;
       }
@@ -77,7 +77,7 @@ export function computeRepoInfo(
             ]) {
               if (exportEntry.exportName === importEntry.importName) {
                 exportEntry.externallyImportedBy.push({
-                  packageRootDir: analyzedProjectInfo.packageRootDir,
+                  packageRootDir: analyzedPackageInfo.packageRootDir,
                   filePath,
                   importEntry,
                 });
@@ -98,7 +98,7 @@ export function computeRepoInfo(
                 continue;
               }
               exportEntry.externallyImportedBy.push({
-                packageRootDir: analyzedProjectInfo.packageRootDir,
+                packageRootDir: analyzedPackageInfo.packageRootDir,
                 filePath,
                 importEntry,
               });
