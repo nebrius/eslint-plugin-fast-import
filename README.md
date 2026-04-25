@@ -2,6 +2,9 @@
 
 [![npm version](https://badge.fury.io/js/eslint-plugin-fast-import.svg)](https://badge.fury.io/js/eslint-plugin-fast-import) ![ci workflow](https://github.com/nebrius/eslint-plugin-fast-import/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/eslint-plugin-fast-import/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/eslint-plugin-fast-import)
 
+> [!WARNING]
+> Version 3 of Fast Import is currently under development, and is a significant rewrite. To see documentation for the current production version, see the [version 2.2.1 docs](https://github.com/nebrius/eslint-plugin-fast-import/tree/2.2.1).
+
 - [Installation](#installation)
 - [Rules](#rules)
 - [Configuration](#configuration)
