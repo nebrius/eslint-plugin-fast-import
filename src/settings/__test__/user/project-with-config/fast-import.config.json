@@ -1,0 +1,10 @@
+{
+  "alias": {
+    "@/*": "src/*",
+    "@a": "src/a.ts"
+  },
+  "ignorePatterns": ["src/b*"],
+  "ignoreOverridePatterns": ["src/c*"],
+  "entryPointFiles": { ".": "./src/a.ts" },
+  "externallyImportedFiles": ["src/b.ts"]
+}

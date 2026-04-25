@@ -27,6 +27,27 @@ export function isDefaultIgnoredPath(path: string) {
   );
 }
 
+// Look for a single fast-import.config.json(c) file directly inside dir.
+// Returns the absolute path if exactly one is present, undefined if none, and
+// throws if both filename variants exist in the same directory.
+export function findPackageConfigFile(dir: string): string | undefined {
+  const directoryContents = readdirSync(dir, { withFileTypes: true });
+  const configFiles = directoryContents.filter(
+    (item) =>
+      item.name === 'fast-import.config.json' ||
+      item.name === 'fast-import.config.jsonc'
+  );
+  if (configFiles.length === 0) {
+    return undefined;
+  }
+  if (configFiles.length > 1) {
+    throw new Error(
+      `Multiple fast-import.config.json(c) files found in ${dir}`
+    );
+  }
+  return join(dir, configFiles[0].name);
+}
+
 // Fetch a list of all fast-import.config.json files, which correspond to each
 // package that we want to analyze in a monorepo. We use our own recursive
 // implementation instead of a library like glob to avoid recusring into folders
@@ -42,22 +63,15 @@ export function getMonorepoPackageSettings(packageRootDir: string): string[] {
     if (DEFAULT_IGNORE_DIRECTORIES.includes(basename(currentDir))) {
       continue;
     }
-    const directoryContents = readdirSync(currentDir, { withFileTypes: true });
-    const configFiles = directoryContents.filter(
-      (item) =>
-        item.name === 'fast-import.config.json' ||
-        item.name === 'fast-import.config.jsonc'
-    );
-    if (configFiles.length === 1) {
-      packages.push(join(currentDir, configFiles[0].name));
-    } else if (configFiles.length > 1) {
-      // Multiple config files found, which is an error
-      throw new Error(
-        `Multiple fast-import.config.json(c) files found in ${currentDir}`
-      );
+    const configFile = findPackageConfigFile(currentDir);
+    if (configFile) {
+      packages.push(configFile);
     } else {
       // Only continue recursing if we didn't find a config file, since we don't
       // support nested config files by design
+      const directoryContents = readdirSync(currentDir, {
+        withFileTypes: true,
+      });
       for (const item of directoryContents) {
         if (item.isDirectory()) {
           directoryStack.push(join(currentDir, item.name));

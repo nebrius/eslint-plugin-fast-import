@@ -39,7 +39,6 @@ export default defineConfig([
     settings: {
       'fast-import': {
         packageRootDir: import.meta.dirname,
-        entryPointFiles: { '.': './src/plugin.ts' },
         debugLogging: true,
       },
     },

@@ -5,7 +5,10 @@ import { parse, printParseErrorCode } from 'jsonc-parser';
 import { z, type ZodError } from 'zod';
 
 import type { GenericContext } from '../types/context.js';
-import { trimTrailingPathSeparator } from '../util/files.js';
+import {
+  findPackageConfigFile,
+  trimTrailingPathSeparator,
+} from '../util/files.js';
 import { setVerbose } from '../util/logging.js';
 
 const globalSettingsSchema = z.strictObject({
@@ -151,17 +154,38 @@ export function getUserRepoSettings(
     // Set verbose logging, if enabled
     setVerbose(!!debugLogging);
 
+    // If a fast-import.config.json(c) file exists in packageRootDir, load
+    // package-level settings from it. This lets the same config file serve a
+    // root-level monorepo config and a per-package single-repo config without
+    // duplication. Mixing the two sources is rejected to keep a single source
+    // of truth per package.
+    const configFilePath = findPackageConfigFile(trimmedPackageRootDir);
+    let resolvedPackageSettings: PackageSettings;
+    if (configFilePath) {
+      if (Object.keys(packageSettings).length > 0) {
+        throw new Error(
+          `Found ${configFilePath} and package-level settings in ESLint config. Config files and package-level settings cannot be used together.`
+        );
+      }
+      resolvedPackageSettings = getUserPackageSettingsFromConfigFile({
+        configFilePath,
+        repoRootDir: trimmedPackageRootDir,
+      });
+    } else {
+      resolvedPackageSettings = {
+        ...packageSettings,
+        repoRootDir: trimmedPackageRootDir,
+        packageRootDir: trimmedPackageRootDir,
+      };
+    }
+
     // Return formatted user supplied settings, minus debug logging
     return {
       type: 'singlerepo',
       mode,
       editorUpdateRate,
       repoRootDir: trimmedPackageRootDir,
-      packageSettings: {
-        ...packageSettings,
-        repoRootDir: trimmedPackageRootDir,
-        packageRootDir: trimmedPackageRootDir,
-      },
+      packageSettings: resolvedPackageSettings,
     };
   }
 }

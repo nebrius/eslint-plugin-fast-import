@@ -16,6 +16,15 @@ import { getUserPackageSettingsFromConfigFile } from '../../user.js';
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
+const CONFIG_FILE_PACKAGE_DIR = join(getDirname(), 'project-with-config');
+const CONFIG_FILE_FILE_A = join(CONFIG_FILE_PACKAGE_DIR, 'src', 'a.ts');
+
+const MULTI_CONFIG_PACKAGE_DIR = join(
+  getDirname(),
+  'project-with-multiple-configs'
+);
+const MULTI_CONFIG_FILE_A = join(MULTI_CONFIG_PACKAGE_DIR, 'src', 'a.ts');
+
 const MONOREPO_DIR = join(
   getDirname(),
   '../../../module/__test__/cache/project/monorepo'
@@ -685,4 +694,90 @@ it('Parses a JSONC config file with comments and trailing commas', () => {
     repoRootDir: TEST_PACKAGE_DIR,
     packageRootDir: TEST_PACKAGE_DIR,
   });
+});
+
+// ─── single-repo + fast-import.config.json(c) ────────────────────────────────
+
+it('Loads package settings from fast-import.config.json in single-repo mode', () => {
+  const { packageSettings } = getAllPackageSettings({
+    filename: CONFIG_FILE_FILE_A,
+    settings: {
+      'fast-import': {
+        mode: 'one-shot',
+        packageRootDir: CONFIG_FILE_PACKAGE_DIR,
+      },
+    },
+  });
+  if (!packageSettings) {
+    throw new Error('packageSettings should be defined');
+  }
+  const { entryPoints, externallyImported, ...settings } = packageSettings;
+  const expected: Omit<
+    ParsedPackageSettings,
+    'entryPoints' | 'externallyImported'
+  > = {
+    repoRootDir: CONFIG_FILE_PACKAGE_DIR,
+    packageRootDir: CONFIG_FILE_PACKAGE_DIR,
+    packageName: undefined,
+    ignorePatterns: [{ dir: CONFIG_FILE_PACKAGE_DIR, contents: 'src/b*' }],
+    ignoreOverridePatterns: [
+      { dir: CONFIG_FILE_PACKAGE_DIR, contents: 'src/c*' },
+    ],
+    testFilePatterns: [],
+    wildcardAliases: {
+      '@/': join(CONFIG_FILE_PACKAGE_DIR, 'src' + sep),
+    },
+    fixedAliases: {
+      '@a': CONFIG_FILE_FILE_A,
+    },
+  };
+  expect(settings).toEqual(expected);
+  expect(entryPoints).toEqual([
+    {
+      type: 'static',
+      subPath: '.',
+      filePath: './src/a.ts',
+    },
+  ]);
+  expect(externallyImported).toHaveLength(2);
+  expect(externallyImported[0].file.ignores('eslint.config.mjs')).toBeTruthy();
+  expect(externallyImported[1].file.ignores('src/b.ts')).toBeTruthy();
+  expect(externallyImported[1].file.ignores('src/a.ts')).toBeFalsy();
+});
+
+it('Throws when single-repo settings include package-level keys alongside a config file', () => {
+  const expectedConfigFilePath = join(
+    CONFIG_FILE_PACKAGE_DIR,
+    'fast-import.config.json'
+  );
+  expect(() =>
+    getAllPackageSettings({
+      filename: CONFIG_FILE_FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: CONFIG_FILE_PACKAGE_DIR,
+          alias: { '@x': 'src/a.ts' },
+        },
+      },
+    })
+  ).toThrow(
+    `Found ${expectedConfigFilePath} and package-level settings in ESLint config. Config files and package-level settings cannot be used together.`
+  );
+});
+
+it('Throws when both fast-import.config.json and .jsonc exist in packageRootDir', () => {
+  expect(() =>
+    getAllPackageSettings({
+      filename: MULTI_CONFIG_FILE_A,
+      settings: {
+        'fast-import': {
+          mode: 'one-shot',
+          packageRootDir: MULTI_CONFIG_PACKAGE_DIR,
+        },
+      },
+    })
+  ).toThrow(
+    `Multiple fast-import.config.json(c) files found in ${MULTI_CONFIG_PACKAGE_DIR}`
+  );
 });

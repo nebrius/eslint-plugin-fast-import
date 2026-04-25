@@ -5,9 +5,11 @@
 - [Installation](#installation)
 - [Rules](#rules)
 - [Configuration](#configuration)
-  - [Configuration options](#configuration-options)
+  - [Configuration files](#configuration-files)
+  - [Repo-level configuration options](#repo-level-configuration-options)
     - [packageRootDir](#packagerootdir)
     - [monorepoRootDir (monorepo)](#monoreporootdir-monorepo)
+  - [Package-level configuration options](#package-level-configuration-options)
     - [alias](#alias)
     - [externallyImportedFiles / entryPointFiles](#externallyimportedfiles--entrypointfiles)
     - [ignorePatterns](#ignorepatterns)
@@ -17,6 +19,9 @@
     - [editorUpdateRate](#editorupdaterate)
     - [debugLogging](#debuglogging)
   - [Use in monorepos](#use-in-monorepos)
+    - [Option 1: one root config with `monorepoRootDir`](#option-1-one-root-config-with-monoreporootdir)
+    - [Option 2: separate configs per package](#option-2-separate-configs-per-package)
+    - [Option 3: combine the two (recommended)](#option-3-combine-the-two-recommended)
   - [Using with Oxlint](#using-with-oxlint)
 - [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
   - [Performance](#performance)
@@ -29,12 +34,14 @@
   - [All first party code must live inside `packageRootDir`](#all-first-party-code-must-live-inside-packagerootdir)
   - [CommonJS is not supported](#commonjs-is-not-supported)
   - [Barrel exporting from third-party/built-in modules are ignored](#barrel-exporting-from-third-partybuilt-in-modules-are-ignored)
+  - [Non-named barrel export entry points are not considered in external dependency tracking](#non-named-barrel-export-entry-points-are-not-considered-in-external-dependency-tracking)
   - [Case insensitivity inconsistency in ESLint arguments](#case-insensitivity-inconsistency-in-eslint-arguments)
+  - [Entrypoint file patterns with more than one wildcard are not supported](#entrypoint-file-patterns-with-more-than-one-wildcard-are-not-supported)
 - [Creating new rules](#creating-new-rules)
   - [getESMInfo(context)](#getesminfocontext)
   - [getLocFromRange(context, range)](#getlocfromrangecontext-range)
   - [registerUpdateListener(listener)](#registerupdatelistenerlistener)
-  - [isNonTestFile(filePath)](#isnontestfilefilepath-packagerootdir-packagesettings)
+  - [isNonTestFile(filePath)](#isnontestfilefilepath)
 - [Frequently Asked Questions](#frequently-asked-questions)
   - [Is this plugin a replacement for eslint-plugin-import/eslint-plugin-import-x?](#is-this-plugin-a-replacement-for-eslint-plugin-importeslint-plugin-import-x)
   - [Do you support user-supplied resolvers like eslint-plugin-import does?](#do-you-support-user-supplied-resolvers-like-eslint-plugin-import-does)
@@ -108,16 +115,21 @@ In monorepos with multiple packages, you can either:
 
 See [Use in monorepos](#use-in-monorepos) for more details.
 
-### Configuration options
-
 Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or supplement these options.
 
-In single-repo mode, all options live in `settings['fast-import']`.
+Configuration options are split into two groups: repo-level configuration options and package-level configuration options. In the single repo case, there isn't a notable distinction between the two groups. In monorepo mode, repo-level options apply to all packages in the monorepo, while package-level options are specified per-package. This means that in a monorepo there are multiple per-package configurations, compared to a single repo-level configuration.
 
-In monorepo mode:
+### Configuration files
 
-- `monorepoRootDir`, `mode`, `editorUpdateRate`, and `debugLogging` live in `settings['fast-import']`
-- `alias`, `entryPointFiles`, `externallyImportedFiles`, `ignorePatterns`, `ignoreOverridePatterns`, and `testFilePatterns` live in each package's `fast-import.config.json`/`fast-import.config.jsonc` file.
+To support this "split-level" configuration, Fast Import makes use of configuration files that are independent of the ESLint/Oxlint configuration file. Repo-level options are always configured in `settings['fast-import']` in the ESLint/Oxlint configuration file.
+
+In single-repo mode, all package-level options can live in `settings['fast-import']`, or you can place package-level options in a configuration file, but you cannot have both.
+
+In monorepo mode, package-level options are required to be in a configuration file. Fast Import scans your monorepo for these config files, and uses the presense of these config files to automatically build up a list of packages to analyze. If you do not want a package to be analyzed by Fast Import, simply do not create a config file for that package. Fast Import automatically filters out folders named `node_modules`, `build`, `out`, `dist`, and any folder that starts with a `.`, meaning config files in these folders are ignored.
+
+Configuration files are written using JSON-C (JSON with comments) and are named `fast-import.config.json` or `fast-import.config.jsonc`. These files must live in the package root dir as a sibling to `package.json` and `tsconfig.json`. In monorepo mode, you must set `name` in `package.json`.
+
+### Repo-level configuration options
 
 #### packageRootDir
 
@@ -125,15 +137,16 @@ Type: `string`
 
 Fast Import uses `packageRootDir` to scan for files in the current package. When Fast Import starts up for the first time, it creates a map of all files inside of `packageRootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
 
+Note: Fast Import idoes not analyze files in folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze files in one of these folders, file an issue and we'll find a way to support your use case.
+
 In single-repo mode, you must set `packageRootDir` directly in `settings['fast-import']`.
 
-In monorepo mode, every package still has a `packageRootDir` under the hood, but it is inferred automatically from the directory containing that package's `fast-import.config.json`/`fast-import.config.jsonc` file.
+In monorepo mode, every package still has a `packageRootDir` under the hood, but it is automatically set to be the directory containing that package's Fast Import config file.
 
-Note: Fast Import automatically filters out folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze one of these folders, file an issue and we'll find a way to support your use case.
 
 `packageRootDir` _must_ be an absolute path!
 
-`packageRootDir` should generally point to the directory containing the package's `package.json` and `tsconfig.json`, not a nested `src` directory.
+`packageRootDir` must point to the directory containing the package's `package.json` and `tsconfig.json`, not a nested `src` directory.
 
 CommonJS Example:
 
@@ -179,7 +192,9 @@ Example:
 }
 ```
 
-The remaining options are package-scoped. In single-repo mode, place them in `settings['fast-import']`. In monorepo mode, place them in each package's Fast Import config. The examples below use the single-repo form.
+### Package-level configuration options
+
+The remaining options are package-scoped. In single-repo mode, place them in `settings['fast-import']` or in a `fast-import.config.json`/`fast-import.config.jsonc` file in `packageRootDir` (but not both). In monorepo mode, place them in each package's Fast Import config. The examples below use the single-repo form.
 
 #### alias
 
@@ -391,11 +406,11 @@ Monorepos can be configured in one of two ways.
 
 Use this when you want one top-level ESLint or Oxlint config to cover the whole monorepo.
 
+Warning: using a single root config exclusively can cause performance issues. See Option 3 for a more performant approach and explanaition of performance issues with single root configs.
+
 1. Set `settings['fast-import'].monorepoRootDir` in your root ESLint or Oxlint config.
 2. Add a `fast-import.config.json`/`fast-import.config.jsonc` config file to each package you want Fast Import to analyze.
 3. Put package-scoped options such as `alias`, `entryPointFiles`, `externallyImportedFiles`, `ignorePatterns`, `ignoreOverridePatterns`, and `testFilePatterns` in those package config files.
-
-Note that Fast Import config files cannot be nested inside one another. Once Fast Import finds a Fast Import config file in a directory, that directory becomes the package root and nested config files beneath it are ignored by design.
 
 Example structure:
 
@@ -458,6 +473,16 @@ export default defineConfig([
 ]);
 ```
 
+#### Option 3: combine the two (recommended)
+
+In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. This allows you to enable repo-wide rules that much be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) without paying the performance cost of having all lint rules at the root, especially in ESLint.
+
+ESLint is single-threaded, which means that a root-level config will lint your entire codebase serially. If you have package-level configs however and are using a multithreaded/multiprocess repo manager like Nx or Turborepo, linting gets parallelized. This performance difference can be especially important when running ESLint in an editor or are using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md). Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (such as Fast Import) are not multithreaded and still susceptible to this issue.
+
+To combine these two options, you use per-package Fast Import configuration files. The root config uses `monorepoRootDir` and discovers each package's config file recursively. The per-package config sets `packageRootDir` and Fast Import will pick up the config file for that package automatically.
+
+Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you should use option 1. ESLint handles nested configs without any issues.
+
 ### Using with Oxlint
 
 Fast Import works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
@@ -479,8 +504,6 @@ export default {
   },
 };
 ```
-
-Oxlint does not currently support putting plugin `settings` inside `overrides`, so if you need package-specific settings in a monorepo with a root-level config, use per-package Fast Import config files.
 
 For a full working example, see this repo's own [oxlint.config.ts](./oxlint.config.ts).
 

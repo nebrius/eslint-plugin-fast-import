@@ -44,7 +44,7 @@ export default {
   },
   settings: {
     'fast-import': {
-      monorepoRootDir: import.meta.dirname,
+      packageRootDir: import.meta.dirname,
       debugLogging: true,
     },
   },
