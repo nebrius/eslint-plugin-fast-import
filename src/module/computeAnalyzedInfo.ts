@@ -91,10 +91,15 @@ export function computeAnalyzedInfo(
     for (const importDetails of fileDetails.singleImports) {
       analyzedFileInfo.singleImports.push({
         ...importDetails,
-        // We don't know what the type is yet, but once we determine the
-        // type we'll change this value and potentially fill in other
-        // details
-        rootModuleType: undefined,
+        // If this import is a builtin or thirdParty import, we know what
+        // the root module type is. Otherwise, once we determine the type
+        // during traversal we'll change this value and potentially fill
+        // in other details.
+        rootModuleType:
+          importDetails.resolvedModuleType === 'builtin' ||
+          importDetails.resolvedModuleType === 'thirdParty'
+            ? importDetails.resolvedModuleType
+            : undefined,
       });
     }
 

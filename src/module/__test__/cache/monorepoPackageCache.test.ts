@@ -124,7 +124,7 @@ const FILE_D_SINGLE_IMPORT = {
   isTypeImport: true,
   moduleSpecifier: '@test/package-one/a',
   resolvedModuleType: 'thirdParty' as const,
-  rootModuleType: undefined,
+  rootModuleType: 'thirdParty' as const,
 };
 
 // The e.ts cross-package barrel import of `@test/package-one/a` shows up as a
@@ -833,7 +833,7 @@ export type Two = AlsoOne;
     isTypeImport: true,
     moduleSpecifier: '@test/package-one/a',
     resolvedModuleType: 'thirdParty' as const,
-    rootModuleType: undefined,
+    rootModuleType: 'thirdParty' as const,
   };
 
   const EXPECTED_FILE_C_WITH_IMPORT: StrippedAnalyzedFileDetails = {

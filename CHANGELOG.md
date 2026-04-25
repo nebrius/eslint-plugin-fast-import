@@ -24,6 +24,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - BREAKING CHANGE: Config files matching `/*.config.*` are now automatically treated as externally imported
   - If you previously specified these entries in your config, you can remove them
 - Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
+- Fixed a bug where imports that resolved to third party type weren't getting root module type set correctly
 
 ## 2.2.1 (10/13/2025)
 
