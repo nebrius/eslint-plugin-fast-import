@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { _resetPackageInfo } from '../../../module/module.js';
-import { _resetAllSettings } from '../../../settings/settings.js';
+import { _testOnlyResetPackageInfo } from '../../../module/module.js';
+import { _testOnlyResetAllSettings } from '../../../settings/settings.js';
 import { noTestImportsInProd } from '../rule.js';
 
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
@@ -22,8 +22,8 @@ const ruleTester = new RuleTester({
 });
 
 beforeEach(() => {
-  _resetAllSettings();
-  _resetPackageInfo();
+  _testOnlyResetAllSettings();
+  _testOnlyResetPackageInfo();
 });
 
 ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
@@ -44,6 +44,23 @@ ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
       code: `import { bTest } from './__test__/b';
 
 console.log(bTest);
+`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTestImports' }],
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    // c.ts is a production file that exposes a `_testOnly`-prefixed export.
+    // A production caller importing it should be flagged even though the
+    // resolved file is not itself a test file.
+    {
+      code: `import { _testOnlyHelper } from './c';
+
+console.log(_testOnlyHelper);
 `,
       filename: FILE_A,
       errors: [{ messageId: 'noTestImports' }],

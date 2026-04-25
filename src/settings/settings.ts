@@ -85,8 +85,7 @@ const repoSettingsCache = new Map<
 >();
 
 // Used for tests
-// eslint-disable-next-line fast-import/no-unused-exports
-export function _resetAllSettings() {
+export function _testOnlyResetAllSettings() {
   packageSettingsCache.clear();
   repoSettingsCache.clear();
 }

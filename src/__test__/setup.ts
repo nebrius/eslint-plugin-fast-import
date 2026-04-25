@@ -1,12 +1,12 @@
 import deepEqual from 'fast-deep-equal';
 import { diff } from 'jest-diff';
 
-import { _resetPackageInfo } from '../module/module.js';
-import { _resetAllSettings } from '../settings/settings.js';
+import { _testOnlyResetPackageInfo } from '../module/module.js';
+import { _testOnlyResetAllSettings } from '../settings/settings.js';
 import type { AnalyzedPackageInfo } from '../types/analyzed.js';
 import type { BaseESMStatement, BasePackageInfo } from '../types/base.js';
 import { InternalError } from '../util/error.js';
-import { _reset } from '../util/files.js';
+import { _testOnlyResetFiles } from '../util/files.js';
 import type {
   StrippedAnalyzedFileDetails,
   StrippedBaseFileDetails,
@@ -253,7 +253,7 @@ expect.extend({
 });
 
 beforeEach(() => {
-  _resetAllSettings();
-  _resetPackageInfo();
-  _reset();
+  _testOnlyResetAllSettings();
+  _testOnlyResetPackageInfo();
+  _testOnlyResetFiles();
 });

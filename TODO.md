@@ -9,3 +9,4 @@ Config:
 Misc:
 - Rename plugin
 - Proper docs site on GitHub Pages
+- Upgrade to vitest

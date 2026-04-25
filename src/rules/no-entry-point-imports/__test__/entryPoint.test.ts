@@ -4,8 +4,8 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { _resetPackageInfo } from '../../../module/module.js';
-import { _resetAllSettings } from '../../../settings/settings.js';
+import { _testOnlyResetPackageInfo } from '../../../module/module.js';
+import { _testOnlyResetAllSettings } from '../../../settings/settings.js';
 import { getRelativePathFromRoot } from '../../../util/files.js';
 import { noEntryPointImports } from '../rule.js';
 
@@ -30,8 +30,8 @@ const ruleTester = new RuleTester({
 });
 
 beforeEach(() => {
-  _resetAllSettings();
-  _resetPackageInfo();
+  _testOnlyResetAllSettings();
+  _testOnlyResetPackageInfo();
 });
 
 ruleTester.run('no-entry-point-imports', noEntryPointImports, {

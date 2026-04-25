@@ -13,6 +13,7 @@ const FILE_C_TEST = join(TEST_PACKAGE_DIR, '__fixture__', 'c-test.ts');
 const FILE_D_DTS = join(TEST_PACKAGE_DIR, 'd.d.ts');
 const FILE_E = join(TEST_PACKAGE_DIR, 'e.ts');
 const FILE_G = join(TEST_PACKAGE_DIR, 'g.ts');
+const FILE_H = join(TEST_PACKAGE_DIR, 'h.ts');
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -89,6 +90,19 @@ export const a2 = 10;
     {
       code: readFileSync(FILE_G, 'utf8'),
       filename: FILE_G,
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    // h.ts exports two `_testOnly`-prefixed values: one only imported by a test
+    // file, one not imported at all. Both are exempt from this rule because of
+    // the prefix.
+    {
+      code: readFileSync(FILE_H, 'utf8'),
+      filename: FILE_H,
       settings: {
         'fast-import': {
           packageRootDir: TEST_PACKAGE_DIR,

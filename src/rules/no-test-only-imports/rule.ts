@@ -50,15 +50,15 @@ export const noTestOnlyImports = createRule({
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {
-      // If this is an entry point, then it's being imported externally
+      // If this is an entry point, then it's being imported externally by definition
       if (exportEntry.isEntryPoint || exportEntry.isExternallyImported) {
         continue;
       }
 
-      // If imported by is empty, then this isn't used anywhere
       if (
         isNonTestFile(context.filename) &&
-        !exportEntry.importedBy.some((i) => isNonTestFile(i.filePath))
+        !exportEntry.importedBy.some((i) => isNonTestFile(i.filePath)) &&
+        !exportEntry.exportName?.startsWith('_testOnly')
       ) {
         if (!(`isTypeExport` in exportEntry) || !exportEntry.isTypeExport) {
           context.report({

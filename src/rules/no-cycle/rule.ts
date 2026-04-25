@@ -97,8 +97,7 @@ registerUpdateListener((root) => {
 
 // This is only used in tests, since update listeners aren't guaranteed to
 // be called on each run
-// eslint-disable-next-line fast-import/no-unused-exports
-export function _resetCycleMap() {
+export function _testOnlyResetCycleMap() {
   cycleMaps.clear();
 }
 

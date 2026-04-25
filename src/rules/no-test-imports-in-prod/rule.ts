@@ -48,8 +48,13 @@ export const noTestImportsInProd = createRule({
         continue;
       }
       if (
-        importEntry.resolvedModulePath &&
-        !isNonTestFile(importEntry.resolvedModulePath)
+        // First check if the imported file is a test file
+        (importEntry.resolvedModulePath &&
+          !isNonTestFile(importEntry.resolvedModulePath)) ||
+        // Now check if the imported symbol is in production but intended to be
+        // test only
+        ('importName' in importEntry &&
+          importEntry.importName.startsWith('_testOnly'))
       ) {
         context.report({
           loc: getLocFromRange(context, importEntry.reportNodeRange),

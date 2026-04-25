@@ -151,8 +151,7 @@ function getIsExternallyImportedCheck(
 }
 
 // We need to reset settings between runs, since some tests try different settings
-// eslint-disable-next-line fast-import/no-unused-exports
-export function _resetPackageInfo() {
+export function _testOnlyResetPackageInfo() {
   basePackageInfos.clear();
   resolvedPackageInfos.clear();
   analyzedPackageInfos.clear();
@@ -174,7 +173,7 @@ export function initializeRepo(
 
 // Testing this logic through initializeRepo would be more difficult than just
 // testing this function directly, since we'd have to create full packages
-// eslint-disable-next-line fast-import/no-unused-exports
+// eslint-disable-next-line fast-import/no-test-only-imports
 export function initializePackage({
   packageRootDir,
   packageName,

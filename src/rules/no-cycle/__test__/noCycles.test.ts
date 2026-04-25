@@ -3,13 +3,13 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { _resetCycleMap, noCycle } from '../rule.js';
+import { _testOnlyResetCycleMap, noCycle } from '../rule.js';
 
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 
 beforeEach(() => {
-  _resetCycleMap();
+  _testOnlyResetCycleMap();
 });
 
 const ruleTester = new RuleTester({

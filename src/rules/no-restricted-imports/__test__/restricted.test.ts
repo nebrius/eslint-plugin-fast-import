@@ -3,8 +3,8 @@ import { join } from 'node:path';
 import { RuleTester } from '@typescript-eslint/rule-tester';
 import { getDirname } from 'cross-dirname';
 
-import { _resetPackageInfo } from '../../../module/module.js';
-import { _resetAllSettings } from '../../../settings/settings.js';
+import { _testOnlyResetPackageInfo } from '../../../module/module.js';
+import { _testOnlyResetAllSettings } from '../../../settings/settings.js';
 import { noRestrictedImports } from '../rule.js';
 
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
@@ -24,8 +24,8 @@ const ruleTester = new RuleTester({
 });
 
 beforeEach(() => {
-  _resetAllSettings();
-  _resetPackageInfo();
+  _testOnlyResetAllSettings();
+  _testOnlyResetPackageInfo();
 });
 
 ruleTester.run('no-restricted-imports', noRestrictedImports, {

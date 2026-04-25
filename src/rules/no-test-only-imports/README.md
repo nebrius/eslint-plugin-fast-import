@@ -8,14 +8,15 @@ The primary use case for flagging unused exports is to identify and remove dead 
 
 It's also generally considered best practice for tests to not import internal implementation details, and to only test public API surfaces. These test-only exports will get flagged, and can be a call to action to refactor the code to be more testable.
 
-Type exports are an exception though because they can help surface issues in tests. As such, they are not flagged by this rule
+Type exports are an exception though because they can help surface issues in tests. As such, they are not flagged by this rule. If you do need to export something specifically for tests, such as a test reset helper, prefix it with an underscore (`_`).
 
 `no-test-only-imports` looks at all exports and analyzes who imports the export, if any. An export is flagged by this rule if none of the following are true:
 
 1. The export is [in an entry point file or externally imported file](../../../README.md#externallyimportedfiles--entrypointfiles)
 2. The export is in a non-test file and is imported by another non-test file
-3. The export is in a test file and is imported by another test file
-4. The export is a type export and is imported in a test _or_ non-test file
+3. The export is in a non-test file, is prefixed with (`_testOnly`), and is imported by a test file
+4. The export is in a test file and is imported by another file
+5. The export is a type export and is imported in a test _or_ non-test file
 
 Examples of _incorrect_ code
 

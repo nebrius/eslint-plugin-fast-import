@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { getDirname } from 'cross-dirname';
 
 import {
-  _reset,
+  _testOnlyResetFiles,
   convertToUnixishPath,
   getFiles,
   getMonorepoPackageSettings,
@@ -16,7 +16,7 @@ const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const ROOT_DIR = resolve(join(getDirname(), '..', '..', '..'));
 
 beforeEach(() => {
-  _reset();
+  _testOnlyResetFiles();
 });
 
 it('Fetches files asynchronously, respecting ignorePatterns', async () => {
@@ -56,7 +56,7 @@ it('ignoreOverridePatterns overrides .gitignore patterns', async () => {
   ).not.toContain(join(TEST_PACKAGE_DIR, 'src/c.ts'));
 
   // Reset to clear the cached ignore data
-  _reset();
+  _testOnlyResetFiles();
 
   // Now verify that ignoreOverridePatterns brings back the ignored file.
   // The override pattern 'src/c.ts' is relative to TEST_PACKAGE_DIR (the package root)

@@ -24,9 +24,10 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - BREAKING CHANGE: Config files matching `/*.config.*` are now automatically treated as externally imported
   - If you previously specified these entries in your config, you can remove them
 - BREAKING CHANGE: The `no-unused-exports` was split into two rules: `no-unused-exports` and `no-test-only-imports`
-    - The previous version of `no-unused-exports` used to check both conditions, with test-only imports configurable by an option
-    - This setup did not allow for test-only imports to be disabled for a specific export without also disabling the unused export checl, which is not desirable
-    - The two new rules no longer take any options
+  - The previous version of `no-unused-exports` used to check both conditions, with test-only imports configurable by an option
+  - This setup did not allow for test-only imports to be disabled for a specific export without also disabling the unused export checl, which is not desirable
+  - The two new rules no longer take any options
+- `no-test-only-imports` and `no-test-imports-in-prod` were both updated to be aware of non-test file exports prefixed with `_testOnly`. When a non-test file exports something with this prefix, it is considered a test-only export and can be imported by test files but not by production code.
 - BREAKING CHANGE: The `all` config has been removed. Due to the removal of `consistent-file-extensions`, there was no longer any difference between these two configs
 - Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
 - Fixed a bug where imports that resolved to third party type weren't getting root module type set correctly

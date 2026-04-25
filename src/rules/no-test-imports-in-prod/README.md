@@ -4,9 +4,9 @@ Ensures that production code does not import test code.
 
 ## Rule Details
 
-`no-test-imports-in-prod` checks all imports in non-test code to ensure that test code is not imported. Importing test code is often a mistake, and can also contribute to bundle size bloat due to the size of test frameworks.
+`no-test-imports-in-prod` checks all imports in non-test code to ensure that test code or test helpers are not imported. Importing test code is often a mistake, and can also contribute to bundle size bloat due to the size of test frameworks.
 
-By default, a file is considered a test file if it lives inside a folder named `__test__` or `__tests__`, or contains `.test.` in its filename. Additional test-file markers can be configured with `testFilePatterns`.
+By default, a file is considered a test file if it lives inside a folder named `__test__` or `__tests__`, or contains `.test.` in its filename. A test helper lives in production code and is prefixed with `_testOnly`. Additional test-file markers can be configured with `testFilePatterns`.
 
 Examples of _incorrect_ code
 
