@@ -475,9 +475,13 @@ export default defineConfig([
 
 #### Option 3: combine the two (recommended)
 
-In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. This allows you to enable repo-wide rules that much be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) without paying the performance cost of having all lint rules at the root, especially in ESLint.
+In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. This allows you to enable repo-wide rules that must be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md), without paying the performance cost of having _all_ lint rules at the root.
 
-ESLint is single-threaded, which means that a root-level config will lint your entire codebase serially. If you have package-level configs however and are using a multithreaded/multiprocess repo manager like Nx or Turborepo, linting gets parallelized. This performance difference can be especially important when running ESLint in an editor or are using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md). Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (such as Fast Import) are not multithreaded and still susceptible to this issue.
+ESLint is single-threaded by default, and using `--concurrency` requires typescript-eslint, Fast Import, and others to duplicate the expensive cross-file computations, thus erasing multithreaded gains. This means that a root-level config will lint your entire codebase serially or take a performance hit so great it might as well be linted serially.
+
+If you have package-level configs however and are using a multithreaded/multiprocess repo manager like Nx or Turborepo, linting gets parallelized. In addition, these repo managers cache per-package results and doesn't rerun them if files/dependencies have not changed. Using a root-level config does not utilize per-package caching.
+
+This performance difference can be especially important when running ESLint in an editor or when using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md), where response time is important. Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (including Fast Import) are not multithreaded and still susceptible to this issue.
 
 To combine these two options, you use per-package Fast Import configuration files. The root config uses `monorepoRootDir` and discovers each package's config file recursively. The per-package config sets `packageRootDir` and Fast Import will pick up the config file for that package automatically.
 
