@@ -98,7 +98,7 @@ export function getLocFromRange(
 
 const fileWatchingInitialized = new Set<string>();
 // This code is too dynamic w.r.t. the filesystem to effectively test
-/* istanbul ignore next*/
+/* istanbul ignore next */
 async function initializeFileWatching(
   repoSettings: ParsedRepoSettings,
   packageSettings: ParsedPackageSettings

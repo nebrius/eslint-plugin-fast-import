@@ -61,7 +61,7 @@ export const noNamedAsDefault = createRule({
     }
 
     for (const importEntry of fileInfo.singleReexports) {
-      /* istanbul ignore else */
+      /* istanbul ignore if */
       if (
         importEntry.importName !== 'default' ||
         !importEntry.resolvedModulePath
