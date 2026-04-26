@@ -30,7 +30,7 @@
     "lint:oxlint": "oxlint --type-aware",
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage src",
-    "format": "prettier --write .",
+    "format": "prettier --write  \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "publish-package": "node --experimental-strip-types scripts/publish.ts"
   },
   "dependencies": {

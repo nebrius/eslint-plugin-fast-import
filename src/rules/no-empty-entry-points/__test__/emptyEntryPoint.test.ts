@@ -6,13 +6,19 @@ import { getDirname } from 'cross-dirname';
 import { _testOnlyResetPackageInfo } from '../../../module/module.js';
 import { _testOnlyResetAllSettings } from '../../../settings/settings.js';
 import { getRelativePathFromRoot } from '../../../util/files.js';
-import { noUnnamedEntryPointExports } from '../rule.js';
+import { noEmptyEntryPoints } from '../rule.js';
 
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const FILE_INDEX = join(TEST_PACKAGE_DIR, 'index.ts');
 const FILE_INTERNAL = join(TEST_PACKAGE_DIR, 'internal.ts');
+const FILE_EMPTY = join(TEST_PACKAGE_DIR, 'empty.ts');
+const FILE_SOMETHING_CONFIG = join(TEST_PACKAGE_DIR, 'something.config.ts');
 
 const FILE_INDEX_ENTRY = getRelativePathFromRoot(TEST_PACKAGE_DIR, FILE_INDEX);
+const FILE_SOMETHING_CONFIG_ENTRY = getRelativePathFromRoot(
+  TEST_PACKAGE_DIR,
+  FILE_SOMETHING_CONFIG
+);
 
 const ruleTester = new RuleTester({
   languageOptions: {
@@ -30,9 +36,21 @@ beforeEach(() => {
   _testOnlyResetPackageInfo();
 });
 
-ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
+ruleTester.run('no-empty-entry-points', noEmptyEntryPoints, {
   valid: [
-    // Entry point file (entryPointFiles) with a named barrel reexport
+    // Entry point file with a named export
+    {
+      code: `export const foo = 10;`,
+      filename: FILE_INDEX,
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+          entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
+        },
+      },
+    },
+    // Entry point file with a named barrel reexport
     {
       code: `export * as internal from './internal';`,
       filename: FILE_INDEX,
@@ -44,7 +62,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
         },
       },
     },
-    // Entry point file with explicit named reexports (no barrel)
+    // Entry point file with a single reexport
     {
       code: `export { foo } from './internal';`,
       filename: FILE_INDEX,
@@ -56,34 +74,9 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
         },
       },
     },
-    // Non-entry-point file with a bare barrel reexport: rule should not fire
+    // Externally imported file with a named export
     {
-      code: `export * from './internal';`,
-      filename: FILE_INDEX,
-      settings: {
-        'fast-import': {
-          packageRootDir: TEST_PACKAGE_DIR,
-          mode: 'fix',
-        },
-      },
-    },
-    // internal.ts is not an entry point, so a bare barrel reexport here is
-    // allowed even when index.ts is configured as the entry point
-    {
-      code: `export * from './internal';`,
-      filename: FILE_INTERNAL,
-      settings: {
-        'fast-import': {
-          packageRootDir: TEST_PACKAGE_DIR,
-          mode: 'fix',
-          entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
-        },
-      },
-    },
-    // externallyImportedFiles is intentionally not covered by this rule, so
-    // a bare barrel reexport in such a file is allowed
-    {
-      code: `export * from './internal';`,
+      code: `export const foo = 10;`,
       filename: FILE_INDEX,
       settings: {
         'fast-import': {
@@ -93,33 +86,61 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
         },
       },
     },
-  ],
-
-  invalid: [
-    // Bare barrel reexport in an entry point file (entryPointFiles)
+    // A file that is neither an entry point nor externally imported, with no
+    // exports: rule should not fire
     {
-      code: `export * from './internal';`,
-      filename: FILE_INDEX,
-      errors: [{ messageId: 'noUnnamedEntryPointExports' }],
+      code: ``,
+      filename: FILE_INTERNAL,
       settings: {
         'fast-import': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
-          entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
         },
       },
     },
-    // A named barrel reexport alongside a bare one: only the bare one fires
+    // A *.config.* file with no exports: rule should not fire even though
+    // config files are auto-treated as externally imported
     {
-      code: `export * as internal from './internal';
-export * from './internal';`,
-      filename: FILE_INDEX,
-      errors: [{ messageId: 'noUnnamedEntryPointExports' }],
+      code: ``,
+      filename: FILE_SOMETHING_CONFIG,
       settings: {
         'fast-import': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
-          entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
+          externallyImportedFiles: [FILE_SOMETHING_CONFIG_ENTRY],
+        },
+      },
+    },
+  ],
+
+  invalid: [
+    // Entry point file with no exports
+    {
+      code: ``,
+      filename: FILE_EMPTY,
+      errors: [{ messageId: 'noEmptyEntryPoints' }],
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+          entryPointFiles: {
+            '.': `./${getRelativePathFromRoot(TEST_PACKAGE_DIR, FILE_EMPTY)}`,
+          },
+        },
+      },
+    },
+    // Externally imported file with no exports
+    {
+      code: ``,
+      filename: FILE_EMPTY,
+      errors: [{ messageId: 'noEmptyExternallyImportedFiles' }],
+      settings: {
+        'fast-import': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+          externallyImportedFiles: [
+            getRelativePathFromRoot(TEST_PACKAGE_DIR, FILE_EMPTY),
+          ],
         },
       },
     },

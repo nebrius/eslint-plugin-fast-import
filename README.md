@@ -101,6 +101,7 @@ These rules are designed to prevent certain types of imports/exports that can le
 
 | Name                                                                             | 💼    | 🔧  |
 | -------------------------------------------------------------------------------- | ----- | --- |
+| [no-empty-entry-points](src/rules/no-empty-entry-points/README.md)               | 🧰 ☑️ |     |
 | [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             | 🧰 ☑️ |     |
 | [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) | 🧰 ☑️ |     |
 | [no-named-as-default](src/rules/no-named-as-default/README.md)                   | 🧰 ☑️ |     |

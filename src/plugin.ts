@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { getDirname } from 'cross-dirname';
 
 import { noCycle } from './rules/no-cycle/rule.js';
+import { noEmptyEntryPoints } from './rules/no-empty-entry-points/rule.js';
 import { noEntryPointImports } from './rules/no-entry-point-imports/rule.js';
 import { noExternalBarrelReexports } from './rules/no-external-barrel-reexports/rule.js';
 import { noNamedAsDefault } from './rules/no-named-as-default/rule.js';
@@ -39,6 +40,7 @@ const plugin = {
   configs: {},
   rules: {
     'no-cycle': noCycle,
+    'no-empty-entry-points': noEmptyEntryPoints,
     'no-entry-point-imports': noEntryPointImports,
     'no-external-barrel-reexports': noExternalBarrelReexports,
     'no-named-as-default': noNamedAsDefault,
@@ -62,6 +64,7 @@ const recommendedConfig = {
   },
   rules: {
     'fast-import/no-cycle': 'error',
+    'fast-import/no-empty-entry-points': 'error',
     'fast-import/no-entry-point-imports': 'error',
     'fast-import/no-external-barrel-reexports': 'error',
     'fast-import/no-named-as-default': 'error',
@@ -71,7 +74,7 @@ const recommendedConfig = {
     'fast-import/no-unresolved-imports': 'error',
     'fast-import/no-unused-exports': 'error',
     'fast-import/prefer-alias-imports': 'error',
-    'fast-import/require-node-prefix': 'off',
+    'fast-import/require-node-prefix': 'error',
   },
 } as const;
 
@@ -89,18 +92,19 @@ const offConfig = {
     'fast-import': plugin,
   },
   rules: {
-    'fast-import/no-unused-exports': 'off',
-    'fast-import/no-test-only-imports': 'off',
     'fast-import/no-cycle': 'off',
+    'fast-import/no-empty-entry-points': 'off',
     'fast-import/no-entry-point-imports': 'off',
-    'fast-import/no-unresolved-imports': 'off',
     'fast-import/no-external-barrel-reexports': 'off',
-    'fast-import/no-test-imports-in-prod': 'off',
     'fast-import/no-named-as-default': 'off',
     'fast-import/no-node-builtins': 'off',
-    'fast-import/require-node-prefix': 'off',
     'fast-import/no-restricted-imports': 'off',
+    'fast-import/no-test-imports-in-prod': 'off',
+    'fast-import/no-test-only-imports': 'off',
+    'fast-import/no-unresolved-imports': 'off',
+    'fast-import/no-unused-exports': 'off',
     'fast-import/prefer-alias-imports': 'off',
+    'fast-import/require-node-prefix': 'off',
   },
 } as const;
 
