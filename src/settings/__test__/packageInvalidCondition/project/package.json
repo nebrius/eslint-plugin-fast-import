@@ -1,0 +1,10 @@
+{
+  "name": "package-invalid-condition-test",
+  "exports": {
+    ".": {
+      "types": "./types.d.ts",
+      "browser": "./browser.js"
+    },
+    "./valid": "./valid.js"
+  }
+}

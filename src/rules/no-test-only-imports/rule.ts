@@ -55,6 +55,13 @@ export const noTestOnlyImports = createRule({
         continue;
       }
 
+      // Check if there are no imports at all and bail, since this means it's
+      // by definition not imported by a test file. Otherwise, it trips our
+      // logic below
+      if (exportEntry.importedBy.length === 0) {
+        continue;
+      }
+
       if (
         isNonTestFile(context.filename) &&
         !exportEntry.importedBy.some((i) => isNonTestFile(i.filePath)) &&

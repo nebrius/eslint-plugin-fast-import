@@ -30,7 +30,7 @@
     "lint:oxlint": "oxlint --type-aware",
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage src",
-    "format": "prettier --write  \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
+    "format": "prettier --write A\"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "publish-package": "node --experimental-strip-types scripts/publish.ts"
   },
   "dependencies": {
@@ -46,6 +46,7 @@
     "@eslint/compat": "^2.0.0",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.24.0",
+    "@jest/globals": "^30.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.0.0",
     "@typescript-eslint/parser": "^8.30.1",

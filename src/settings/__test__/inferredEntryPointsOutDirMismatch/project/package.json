@@ -1,0 +1,6 @@
+{
+  "name": "inferred-out-dir-mismatch-test",
+  "exports": {
+    ".": "./build/index.js"
+  }
+}

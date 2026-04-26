@@ -1,0 +1,45 @@
+{
+  "name": "package-exports-test",
+  "main": "./main.js",
+  "exports": {
+    ".": "./root.js",
+    "./string": "./string.js",
+    "./node-addons": {
+      "node-addons": "./na.js",
+      "node": "./n.js",
+      "import": "./i.js",
+      "require": "./r.js",
+      "module-sync": "./ms.js",
+      "default": "./d.js"
+    },
+    "./node": {
+      "node": "./n.js",
+      "import": "./i.js",
+      "require": "./r.js",
+      "module-sync": "./ms.js",
+      "default": "./d.js"
+    },
+    "./import": {
+      "import": "./i.js",
+      "require": "./r.js",
+      "module-sync": "./ms.js",
+      "default": "./d.js"
+    },
+    "./require": {
+      "require": "./r.js",
+      "module-sync": "./ms.js",
+      "default": "./d.js"
+    },
+    "./module-sync": {
+      "module-sync": "./ms.js",
+      "default": "./d.js"
+    },
+    "./default": {
+      "default": "./d.js"
+    },
+    "./types-ignored": {
+      "types": "./t.d.ts",
+      "import": "./i.js"
+    }
+  }
+}

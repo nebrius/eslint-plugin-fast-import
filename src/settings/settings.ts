@@ -1,4 +1,5 @@
-import { isAbsolute, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { isAbsolute, join, resolve } from 'node:path';
 
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
@@ -10,7 +11,7 @@ import {
   trimTrailingPathSeparator,
 } from '../util/files.js';
 import { getSubpathEntry } from '../util/getSubpathEntry.js';
-import { debug } from '../util/logging.js';
+import { debug, warn } from '../util/logging.js';
 import { getPackageJsonSettings } from './package.js';
 import { getTypeScriptSettings } from './typescript.js';
 import type { PackageSettings, RepoUserSettings } from './user.js';
@@ -214,15 +215,15 @@ export function getAllPackageSettings(
 }
 
 function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
+  const { packageRootDir } = userPackageSettings;
+
   // Get TypeScript supplied settings
-  const typeScriptSettings = getTypeScriptSettings(
-    userPackageSettings.packageRootDir
-  );
+  const { mapping, ...typeScriptSettings } =
+    getTypeScriptSettings(packageRootDir);
 
   // Get package.json settings
-  const packageJsonSettings = getPackageJsonSettings(
-    userPackageSettings.packageRootDir
-  );
+  const { exports: packageJsonExports, ...packageJsonSettings } =
+    getPackageJsonSettings(packageRootDir);
 
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
@@ -231,16 +232,48 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     ...userPackageSettings,
   };
 
-  const {
-    alias = {},
-    entryPointFiles = [],
-    externallyImportedFiles = [],
-  } = mergedSettings;
+  // Compute a mapping from compiled package exports to source, if possible
+  const inferredEntryPoints: Record<string, string> = {};
+  if (mapping && packageJsonExports) {
+    for (const [key, value] of Object.entries(packageJsonExports)) {
+      if (!value.startsWith(mapping.outDir)) {
+        warn(
+          `Export ${key} in ${packageRootDir} in package.json export doesn't start with TypeScript's outDir ${mapping.outDir}`
+        );
+        continue;
+      }
+      const baseFile = value.replace(mapping.outDir, mapping.rootDir);
+      let srcFile: string | undefined;
+      if (existsSync(join(packageRootDir, baseFile))) {
+        srcFile = baseFile;
+      } else {
+        const tsBaseFile = baseFile.replace(/\.[^/.]+$/, '.ts');
+        if (existsSync(join(packageRootDir, tsBaseFile))) {
+          srcFile = tsBaseFile;
+        } else {
+          const tsxBaseFile = baseFile.replace(/\.[^/.]+$/, '.tsx');
+          if (existsSync(join(packageRootDir, tsxBaseFile))) {
+            srcFile = tsxBaseFile;
+          }
+        }
+      }
+
+      if (srcFile) {
+        inferredEntryPoints[key] = srcFile;
+      }
+    }
+  }
+
+  const { alias = {}, externallyImportedFiles = [] } = mergedSettings;
+
+  const entryPointFiles = {
+    ...inferredEntryPoints,
+    ...mergedSettings.entryPointFiles,
+  };
 
   // Clean up any aliases
   const wildcardAliases: ParsedPackageSettings['wildcardAliases'] = {};
   const fixedAliases: ParsedPackageSettings['fixedAliases'] = {};
-  const { packageRootDir } = userPackageSettings;
   for (let [symbol, path] of Object.entries(alias)) {
     // Compute the absolute version of the path if needed (TypeScript does this
     // already since it has different resolution rules)
@@ -373,6 +406,13 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
       for (const [symbol, path] of Object.entries(fixedAliases)) {
         debug(`  ${symbol}: ${path}`);
       }
+    }
+  }
+
+  if (Object.keys(inferredEntryPoints).length > 0) {
+    debug(`Inferred entry points:`);
+    for (const [key, value] of Object.entries(inferredEntryPoints)) {
+      debug(`  ${key} -> ${value}`);
     }
   }
 

@@ -1,0 +1,6 @@
+{
+  "name": "inferred-missing-source-test",
+  "exports": {
+    ".": "./dist/missing.js"
+  }
+}

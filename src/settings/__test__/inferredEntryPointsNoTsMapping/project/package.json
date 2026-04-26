@@ -1,0 +1,6 @@
+{
+  "name": "inferred-no-ts-mapping-test",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 import ts from 'typescript';
 
@@ -8,11 +8,23 @@ import { isDefaultIgnoredPath } from '../util/files.js';
 import { warn } from '../util/logging.js';
 import type { PackageSettings } from './user.js';
 
-type TypeScriptSettings = Pick<PackageSettings, 'alias'>;
+type TypeScriptSettings = Pick<PackageSettings, 'alias'> & {
+  rootDir?: string;
+  outDir?: string;
+};
+
+type ExtendedTypeScriptSettings = Pick<PackageSettings, 'alias'> & {
+  mapping:
+    | {
+        rootDir: string;
+        outDir: string;
+      }
+    | undefined;
+};
 
 export function getTypeScriptSettings(
   packageRootDir: string
-): TypeScriptSettings {
+): ExtendedTypeScriptSettings {
   // Read in the file. Note: we don't support the full breadth of tsconfigs,
   // notably we don't support multiple nested configs and only look at the
   // config found in the eslint config file's directory
@@ -25,10 +37,49 @@ export function getTypeScriptSettings(
   // possible to test this code path
   /* istanbul ignore if */
   if (!configPath) {
-    return {};
+    return {
+      mapping: undefined,
+    };
   }
 
-  return parseTsConfig(configPath);
+  const { alias, rootDir, outDir } = parseTsConfig(configPath);
+
+  if (rootDir && outDir) {
+    return {
+      alias,
+      mapping: {
+        rootDir,
+        outDir,
+      },
+    };
+  } else {
+    return {
+      alias,
+      mapping: undefined,
+    };
+  }
+}
+
+// Normalize a path to be a relative path that starts with ./ or ../
+function normalizePath(
+  path: string | undefined,
+  configPath: string
+): string | undefined {
+  if (!path) {
+    return undefined;
+  }
+  // If absolute, make it relative to the tsconfig location first
+  if (isAbsolute(path)) {
+    path = relative(dirname(configPath), path);
+  }
+
+  // Now check if it's the shortform of a relative path
+  if (!path.startsWith('./') && !path.startsWith('../')) {
+    path = './' + path;
+  }
+
+  // Otherwise, return as-is
+  return path;
 }
 
 function parseTsConfig(
@@ -64,13 +115,20 @@ function parseTsConfig(
     return {};
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const packageRootDir = config.config?.compilerOptions?.rootDir as
-    | string
-    | undefined;
+  const packageRootDir = normalizePath(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    config.config?.compilerOptions?.rootDir,
+    configPath
+  );
   const absoluteRootDir =
     projectRootDir ??
     (packageRootDir && join(dirname(configPath), packageRootDir));
+
+  const outDir = normalizePath(
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+    config.config?.compilerOptions?.outDir,
+    configPath
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const configExtends = config.config?.extends as string | undefined;
@@ -136,5 +194,7 @@ function parseTsConfig(
 
   return {
     alias: { ...parsedPaths, ...baseConfig.alias },
+    rootDir: packageRootDir,
+    outDir,
   };
 }

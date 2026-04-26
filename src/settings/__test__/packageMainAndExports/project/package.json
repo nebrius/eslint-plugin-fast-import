@@ -1,0 +1,7 @@
+{
+  "name": "package-main-and-exports-test",
+  "main": "./main.js",
+  "exports": {
+    "./util": "./util.js"
+  }
+}

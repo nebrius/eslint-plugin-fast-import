@@ -1,6 +1,3 @@
-// This is a JSONC file (JSON with Comments)
 {
-  "entryPointFiles": {
-    ".": "./src/plugin.ts"
-  }
+  // We use a default config with all options inferred from package.json and tsconfig.json
 }

@@ -1,0 +1,7 @@
+{
+  "name": "inferred-override-test",
+  "exports": {
+    ".": "./dist/index.js",
+    "./extra": "./dist/extra.js"
+  }
+}
