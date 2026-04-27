@@ -27,12 +27,12 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "Debug Oxlint",
+      "name": "Debug Petstore",
       "type": "node",
       "request": "launch",
-      "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/oxlint"],
-      "args": ["-c", "oxlint.config.ts", "--type-aware"],
-      "cwd": "/Users/bryan/Projects/specoro",
+      "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/eslint"],
+      "args": ["-c", "eslint.config.mjs", "src/**/*"],
+      "cwd": "/Users/bryan/Projects/specoro/examples/petstore",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

@@ -12,6 +12,7 @@ import {
 } from '../util/files.js';
 import { getSubpathEntry } from '../util/getSubpathEntry.js';
 import { debug, warn } from '../util/logging.js';
+import { getFrameworkSettings } from './framework.js';
 import { getPackageJsonSettings } from './package.js';
 import { getTypeScriptSettings } from './typescript.js';
 import type { PackageSettings, RepoUserSettings } from './user.js';
@@ -225,8 +226,12 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   const { exports: packageJsonExports, ...packageJsonSettings } =
     getPackageJsonSettings(packageRootDir);
 
+  // Get frameworks-specific settings
+  const frameworkSettings = getFrameworkSettings(packageRootDir);
+
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
+    ...frameworkSettings,
     ...typeScriptSettings,
     ...packageJsonSettings,
     ...userPackageSettings,

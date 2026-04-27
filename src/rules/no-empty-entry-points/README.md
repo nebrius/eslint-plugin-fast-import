@@ -8,8 +8,6 @@ The configuration entries `entryPointFiles` and `externallyImportedFiles` settin
 
 This rule reports any file matched by `entryPointFiles` or `externallyImportedFiles` that has no exports, no barrel reexports, and no single reexports.
 
-Note: config files matching `/*.config.*` are always treated as externally imported regardless of configuration (see [externallyImportedFiles / entryPointFiles](../../../README.md#externallyimportedfiles--entrypointfiles)). To avoid noise on otherwise valid empty config files, this rule does check `*.config.*` files.
-
 Examples of _incorrect_ code, with `index.ts` configured in `entryPointFiles`
 
 ```js

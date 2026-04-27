@@ -2,5 +2,3 @@
 - Proper docs site on GitHub Pages
 - Audit AGENTS.md
 - Create skill
-- Add docs about inferred entry points
-- Add externallyImportedFiles inference

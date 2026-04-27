@@ -258,13 +258,15 @@ Files specified with `externallyImportedFiles` or `entryPointFiles` define files
 - `entryPointFiles` are intended to represent entry points in a library intended for use by others, aka a "public API."
 - `externallyImportedFiles` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application.
 
-In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary for determining if a package's entry points are intended to be used by other packages in the monorepo, and thus should be analyzed for usage. See [Use in monorepos](#use-in-monorepos) for more info.
+In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary for determining if a package's entry points are intended to be used by other packages in the monorepo to, and thus should be analyzed for usage for the [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) rule. See [Use in monorepos](#use-in-monorepos) for more info.
 
 For example, if you are building a Next.js application, then the `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
 
 Entry points/externally imported files allow you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/no-entry-point-imports/README.md) rule.
 
-Note: config files matching `/*.config.*` are always treated as externally imported, regardless of this setting.
+`externallyImportedFiles` are specified as an array of strings using the same ignore syntax you find in `.gitignore`, including the use of `/` to anchor an entry to the root of the package, and the use of `*` and `**` as wildcards.
+
+`entryPointFiles` are specified as an object of subpaths to files, like you use in the `exports` field in package.json without conditions, including the use of `*` as a wildcard. See the [Node.js package entry points](https://nodejs.org/api/packages.html#package-entry-points) documentation for more info, and note the limitation on [entry point file patterns with more than one wildcard](#entrypoint-file-patterns-with-more-than-one-wildcard-are-not-supported).
 
 Example:
 
@@ -273,12 +275,20 @@ Example:
   settings: {
     'fast-import': {
       packageRootDir: import.meta.dirname,
-      externallyImportedFiles: ['./src/app/**/page.tsx', './src/app/**/layout.tsx'],
+      externallyImportedFiles: ['/src/app/**/page.tsx', '/src/app/**/layout.tsx'],
       entryPointFiles: { '.': './src/index.ts' },
     },
   },
 }
 ```
+
+Fast Import inspects your app and applies a few common defaults for `externallyImportedFiles` and `entryPointFiles`.
+
+Entry points will be autopopulated for you if you populate the `exports`/`main` field in `package.json` _and_ you define `outDir` and `rootDir` in your `tsconfig.json`. Fast Import requires both in order to be confident that we can and should map from the compiled output (what `package.json` points to) back to the source code (what Fast Import needs).
+
+Config files matching `/*.config.*` are always included in `externallyImportedFiles` and cannot be overridden.
+
+Next.js is autodetected by Fast Import, and the appropriate externally imported patterns are pre-applied. Fast Import takes into account whether you are using a `src` directory or not, and whether you are using app router or pages router (but not both). If you supply your own patterns, they will override these defaults.
 
 #### ignorePatterns
 
