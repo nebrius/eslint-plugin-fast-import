@@ -1,6 +1,6 @@
 # fast-import/no-test-only-imports
 
-Ensures that non-test files exports are imported by other non-test files.
+Ensures that non-test files' exports are not imported only by test files, unless the export name is prefixed with `_testOnly`.
 
 ## Rule Details
 
@@ -8,27 +8,17 @@ The primary use case for flagging unused exports is to identify and remove dead 
 
 It's also generally considered best practice for tests to not import internal implementation details, and to only test public API surfaces. These test-only exports will get flagged, and can be a call to action to refactor the code to be more testable.
 
-Type exports are an exception though because they can help surface issues in tests. As such, they are not flagged by this rule. If you do need to export something specifically for tests, such as a test reset helper, prefix it with an underscore (`_`).
+Type exports are an exception though because they can help surface issues in tests. As such, they are not flagged by this rule. If you do need to export something specifically for tests, such as a test reset helper, prefix it with `_testOnly`.
 
-`no-test-only-imports` looks at all exports and analyzes who imports the export, if any. An export is flagged by this rule if none of the following are true:
+`no-test-only-imports` looks at all exports and analyzes who imports the export, if any. An export is flagged by this rule if all of the following are true:
 
-1. The export is [in an entry point file or externally imported file](../../../README.md#externallyimportedfiles--entrypointfiles)
-2. The export is in a non-test file and is imported by another non-test file
-3. The export is in a non-test file, is prefixed with (`_testOnly`), and is imported by a test file
-4. The export is in a test file and is imported by another file
-5. The export is a type export and is imported in a test _or_ non-test file
+1. The export is in a non-test file
+5. The export is not a type export
+2. The export is not [in an entry point file or externally imported file](../../../README.md#externallyimportedfiles--entrypointfiles)
+3. The export is imported by at least one file
+4. The export is imported by non-test files OR the export name is prefixed with `_testOnly`
 
 Examples of _incorrect_ code
-
-```js
-/*
-.
-└── a.ts
-*/
-
-// a.ts
-export const a = 10;
-```
 
 ```js
 /*
@@ -50,18 +40,10 @@ Examples of _correct_ code
 ```js
 /*
 .
-└── a.ts
-*/
-
-// a.ts
-const a = 10;
-```
-
-```js
-/*
-.
 ├── a.ts
-└── b.ts
+├── b.ts
+└── __test__/
+    └── c.ts
 */
 
 // a.ts
@@ -69,6 +51,24 @@ export const a = 10;
 
 // b.ts
 import { a } from './a';
+
+// __test__/c.ts
+import { a } from '../a';
+```
+
+```js
+/*
+.
+├── a.ts
+└── __test__/
+    └── b.ts
+*/
+
+// a.ts
+export const _testOnlyA = 10;
+
+// __test__/b.ts
+import { _testOnlyA } from '../a';
 ```
 
 ```js

@@ -83,8 +83,9 @@ it('App Router takes precedence when app/ and pages/ coexist', () => {
 
   // App Router-only pattern — would not be present under the Pages Router set.
   expect(isMatched(settings, 'app/page.tsx')).toBe(true);
-  // The App Router list also includes pages/**/*, so legacy pages still match.
-  expect(isMatched(settings, 'pages/legacy.tsx')).toBe(true);
+
+  // The App Router list excludes pages/**/*, so legacy pages should not match.
+  expect(isMatched(settings, 'pages/legacy.tsx')).toBe(false);
 
   expect(isMatched(settings, 'lib/utils.ts')).toBe(false);
 });

@@ -26,6 +26,7 @@ The `rules` option is an array of objects that define the rules for restricting 
   - If `denied` and `filepath` are regular expressions, then you can specify capture groups from `filepath` and reference them in `denied` as `$1`, `$2`, etc.
 - `message`: An optional custom message to display when a restricted import is found.
   - Supplying a custom message is strongly recommended, because you can communicate to your users _why_ this import is restricted, e.g. `this component can only be used on the settings page`.
+- `excludeTypeImports`: A boolean that indicates whether to exclude type imports from being considered restricted when non-type exports are considered restricted. Defaults to `false`.
 
 For properties that take filepaths, be aware of how filepath matching works. If a string is specified and is a relative path, it is assumed to be relative to the current package's `packageRootDir`. If a regular expression is specified, be aware that files tested using this regular expression are _always_ absolute. This means that you cannot do something like `allowed: [/^\.\/a.ts$/]`, since no file passed in will ever start with `./`.
 

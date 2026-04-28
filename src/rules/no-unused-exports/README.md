@@ -1,6 +1,6 @@
 # fast-import/no-unused-exports
 
-Ensures exports are imported elsewhere, taking into account whether files are test files or non-test files, and whether the export is a type export or value export.
+Ensures exports are imported elsewhere in the package.
 
 ## Rule Details
 

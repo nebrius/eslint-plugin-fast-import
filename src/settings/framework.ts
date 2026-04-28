@@ -36,8 +36,6 @@ const NEXT_JS_APP_ROUTER_EXTERNALLY_IMPORTED_FILES = addExtensions([
   ['/app/**/sitemap', REACT_EXTENSIONS],
   ['/app/**/robots', REACT_EXTENSIONS],
   ['/app/**/manifest', REACT_EXTENSIONS],
-  // Pages router can coexist with App router; Next allows both.
-  ['/pages/**/*', REACT_EXTENSIONS],
   // Top-level entry points. Next looks for these at either the project
   // root or under src/, which the caller handles via the src/ prefix.
   ['/middleware', REACT_EXTENSIONS],

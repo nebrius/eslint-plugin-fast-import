@@ -4,7 +4,7 @@ Ensures that default imports do not have the same name as a named export in the 
 
 ## Rule Details
 
-If someone names a default import the same as a named export in the file being imported from, the developer likely made a mistake and is trying to import the named export. If, on the other hand, the developer _is_ trying to import the default export, then using this name can be confusing.
+If someone names a default import or reexport the same as a named export in the file being imported from, the developer likely made a mistake and is trying to import the named export. If, on the other hand, the developer _is_ trying to import the default export, then using this name can be confusing.
 
 Given:
 
@@ -19,6 +19,9 @@ Examples of _incorrect_ code:
 ```ts
 // b.ts
 import a from './a';
+
+// c.ts
+export { default as a } from './a';
 ```
 
 Examples of _correct_ code:
@@ -26,4 +29,7 @@ Examples of _correct_ code:
 ```ts
 // b.ts
 import aDefault from './a';
+
+// c.ts
+export { default as aDefault } from './a';
 ```

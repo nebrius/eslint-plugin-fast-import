@@ -60,7 +60,10 @@ export function getMonorepoPackageSettings(packageRootDir: string): string[] {
     if (!currentDir) {
       break;
     }
-    if (DEFAULT_IGNORE_DIRECTORIES.includes(basename(currentDir))) {
+    if (
+      DEFAULT_IGNORE_DIRECTORIES.includes(basename(currentDir)) ||
+      basename(currentDir).startsWith('.')
+    ) {
       continue;
     }
     const configFile = findPackageConfigFile(currentDir);

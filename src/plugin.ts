@@ -83,7 +83,7 @@ const monorepoRecommendedConfig = {
     'fast-import': plugin,
   },
   rules: {
-    'no-unused-package-exports': noUnusedPackageExports,
+    'fast-import/no-unused-package-exports': 'error',
   },
 } as const;
 

@@ -133,36 +133,42 @@ export const noRestrictedImports = createRule<
         }
         // Check if this import applies to this entry
         let matches: string[] | null = null;
-        if (entry.type === 'third-party') {
-          // Check if the module specifier matches
-          if (typeof entry.moduleSpecifier === 'string') {
-            if (entry.moduleSpecifier !== moduleSpecifier) {
+        switch (entry.type) {
+          case 'third-party':
+          case 'built-in': {
+            // Check if the module specifier matches
+            if (typeof entry.moduleSpecifier === 'string') {
+              if (entry.moduleSpecifier !== moduleSpecifier) {
+                continue;
+              }
+            } else if (!entry.moduleSpecifier.test(moduleSpecifier)) {
               continue;
             }
-          } else if (!entry.moduleSpecifier.test(moduleSpecifier)) {
-            continue;
+            break;
           }
-        } else if (entry.type === 'first-party') {
-          // First we have to make sure we could resolve the module specifier to
-          // a file path. Otherwise we ignore it, since this is either a broken
-          // import or a dynamic import
-          if (!importEntry.resolvedModulePath) {
-            continue;
-          }
+          case 'first-party': {
+            // First we have to make sure we could resolve the module specifier to
+            // a file path. Otherwise we ignore it, since this is either a broken
+            // import or a dynamic import
+            if (!importEntry.resolvedModulePath) {
+              continue;
+            }
 
-          // Check if the resolved module path matches
-          if (typeof entry.filepath === 'string') {
-            if (entry.filepath !== importEntry.resolvedModulePath) {
-              continue;
+            // Check if the resolved module path matches
+            if (typeof entry.filepath === 'string') {
+              if (entry.filepath !== importEntry.resolvedModulePath) {
+                continue;
+              }
+            } else {
+              const match = entry.filepath.exec(importEntry.resolvedModulePath);
+              if (!match) {
+                continue;
+              }
+              if (match.length > 1) {
+                matches = match.slice(1);
+              }
             }
-          } else {
-            const match = entry.filepath.exec(importEntry.resolvedModulePath);
-            if (!match) {
-              continue;
-            }
-            if (match.length > 1) {
-              matches = match.slice(1);
-            }
+            break;
           }
         }
 

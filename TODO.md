@@ -1,5 +1,6 @@
 - Rename plugin
 - Proper docs site on GitHub Pages
 - Create skill?
-- AI docs audit
+- AI changelog audit
+- Get example monorepo split config working
 - Infer packages w/o a config file via npm/pnpm/yarn workspace analysis

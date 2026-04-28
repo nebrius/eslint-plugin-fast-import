@@ -62,7 +62,7 @@ npm install --save-dev eslint-plugin-fast-import
 
 ## Rules
 
-💼 Configurations enabled in.<br />
+💼 Configuration membership.<br />
 🔧 Automatically fixable by the --fix CLI option.<br />
 ☑️ Set in the recommended configuration.<br />
 🧰 Set in the monorepo configuration.
@@ -151,7 +151,7 @@ To support this "split-level" configuration, Fast Import makes use of configurat
 
 In single-repo mode, all package-level options can live in `settings['fast-import']`, or you can place package-level options in a configuration file, but you cannot have both.
 
-In monorepo mode, package-level options are required to be in a configuration file. Fast Import scans your monorepo for these config files, and uses the presense of these config files to automatically build up a list of packages to analyze. If you do not want a package to be analyzed by Fast Import, simply do not create a config file for that package. Fast Import automatically filters out folders named `node_modules`, `build`, `out`, `dist`, and any folder that starts with a `.`, meaning config files in these folders are ignored.
+In monorepo mode, package-level options are required to be in a configuration file. Fast Import scans your monorepo for these config files, and uses the presence of these config files to automatically build up a list of packages to analyze. If you do not want a package to be analyzed by Fast Import, simply do not create a config file for that package. Fast Import automatically filters out folders named `node_modules`, `build`, `out`, `dist`, and any folder that starts with a `.`, meaning config files in these folders are ignored.
 
 Configuration files are written using JSON-C (JSON with comments) and are named `fast-import.config.json` or `fast-import.config.jsonc`. These files must live in the package root dir as a sibling to `package.json` and `tsconfig.json`. In monorepo mode, you must set `name` in `package.json`.
 
@@ -163,7 +163,7 @@ Type: `string`
 
 Fast Import uses `packageRootDir` to scan for files in the current package. When Fast Import starts up for the first time, it creates a map of all files inside of `packageRootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
 
-Note: Fast Import idoes not analyze files in folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze files in one of these folders, file an issue and we'll find a way to support your use case.
+Note: Fast Import does not analyze files in folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze files in one of these folders, file an issue and we'll find a way to support your use case.
 
 In single-repo mode, you must set `packageRootDir` directly in `settings['fast-import']`.
 
@@ -218,6 +218,77 @@ Example:
 }
 ```
 
+#### mode
+
+Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
+
+When set to `auto`, Fast Import chooses a mode based on the current environment:
+
+- `editor` when running inside supported editors such as VS Code, Cursor, or Windsurf
+- `fix` when Oxlint or ESLint are run with `--fix`, `--fix-dry-run`, or `--fix-type`
+- `one-shot` otherwise
+
+`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint or Oxlint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable update-oriented cache refreshes because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
+
+`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
+
+`editor` builds on `fix` by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout` or `git stash`.
+
+Note: when running in ESLint currently, VS Code, Cursor, and Windsurf are the only supported editors. Oxlint is reliably detected regardless of editor as long as the `--lsp` flag is passed to Oxlint. If you use ESLint and would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use this config file:
+
+```js
+import { defineConfig } from 'eslint/config';
+
+export default defineConfig([
+  ...yourConfig,
+  {
+    settings: {
+      'fast-import': {
+        mode: 'editor',
+      },
+    },
+  },
+]);
+```
+
+#### editorUpdateRate
+
+Type: `number`
+
+Defines the rate in milliseconds at which editor-mode file watching checks for file changes.
+
+Example:
+
+```js
+{
+  settings: {
+    'fast-import': {
+      packageRootDir: import.meta.dirname,
+      editorUpdateRate: 2_000,
+    },
+  },
+}
+```
+
+#### debugLogging
+
+Type: `boolean`
+
+When set to `true`, enables verbose logging that tells you performance numbers, when files are updated, and more.
+
+Example:
+
+```js
+{
+  settings: {
+    'fast-import': {
+      packageRootDir: import.meta.dirname,
+      debugLogging: true,
+    },
+  },
+}
+```
+
 ### Package-level configuration options
 
 The remaining options are package-scoped. In single-repo mode, place them in `settings['fast-import']` or in a `fast-import.config.json`/`fast-import.config.jsonc` file in `packageRootDir` (but not both). In monorepo mode, place them in each package's Fast Import config. The examples below use the single-repo form.
@@ -253,7 +324,7 @@ Note: patterns with a single star after them will match any symbols/files that s
 
 #### externallyImportedFiles / entryPointFiles
 
-Type: `string[]`
+Type: `string[]` / `Record<string, string>`
 
 Files specified with `externallyImportedFiles` or `entryPointFiles` define files whose exports are not imported by code inside of the codebase, but instead by code outside of the codebase. All exports from any matching file are treated as entry points or externally imported. The difference between the two options is:
 
@@ -290,7 +361,7 @@ Entry points will be autopopulated for you if you populate the `exports`/`main` 
 
 Config files matching `/*.config.*` are always included in `externallyImportedFiles` and cannot be overridden.
 
-Next.js is autodetected by Fast Import, and the appropriate externally imported patterns are pre-applied. Fast Import takes into account whether you are using a `src` directory or not, and whether you are using app router or pages router (but not both). If you supply your own patterns, they will override these defaults.
+Next.js is autodetected by Fast Import, and the appropriate externally imported patterns are pre-applied. Fast Import takes into account whether you are using a `src` directory or not, and whether app router patterns should be applied. When app router patterns are applied, pages router patterns are included too because Next.js allows both routers to coexist. If you supply your own patterns, they will override these defaults.
 
 #### ignorePatterns
 
@@ -361,77 +432,6 @@ Example:
 }
 ```
 
-#### mode
-
-Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
-
-When set to `auto`, Fast Import chooses a mode based on the current environment:
-
-- `editor` when running inside supported editors such as VS Code, Cursor, or Windsurf
-- `fix` when Oxlint or ESLint are run with `--fix`, `--fix-dry-run`, or `--fix-type`
-- `one-shot` otherwise
-
-`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint or Oxlint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable any caching because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
-
-`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
-
-`editor` builds on `fix` by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout` or `git stash`.
-
-Note: when running in ESLint currently, VS Code, Cursor, and Windsurf are the only supported editors. Oxlint is reliably detected regardless of editor as long as the `--lsp` flag is passed to Oxlint. If you use ESLint and would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use this config file:
-
-```js
-import { defineConfig } from 'eslint/config';
-
-export default defineConfig([
-  ...yourConfig,
-  {
-    settings: {
-      'fast-import': {
-        mode: 'editor',
-      },
-    },
-  },
-]);
-```
-
-#### editorUpdateRate
-
-Type: `number`
-
-Defines the rate in milliseconds at which editor-mode file watching checks for file changes.
-
-Example:
-
-```js
-{
-  settings: {
-    'fast-import': {
-      packageRootDir: import.meta.dirname,
-      editorUpdateRate: 2_000,
-    },
-  },
-}
-```
-
-#### debugLogging
-
-Type: `boolean`
-
-When set to `true`, enables verbose logging that tells you performance numbers, when files are updated, and more.
-
-Example:
-
-```js
-{
-  settings: {
-    'fast-import': {
-      packageRootDir: import.meta.dirname,
-      debugLogging: true,
-    },
-  },
-}
-```
-
 ### Use in monorepos
 
 Fast Import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
@@ -478,7 +478,7 @@ Package config:
 
 ```json
 {
-  "entryPointFiles": { ".": "src/index.ts" },
+  "entryPointFiles": { ".": "./src/index.ts" },
   "alias": {
     "@/*": "src/*"
   }
@@ -529,15 +529,18 @@ Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs w
 
 Fast Import works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
 
-Configuration is similar to ESLint, except that you spread `fastImportPlugin.configs.all.rules` or `fastImportPlugin.configs.recommended.rules` into Oxlint's `rules` object and keep `settings['fast-import']` at the top level:
+Configuration is similar to ESLint, except that you spread `fastImportPlugin.configs.recommended.rules` and/or `fastImportPlugin.configs.monorepoRecommended.rules` into Oxlint's `rules` object at the top level and add it to the `jsPlugins` array:
 
 ```ts
 import fastImportPlugin from 'eslint-plugin-fast-import';
 
 export default {
-  jsPlugins: [{ name: 'fast-import', specifier: 'eslint-plugin-fast-import' }],
+  jsPlugins: [{
+    name: 'fast-import',
+    specifier: 'eslint-plugin-fast-import',
+  }],
   rules: {
-    ...fastImportPlugin.configs.all.rules,
+    ...fastImportPlugin.configs.recommended.rules,
   },
   settings: {
     'fast-import': {
@@ -620,7 +623,7 @@ For example, the import statement `import { foo } from './bar'` gets boiled down
 }
 ```
 
-This phase is by far the most performance intensive of the three phases due to file reads and AST parsing, comprising over 80% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This correlation is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
+This phase is by far the most performance intensive of the four phases due to file reads and AST parsing, comprising over 80% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This correlation is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
 
 For example, this phase takes 1.26 seconds on a cold cache running on the VS Code codebase on my laptop, out of 1.52 seconds total. Subsequent file edits in the editor only take ~1ms due to the high cacheability of this phase.
 
@@ -732,7 +735,7 @@ According to the Node.js spec, it's legal to define an export like:
   "exports": {
     "./utils/*": "./src/*/utils/*/something/*.ts"
   }
-}*
+}
 ```
 
 In this case, the single \* from the subpath gets repeated in the file path.
