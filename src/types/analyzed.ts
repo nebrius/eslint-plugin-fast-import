@@ -128,6 +128,7 @@ type AnalyzedExportBase = {
     importEntry: AnalyzedSingleImport | AnalyzedSingleReexport;
   }>;
 
+  // Note: this data is not computed until phase 4
   /**
    * A list of files and import entries that imports this export from another
    * package in the same monorepo.
@@ -220,6 +221,7 @@ export type AnalyzedPackageInfo = Omit<ResolvedPackageInfo, 'files'> & {
    */
   files: Map<string, AnalyzedFileDetails>;
 
+  // Note: this data is not computed until phase 4
   /**
    * The entry point files for this package that maps from import specifer
    * (package name + subpath) to file details for quick lookup

@@ -1,4 +1,5 @@
 - Rename plugin
 - Proper docs site on GitHub Pages
-- Audit AGENTS.md
-- Create skill
+- Create skill?
+- AI docs audit
+- Infer packages w/o a config file via npm/pnpm/yarn workspace analysis

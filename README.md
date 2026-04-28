@@ -65,7 +65,7 @@ npm install --save-dev eslint-plugin-fast-import
 💼 Configurations enabled in.<br />
 🔧 Automatically fixable by the --fix CLI option.<br />
 ☑️ Set in the recommended configuration.<br />
-🧰 Set in the all configuration.
+🧰 Set in the monorepo configuration.
 
 There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
 
@@ -75,9 +75,11 @@ These rules inspect how you're using imports/exports to look for semantic issues
 
 | Name                                                                             | 💼    | 🔧  |
 | -------------------------------------------------------------------------------- | ----- | --- |
-| [no-cycle](src/rules/no-cycle/README.md)                                         | 🧰 ☑️ |     |
-| [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           | 🧰 ☑️ |     |
-| [no-unused-exports](src/rules/no-unused-exports/README.md)                       | 🧰 ☑️ |     |
+| [no-cycle](src/rules/no-cycle/README.md)                                         |    ☑️ |     |
+| [no-test-only-imports](src/rules/no-test-only-imports/README.md)                 |    ☑️ |     |
+| [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           |    ☑️ |     |
+| [no-unused-exports](src/rules/no-unused-exports/README.md)                       |    ☑️ |     |
+| [no-unused-package-exports](src/rules/no-unused-package-exports/README.md)       | 🧰    |     |
 | [no-node-builtins](src/rules/no-node-builtins/README.md) \*                      |       |     |
 | [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*\*          |       |     |
 
@@ -91,8 +93,8 @@ These rules govern the style of imports/exports.
 
 | Name                                                                             | 💼    | 🔧  |
 | -------------------------------------------------------------------------------- | ----- | --- |
-| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 | 🧰 ☑️ | 🔧  |
-| [require-node-prefix](src/rules/require-node-prefix/README.md)                   | 🧰    | 🔧  |
+| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 |    ☑️ | 🔧  |
+| [require-node-prefix](src/rules/require-node-prefix/README.md)                   |    ☑️ | 🔧  |
 
 
 ### Footguns
@@ -101,16 +103,16 @@ These rules are designed to prevent certain types of imports/exports that can le
 
 | Name                                                                             | 💼    | 🔧  |
 | -------------------------------------------------------------------------------- | ----- | --- |
-| [no-empty-entry-points](src/rules/no-empty-entry-points/README.md)               | 🧰 ☑️ |     |
-| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             | 🧰 ☑️ |     |
-| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) | 🧰 ☑️ |     |
-| [no-named-as-default](src/rules/no-named-as-default/README.md)                   | 🧰 ☑️ |     |
-| [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) | 🧰 ☑️ |     |
-| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               | 🧰 ☑️ |     |
+| [no-empty-entry-points](src/rules/no-empty-entry-points/README.md)               |    ☑️ |     |
+| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             |    ☑️ |     |
+| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) |    ☑️ |     |
+| [no-named-as-default](src/rules/no-named-as-default/README.md)                   |    ☑️ |     |
+| [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) |    ☑️ |     |
+| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               |    ☑️ |     |
 
 ## Configuration
 
-Fast Import supports ESLint 9+ and Oxlint. Configure `settings['fast-import']` yourself, then enable one of `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.all`, or `fastImportPlugin.configs.off`.
+Fast Import supports ESLint 9+ and Oxlint. Configure `settings['fast-import']` yourself, then enable one of `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.monorepoRecommended`, or `fastImportPlugin.configs.off`.
 
 For most use cases, you can enable Fast Import with:
 
@@ -137,7 +139,7 @@ In monorepos with multiple packages, you can either:
 - Define separate configs per package using the single-repo setup described above.
 - Use `monorepoRootDir` instead of `packageRootDir` in a single root config combined with Fast Import config files.
 
-See [Use in monorepos](#use-in-monorepos) for more details.
+If you use a single root config, you can enable the monorepoRecommended configuration. Note: if you also want the recommended config, enable both sets because they are non-overlapping. See [Use in monorepos](#use-in-monorepos) for more details.
 
 Fast Import supports a number of configuration options. Fast Import attempts to auto-detect as many as possible, but you may need to tweak or supplement these options.
 
@@ -440,7 +442,7 @@ Monorepos can be configured in one of two ways.
 
 Use this when you want one top-level ESLint or Oxlint config to cover the whole monorepo.
 
-Warning: using a single root config exclusively can cause performance issues. See Option 3 for a more performant approach and explanaition of performance issues with single root configs.
+Warning: using a single root config exclusively can cause performance issues. See Option 3 for a more performant approach and explanation of performance issues with single root configs.
 
 1. Set `settings['fast-import'].monorepoRootDir` in your root ESLint or Oxlint config.
 2. Add a `fast-import.config.json`/`fast-import.config.jsonc` config file to each package you want Fast Import to analyze.
@@ -489,6 +491,8 @@ Fast Import discovers package configs recursively under `monorepoRootDir`. Once 
 
 You can also keep monorepo packages on separate ESLint configs using the same single-repo setup shown earlier, with each package setting its own `packageRootDir`.
 
+Warning: the `monorepoRecommended` configuration does not work with this option because it won't see any other packages.
+
 Example package-local config:
 
 ```js
@@ -519,7 +523,7 @@ This performance difference can be especially important when running ESLint in a
 
 To combine these two options, you use per-package Fast Import configuration files. The root config uses `monorepoRootDir` and discovers each package's config file recursively. The per-package config sets `packageRootDir` and Fast Import will pick up the config file for that package automatically.
 
-Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you should use option 1. ESLint handles nested configs without any issues.
+Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you may need to use option 1. ESLint handles nested configs without any issues.
 
 ### Using with Oxlint
 
@@ -596,7 +600,7 @@ Details aside, we can safely say that all three libraries have about the same le
 
 ## Algorithm
 
-Fast Import works by using a three phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
+Fast Import works by using a four phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
 
 ### Phase 1: AST analysis
 
@@ -640,9 +644,9 @@ Details for the information computed in this stage can be viewed in the [types f
 
 ### Phase 3: Import graph analysis
 
-This final stage traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of every file that imports a specific export, and linking each import statement to a specific export statement.
+This third phase traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of every file that imports a specific export, and linking each import statement to a specific export statement.
 
-This phase is the least performance intensive, representing only about 3% of total run time. On the VS Code Codebase, this phase takes 48ms, out of 1.52 seconds total.
+This phase is the second least performance intensive, representing only about 3% of total run time. On the VS Code Codebase, this phase takes 48ms, out of 1.52 seconds total.
 
 Linking imports to exports can be non-trivial, especially if there are a lot of reexports. For example:
 
@@ -663,6 +667,14 @@ export default 10; // Export for import in file a.ts!
 As we've seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overall performance anyways.
 
 Details for the information computed in this stage can be viewed in the [types file for analyzed information](./src/types/analyzed.ts).
+
+### Phase 4: Monorepo analysis
+
+This fourth phase collects the import graph analysis from each package in the monorepo to analyze cross-package imports and exports. This phase produces data similar to the third phase, except it utilizes information from the third phase to short-circuit many of its computations.
+
+This phase is the least performance intensive, representing less than 1% of total run time. On the VS Code Codebase, this phase takes 10ms, out of 1.52 seconds total. Similar to the third phase, this phase is not easily cached, but any caching would have negligible impact on total performance.
+
+Details for the information computed in this stage can also be viewed in the [types file for analyzed information](./src/types/analyzed.ts). Data populated by this phase have comments indicating that they are phase 4 data.
 
 ## Limitations
 
