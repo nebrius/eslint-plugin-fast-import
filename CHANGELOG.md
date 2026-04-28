@@ -4,35 +4,90 @@
 
 Version 3 introduces a fairly large refactor of the plugin's configuration system. This refactor enables users to configure a single, root-level ESLint/Oxlint config in a monorepo that covers all packages, instead of requiring a separate ESLint/Oxlint config in each package. As such, there are a variety of smaller breaking changes detailed below.
 
-- BREAKING CHANGE: Removed the `consistent-file-extensions` rule
-  - This rule papered over gaps in tooling that is no longer needed, and was difficult to use and maintain properly
-- BREAKING CHANGE: Removed `all()` and `recommended()` config helpers
+### Breaking changes
+
+#### Configuration
+
+- Removed `all()` and `recommended()` config helpers, and removed the `all` config
   - These helpers became less useful due to other changes
   - Given that they were a departure from standard plugin configuration mechanisms, I think the value they brought is now outweighed by the confusion they caused
-  - Use `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.all`, and `fastImportPlugin.configs.off`
+  - Use `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.monorepoRecommended`, and `fastImportPlugin.configs.off`
+  - `monorepoRecommended` is additive to `recommended`, not a replacement; enable both if you want the standard recommended rules plus the monorepo-only rule
   - Put plugin settings in `settings['fast-import']`
-- BREAKING CHANGE: Replaced `entryPoints` with `entryPointFiles` and `externallyImported` with `externallyImportedFiles`
+  - The `all` config was removed because, with the rules that were previously only in `all` now folded into `recommended`, there was no longer any meaningful difference between the two
+- Replaced `entryPoints` with `entryPointFiles` and `externallyImported` with `externallyImportedFiles`
   - Previously, `entryPoints`/`externallyImported` indicated a list of exports from a given file that were considered for analysis. In practice this has proven difficult for users to maintain, so basically everyone wrote `/.*/` to include all exports from that file.
   - Regexes themselves are tricky, since they're not serializable, so we also added a change to allow `{ regexp: "..." }` objects to be used instead of strings, further complicating configuration
   - The new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
-- BREAKING CHANGE: `rootDir` was renamed to `packageRootDir` across all API surfaces
+  - `entryPointFiles` now uses a `package.json` `exports`-style subpath map instead of per-symbol file entries
+  - `externallyImportedFiles` is now a list of gitignore-style file patterns
+- Reworked `fast-import.config.json`/`fast-import.config.jsonc` handling
+  - Repo-scoped settings such as `packageRootDir`/`monorepoRootDir`, `mode`, `editorUpdateRate`, and `debugLogging` now live only in `settings['fast-import']`
+  - Fast Import config files are now package-scoped and must live in the package root
+  - In single-repo mode, a package config file in `packageRootDir` is auto-discovered
+  - In single-repo mode, you can define package-scoped options in `settings['fast-import']` or in the package config file, but not both
+- Renamed `rootDir` to `packageRootDir` across all API surfaces
   - The previous naming was a little confusing. It is intended to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause Fast Import to not parse `tsconfig.json` and automatically detect aliases, etc., even though tsconfig's `rootDir` option _is_ intended to point to `src`
-- BREAKING CHANGE: `getESMInfo` now returns `packageSettings` for the current package instead of `settings`, reflecting the new monorepo-aware settings model
-  - In monorepo root-config mode, package settings are discovered recursively from `fast-import.config.json` files
-  - The directory containing each `fast-import.config.json` becomes that package's `packageRootDir`, and nested `fast-import.config.json` files are not allowed
-- BREAKING CHANGE: Default ignore folder list expanded to include folders that start with a dot (e.g. `.git`, `.next`, etc.) and `out`
-- BREAKING CHANGE: Config files matching `/*.config.*` are now automatically treated as externally imported
+- `recommended` config now sets `require-node-prefix` to `error`
+  - Previously this rule was set to `off` in `recommended` and `error` only in `all`. With `all` removed, `recommended` now enables it.
+  - To preserve the previous behavior, add `'fast-import/require-node-prefix': 'off'` to your config.
+- Default ignore folder list expanded to include folders that start with a dot (e.g. `.git`, `.next`, etc.) and `out`
+  - The hard-coded list was also adjusted: `node_modules`, `dist`, `build`, and `out` are always ignored, and any path segment starting with `.` is ignored (which subsumes the previous explicit `.git` entry)
+- Config files matching `/*.config.*` are now automatically treated as externally imported
   - If you previously specified these entries in your config, you can remove them
-- BREAKING CHANGE: The `no-unused-exports` was split into two rules: `no-unused-exports` and `no-test-only-imports`
-  - The previous version of `no-unused-exports` used to check both conditions, with test-only imports configurable by an option
-  - This setup did not allow for test-only imports to be disabled for a specific export without also disabling the unused export checl, which is not desirable
-  - The two new rules no longer take any options
-- `no-test-only-imports` and `no-test-imports-in-prod` were both updated to be aware of non-test file exports prefixed with `_testOnly`. When a non-test file exports something with this prefix, it is considered a test-only export and can be imported by test files but not by production code.
-- BREAKING CHANGE: The `all` config has been removed. Due to the removal of `consistent-file-extensions`, there was no longer any difference between these two configs
-- Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
-- Fixed a bug where imports that resolved to third party type weren't getting root module type set correctly
 
-## 2.2.1 (10/13/2025)
+#### Rules
+
+- Removed the `consistent-file-extensions` rule
+  - This rule papered over gaps in tooling that is no longer needed, and was difficult to use and maintain properly
+- The `no-unused-exports` rule was split into two rules: `no-unused-exports` and `no-test-only-imports`
+  - The previous version of `no-unused-exports` also checked whether exports were only imported by tests, and `allowNonTestTypeExports` controlled whether type-only exports were exempt from that check
+  - To preserve the previous behavior if you manually enabled `fast-import/no-unused-exports`, also enable `fast-import/no-test-only-imports`
+  - There is no direct replacement for `allowNonTestTypeExports: false`; `no-test-only-imports` now always ignores type-only exports
+  - The two new rules no longer take any options
+
+#### Helper API
+
+- `getESMInfo` return shape changed:
+  - `projectInfo` was renamed to `packageInfo`, and `packageInfo.rootDir` was renamed to `packageInfo.packageRootDir`
+  - `settings` was renamed to `packageSettings`, reflecting the new monorepo-aware settings model
+- `isNonTestFile` signature simplified from `isNonTestFile(filePath, rootDir, settings)` to `isNonTestFile(filePath)`. Settings are now resolved internally from the cached package settings for the file.
+- `registerUpdateListener` callback now receives a per-package `packageRootDir` rather than the configured top-level root. In monorepo mode this means the listener may be invoked once per package.
+- See `src/types/base.ts`, `src/types/resolved.ts`, and `src/types/analyzed.ts` for details on the type-shape changes that come with the renames above.
+
+### Added
+
+#### Configuration
+
+- Monorepo root-config mode
+  - Set `monorepoRootDir` (mutually exclusive with `packageRootDir`) in your root ESLint/Oxlint config to enable a single config that covers all packages
+  - Repo-scoped settings stay in `settings['fast-import']`; package-scoped settings are discovered recursively from `fast-import.config.json`/`fast-import.config.jsonc` files
+  - Only packages with a discovered `fast-import.config.json`/`fast-import.config.jsonc` file are analyzed in this mode
+  - The directory containing each config file becomes that package's `packageRootDir`, and nested config files are not allowed
+  - Monorepo packages should define `package.json.name`; cross-package analysis and package entry-point matching depend on it
+- Support for `fast-import.config.jsonc` files, including comments and trailing commas in both `.json` and `.jsonc` config files
+- Next.js auto-detection: when Next.js is detected, default `externallyImportedFiles` patterns for app router, pages router, and mixed-router projects (with or without a `src/` directory) are pre-applied. User-supplied patterns override the defaults.
+- Entry point inference: when `package.json` declares `main`/`exports` and `tsconfig.json` declares both `outDir` and `rootDir`, Fast Import now derives `entryPointFiles` from the compiled `exports` paths automatically. User-supplied `entryPointFiles` still takes precedence.
+
+#### Rules
+
+- Added the `no-empty-entry-points` rule (in `recommended`): flags files matched by `entryPointFiles`/`externallyImportedFiles` that have no exports
+- Added the `no-unnamed-entry-point-exports` rule (in `recommended`): flags bare `export * from './x'` in entry-point files; named barrel reexports (`export * as foo from ...`) are still allowed
+- Added the `no-unused-package-exports` rule (in `monorepoRecommended`): cross-package version of `no-unused-exports` that reports entry-point exports that are not imported by any other package in the monorepo
+  - `monorepoRecommended` only enables this monorepo-only rule; also enable `recommended` if you want the standard recommended rules
+  - This rule depends on `monorepoRootDir` package discovery and does not work when Fast Import only sees isolated package-local configs
+- `no-test-only-imports` and `no-test-imports-in-prod` were both updated to be aware of non-test file exports prefixed with `_testOnly`. When a non-test file exports something with this prefix, it is considered a test-only export and can be imported by test files but not by production code.
+- Cross-package import analysis now considers dynamic imports (statically-resolvable specifiers are tracked; non-static specifiers are skipped) and resolves third-party package exports using `package.json` `exports` subpaths and conditions
+
+### Fixed
+
+- Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
+- Fixed a bug where imports that resolved to third party types weren't getting root module type set correctly
+- Fixed a bug where Oxlint was not running in editor mode
+- Fixed a bug where files outside any discovered package would cause analysis failures; these files are now safely skipped
+- Hardened `package.json` reading against malformed or partially-populated files
+
+## 2.2.1 (4/9/2026)
 
 - Added missing export for `getLocFromRange`
 
