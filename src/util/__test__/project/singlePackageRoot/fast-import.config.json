@@ -1,0 +1,5 @@
+{
+  "entryPointFiles": {
+    ".": "./index.ts"
+  }
+}

@@ -46,12 +46,12 @@ it('Updates cache when a new file is added', () => {
   expect(packageInfo.files.size).toBe(0);
   expect(packageInfo).toMatchAnalyzedSpec({});
 
-  updateCacheForFile(
-    SINGLEREPO_FILE_A,
-    'export const a = 10;',
-    parseContents('export const a = 10;'),
-    settings
-  );
+  updateCacheForFile({
+    filePath: SINGLEREPO_FILE_A,
+    fileContents: 'export const a = 10;',
+    ast: parseContents('export const a = 10;'),
+    packageSettings: settings,
+  });
 
   packageInfo = getPackageInfo(SINGLEREPO_DIR);
   expect(packageInfo).toMatchAnalyzedSpec({

@@ -1,6 +1,6 @@
 - Rename plugin
 - Proper docs site on GitHub Pages
 - Create skill?
-- AI changelog audit
-- Get example monorepo split config working
-- Infer packages w/o a config file via npm/pnpm/yarn workspace analysis
+- Update repo and changelog with new package discovery mechanism
+- Codebase wide implementation review
+- Codebase wide test review

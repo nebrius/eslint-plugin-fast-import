@@ -19,6 +19,8 @@ import { noUnusedPackageExports } from '../rule.js';
 //
 // The entryPointSpecifier early-return test targets packages/one/scratch.ts
 // (not internal.ts) so it doesn't disturb the reexport source.
+// project/lerna.json is load-bearing: @manypkg uses it to detect this fixture
+// as a Lerna monorepo.
 const MONOREPO_ROOT_DIR = join(getDirname(), 'project');
 const PACKAGE_ONE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');
 const PACKAGE_TWO_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'two');

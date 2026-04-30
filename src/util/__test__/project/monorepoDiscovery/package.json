@@ -1,0 +1,7 @@
+{
+  "name": "monorepo-discovery-fixture",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

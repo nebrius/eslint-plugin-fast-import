@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, relative } from 'node:path';
 
 import { TSError } from '@typescript-eslint/typescript-estree';
 import type { TSESTree } from '@typescript-eslint/utils';
@@ -176,6 +176,7 @@ export function initializeRepo(
 // eslint-disable-next-line fast-import/no-test-only-imports
 export function initializePackage({
   packageRootDir,
+  repoRootDir,
   packageName,
   wildcardAliases,
   fixedAliases,
@@ -224,7 +225,13 @@ export function initializePackage({
   analyzedPackageInfos.set(packageRootDir, analyzedPackageInfo);
   const analyzeEnd = performance.now();
 
-  debug(`Initial computation files complete :`);
+  if (packageRootDir !== repoRootDir) {
+    debug(
+      `Initial computation files complete for ${relative(repoRootDir, packageRootDir)}`
+    );
+  } else {
+    debug(`Initial computation files complete :`);
+  }
   debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
   debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
   debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);
@@ -246,11 +253,11 @@ export function initializePackage({
   }
 
   debug(
-    `Package contains ${analyzedPackageInfo.files.size.toLocaleString()} files with:`
+    `  Package contains ${analyzedPackageInfo.files.size.toLocaleString()} files with:`
   );
-  debug(`  ${numImports.toLocaleString()} imports`);
-  debug(`  ${numExports.toLocaleString()} exports`);
-  debug(`  ${numReexports.toLocaleString()} reexports`);
+  debug(`    ${numImports.toLocaleString()} imports`);
+  debug(`    ${numExports.toLocaleString()} exports`);
+  debug(`    ${numReexports.toLocaleString()} reexports`);
 
   return true;
 }
@@ -260,7 +267,7 @@ function initializeRepoInfo() {
   computeRepoInfo(analyzedPackageInfos);
   const analyzeEnd = performance.now();
   debug(
-    `Initialized repository info in ${formatMilliseconds(analyzeEnd - analyzestart)}`
+    `Initialized cross-package info in ${formatMilliseconds(analyzeEnd - analyzestart)}`
   );
 }
 
@@ -287,13 +294,21 @@ type Changes = {
 
 // Batch updates file changes. Note that the order of operations (delete, then
 // add, then modified) is critical
-export function updateCacheFromFileSystem(
-  packageRootDir: string,
-  changes: Changes,
-  packageJsons: string[],
-  packageSettings: ParsedPackageSettings,
-  operationStart: number
-) {
+export function updateCacheFromFileSystem({
+  repoRootDir,
+  packageRootDir,
+  changes,
+  packageJsons,
+  packageSettings,
+  operationStart,
+}: {
+  repoRootDir: string;
+  packageRootDir: string;
+  changes: Changes;
+  packageJsons: string[];
+  packageSettings: ParsedPackageSettings;
+  operationStart: number;
+}) {
   const basePackageInfo = getBasePackageInfo(packageRootDir);
   let resolvedPackageInfo = getResolvedPackageInfo(packageRootDir);
   let analyzedPackageInfo = getAnalyzedPackageInfo(packageRootDir);
@@ -441,8 +456,12 @@ export function updateCacheFromFileSystem(
     initializeRepoInfo();
     const packageInfoEnd = performance.now();
 
+    const packageLabel =
+      repoRootDir !== packageRootDir
+        ? ` for ${relative(repoRootDir, packageRootDir)}`
+        : '';
     debug(
-      `Synchronized changes from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
+      `Synchronized changes${packageLabel} from filesystem (deleted=${numDeletes.toLocaleString()} added=${numAdditions.toLocaleString()} modified=${numModified.toLocaleString()}):`
     );
     debug(
       `  total:         ${formatMilliseconds(analyzeEnd - operationStart)}`
@@ -459,17 +478,23 @@ export function updateCacheFromFileSystem(
   return false;
 }
 
-export function updateCacheForFile(
-  filePath: string,
-  fileContents: string,
-  ast: TSESTree.Program,
-  {
+export function updateCacheForFile({
+  filePath,
+  fileContents,
+  ast,
+  packageSettings: {
     entryPoints,
     externallyImported,
     packageRootDir,
+    repoRootDir,
     packageName,
-  }: ParsedPackageSettings
-) {
+  },
+}: {
+  filePath: string;
+  fileContents: string;
+  ast: TSESTree.Program;
+  packageSettings: ParsedPackageSettings;
+}) {
   const basePackageInfo = getBasePackageInfo(filePath);
   const resolvedPackageInfo = getResolvedPackageInfo(filePath);
   const analyzedPackageInfo = getAnalyzedPackageInfo(filePath);
@@ -637,7 +662,7 @@ export function updateCacheForFile(
     initializeRepoInfo();
     const packageInfoEnd = performance.now();
 
-    debug(`${filePath.replace(packageRootDir, '')} add complete:`);
+    debug(`${filePath.replace(repoRootDir, '')} add complete:`);
     debug(`  total:         ${formatMilliseconds(analyzeEnd - baseStart)}`);
     debug(`  base info:     ${formatMilliseconds(baseEnd - baseStart)}`);
     debug(`  resolved info: ${formatMilliseconds(resolveEnd - resolveStart)}`);

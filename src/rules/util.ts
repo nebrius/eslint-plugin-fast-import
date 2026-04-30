@@ -56,12 +56,12 @@ export function getESMInfo(context: GenericContext) {
   // call any esm change subscribers
   if (
     repoSettings.mode !== 'one-shot' &&
-    updateCacheForFile(
-      context.filename,
-      context.sourceCode.getText(),
-      context.sourceCode.ast,
-      packageSettings
-    )
+    updateCacheForFile({
+      filePath: context.filename,
+      fileContents: context.sourceCode.getText(),
+      ast: context.sourceCode.ast,
+      packageSettings,
+    })
   ) {
     for (const updateListener of updateListeners) {
       updateListener(packageSettings.packageRootDir);
@@ -175,17 +175,18 @@ async function initializeFileWatching(
 
       // Update the cache
       if (
-        updateCacheFromFileSystem(
-          packageSettings.packageRootDir,
-          {
+        updateCacheFromFileSystem({
+          repoRootDir: packageSettings.repoRootDir,
+          packageRootDir: packageSettings.packageRootDir,
+          changes: {
             added,
             deleted,
             modified,
           },
-          latestUpdatedTimes.packageJsons,
+          packageJsons: latestUpdatedTimes.packageJsons,
           packageSettings,
-          start
-        )
+          operationStart: start,
+        })
       ) {
         for (const updateListener of updateListeners) {
           updateListener(packageSettings.packageRootDir);

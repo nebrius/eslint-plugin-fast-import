@@ -3,11 +3,13 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { basename, dirname, join, relative, sep } from 'node:path';
 
+import { getPackagesSync } from '@manypkg/get-packages';
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
 
 import type { IgnorePattern } from '../settings/settings.js';
 import { InternalError } from './error.js';
+import { debug } from './logging.js';
 
 type PotentialFile = {
   filePath: string;
@@ -52,37 +54,24 @@ export function findPackageConfigFile(dir: string): string | undefined {
 // package that we want to analyze in a monorepo. We use our own recursive
 // implementation instead of a library like glob to avoid recusring into folders
 // that are a) very large and b) guaranteed to not be analyzed.
-export function getMonorepoPackageSettings(packageRootDir: string): string[] {
-  const packages: string[] = [];
-  const directoryStack = [packageRootDir];
-  while (directoryStack.length) {
-    const currentDir = directoryStack.pop();
-    if (!currentDir) {
-      break;
-    }
-    if (
-      DEFAULT_IGNORE_DIRECTORIES.includes(basename(currentDir)) ||
-      basename(currentDir).startsWith('.')
-    ) {
-      continue;
-    }
-    const configFile = findPackageConfigFile(currentDir);
-    if (configFile) {
-      packages.push(configFile);
-    } else {
-      // Only continue recursing if we didn't find a config file, since we don't
-      // support nested config files by design
-      const directoryContents = readdirSync(currentDir, {
-        withFileTypes: true,
-      });
-      for (const item of directoryContents) {
-        if (item.isDirectory()) {
-          directoryStack.push(join(currentDir, item.name));
-        }
-      }
-    }
+export function getRawMonorepoPackageSettings(repoRootDir: string) {
+  const rawPackageSettings: {
+    packageRootDir: string;
+    configFileContents: string;
+  }[] = [];
+
+  const packageDirs = getPackagesSync(repoRootDir).packages;
+  debug('Packages to analyze:');
+  for (const packageDir of packageDirs) {
+    debug(`  ${relative(repoRootDir, packageDir.dir)}`);
+    const configFile = findPackageConfigFile(packageDir.dir);
+    rawPackageSettings.push({
+      packageRootDir: packageDir.dir,
+      configFileContents: configFile ? readFileSync(configFile, 'utf-8') : '{}',
+    });
   }
-  return packages;
+
+  return rawPackageSettings;
 }
 
 export function getFilesSync(

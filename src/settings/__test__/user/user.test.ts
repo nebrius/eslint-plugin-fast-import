@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
@@ -675,24 +676,28 @@ it('markSettingsForRefresh forces a re-read of user settings (monorepo)', () => 
 
 it('Throws a formatted error when the config file contains invalid JSON', () => {
   const configFilePath = join(TEST_PACKAGE_DIR, 'invalid.config.json');
+  const packageRootDir = join(TEST_PACKAGE_DIR, 'packages', 'foo');
   expect(() =>
     getUserPackageSettingsFromConfigFile({
-      configFilePath,
+      configFileContents: readFileSync(configFilePath, 'utf-8'),
       repoRootDir: TEST_PACKAGE_DIR,
+      packageRootDir,
     })
-  ).toThrow(`Failed to parse package config file ${configFilePath}:`);
+  ).toThrow(`Failed to parse config file for package ${packageRootDir}:`);
 });
 
 it('Parses a JSONC config file with comments and trailing commas', () => {
   const configFilePath = join(TEST_PACKAGE_DIR, 'jsonc.config.jsonc');
+  const packageRootDir = join(TEST_PACKAGE_DIR, 'packages', 'foo');
   const settings = getUserPackageSettingsFromConfigFile({
-    configFilePath,
+    configFileContents: readFileSync(configFilePath, 'utf-8'),
     repoRootDir: TEST_PACKAGE_DIR,
+    packageRootDir,
   });
   expect(settings).toEqual({
     entryPointFiles: { '.': './src/a.ts' },
     repoRootDir: TEST_PACKAGE_DIR,
-    packageRootDir: TEST_PACKAGE_DIR,
+    packageRootDir,
   });
 });
 

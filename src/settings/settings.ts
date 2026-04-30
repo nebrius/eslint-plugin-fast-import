@@ -7,7 +7,7 @@ import ignore from 'ignore';
 import type { GenericContext } from '../types/context.js';
 import { InternalError } from '../util/error.js';
 import {
-  getMonorepoPackageSettings,
+  getRawMonorepoPackageSettings,
   trimTrailingPathSeparator,
 } from '../util/files.js';
 import { getSubpathEntry } from '../util/getSubpathEntry.js';
@@ -163,11 +163,11 @@ export function getRepoSettings(
   if (rest.type === 'singlerepo') {
     populatePackageSettingsCache(rest.packageSettings);
   } else {
-    const packageConfigFiles = getMonorepoPackageSettings(rest.repoRootDir);
+    const packageConfigFiles = getRawMonorepoPackageSettings(rest.repoRootDir);
     for (const packageConfigFile of packageConfigFiles) {
       const packageSettings = getUserPackageSettingsFromConfigFile({
         repoRootDir: rest.repoRootDir,
-        configFilePath: packageConfigFile,
+        ...packageConfigFile,
       });
       populatePackageSettingsCache(packageSettings);
     }

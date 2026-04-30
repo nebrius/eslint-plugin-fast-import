@@ -490,7 +490,12 @@ it('Cross-package barrelImport populates externallyImportedBy on every entry-poi
 it('Package isolation: adding a file to packageOne does not affect packageTwo', () => {
   const { packageOneSettings } = initialize();
 
-  updateCacheForFile(FILE_TS_NEW_PKG1, '', EMPTY_AST, packageOneSettings);
+  updateCacheForFile({
+    filePath: FILE_TS_NEW_PKG1,
+    fileContents: '',
+    ast: EMPTY_AST,
+    packageSettings: packageOneSettings,
+  });
 
   const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -513,7 +518,12 @@ it('Updates packageOne cache when a new file is added via updateCacheForFile', (
     expectedPkg1({ withCrossPackage: true })
   );
 
-  updateCacheForFile(FILE_TS_NEW_PKG1, '', EMPTY_AST, packageOneSettings);
+  updateCacheForFile({
+    filePath: FILE_TS_NEW_PKG1,
+    fileContents: '',
+    ast: EMPTY_AST,
+    packageSettings: packageOneSettings,
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -530,7 +540,12 @@ it('Updates packageTwo cache when a new file is added via updateCacheForFile', (
   let pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec(EXPECTED_PKG2);
 
-  updateCacheForFile(FILE_TS_NEW_PKG2, '', EMPTY_AST, packageTwoSettings);
+  updateCacheForFile({
+    filePath: FILE_TS_NEW_PKG2,
+    fileContents: '',
+    ast: EMPTY_AST,
+    packageSettings: packageTwoSettings,
+  });
 
   pkg2Info = getPackageInfo(PACKAGE_TWO_DIR);
   expect(pkg2Info).toMatchAnalyzedSpec({
@@ -554,12 +569,12 @@ export type AlsoOne = number;
 export type Another = string;
 `;
 
-  updateCacheForFile(
-    FILE_A,
-    FILE_A_UPDATED_CONTENTS,
-    parseContents(FILE_A_UPDATED_CONTENTS),
-    packageOneSettings
-  );
+  updateCacheForFile({
+    filePath: FILE_A,
+    fileContents: FILE_A_UPDATED_CONTENTS,
+    ast: parseContents(FILE_A_UPDATED_CONTENTS),
+    packageSettings: packageOneSettings,
+  });
 
   const EXPECTED_FILE_A_UPDATED = buildExpectedFileA({
     withCrossPackage: true,
@@ -589,17 +604,18 @@ it('Updates packageOne package cache in bulk for a code file', () => {
 
   // Add a new file to packageOne
   writeFileSync(FILE_TS_NEW_PKG1, '');
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [{ filePath: FILE_TS_NEW_PKG1, latestUpdatedAt: Date.now() }],
       modified: [],
       deleted: [],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -614,17 +630,18 @@ it('Updates packageOne package cache in bulk for a code file', () => {
 
   // Modify the new file
   writeFileSync(FILE_TS_NEW_PKG1, `console.log()`);
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [{ filePath: FILE_TS_NEW_PKG1, latestUpdatedAt: Date.now() }],
       deleted: [],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -636,17 +653,18 @@ it('Updates packageOne package cache in bulk for a code file', () => {
 
   // Modify with invalid code (should keep previous state)
   writeFileSync(FILE_TS_NEW_PKG1, `+_)(*&^%$%)`);
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [{ filePath: FILE_TS_NEW_PKG1, latestUpdatedAt: Date.now() }],
       deleted: [],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -658,17 +676,18 @@ it('Updates packageOne package cache in bulk for a code file', () => {
 
   // Delete the file
   unlinkSync(FILE_TS_NEW_PKG1);
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [],
       deleted: [FILE_TS_NEW_PKG1],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -689,17 +708,18 @@ it('Updates package cache in bulk for a non-code file in packageOne', () => {
 
   // Add a JSON file to packageOne
   writeFileSync(FILE_JSON_NEW, '{}');
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [{ filePath: FILE_JSON_NEW, latestUpdatedAt: Date.now() }],
       modified: [],
       deleted: [],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -714,17 +734,18 @@ it('Updates package cache in bulk for a non-code file in packageOne', () => {
 
   // Modify the JSON file
   writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [{ filePath: FILE_JSON_NEW, latestUpdatedAt: Date.now() }],
       deleted: [],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -736,17 +757,18 @@ it('Updates package cache in bulk for a non-code file in packageOne', () => {
 
   // Delete the JSON file
   unlinkSync(FILE_JSON_NEW);
-  updateCacheFromFileSystem(
-    packageOneSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageOneSettings.repoRootDir,
+    packageRootDir: packageOneSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [],
       deleted: [FILE_JSON_NEW],
     },
-    [],
-    packageOneSettings,
-    Date.now()
-  );
+    packageJsons: [],
+    packageSettings: packageOneSettings,
+    operationStart: Date.now(),
+  });
 
   pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   expect(pkg1Info).toMatchAnalyzedSpec(
@@ -766,12 +788,12 @@ it('Cache update adds new cross-package singleImport', () => {
 const n: AlsoOne = 1;
 console.log(n);
 `;
-  updateCacheForFile(
-    FILE_TS_NEW_PKG2,
-    NEW_FILE_CONTENTS,
-    parseContents(NEW_FILE_CONTENTS),
-    packageTwoSettings
-  );
+  updateCacheForFile({
+    filePath: FILE_TS_NEW_PKG2,
+    fileContents: NEW_FILE_CONTENTS,
+    ast: parseContents(NEW_FILE_CONTENTS),
+    packageSettings: packageTwoSettings,
+  });
 
   const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);
@@ -819,12 +841,12 @@ it('Cache update on an existing file introduces a new cross-package singleImport
 import type { AlsoOne } from '@test/package-one/a';
 export type Two = AlsoOne;
 `;
-  updateCacheForFile(
-    FILE_C,
-    NEW_C_CONTENTS,
-    parseContents(NEW_C_CONTENTS),
-    packageTwoSettings
-  );
+  updateCacheForFile({
+    filePath: FILE_C,
+    fileContents: NEW_C_CONTENTS,
+    ast: parseContents(NEW_C_CONTENTS),
+    packageSettings: packageTwoSettings,
+  });
 
   const FILE_C_SINGLE_IMPORT = {
     type: 'singleImport' as const,
@@ -910,12 +932,12 @@ it('Cache update removes an existing cross-package singleImport', () => {
 const one: unknown = undefined;
 console.log(one);
 `;
-  updateCacheForFile(
-    FILE_D,
-    D_WITHOUT_IMPORT,
-    parseContents(D_WITHOUT_IMPORT),
-    packageTwoSettings
-  );
+  updateCacheForFile({
+    filePath: FILE_D,
+    fileContents: D_WITHOUT_IMPORT,
+    ast: parseContents(D_WITHOUT_IMPORT),
+    packageSettings: packageTwoSettings,
+  });
 
   const pkg1Info = getPackageInfo(PACKAGE_ONE_DIR);
   const fileA = pkg1Info.files.get(FILE_A);

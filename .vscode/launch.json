@@ -27,12 +27,12 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "Debug Petstore",
+      "name": "Debug monorepo",
       "type": "node",
       "request": "launch",
       "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/eslint"],
-      "args": ["-c", "eslint.config.mjs", "src/**/*"],
-      "cwd": "/Users/bryan/Projects/specoro/examples/petstore",
+      "args": ["-c", "eslint.config.mjs", "**/*.{ts,tsx,mts,js,jsx,mjs}"],
+      "cwd": "/Users/bryan/Projects/specoro",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
     }

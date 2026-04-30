@@ -1,0 +1,6 @@
+{
+  // entry points for this fixture package
+  "entryPointFiles": {
+    ".": "./index.ts",
+  },
+}

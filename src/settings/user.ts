@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, isAbsolute } from 'node:path';
+import { isAbsolute } from 'node:path';
 
 import { parse, printParseErrorCode } from 'jsonc-parser';
 import { z, type ZodError } from 'zod';
@@ -60,7 +60,7 @@ type MonorepoUserSettings = BaseRepoUserSettings & {
 export type RepoUserSettings = SingleRepoUserSettings | MonorepoUserSettings;
 
 // If there were errors, print a friendly-ish explanation of them
-function formatErrors(error: ZodError): never {
+function throwFormattedErrors(error: ZodError): never {
   const issues: string[] = [];
   for (const issue of error.issues) {
     let formattedIssue = issue.code.replace('_', ' ');
@@ -99,7 +99,7 @@ export function getUserRepoSettings(
     const parseResult =
       monorepoPackageSettingsSchema.safeParse(fastEsmSettings);
     if (!parseResult.success) {
-      formatErrors(parseResult.error);
+      throwFormattedErrors(parseResult.error);
     }
 
     // Split props apart so we can recombine them in the standardized format
@@ -129,7 +129,7 @@ export function getUserRepoSettings(
   } else {
     const parseResult = singleRepoSettingsSchema.safeParse(fastEsmSettings);
     if (!parseResult.success) {
-      formatErrors(parseResult.error);
+      throwFormattedErrors(parseResult.error);
     }
 
     // Split props apart so we can recombine them in the standardized format
@@ -167,9 +167,11 @@ export function getUserRepoSettings(
           `Found ${configFilePath} and package-level settings in ESLint config. Config files and package-level settings cannot be used together.`
         );
       }
+      const configFileContents = readFileSync(configFilePath, 'utf-8');
       resolvedPackageSettings = getUserPackageSettingsFromConfigFile({
-        configFilePath,
+        configFileContents,
         repoRootDir: trimmedPackageRootDir,
+        packageRootDir: trimmedPackageRootDir,
       });
     } else {
       resolvedPackageSettings = {
@@ -191,19 +193,19 @@ export function getUserRepoSettings(
 }
 
 export function getUserPackageSettingsFromConfigFile({
-  configFilePath,
+  configFileContents,
   repoRootDir,
+  packageRootDir,
 }: {
   repoRootDir: string;
-  configFilePath: string;
+  packageRootDir: string;
+  configFileContents: string;
 }): PackageSettings {
-  const configContent = readFileSync(configFilePath, 'utf-8');
-
-  // Read the config file. jsonc-parser's parse() does not throw on malformed
-  // input — it returns a best-effort partial result and reports issues via
-  // the errors out-parameter, so we surface those manually.
+  // Parse the config file contents from JSON-C. jsonc-parser's parse() does not
+  // throw on malformed input — it returns a best-effort partial result and
+  // reports issues via the errors out-parameter, so we surface those manually.
   const errors: Array<{ error: number; offset: number; length: number }> = [];
-  const config: unknown = parse(configContent, errors, {
+  const config: unknown = parse(configFileContents, errors, {
     allowTrailingComma: true,
   });
   if (errors.length > 0) {
@@ -213,18 +215,18 @@ export function getUserPackageSettingsFromConfigFile({
       )
       .join(', ');
     throw new Error(
-      `Failed to parse package config file ${configFilePath}: ${formatted}`
+      `Failed to parse config file for package ${packageRootDir}: ${formatted}`
     );
   }
 
-  // Parse and return the results
+  // Validate the parsed config data and return the results
   const parseResult = packageSettingsSchema.safeParse(config);
   if (!parseResult.success) {
-    formatErrors(parseResult.error);
+    throwFormattedErrors(parseResult.error);
   }
   return {
     ...parseResult.data,
     repoRootDir,
-    packageRootDir: dirname(configFilePath),
+    packageRootDir,
   };
 }

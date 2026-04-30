@@ -1,0 +1,7 @@
+{
+  "name": "monorepo-conflict-fixture",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}

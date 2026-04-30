@@ -121,17 +121,17 @@ it('Updates package cache when a new file is added', () => {
   let packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
   expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 
-  updateCacheForFile(
-    FILE_TS_NEW,
-    '',
-    parse('', {
+  updateCacheForFile({
+    filePath: FILE_TS_NEW,
+    fileContents: '',
+    ast: parse('', {
       loc: true,
       range: true,
       tokens: true,
       jsx: true,
     }),
-    packageSettings
-  );
+    packageSettings,
+  });
 
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'code',
@@ -163,17 +163,17 @@ it('Updates package cache when an unused export is added to an existing file', (
 export type Two = string;
 `;
 
-  updateCacheForFile(
-    FILE_A,
-    FILE_A_UPDATED_CONTENTS,
-    parse(FILE_A_UPDATED_CONTENTS, {
+  updateCacheForFile({
+    filePath: FILE_A,
+    fileContents: FILE_A_UPDATED_CONTENTS,
+    ast: parse(FILE_A_UPDATED_CONTENTS, {
       loc: true,
       range: true,
       tokens: true,
       jsx: true,
     }),
-    packageSettings
-  );
+    packageSettings,
+  });
 
   packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
 
@@ -268,9 +268,10 @@ it('Updates package cache in bulk for a code file', () => {
 
   // Add a new file
   writeFileSync(FILE_TS_NEW, '');
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [
         {
           filePath: FILE_TS_NEW,
@@ -280,10 +281,10 @@ it('Updates package cache in bulk for a code file', () => {
       modified: [],
       deleted: [],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   const EXPECTED_FILE_TS_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     entryPointSpecifier: undefined,
@@ -304,9 +305,10 @@ it('Updates package cache in bulk for a code file', () => {
 
   // Modify the new new file
   writeFileSync(FILE_TS_NEW, `console.log()`);
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [
         {
@@ -316,10 +318,10 @@ it('Updates package cache in bulk for a code file', () => {
       ],
       deleted: [],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   const EXPECTED_FILE_TS_NEW_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'code',
     entryPointSpecifier: undefined,
@@ -341,9 +343,10 @@ it('Updates package cache in bulk for a code file', () => {
   // Modify the new file with invalid code (testing fallback to ensure package
   // info isn't changed in any way)
   writeFileSync(FILE_TS_NEW, `+_)(*&^%$%)`);
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [
         {
@@ -353,10 +356,10 @@ it('Updates package cache in bulk for a code file', () => {
       ],
       deleted: [],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
   expect(packageInfo).toMatchAnalyzedSpec({
     [FILE_A]: EXPECTED_FILE_A,
@@ -366,17 +369,18 @@ it('Updates package cache in bulk for a code file', () => {
 
   // Delete the file
   unlinkSync(FILE_TS_NEW);
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [],
       deleted: [FILE_TS_NEW],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
   expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 });
@@ -389,9 +393,10 @@ it('Updates package cache in bulk for a non-code file', () => {
 
   // Add a new file
   writeFileSync(FILE_JSON_NEW, '{}');
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [
         {
           filePath: FILE_JSON_NEW,
@@ -401,10 +406,10 @@ it('Updates package cache in bulk for a non-code file', () => {
       modified: [],
       deleted: [],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   const EXPECTED_FILE_JSON_NEW: StrippedAnalyzedFileDetails = {
     fileType: 'other',
   };
@@ -417,9 +422,10 @@ it('Updates package cache in bulk for a non-code file', () => {
 
   // Modify the new new file
   writeFileSync(FILE_JSON_NEW, `{ "foo": 10 }`);
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [
         {
@@ -429,10 +435,10 @@ it('Updates package cache in bulk for a non-code file', () => {
       ],
       deleted: [],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   const EXPECTED_FILE_JSON_NEW_UPDATED: StrippedAnalyzedFileDetails = {
     fileType: 'other',
   };
@@ -445,17 +451,18 @@ it('Updates package cache in bulk for a non-code file', () => {
 
   // Delete the file
   unlinkSync(FILE_JSON_NEW);
-  updateCacheFromFileSystem(
-    packageSettings.packageRootDir,
-    {
+  updateCacheFromFileSystem({
+    repoRootDir: packageSettings.repoRootDir,
+    packageRootDir: packageSettings.packageRootDir,
+    changes: {
       added: [],
       modified: [],
       deleted: [FILE_JSON_NEW],
     },
-    [],
+    packageJsons: [],
     packageSettings,
-    Date.now()
-  );
+    operationStart: Date.now(),
+  });
   packageInfo = getPackageInfo(TEST_PACKAGE_DIR);
   expect(packageInfo).toMatchAnalyzedSpec(EXPECTED);
 });

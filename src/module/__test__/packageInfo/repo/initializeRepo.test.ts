@@ -43,6 +43,8 @@ function findExport(fileDetails: AnalyzedCodeFileDetails, exportName: string) {
   ].find((entry) => entry.exportName === exportName);
 }
 
+// project/monorepo/yarn.lock is load-bearing: @manypkg uses it to detect this
+// fixture as a Yarn-workspaces monorepo.
 const MONOREPO_DIR = join(getDirname(), 'project', 'monorepo');
 const PACKAGES_DIR = join(MONOREPO_DIR, 'packages');
 const PACKAGE_A_DIR = join(PACKAGES_DIR, 'packageA');

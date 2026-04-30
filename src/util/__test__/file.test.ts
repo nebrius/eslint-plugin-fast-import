@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { getDirname } from 'cross-dirname';
@@ -6,7 +7,7 @@ import {
   _testOnlyResetFiles,
   convertToUnixishPath,
   getFiles,
-  getMonorepoPackageSettings,
+  getRawMonorepoPackageSettings,
   getRelativePathFromRoot,
   splitPathIntoSegments,
   trimTrailingPathSeparator,
@@ -15,6 +16,16 @@ import {
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const ROOT_DIR = resolve(join(getDirname(), '..', '..', '..'));
 
+// Each major monorepo fixture across the test suite intentionally uses a
+// different package-manager marker so @manypkg's detection paths all get
+// exercised somewhere:
+//   - util/.../monorepoDiscovery, monorepoConflict,
+//     no-unresolved-imports/.../project: npm (package-lock.json + workspaces)
+//   - module/.../cache/project/monorepo: pnpm (pnpm-workspace.yaml)
+//   - module/.../packageInfo/repo/project/monorepo: yarn (yarn.lock + workspaces)
+//   - rules/no-unused-package-exports/.../project: lerna (lerna.json)
+// The marker files are load-bearing for detection — keep them in place even
+// when they look empty.
 beforeEach(() => {
   _testOnlyResetFiles();
 });
@@ -135,23 +146,65 @@ it('Can get relative path to root', () => {
   expect(getRelativePathFromRoot(`/base`, 'src/a.ts')).toEqual('src/a.ts');
 });
 
-it('Does not find fast-import.config.json files inside node_modules', () => {
-  const fixtureDir = join(TEST_PACKAGE_DIR, 'nodeModules');
-  const result = getMonorepoPackageSettings(fixtureDir);
-  expect(result).toEqual([
-    join(fixtureDir, 'packages', 'foo', 'fast-import.config.json'),
+it('Returns one entry per workspace package and reads each package config file', () => {
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'monorepoDiscovery');
+  const result = getRawMonorepoPackageSettings(fixtureDir);
+
+  // Sorted by directory per @manypkg's expandPackageGlobsSync.
+  expect(result).toHaveLength(3);
+  expect(result.map((r) => r.packageRootDir)).toEqual([
+    join(fixtureDir, 'packages', 'noConfig'),
+    join(fixtureDir, 'packages', 'withJson'),
+    join(fixtureDir, 'packages', 'withJsonc'),
   ]);
+
+  // Packages without a fast-import config get the empty-object default.
+  const noConfig = result.find((r) => r.packageRootDir.endsWith('noConfig'));
+  expect(noConfig?.configFileContents).toBe('{}');
+
+  // .json contents are returned verbatim.
+  const withJson = result.find((r) => r.packageRootDir.endsWith('withJson'));
+  expect(withJson?.configFileContents).toBe(
+    readFileSync(
+      join(fixtureDir, 'packages', 'withJson', 'fast-import.config.json'),
+      'utf-8'
+    )
+  );
+
+  // .jsonc contents are returned verbatim — caller is responsible for parsing
+  // jsonc, this function only reads the bytes.
+  const withJsonc = result.find((r) => r.packageRootDir.endsWith('withJsonc'));
+  expect(withJsonc?.configFileContents).toBe(
+    readFileSync(
+      join(fixtureDir, 'packages', 'withJsonc', 'fast-import.config.jsonc'),
+      'utf-8'
+    )
+  );
 });
 
-it('Discovers fast-import.config.jsonc files', () => {
-  const fixtureDir = join(TEST_PACKAGE_DIR, 'jsoncDiscovery');
-  const result = getMonorepoPackageSettings(fixtureDir);
-  expect(result).toEqual([join(fixtureDir, 'foo', 'fast-import.config.jsonc')]);
+it('Ignores fast-import config files outside declared workspace globs', () => {
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'monorepoDiscovery');
+  const result = getRawMonorepoPackageSettings(fixtureDir);
+
+  expect(result.map((r) => r.packageRootDir)).not.toContain(
+    join(fixtureDir, 'notWorkspace')
+  );
 });
 
-it('Throws when both fast-import.config.json and .jsonc exist in the same directory', () => {
-  const fixtureDir = join(TEST_PACKAGE_DIR, 'jsoncMultiple');
-  expect(() => getMonorepoPackageSettings(fixtureDir)).toThrow(
-    `Multiple fast-import.config.json(c) files found in ${join(fixtureDir, 'foo')}`
+it('Throws when both fast-import.config.json and .jsonc exist in the same package', () => {
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'monorepoConflict');
+  expect(() => getRawMonorepoPackageSettings(fixtureDir)).toThrow(
+    `Multiple fast-import.config.json(c) files found in ${join(fixtureDir, 'packages', 'conflict')}`
+  );
+});
+
+it('Returns the root as a single package when the root has no workspaces config', () => {
+  const fixtureDir = join(TEST_PACKAGE_DIR, 'singlePackageRoot');
+  const result = getRawMonorepoPackageSettings(fixtureDir);
+
+  expect(result).toHaveLength(1);
+  expect(result[0].packageRootDir).toBe(fixtureDir);
+  expect(result[0].configFileContents).toBe(
+    readFileSync(join(fixtureDir, 'fast-import.config.json'), 'utf-8')
   );
 });
