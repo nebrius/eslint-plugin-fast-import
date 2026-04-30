@@ -1,6 +1,7 @@
 - Rename plugin
 - Proper docs site on GitHub Pages
 - Create skill?
-- Update repo and changelog with new package discovery mechanism
+- no-package-cycle
 - Codebase wide implementation review
 - Codebase wide test review
+- Manually review README top to bottom

@@ -61,9 +61,9 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 
 - Monorepo root-config mode
   - Set `monorepoRootDir` (mutually exclusive with `packageRootDir`) in your root ESLint/Oxlint config to enable a single config that covers all packages
-  - Repo-scoped settings stay in `settings['fast-import']`; package-scoped settings are discovered recursively from `fast-import.config.json`/`fast-import.config.jsonc` files
-  - Only packages with a discovered `fast-import.config.json`/`fast-import.config.jsonc` file are analyzed in this mode
-  - The directory containing each config file becomes that package's `packageRootDir`, and nested config files are not allowed
+  - Repo-scoped settings stay in `settings['fast-import']`; workspace packages are discovered from the monorepo's declared workspaces via `@manypkg/get-packages`
+  - Each discovered workspace package becomes a Fast Import `packageRootDir`; if `fast-import.config.json`/`fast-import.config.jsonc` exists at that package root, its package-scoped settings are loaded
+  - Discovered workspace packages without a Fast Import config file are still analyzed with default package-level settings, and stray config files outside declared workspace globs are ignored
   - Monorepo packages should define `package.json.name`; cross-package analysis and package entry-point matching depend on it
 - Support for `fast-import.config.jsonc` files, including comments and trailing commas in both `.json` and `.jsonc` config files
 - Next.js auto-detection: when Next.js is detected, default `externallyImportedFiles` patterns for app router, pages router, and mixed-router projects (with or without a `src/` directory) are pre-applied. User-supplied patterns override the defaults.
@@ -75,7 +75,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Added the `no-unnamed-entry-point-exports` rule (in `recommended`): flags bare `export * from './x'` in entry-point files; named barrel reexports (`export * as foo from ...`) are still allowed
 - Added the `no-unused-package-exports` rule (in `monorepoRecommended`): cross-package version of `no-unused-exports` that reports entry-point exports that are not imported by any other package in the monorepo
   - `monorepoRecommended` only enables this monorepo-only rule; also enable `recommended` if you want the standard recommended rules
-  - This rule depends on `monorepoRootDir` package discovery and does not work when Fast Import only sees isolated package-local configs
+  - This rule depends on `monorepoRootDir` workspace package discovery and does not work when Fast Import only sees isolated package-local ESLint/Oxlint configs
 - `no-test-only-imports` and `no-test-imports-in-prod` were both updated to be aware of non-test file exports prefixed with `_testOnly`. When a non-test file exports something with this prefix, it is considered a test-only export and can be imported by test files but not by production code.
 - Cross-package import analysis now considers dynamic imports (statically-resolvable specifiers are tracked; non-static specifiers are skipped) and resolves third-party package exports using `package.json` `exports` subpaths and conditions
 
@@ -84,7 +84,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Fixed a bug where packages could be incorrectly matched to a wrong package folder if multiple packages share the same prefix (e.g. matching `/foo` instead of `/foo-bar`)
 - Fixed a bug where imports that resolved to third party types weren't getting root module type set correctly
 - Fixed a bug where Oxlint was not running in editor mode
-- Fixed a bug where files outside any discovered package would cause analysis failures; these files are now safely skipped
+- Fixed a bug where files outside any workspace-discovered package would cause analysis failures; these files are now safely skipped
 - Hardened `package.json` reading against malformed or partially-populated files
 
 ## 2.2.1 (4/9/2026)
