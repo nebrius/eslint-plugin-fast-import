@@ -435,7 +435,7 @@ it('Returns full single-repo structure from getRepoSettings', () => {
   const expected: ParsedRepoSettings = {
     type: 'singlerepo',
     mode: 'one-shot',
-    editorUpdateRate: undefined,
+    editorUpdateRate: 500,
     repoRootDir: TEST_PACKAGE_DIR,
     packageSettings: {
       repoRootDir: TEST_PACKAGE_DIR,

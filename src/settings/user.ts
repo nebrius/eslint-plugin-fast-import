@@ -37,6 +37,8 @@ const monorepoPackageSettingsSchema = z.strictObject({
   ...globalSettingsSchema.shape,
 });
 
+const DEFAULT_EDITOR_UPDATE_RATE = 500;
+
 export type PackageSettings = z.infer<typeof packageSettingsSchema> & {
   repoRootDir: string;
   packageRootDir: string;
@@ -82,7 +84,7 @@ function throwFormattedErrors(error: ZodError): never {
 
 export function getUserRepoSettings(
   settings: GenericContext['settings'] | undefined
-): RepoUserSettings {
+): RepoUserSettings & { editorUpdateRate: number } {
   // Parse the raw settings, if supplied
   const fastEsmSettings = settings?.['fast-import'];
   if (!fastEsmSettings) {
@@ -103,8 +105,12 @@ export function getUserRepoSettings(
     }
 
     // Split props apart so we can recombine them in the standardized format
-    const { debugLogging, mode, editorUpdateRate, monorepoRootDir } =
-      parseResult.data;
+    const {
+      debugLogging = false,
+      mode,
+      editorUpdateRate = DEFAULT_EDITOR_UPDATE_RATE,
+      monorepoRootDir,
+    } = parseResult.data;
 
     // Validate monorepoRootDir exists
     if (!isAbsolute(monorepoRootDir)) {
@@ -117,7 +123,7 @@ export function getUserRepoSettings(
     const trimmedMonorepoRootDir = trimTrailingPathSeparator(monorepoRootDir);
 
     // Set verbose logging, if enabled
-    setVerbose(!!debugLogging);
+    setVerbose(debugLogging);
 
     // Return formatted user supplied settings, minus debug logging
     return {
@@ -134,9 +140,9 @@ export function getUserRepoSettings(
 
     // Split props apart so we can recombine them in the standardized format
     const {
-      debugLogging,
+      debugLogging = false,
       mode,
-      editorUpdateRate,
+      editorUpdateRate = DEFAULT_EDITOR_UPDATE_RATE,
       packageRootDir,
       ...packageSettings
     } = parseResult.data;
@@ -152,7 +158,7 @@ export function getUserRepoSettings(
     const trimmedPackageRootDir = trimTrailingPathSeparator(packageRootDir);
 
     // Set verbose logging, if enabled
-    setVerbose(!!debugLogging);
+    setVerbose(debugLogging);
 
     // If a fast-import.config.json(c) file exists in packageRootDir, load
     // package-level settings from it. This lets the same config file serve a

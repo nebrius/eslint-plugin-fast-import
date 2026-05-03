@@ -50,6 +50,7 @@ export type ParsedPackageSettings = Omit<
 
 export type ParsedRepoSettings = Exclude<RepoUserSettings, 'mode'> & {
   mode: 'editor' | 'fix' | 'one-shot';
+  editorUpdateRate: number;
 };
 
 // Honestly the process.argv stuff isn't worth the effort to test, since it
