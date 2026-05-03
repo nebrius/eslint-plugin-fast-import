@@ -7,24 +7,27 @@
 
 - [Installation](#installation)
 - [Rules](#rules)
+  - [Usage](#usage)
+  - [Style](#style)
+  - [Footguns](#footguns)
 - [Configuration](#configuration)
   - [Configuration files](#configuration-files)
   - [Repo-level configuration options](#repo-level-configuration-options)
     - [packageRootDir](#packagerootdir)
     - [monorepoRootDir (monorepo)](#monoreporootdir-monorepo)
+    - [mode](#mode)
+    - [editorUpdateRate](#editorupdaterate)
+    - [debugLogging](#debuglogging)
   - [Package-level configuration options](#package-level-configuration-options)
     - [alias](#alias)
     - [externallyImportedFiles / entryPointFiles](#externallyimportedfiles--entrypointfiles)
     - [ignorePatterns](#ignorepatterns)
     - [ignoreOverridePatterns](#ignoreoverridepatterns)
     - [testFilePatterns](#testfilepatterns)
-    - [mode](#mode)
-    - [editorUpdateRate](#editorupdaterate)
-    - [debugLogging](#debuglogging)
   - [Use in monorepos](#use-in-monorepos)
     - [Option 1: one root config with `monorepoRootDir`](#option-1-one-root-config-with-monoreporootdir)
     - [Option 2: separate configs per package](#option-2-separate-configs-per-package)
-    - [Option 3: combine the two (recommended)](#option-3-combine-the-two-recommended)
+    - [Option 3: root + separate configs (recommended)](#option-3-root--separate-configs-recommended)
   - [Using with Oxlint](#using-with-oxlint)
 - [Comparisons to import and import-x](#comparisons-to-import-and-import-x)
   - [Performance](#performance)
@@ -33,6 +36,7 @@
   - [Phase 1: AST analysis](#phase-1-ast-analysis)
   - [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution)
   - [Phase 3: Import graph analysis](#phase-3-import-graph-analysis)
+  - [Phase 4: Monorepo analysis](#phase-4-monorepo-analysis)
 - [Limitations](#limitations)
   - [All first party code must live inside `packageRootDir`](#all-first-party-code-must-live-inside-packagerootdir)
   - [CommonJS is not supported](#commonjs-is-not-supported)
@@ -52,71 +56,20 @@
 
 Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
 
-Fast Import uses a novel algorithm combined with the [Oxc Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
+Fast Import uses a novel algorithm combined with the [Oxc Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other third-party ESLint import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
 
-## Installation
+## Getting Started
+
+Install the plugin from npm:
 
 ```bash
 npm install --save-dev eslint-plugin-fast-import
 ```
 
-## Rules
-
-💼 Configuration membership.<br />
-🔧 Automatically fixable by the --fix CLI option.<br />
-☑️ Set in the recommended configuration.<br />
-🧰 Set in the monorepo configuration.
-
-There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
-
-## Usage
-
-These rules inspect how you're using imports/exports to look for semantic issues.
-
-| Name                                                                             | 💼    | 🔧  |
-| -------------------------------------------------------------------------------- | ----- | --- |
-| [no-cycle](src/rules/no-cycle/README.md)                                         |    ☑️ |     |
-| [no-test-only-imports](src/rules/no-test-only-imports/README.md)                 |    ☑️ |     |
-| [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           |    ☑️ |     |
-| [no-unused-exports](src/rules/no-unused-exports/README.md)                       |    ☑️ |     |
-| [no-unused-package-exports](src/rules/no-unused-package-exports/README.md)       | 🧰    |     |
-| [no-node-builtins](src/rules/no-node-builtins/README.md) \*                      |       |     |
-| [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*\*          |       |     |
-
-\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any default configuration.
-
-\*\* No restricted imports requires rule-specific options for use, and so is not enabled in any default configuration.
-
-## Style
-
-These rules govern the style of imports/exports.
-
-| Name                                                                             | 💼    | 🔧  |
-| -------------------------------------------------------------------------------- | ----- | --- |
-| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 |    ☑️ | 🔧  |
-| [require-node-prefix](src/rules/require-node-prefix/README.md)                   |    ☑️ | 🔧  |
-
-
-### Footguns
-
-These rules are designed to prevent certain types of imports/exports that can lead to issues.
-
-| Name                                                                             | 💼    | 🔧  |
-| -------------------------------------------------------------------------------- | ----- | --- |
-| [no-empty-entry-points](src/rules/no-empty-entry-points/README.md)               |    ☑️ |     |
-| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             |    ☑️ |     |
-| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) |    ☑️ |     |
-| [no-named-as-default](src/rules/no-named-as-default/README.md)                   |    ☑️ |     |
-| [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) |    ☑️ |     |
-| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               |    ☑️ |     |
-
-## Configuration
-
-Fast Import supports ESLint 9+ and Oxlint. Configure `settings['fast-import']`, then enable one of `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.monorepoRecommended`, or `fastImportPlugin.configs.off`.
-
 For typical single-package-per-repo projects, you can enable Fast Import with:
 
 ```js
+// ESLint
 import { defineConfig } from 'eslint/config';
 import fastImportPlugin from 'eslint-plugin-fast-import';
 
@@ -132,38 +85,87 @@ export default defineConfig([
 ]);
 ```
 
-For typical monorepo projects, you can enable Fast Import with:
-
 ```js
-import { defineConfig } from 'eslint/config';
+// Oxlint
 import fastImportPlugin from 'eslint-plugin-fast-import';
 
-export default defineConfig([
-  {
-    settings: {
-      'fast-import': {
-        monorepoRootDir: import.meta.dirname,
-      },
+export default {
+  settings: {
+    'fast-import': {
+      packageRootDir: import.meta.dirname,
     },
   },
-  fastImportPlugin.configs.recommended,
-  fastImportPlugin.configs.monorepoRecommended,
-]);
+  jsPlugins: [{
+    name: 'fast-import',
+    specifier: 'eslint-plugin-fast-import',
+  }],
+  rules: {
+    ...fastImportPlugin.configs.recommended.rules,
+  },
+}
+
 ```
 
-This will apply the recommended rules along with the default configuration.
+## Rules
 
-Configuration options are split into two groups: repo-level configuration options and package-level configuration options. In the single repo case, there isn't a distinction between the two groups. In monorepo mode, repo-level options apply to all packages in the monorepo, while package-level options are specified per-package. This means that in a monorepo there are multiple per-package configurations but just a single repo-level configuration. Fast Import determines which packages are in a monorepo and infers everything it can, but sometimes you may need to customize per-package configuration options.
+🔧 Automatically fixable by the --fix CLI option.<br />
+☑️ Set in the recommended configuration.<br />
+🧰 Set in the monorepo configuration.
 
-### Configuration files
+There is also a configuration called "off" that disables all rules. This configuration is useful if you want to disable all rules for specific files after enabling rules for all other files.
 
-To support this "split-level" configuration, Fast Import makes use of configuration files that are independent of the ESLint/Oxlint configuration file. Repo-level options are always configured in `settings['fast-import']` in the ESLint/Oxlint configuration file.
+### Usage
 
-In single-repo mode, all package-level options can live in `settings['fast-import']`, or you can place package-level options in a configuration file.
+These rules look for issues with how you're using imports/exports.
+
+| Name                                                                             | 💼    | 🔧  |
+| -------------------------------------------------------------------------------- | ----- | --- |
+| [no-cycle](src/rules/no-cycle/README.md)                                         |    ☑️ |     |
+| [no-test-only-imports](src/rules/no-test-only-imports/README.md)                 |    ☑️ |     |
+| [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           |    ☑️ |     |
+| [no-unused-exports](src/rules/no-unused-exports/README.md)                       |    ☑️ |     |
+| [no-unused-package-exports](src/rules/no-unused-package-exports/README.md)       | 🧰    |     |
+| [no-node-builtins](src/rules/no-node-builtins/README.md) \*                      |       |     |
+| [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*\*          |       |     |
+
+\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any default configuration.
+
+\*\* No restricted imports requires rule-specific options for use, and so is not enabled in any default configuration.
+
+### Style
+
+These rules govern the style of imports/exports.
+
+| Name                                                                             | 💼    | 🔧  |
+| -------------------------------------------------------------------------------- | ----- | --- |
+| [prefer-alias-imports](src/rules/prefer-alias-imports/README.md)                 |    ☑️ | 🔧  |
+| [require-node-prefix](src/rules/require-node-prefix/README.md)                   |    ☑️ | 🔧  |
+
+
+### Footguns
+
+These rules are designed to prevent certain types of imports/export usage that are prone to easy-to_miss problems.
+
+| Name                                                                             | 💼    | 🔧  |
+| -------------------------------------------------------------------------------- | ----- | --- |
+| [no-empty-entry-points](src/rules/no-empty-entry-points/README.md)               |    ☑️ |     |
+| [no-entry-point-imports](src/rules/no-entry-point-imports/README.md)             |    ☑️ |     |
+| [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) |    ☑️ |     |
+| [no-named-as-default](src/rules/no-named-as-default/README.md)                   |    ☑️ |     |
+| [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) |    ☑️ |     |
+| [no-unresolved-imports](src/rules/no-unresolved-imports/README.md)               |    ☑️ |     |
+
+## Configuration
+
+Configuration options are split into two groups: repo-level configuration options and package-level configuration options. In the single package case, which we call "single package mode", there isn't a distinction between the two groups. When [using a lint config at the repo root](#option-1-one-root-config-with-monoreporootdir) to apply to more than one package, which we call "monorepo mode," repo-level options apply to all packages in the monorepo, while package-level options are specified per-package.
+
+To support this "split-level" configuration, Fast Import uses separate configuration files for package-level options that are independent of the ESLint/Oxlint configuration, while repo-level options go in `settings['fast-import']` in the ESLint/Oxlint configuration file.
+
+In single package mode, package-level options can also go in `settings['fast-import']` if you prefer to not create a separate configuration file.
 
 In monorepo mode, custom package-level options are required to be in a configuration file, not `settings['fast-import']`. Fast Import uses your monorepo's workspace configuration to determine which packages to analyze (supports Yarn, npm, Lerna, pnpm, Bun, and Rush). If a workspace package has a configuration file, Fast Import loads its package-level options from that file. Workspace packages without a configuration file fall back to default values for all package-level options.
 
-Configuration files are written using JSON-C (JSON with comments) and are named `fast-import.config.json` or `fast-import.config.jsonc`. These files must live in the package root dir as a sibling to `package.json` and `tsconfig.json`. In monorepo mode, you must set `name` in `package.json`, because this is used by cross-package import analysis.
+Configuration files are written using JSON-C (JSON with comments) and are named `fast-import.config.json` or `fast-import.config.jsonc`. These files must live in the package root dir as a sibling to `package.json` and `tsconfig.json`. In monorepo mode, you must set `name` in `package.json`, because this is used by Fast Import for cross-package import analysis.
 
 ### Repo-level configuration options
 
@@ -175,13 +177,11 @@ Fast Import uses `packageRootDir` to scan for files in the current package. When
 
 Note: Fast Import does not analyze files in folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze files in one of these folders, file an issue and we'll find a way to support your use case.
 
-In single-repo mode, you must set `packageRootDir` directly in `settings['fast-import']`.
+In single package mode, you must set `packageRootDir` directly in `settings['fast-import']`.
 
 In monorepo mode, every package still has a `packageRootDir` under the hood, but it is automatically set to the directory discovered from the workspace configuration.
 
-`packageRootDir` _must_ be an absolute path!
-
-`packageRootDir` must point to the directory containing the package's `package.json` and `tsconfig.json`, not a nested `src` directory.
+`packageRootDir` must be an absolute path that points to the directory containing the package's `package.json` and `tsconfig.json`, not a nested `src` directory.
 
 CommonJS Example:
 
@@ -207,13 +207,13 @@ ESM Example:
 }
 ```
 
-#### monorepoRootDir (monorepo)
+#### monorepoRootDir
 
 Type: `string`
 
-`monorepoRootDir` is the absolute path to the monorepo root. Fast Import uses your monorepo's workspace configuration to discover packages underneath this directory (supports Yarn, npm, Lerna, pnpm, Bun, and Rush). Each discovered workspace package becomes a package root. If a workspace package contains `fast-import.config.json` or `fast-import.config.jsonc` at its root, Fast Import loads package-level settings from that file; otherwise default package-level settings are used. Config files outside the declared workspace globs are ignored.
+`monorepoRootDir` is the absolute path to the monorepo root. Fast Import uses your monorepo's workspace configuration to discover packages underneath this directory. Each discovered workspace package becomes a package root. If a workspace package contains `fast-import.config.json` or `fast-import.config.jsonc` at its root, Fast Import loads package-level settings from that file; otherwise default package-level settings are used. Config files outside the package root directories of declared workspace packages are ignored.
 
-`packageRootDir` and `monorepoRootDir` are mutually exclusive.
+`packageRootDir` and `monorepoRootDir` are mutually exclusive and cannot both be defined.
 
 Example:
 
@@ -231,6 +231,8 @@ Example:
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
+Default: `'auto'`
+
 When set to `auto`, Fast Import chooses a mode based on the current environment:
 
 - `editor` when running inside supported editors such as VS Code, Cursor, or Windsurf
@@ -243,26 +245,27 @@ When set to `auto`, Fast Import chooses a mode based on the current environment:
 
 `editor` builds on `fix` by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout` or `git stash`.
 
-Note: when running in ESLint currently, VS Code, Cursor, and Windsurf are the only supported editors. Oxlint is reliably detected regardless of editor as long as the `--lsp` flag is passed to Oxlint. If you use ESLint and would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use this config file:
+Example:
 
 ```js
-import { defineConfig } from 'eslint/config';
-
-export default defineConfig([
-  ...yourConfig,
-  {
-    settings: {
-      'fast-import': {
-        mode: 'editor',
-      },
+{
+  settings: {
+    'fast-import': {
+      packageRootDir: import.meta.dirname,
+      mode: 'editor',
     },
   },
-]);
+},
 ```
+
+Note: when running in ESLint currently, VS Code, Cursor, and Windsurf are the only supported editors. Oxlint is reliably detected regardless of editor as long as the `--lsp` flag is passed to Oxlint. If you use ESLint and would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use the derived config.
+
 
 #### editorUpdateRate
 
 Type: `number`
+
+Default: `500`
 
 Defines the rate in milliseconds at which editor-mode file watching checks for file changes.
 
@@ -282,6 +285,8 @@ Example:
 #### debugLogging
 
 Type: `boolean`
+
+Default: `false`
 
 When set to `true`, enables verbose logging that tells you performance numbers, when files are updated, and more.
 
@@ -306,11 +311,13 @@ The remaining options are package-scoped. In single-repo mode, place them in `se
 
 Type: `Record<string, string>`
 
+Default: aliases in `tsconfig.json`
+
 `alias` defines a set of module specifier aliases. For example, if you use Next.js with its default configuration, you're probably familiar with the alias it creates: `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
 
 Fast Import defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
 
-- Aliases that point to files outside of `packageRootDir`, or point to files inside of `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, are ignored
+- Aliases that point to files outside of `packageRootDir`, or point to files inside of `node_modules`, `build`, `out`, `dist`, or any folder or file that starts with a `.`, are ignored
 - Aliases with more than one file, e.g. `"@/": ["a.ts", "b.ts"]`, are ignored
 
 Example:
@@ -335,16 +342,18 @@ Note: patterns with a single star after them will match any symbols/files that s
 
 Type: `string[]` / `Record<string, string>`
 
-Files specified with `externallyImportedFiles` or `entryPointFiles` define files whose exports are not imported by code inside of the codebase, but instead by code outside of the codebase. All exports from any matching file are treated as entry points or externally imported. The difference between the two options is:
+Default (entryPointFiles): package.json entry points under certan conditions, else `{}`
+
+Default (externallyImportedFiles): Next.js values if Next.js is detected, else `[]`
+
+Files specified with `externallyImportedFiles` or `entryPointFiles` define files whose exports are not imported by code inside of the codebase, but instead by code outside of the codebase. All exports from any matching file are treated as entry points or externally imported. The difference between the two is:
 
 - `entryPointFiles` are intended to represent entry points in a library intended for use by others, aka a "public API."
 - `externallyImportedFiles` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application.
 
-In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary for determining if a package's entry points are intended to be used by other packages in the monorepo to, and thus should be analyzed for usage for the [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) rule. See [Use in monorepos](#use-in-monorepos) for more info.
+In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary to determine if a package's entry points are intended to be used by other packages in the monorepo to, and thus should be analyzed for usage for the [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) rule. See [Use in monorepos](#use-in-monorepos) for more info.
 
-For example, if you are building a Next.js application, then the `default` export in files titled `page.tsx`, `layout.tsx`, etc. are imported by the Next.js runtime itself, and thus Fast Import never sees the import.
-
-Entry points/externally imported files allow you to define these types of imports so they are not flagged as unused, and enable other useful checks such as the [no-entry-point-imports](./src/rules/no-entry-point-imports/README.md) rule.
+Entry points/externally imported files enable other useful checks such as the [no-entry-point-imports](./src/rules/no-entry-point-imports/README.md) rule.
 
 `externallyImportedFiles` are specified as an array of strings using the same ignore syntax you find in `.gitignore`, including the use of `/` to anchor an entry to the root of the package, and the use of `*` and `**` as wildcards.
 
@@ -357,8 +366,13 @@ Example:
   settings: {
     'fast-import': {
       packageRootDir: import.meta.dirname,
-      externallyImportedFiles: ['/src/app/**/page.tsx', '/src/app/**/layout.tsx'],
-      entryPointFiles: { '.': './src/index.ts' },
+      externallyImportedFiles: [
+        '/src/app/**/page.tsx',
+        '/src/app/**/layout.tsx',
+      ],
+      entryPointFiles: {
+        '.': './src/index.ts',
+      },
     },
   },
 }
@@ -376,9 +390,11 @@ Next.js is autodetected by Fast Import, and the appropriate externally imported 
 
 Type : `string[]`
 
+Default; `[]`
+
 A list of ignore patterns, using the format used by `.gitignore` files. Files that match these patterns are excluded from analysis.
 
-By default, Fast Import includes the contents of all `.gitignore` files that apply to each file, taking into account nesting, between the file in question and the closest parent folder that contains a `.git` folder. In other words, if you have a fully fleshed out `.gitignore` setup, you can likely ignore this setting.
+By default, Fast Import includes the contents of all `.gitignore` files that apply to each file, taking into account nesting, between the file in question and the closest parent folder that contains a `.git` folder. In other words, if you have a fully fleshed out `.gitignore` setup, you can ignore this setting.
 
 Example:
 
@@ -399,6 +415,8 @@ Example:
 #### ignoreOverridePatterns
 
 Type : `string[]`
+
+Default; `[]`
 
 A list of "inverse" ignore patterns that negate other ignore patterns, using the format used by `.gitignore` files. This pattern is useful if your `.gitignore` file includes generated code that is needed for proper import/export analysis.
 
@@ -421,12 +439,9 @@ Example:
 
 type: `string[]`
 
-Several rules take into account whether or not a given file is a "test" file or a "production" file. By default, any
-file path that contains `__test__`, `__tests__`, or `.test.` is considered a test file, and everything else is
-considered a production file.
+Default: `[ '.test.', '.spec', '__test__', '__tests__', '__fixture__' ]`
 
-This option allows you to define extra patterns in addition to the default three to indicate other test files. Note that
-globs are not currently supported.
+Several rules take into account whether or not a given file is a "test" file or a "production" file. This option allows you to define extra patterns in addition to the default three to indicate other test files. Note that globs are not currently supported.
 
 Example:
 
@@ -435,7 +450,7 @@ Example:
   settings: {
     'fast-import': {
       packageRootDir: import.meta.dirname,
-      testFilePatterns: ['__fixture__'],
+      testFilePatterns: ['__custom_test__'],
     },
   },
 }
@@ -464,7 +479,6 @@ repo
 ├── eslint.config.mjs
 └── packages
     ├── web
-    │   ├── fast-import.config.json
     │   └── src
     └── shared
         ├── fast-import.config.jsonc
@@ -480,17 +494,16 @@ Root config:
       monorepoRootDir: import.meta.dirname,
     },
   },
+
+  ...fastImportPlugin.configs.monorepoRecommended,
 }
 ```
 
-Package config:
+Shared package config:
 
-```json
+```js
 {
-  "entryPointFiles": { ".": "./src/index.ts" },
-  "alias": {
-    "@/*": "src/*"
-  }
+  testFilePatterns: ['__custom_test__'],
 }
 ```
 
@@ -500,7 +513,7 @@ Note: config files outside the declared workspace globs are ignored.
 
 #### Option 2: separate configs per package
 
-You can also keep monorepo packages on separate ESLint configs using the same single-repo setup shown earlier, with each package setting its own `packageRootDir`.
+You can also keep monorepo packages on separate ESLint configs using the same single package mode setup shown earlier, with each package setting its own `packageRootDir`.
 
 Warning: the `monorepoRecommended` configuration does not work with this option because it won't see any other packages.
 
@@ -522,19 +535,19 @@ export default defineConfig([
 ]);
 ```
 
-#### Option 3: combine the two (recommended)
+#### Option 3: root + separate configs (recommended)
 
 In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. This allows you to enable repo-wide rules that must be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md), without paying the performance cost of having _all_ lint rules at the root.
 
 ESLint is single-threaded by default, and using `--concurrency` requires typescript-eslint, Fast Import, and others to duplicate the expensive cross-file computations, thus erasing multithreaded gains. This means that a root-level config will lint your entire codebase serially or take a performance hit so great it might as well be linted serially.
 
-If you have package-level configs however and are using a multithreaded/multiprocess repo manager like Nx or Turborepo, linting gets parallelized. In addition, these repo managers cache per-package results and doesn't rerun them if files/dependencies have not changed. Using a root-level config does not utilize per-package caching.
+If you have package-level configs however and are using a multithreaded/multiprocess repo manager like Nx or Turborepo, linting gets parallelized. In addition, these repo managers cache per-package results and doesn't rerun them if files/dependencies have not changed. Using a root-level config means we cant take advantage of this parallelization or caching.
 
-This performance difference can be especially important when running ESLint in an editor or when using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md), where response time is important. Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (including Fast Import) are not multithreaded and still susceptible to this issue.
+This performance difference can be especially important when running ESLint in an editor or when using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md), where response time is important. Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (including Fast Import) are not multithreaded and thus still susceptible to this issue.
 
 To combine these two options, you use per-package Fast Import configuration files where needed. The root config uses `monorepoRootDir` and discovers workspace packages from your monorepo configuration. The per-package config sets `packageRootDir`, and if a `fast-import.config.json`/`fast-import.config.jsonc` file exists at that package root Fast Import will pick it up automatically. Do _not_ put any package-level settings in package-local ESLint/Oxlint config file's `settings['fast-import]` section.
 
-Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you may need to use option 1. ESLint handles nested configs without any issues.
+Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you may need to use the first option. ESLint handles nested configs without any issues.
 
 ### Using with Oxlint
 
