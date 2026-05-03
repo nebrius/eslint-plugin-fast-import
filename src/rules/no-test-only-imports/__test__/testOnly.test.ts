@@ -9,7 +9,7 @@ import { noTestOnlyImports } from '../rule.js';
 const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
-const FILE_C_TEST = join(TEST_PACKAGE_DIR, '__fixture__', 'c-test.ts');
+const FILE_C_TEST = join(TEST_PACKAGE_DIR, '__custom_test__', 'c-test.ts');
 const FILE_D_DTS = join(TEST_PACKAGE_DIR, 'd.d.ts');
 const FILE_E = join(TEST_PACKAGE_DIR, 'e.ts');
 const FILE_G = join(TEST_PACKAGE_DIR, 'g.ts');
@@ -19,7 +19,11 @@ const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
       projectService: {
-        allowDefaultProject: ['*.ts*', '__fixture__/*.ts*', '__test__/*.ts*'],
+        allowDefaultProject: [
+          '*.ts*',
+          '__custom_test__/*.ts*',
+          '__test__/*.ts*',
+        ],
       },
       tsconfigRootDir: TEST_PACKAGE_DIR,
     },
@@ -72,7 +76,7 @@ export const a2 = 10;
         },
       },
     },
-    // __fixture__ is added to testFilePatterns, so c-test.ts is a test file
+    // __custom_test__ is added to testFilePatterns, so c-test.ts is a test file
     // and its exports only being used by other test files is valid
     {
       code: readFileSync(FILE_C_TEST, 'utf8'),
@@ -81,7 +85,7 @@ export const a2 = 10;
         'fast-import': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
-          testFilePatterns: ['__fixture__'],
+          testFilePatterns: ['__custom_test__'],
         },
       },
     },
@@ -128,7 +132,7 @@ export const a2 = 10;
         },
       },
     },
-    // __fixture__ is NOT in testFilePatterns, so c-test.ts is a prod file
+    // __custom_test__ is NOT in testFilePatterns, so c-test.ts is a prod file
     // and its exports only being used by test files is an error
     {
       code: readFileSync(FILE_C_TEST, 'utf8'),

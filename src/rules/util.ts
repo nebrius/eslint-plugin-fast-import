@@ -203,7 +203,13 @@ async function initializeFileWatching(
   setTimeout(() => void refresh(), repoSettings.editorUpdateRate);
 }
 
-const DEFAULT_TEST_FILE_PATTERNS = ['.test.', '__test__', '__tests__'];
+const DEFAULT_TEST_FILE_PATTERNS = [
+  '.test.',
+  '.spec',
+  '__test__',
+  '__tests__',
+  '__fixture__',
+];
 export function isNonTestFile(filePath: string) {
   const packageSettings = getPackageCacheEntryForFile(filePath);
   if (!packageSettings) {

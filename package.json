@@ -1,11 +1,13 @@
 {
   "name": "eslint-plugin-fast-import",
   "version": "2.2.1",
-  "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
+  "description": "ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports",
   "keywords": [
     "eslint",
     "eslint-plugin",
-    "eslintplugin"
+    "eslintplugin",
+    "oxlint",
+    "oxlint-plugin"
   ],
   "homepage": "https://github.com/nebrius/eslint-plugin-fast-import",
   "bugs": "https://github.com/nebrius/eslint-plugin-fast-import/issues",

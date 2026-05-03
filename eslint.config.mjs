@@ -45,6 +45,7 @@ export default defineConfig([
   },
 
   fastImportPlugin.configs.recommended,
+
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'
       ? {
