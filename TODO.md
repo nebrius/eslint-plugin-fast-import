@@ -1,8 +1,5 @@
-- Rename plugin. Semantic Import w/ package semantic-import-lint?
+- Rename plugin. "Import Integrity" and either import-integrity-lint or eslint-plugin-import-integrity
 - Proper docs site on GitHub Pages
-- Create skill?
-- Codebase wide implementation review
-- Codebase wide test review
-- Manually review README top to bottom
-- Is there a modern reliable replacement for chokidar to replace polling?
-
+- Add Oxlint perf comparison
+- Update Aquarium control to use v3 and dual ESLint OXlint setups.
+    - Link to it from the README
