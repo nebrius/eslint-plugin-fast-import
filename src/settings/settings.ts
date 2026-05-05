@@ -240,32 +240,40 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
 
   // Compute a mapping from compiled package exports to source, if possible
   const inferredEntryPoints: Record<string, string> = {};
-  if (mapping && packageJsonExports) {
+  if (packageJsonExports) {
     for (const [key, value] of Object.entries(packageJsonExports)) {
-      if (!value.startsWith(mapping.outDir)) {
-        warn(
-          `Export ${key} in ${packageRootDir} in package.json export doesn't start with TypeScript's outDir ${mapping.outDir}`
-        );
-        continue;
+      // If this is a TypeScript file, we know it's not mapped and can use its
+      // entry directly
+      if (value.endsWith('.ts')) {
+        inferredEntryPoints[key] = value;
       }
-      const baseFile = value.replace(mapping.outDir, mapping.rootDir);
-      let srcFile: string | undefined;
-      if (existsSync(join(packageRootDir, baseFile))) {
-        srcFile = baseFile;
-      } else {
-        const tsBaseFile = baseFile.replace(/\.[^/.]+$/, '.ts');
-        if (existsSync(join(packageRootDir, tsBaseFile))) {
-          srcFile = tsBaseFile;
+      // Otherwise we require a mapping from tsconfig
+      else if (mapping) {
+        if (!value.startsWith(mapping.outDir)) {
+          warn(
+            `Export ${key} in ${packageRootDir} in package.json export doesn't start with TypeScript's outDir ${mapping.outDir}`
+          );
+          continue;
+        }
+        const baseFile = value.replace(mapping.outDir, mapping.rootDir);
+        let srcFile: string | undefined;
+        if (existsSync(join(packageRootDir, baseFile))) {
+          srcFile = baseFile;
         } else {
-          const tsxBaseFile = baseFile.replace(/\.[^/.]+$/, '.tsx');
-          if (existsSync(join(packageRootDir, tsxBaseFile))) {
-            srcFile = tsxBaseFile;
+          const tsBaseFile = baseFile.replace(/\.[^/.]+$/, '.ts');
+          if (existsSync(join(packageRootDir, tsBaseFile))) {
+            srcFile = tsBaseFile;
+          } else {
+            const tsxBaseFile = baseFile.replace(/\.[^/.]+$/, '.tsx');
+            if (existsSync(join(packageRootDir, tsxBaseFile))) {
+              srcFile = tsxBaseFile;
+            }
           }
         }
-      }
 
-      if (srcFile) {
-        inferredEntryPoints[key] = srcFile;
+        if (srcFile) {
+          inferredEntryPoints[key] = srcFile;
+        }
       }
     }
   }

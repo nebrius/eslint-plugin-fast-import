@@ -1,5 +1,4 @@
 - Rename plugin. "Import Integrity" and either import-integrity-lint or eslint-plugin-import-integrity
 - Proper docs site on GitHub Pages
 - Add Oxlint perf comparison
-- Update Aquarium control to use v3 and dual ESLint OXlint setups.
-    - Link to it from the README
+- Split externally imported/entry points in README?

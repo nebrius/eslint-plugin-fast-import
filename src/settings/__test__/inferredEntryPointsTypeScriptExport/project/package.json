@@ -1,0 +1,6 @@
+{
+  "name": "inferred-typescript-export-test",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

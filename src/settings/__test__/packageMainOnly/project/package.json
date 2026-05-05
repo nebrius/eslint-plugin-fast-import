@@ -1,4 +1,4 @@
 {
   "name": "package-main-only-test",
-  "main": "./index.js"
+  "main": "index.js"
 }

@@ -537,7 +537,7 @@ export default defineConfig([
 
 #### Option 3: root + separate configs (recommended)
 
-In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. This allows you to enable repo-wide rules that must be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md), without paying the performance cost of having _all_ lint rules at the root.
+In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. Then you configure separate ESLint instances to run on every file, including the root config. This allows you to enable repo-wide rules that must be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md), without paying the performance cost of having _all_ lint rules at the root.
 
 ESLint is single-threaded by default, and using `--concurrency` requires typescript-eslint, Fast Import, and others to duplicate the expensive cross-file computations, thus erasing multithreaded gains. This means that a root-level config will lint your entire codebase serially or take a performance hit so great it might as well be linted serially.
 
@@ -546,6 +546,8 @@ If you have package-level configs however and are using a multithreaded/multipro
 This performance difference can be especially important when running ESLint in an editor or when using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md), where response time is important. Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (including Fast Import) are not multithreaded and thus still susceptible to this issue.
 
 To combine these two options, you use per-package Fast Import configuration files where needed. The root config uses `monorepoRootDir` and discovers workspace packages from your monorepo configuration. The per-package config sets `packageRootDir`, and if a `fast-import.config.json`/`fast-import.config.jsonc` file exists at that package root Fast Import will pick it up automatically. Do _not_ put any package-level settings in package-local ESLint/Oxlint config file's `settings['fast-import]` section.
+
+For a complete working example of this approach, see my [Aquarium Control project](https://github.com/nebrius/aquarium-control).
 
 Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you may need to use the first option. ESLint handles nested configs without any issues.
 

@@ -53,6 +53,10 @@ export function getPackageJsonSettings(
 
     // Fall back to "main" if no exports are defined for the root subpath
     if (packageJson.main) {
+      // unlike "exports", "main" is not required to start with `./`
+      if (!packageJson.main.startsWith('./')) {
+        packageJson.main = `./${packageJson.main}`;
+      }
       parsedExports = {
         // We set the main entry first so that packages.exports takes precedence
         // if it also defines a "." entry
