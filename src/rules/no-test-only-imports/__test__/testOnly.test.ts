@@ -38,7 +38,7 @@ export const a2 = 10;
 `,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -48,7 +48,7 @@ export const a2 = 10;
       code: readFileSync(FILE_B, 'utf8'),
       filename: FILE_B,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': './f.ts' },
@@ -59,7 +59,7 @@ export const a2 = 10;
       code: readFileSync(FILE_D_DTS, 'utf8'),
       filename: FILE_D_DTS,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -69,7 +69,7 @@ export const a2 = 10;
       code: readFileSync(FILE_E, 'utf8'),
       filename: FILE_E,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': './e.ts' },
@@ -82,7 +82,7 @@ export const a2 = 10;
       code: readFileSync(FILE_C_TEST, 'utf8'),
       filename: FILE_C_TEST,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           testFilePatterns: ['__custom_test__'],
@@ -95,7 +95,7 @@ export const a2 = 10;
       code: readFileSync(FILE_G, 'utf8'),
       filename: FILE_G,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -108,7 +108,7 @@ export const a2 = 10;
       code: readFileSync(FILE_H, 'utf8'),
       filename: FILE_H,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -126,7 +126,7 @@ export const a2 = 10;
       filename: FILE_A,
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -139,7 +139,7 @@ export const a2 = 10;
       filename: FILE_C_TEST,
       errors: [{ messageId: 'noTestOnlyImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

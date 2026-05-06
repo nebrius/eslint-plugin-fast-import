@@ -1,4 +1,4 @@
-# fast-import/no-unresolved-imports
+# import-integrity/no-unresolved-imports
 
 Ensures that module specifiers in import statements (aka `foo` in `import { bar } from 'foo'`) resolve to known modules.
 

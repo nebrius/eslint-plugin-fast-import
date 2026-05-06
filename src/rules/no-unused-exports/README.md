@@ -1,4 +1,4 @@
-# fast-import/no-unused-exports
+# import-integrity/no-unused-exports
 
 Ensures exports are imported elsewhere in the package.
 

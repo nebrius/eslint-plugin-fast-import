@@ -26,7 +26,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       code: `import { foo } from './b';`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -37,7 +37,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       code: `import lodash from 'lodash';`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -52,7 +52,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -64,7 +64,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -76,7 +76,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -88,7 +88,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -100,7 +100,7 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
       filename: FILE_A,
       errors: [{ messageId: 'noNodeBuiltins' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

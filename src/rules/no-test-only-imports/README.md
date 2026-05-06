@@ -1,4 +1,4 @@
-# fast-import/no-test-only-imports
+# import-integrity/no-test-only-imports
 
 Ensures that non-test files' exports are not imported only by test files, unless the export name is prefixed with `_testOnly`.
 

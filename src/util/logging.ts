@@ -1,5 +1,5 @@
 export function warn(msg: string) {
-  console.warn(`[Warn] fast-import: ${msg}`);
+  console.warn(`[Warn] import-integrity: ${msg}`);
 }
 
 let verboseEnabled = false;
@@ -9,7 +9,7 @@ export function setVerbose(verbose: boolean) {
 
 export function debug(msg: string) {
   if (verboseEnabled) {
-    console.debug(`[Debug] fast-import: ${msg}`);
+    console.debug(`[Debug] import-integrity: ${msg}`);
   }
 }
 

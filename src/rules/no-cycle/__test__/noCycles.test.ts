@@ -29,7 +29,7 @@ ruleTester.run('no-cycle', noCycle, {
       code: `export const a = 10;`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -48,7 +48,7 @@ console.log(c);
       filename: FILE_A,
       errors: [{ messageId: 'noCycles' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -64,7 +64,7 @@ console.log(c);
       filename: FILE_A,
       errors: [{ messageId: 'noCycles' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -77,7 +77,7 @@ export const a = 10;`,
       filename: FILE_A,
       errors: [{ messageId: 'noCycles' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

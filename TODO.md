@@ -1,4 +1,4 @@
-- Rename plugin. "Import Integrity" and either import-integrity-lint or eslint-plugin-import-integrity
 - Proper docs site on GitHub Pages
 - Add Oxlint perf comparison
 - Split externally imported/entry points in README?
+- Convert Changelog into upgrade guide.

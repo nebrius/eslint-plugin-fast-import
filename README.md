@@ -1,9 +1,9 @@
-# eslint-plugin-fast-import
+# Import Integrity
 
-[![npm version](https://badge.fury.io/js/eslint-plugin-fast-import.svg)](https://badge.fury.io/js/eslint-plugin-fast-import) ![ci workflow](https://github.com/nebrius/eslint-plugin-fast-import/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/eslint-plugin-fast-import/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/eslint-plugin-fast-import)
+[![npm version](https://badge.fury.io/js/import-integrity-lint.svg)](https://badge.fury.io/js/import-integrity-lint) ![ci workflow](https://github.com/nebrius/import-integrity-lint/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/import-integrity-lint/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/import-integrity-lint)
 
 > [!WARNING]
-> This README documents version 3 of Fast Import. Version 3 is currently under active development on main and is a significant rewrite. To see documentation for the current production version, see the [version 2.2.1 docs](https://github.com/nebrius/eslint-plugin-fast-import/tree/2.2.1).
+> This README documents version 3 of Import Integrity. Version 3 is currently under active development on main and is a significant rewrite. To see documentation for the current production version, see the [version 2.2.1 docs](https://github.com/nebrius/import-integrity-lint/tree/2.2.1).
 
 - [Installation](#installation)
 - [Rules](#rules)
@@ -54,53 +54,53 @@
   - [Do you support user-supplied resolvers like eslint-plugin-import does?](#do-you-support-user-supplied-resolvers-like-eslint-plugin-import-does)
 - [License](#license)
 
-Fast Import implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
+Import Integrity implements a series of lint rules that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
 
-Fast Import uses a novel algorithm combined with the [Oxc Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other third-party ESLint import plugins. Fast Import also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
+Import Integrity uses a novel algorithm combined with the [Oxc Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other third-party ESLint import plugins. Import Integrity also includes an editor mode that keeps its internal datastructures up to date with file system changes. This way you don't get stale errors in your editor when you change branches, unlike other plugins.
 
 ## Getting Started
 
 Install the plugin from npm:
 
 ```bash
-npm install --save-dev eslint-plugin-fast-import
+npm install --save-dev import-integrity-lint
 ```
 
-For typical single-package-per-repo projects, you can enable Fast Import with:
+For typical single-package-per-repo projects, you can enable Import Integrity with:
 
 ```js
 // ESLint
 import { defineConfig } from 'eslint/config';
-import fastImportPlugin from 'eslint-plugin-fast-import';
+import importIntegrityPlugin from 'import-integrity-lint';
 
 export default defineConfig([
   {
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: import.meta.dirname,
       },
     },
   },
-  fastImportPlugin.configs.recommended,
+  importIntegrityPlugin.configs.recommended,
 ]);
 ```
 
 ```js
 // Oxlint
-import fastImportPlugin from 'eslint-plugin-fast-import';
+import importIntegrityPlugin from 'import-integrity-lint';
 
 export default {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
     },
   },
   jsPlugins: [{
-    name: 'fast-import',
-    specifier: 'eslint-plugin-fast-import',
+    name: 'import-integrity',
+    specifier: 'import-integrity-lint',
   }],
   rules: {
-    ...fastImportPlugin.configs.recommended.rules,
+    ...importIntegrityPlugin.configs.recommended.rules,
   },
 }
 
@@ -159,13 +159,13 @@ These rules are designed to prevent certain types of imports/export usage that a
 
 Configuration options are split into two groups: repo-level configuration options and package-level configuration options. In the single package case, which we call "single package mode", there isn't a distinction between the two groups. When [using a lint config at the repo root](#option-1-one-root-config-with-monoreporootdir) to apply to more than one package, which we call "monorepo mode," repo-level options apply to all packages in the monorepo, while package-level options are specified per-package.
 
-To support this "split-level" configuration, Fast Import uses separate configuration files for package-level options that are independent of the ESLint/Oxlint configuration, while repo-level options go in `settings['fast-import']` in the ESLint/Oxlint configuration file.
+To support this "split-level" configuration, Import Integrity uses separate configuration files for package-level options that are independent of the ESLint/Oxlint configuration, while repo-level options go in `settings['import-integrity']` in the ESLint/Oxlint configuration file.
 
-In single package mode, package-level options can also go in `settings['fast-import']` if you prefer to not create a separate configuration file.
+In single package mode, package-level options can also go in `settings['import-integrity']` if you prefer to not create a separate configuration file.
 
-In monorepo mode, custom package-level options are required to be in a configuration file, not `settings['fast-import']`. Fast Import uses your monorepo's workspace configuration to determine which packages to analyze (supports Yarn, npm, Lerna, pnpm, Bun, and Rush). If a workspace package has a configuration file, Fast Import loads its package-level options from that file. Workspace packages without a configuration file fall back to default values for all package-level options.
+In monorepo mode, custom package-level options are required to be in a configuration file, not `settings['import-integrity']`. Import Integrity uses your monorepo's workspace configuration to determine which packages to analyze (supports Yarn, npm, Lerna, pnpm, Bun, and Rush). If a workspace package has a configuration file, Import Integrity loads its package-level options from that file. Workspace packages without a configuration file fall back to default values for all package-level options.
 
-Configuration files are written using JSON-C (JSON with comments) and are named `fast-import.config.json` or `fast-import.config.jsonc`. These files must live in the package root dir as a sibling to `package.json` and `tsconfig.json`. In monorepo mode, you must set `name` in `package.json`, because this is used by Fast Import for cross-package import analysis.
+Configuration files are written using JSON-C (JSON with comments) and are named `import-integrity.config.json` or `import-integrity.config.jsonc`. These files must live in the package root dir as a sibling to `package.json` and `tsconfig.json`. In monorepo mode, you must set `name` in `package.json`, because this is used by Import Integrity for cross-package import analysis.
 
 ### Repo-level configuration options
 
@@ -173,11 +173,11 @@ Configuration files are written using JSON-C (JSON with comments) and are named 
 
 Type: `string`
 
-Fast Import uses `packageRootDir` to scan for files in the current package. When Fast Import starts up for the first time, it creates a map of all files inside of `packageRootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
+Import Integrity uses `packageRootDir` to scan for files in the current package. When Import Integrity starts up for the first time, it creates a map of all files inside of `packageRootDir`, filters out any ignored files (see [ignorePatterns](#ignorepatterns) for more info), and analyzes the remaining files.
 
-Note: Fast Import does not analyze files in folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze files in one of these folders, file an issue and we'll find a way to support your use case.
+Note: Import Integrity does not analyze files in folders named `node_modules`, `build`, `out`, `dist`, and any folder or file that starts with a `.`, regardless of ignore settings. These folders are almost always ignored anyways, and hard-coding this list improves performance. If you want to analyze files in one of these folders, file an issue and we'll find a way to support your use case.
 
-In single package mode, you must set `packageRootDir` directly in `settings['fast-import']`.
+In single package mode, you must set `packageRootDir` directly in `settings['import-integrity']`.
 
 In monorepo mode, every package still has a `packageRootDir` under the hood, but it is automatically set to the directory discovered from the workspace configuration.
 
@@ -188,7 +188,7 @@ CommonJS Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: __dirname,
     },
   },
@@ -200,7 +200,7 @@ ESM Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
     },
   },
@@ -211,7 +211,7 @@ ESM Example:
 
 Type: `string`
 
-`monorepoRootDir` is the absolute path to the monorepo root. Fast Import uses your monorepo's workspace configuration to discover packages underneath this directory. Each discovered workspace package becomes a package root. If a workspace package contains `fast-import.config.json` or `fast-import.config.jsonc` at its root, Fast Import loads package-level settings from that file; otherwise default package-level settings are used. Config files outside the package root directories of declared workspace packages are ignored.
+`monorepoRootDir` is the absolute path to the monorepo root. Import Integrity uses your monorepo's workspace configuration to discover packages underneath this directory. Each discovered workspace package becomes a package root. If a workspace package contains `import-integrity.config.json` or `import-integrity.config.jsonc` at its root, Import Integrity loads package-level settings from that file; otherwise default package-level settings are used. Config files outside the package root directories of declared workspace packages are ignored.
 
 `packageRootDir` and `monorepoRootDir` are mutually exclusive and cannot both be defined.
 
@@ -220,7 +220,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       monorepoRootDir: import.meta.dirname,
     },
   },
@@ -233,24 +233,24 @@ Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
 
 Default: `'auto'`
 
-When set to `auto`, Fast Import chooses a mode based on the current environment:
+When set to `auto`, Import Integrity chooses a mode based on the current environment:
 
 - `editor` when running inside supported editors such as VS Code, Cursor, or Windsurf
 - `fix` when Oxlint or ESLint are run with `--fix`, `--fix-dry-run`, or `--fix-type`
 - `one-shot` otherwise
 
-`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint or Oxlint from the command line without a fix flag. In this mode, Fast Import first creates a map of all files, but does not enable update-oriented cache refreshes because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
+`one-shot` mode assumes that each file will be linted exactly once. This mode optimizes for running ESLint or Oxlint from the command line without a fix flag. In this mode, Import Integrity first creates a map of all files, but does not enable update-oriented cache refreshes because it is assumed files will not be updated throughout the duration of the run. This mode should be used in CI.
 
-`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Fast Import updates its cache if any imports/exports are modified in a file.
+`fix` builds on `one-shot` by introducing the caching layer. Each time a rule is called, Import Integrity updates its cache if any imports/exports are modified in a file.
 
-`editor` builds on `fix` by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Fast Import to respond to changes outside of the editor, such as when running `git checkout` or `git stash`.
+`editor` builds on `fix` by adding a file watcher that looks for changes at a regular interval defined by [`editorUpdateRate`](#editorupdaterate). When changes are detected, the file map is updated. This allows Import Integrity to respond to changes outside of the editor, such as when running `git checkout` or `git stash`.
 
 Example:
 
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       mode: 'editor',
     },
@@ -274,7 +274,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       editorUpdateRate: 2_000,
     },
@@ -295,7 +295,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       debugLogging: true,
     },
@@ -305,7 +305,7 @@ Example:
 
 ### Package-level configuration options
 
-The remaining options are package-scoped. In single-repo mode, place them in `settings['fast-import']` or in a `fast-import.config.json`/`fast-import.config.jsonc` file in `packageRootDir` (but not both). In monorepo mode, place them in a package's Fast Import config if that package needs non-default values. The examples below use the single-repo form.
+The remaining options are package-scoped. In single-repo mode, place them in `settings['import-integrity']` or in a `import-integrity.config.json`/`import-integrity.config.jsonc` file in `packageRootDir` (but not both). In monorepo mode, place them in a package's Import Integrity config if that package needs non-default values. The examples below use the single-repo form.
 
 #### alias
 
@@ -315,7 +315,7 @@ Default: aliases in `tsconfig.json`
 
 `alias` defines a set of module specifier aliases. For example, if you use Next.js with its default configuration, you're probably familiar with the alias it creates: `@/` points to `src/`, such that a file inside of `src` can import `src/components/foo/index.ts` with `@/components/foo`.
 
-Fast Import defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
+Import Integrity defaults to the values inside of `tsconfig.json`, if present, with a few limitations:
 
 - Aliases that point to files outside of `packageRootDir`, or point to files inside of `node_modules`, `build`, `out`, `dist`, or any folder or file that starts with a `.`, are ignored
 - Aliases with more than one file, e.g. `"@/": ["a.ts", "b.ts"]`, are ignored
@@ -325,7 +325,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       alias: {
         '@/*': 'src/*',
@@ -364,7 +364,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       externallyImportedFiles: [
         '/src/app/**/page.tsx',
@@ -378,13 +378,13 @@ Example:
 }
 ```
 
-Fast Import inspects your app and applies a few common defaults for `externallyImportedFiles` and `entryPointFiles`.
+Import Integrity inspects your app and applies a few common defaults for `externallyImportedFiles` and `entryPointFiles`.
 
-Entry points will be autopopulated for you if you populate the `exports`/`main` field in `package.json` _and_ you define `outDir` and `rootDir` in your `tsconfig.json`. Fast Import requires both in order to be confident that we can and should map from the compiled output (what `package.json` points to) back to the source code (what Fast Import needs).
+Entry points will be autopopulated for you if you populate the `exports`/`main` field in `package.json` _and_ you define `outDir` and `rootDir` in your `tsconfig.json`. Import Integrity requires both in order to be confident that we can and should map from the compiled output (what `package.json` points to) back to the source code (what Import Integrity needs).
 
 Config files matching `/*.config.*` are always included in `externallyImportedFiles` and cannot be overridden.
 
-Next.js is autodetected by Fast Import, and the appropriate externally imported patterns are pre-applied. Fast Import takes into account whether you are using a `src` directory or not, and whether app router patterns should be applied. When app router patterns are applied, pages router patterns are included too because Next.js allows both routers to coexist. If you supply your own patterns, they will override these defaults.
+Next.js is autodetected by Import Integrity, and the appropriate externally imported patterns are pre-applied. Import Integrity takes into account whether you are using a `src` directory or not, and whether app router patterns should be applied. When app router patterns are applied, pages router patterns are included too because Next.js allows both routers to coexist. If you supply your own patterns, they will override these defaults.
 
 #### ignorePatterns
 
@@ -394,14 +394,14 @@ Default; `[]`
 
 A list of ignore patterns, using the format used by `.gitignore` files. Files that match these patterns are excluded from analysis.
 
-By default, Fast Import includes the contents of all `.gitignore` files that apply to each file, taking into account nesting, between the file in question and the closest parent folder that contains a `.git` folder. In other words, if you have a fully fleshed out `.gitignore` setup, you can ignore this setting.
+By default, Import Integrity includes the contents of all `.gitignore` files that apply to each file, taking into account nesting, between the file in question and the closest parent folder that contains a `.git` folder. In other words, if you have a fully fleshed out `.gitignore` setup, you can ignore this setting.
 
 Example:
 
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       ignorePatterns: [
         'src/**/__test__/**/snapshot/**/*',
@@ -425,7 +425,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       ignoreOverridePatterns: [
         'src/generated/**/*.ts',
@@ -448,7 +448,7 @@ Example:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       testFilePatterns: ['__custom_test__'],
     },
@@ -458,7 +458,7 @@ Example:
 
 ### Use in monorepos
 
-Fast Import is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing fast import to manage multiple caches for different packages in the monorepo simultaneously.
+Import Integrity is designed to work well in monorepos. The caching mechanism described in [the algorithm](#algorithm) is monorepo aware, allowing Import Integrity to manage multiple caches for different packages in the monorepo simultaneously.
 
 Monorepos can be configured in a few ways, as described below.
 
@@ -468,8 +468,8 @@ Use this when you want one top-level ESLint or Oxlint config to cover the whole 
 
 Warning: using a single root config exclusively can cause performance issues. See Option 3 for a more performant approach and explanation of performance issues with single root configs.
 
-1. Set `settings['fast-import'].monorepoRootDir` in your root ESLint or Oxlint config.
-2. Optionally add a `fast-import.config.json`/`fast-import.config.jsonc` config file to any workspace package that needs non-default package-scoped options.
+1. Set `settings['import-integrity'].monorepoRootDir` in your root ESLint or Oxlint config.
+2. Optionally add a `import-integrity.config.json`/`import-integrity.config.jsonc` config file to any workspace package that needs non-default package-scoped options.
 3. Put package-scoped options such as `alias`, `entryPointFiles`, `externallyImportedFiles`, `ignorePatterns`, `ignoreOverridePatterns`, and `testFilePatterns` in those package config files.
 
 Example structure:
@@ -481,7 +481,7 @@ repo
     ├── web
     │   └── src
     └── shared
-        ├── fast-import.config.jsonc
+        ├── import-integrity.config.jsonc
         └── src
 ```
 
@@ -490,12 +490,12 @@ Root config:
 ```js
 {
   settings: {
-    'fast-import': {
+    'import-integrity': {
       monorepoRootDir: import.meta.dirname,
     },
   },
 
-  ...fastImportPlugin.configs.monorepoRecommended,
+  ...importIntegrityPlugin.configs.monorepoRecommended,
 }
 ```
 
@@ -507,7 +507,7 @@ Shared package config:
 }
 ```
 
-Fast Import discovers workspace packages from your monorepo configuration under `monorepoRootDir`. Each discovered workspace package becomes a package root. If a workspace package has a Fast Import config file at its root, that file is loaded, otherwise default package-level settings are used.
+Import Integrity discovers workspace packages from your monorepo configuration under `monorepoRootDir`. Each discovered workspace package becomes a package root. If a workspace package has a Import Integrity config file at its root, that file is loaded, otherwise default package-level settings are used.
 
 Note: config files outside the declared workspace globs are ignored.
 
@@ -521,17 +521,17 @@ Example package-local config:
 
 ```js
 import { defineConfig } from 'eslint/config';
-import fastImportPlugin from 'eslint-plugin-fast-import';
+import importIntegrityPlugin from 'import-integrity-lint';
 
 export default defineConfig([
   {
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: import.meta.dirname,
       },
     },
   },
-  fastImportPlugin.configs.recommended,
+  importIntegrityPlugin.configs.recommended,
 ]);
 ```
 
@@ -539,13 +539,13 @@ export default defineConfig([
 
 In a monorepo, I recommend that you use nested ESLint/Oxlint config files, with a minimal configuration at the repo root and putting everything else in per-package configs. Then you configure separate ESLint instances to run on every file, including the root config. This allows you to enable repo-wide rules that must be declared at the root, such as [no-unused-package-exports](src/rules/no-unused-package-exports/README.md), without paying the performance cost of having _all_ lint rules at the root.
 
-ESLint is single-threaded by default, and using `--concurrency` requires typescript-eslint, Fast Import, and others to duplicate the expensive cross-file computations, thus erasing multithreaded gains. This means that a root-level config will lint your entire codebase serially or take a performance hit so great it might as well be linted serially.
+ESLint is single-threaded by default, and using `--concurrency` requires typescript-eslint, Import Integrity, and others to duplicate the expensive cross-file computations, thus erasing multithreaded gains. This means that a root-level config will lint your entire codebase serially or take a performance hit so great it might as well be linted serially.
 
 If you have package-level configs however and are using a multithreaded/multiprocess repo manager like Nx or Turborepo, linting gets parallelized. In addition, these repo managers cache per-package results and doesn't rerun them if files/dependencies have not changed. Using a root-level config means we cant take advantage of this parallelization or caching.
 
-This performance difference can be especially important when running ESLint in an editor or when using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md), where response time is important. Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (including Fast Import) are not multithreaded and thus still susceptible to this issue.
+This performance difference can be especially important when running ESLint in an editor or when using an LSP-aware AI agent such as [Claude Code](https://github.com/boostvolt/claude-code-lsps/blob/main/README.md), where response time is important. Oxlint is multithreaded and so is less sensitive to this issue, but Oxlint JS Plugins (including Import Integrity) are not multithreaded and thus still susceptible to this issue.
 
-To combine these two options, you use per-package Fast Import configuration files where needed. The root config uses `monorepoRootDir` and discovers workspace packages from your monorepo configuration. The per-package config sets `packageRootDir`, and if a `fast-import.config.json`/`fast-import.config.jsonc` file exists at that package root Fast Import will pick it up automatically. Do _not_ put any package-level settings in package-local ESLint/Oxlint config file's `settings['fast-import]` section.
+To combine these two options, you use per-package Import Integrity configuration files where needed. The root config uses `monorepoRootDir` and discovers workspace packages from your monorepo configuration. The per-package config sets `packageRootDir`, and if a `import-integrity.config.json`/`import-integrity.config.jsonc` file exists at that package root Import Integrity will pick it up automatically. Do _not_ put any package-level settings in package-local ESLint/Oxlint config file's `settings['import-integrity]` section.
 
 For a complete working example of this approach, see my [Aquarium Control project](https://github.com/nebrius/aquarium-control).
 
@@ -553,23 +553,23 @@ Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs w
 
 ### Using with Oxlint
 
-Fast Import works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
+Import Integrity works with [Oxlint](https://oxc.rs/docs/guide/usage/linter) via its [JS plugin interface](https://oxc.rs/docs/guide/usage/linter/js-plugins).
 
-Configuration is similar to ESLint, except that you spread `fastImportPlugin.configs.recommended.rules` and/or `fastImportPlugin.configs.monorepoRecommended.rules` into Oxlint's `rules` object at the top level and add it to the `jsPlugins` array:
+Configuration is similar to ESLint, except that you spread `importIntegrityPlugin.configs.recommended.rules` and/or `importIntegrityPlugin.configs.monorepoRecommended.rules` into Oxlint's `rules` object at the top level and add it to the `jsPlugins` array:
 
 ```ts
-import fastImportPlugin from 'eslint-plugin-fast-import';
+import importIntegrityPlugin from 'import-integrity-lint';
 
 export default {
   jsPlugins: [{
-    name: 'fast-import',
-    specifier: 'eslint-plugin-fast-import',
+    name: 'import-integrity',
+    specifier: 'import-integrity-lint',
   }],
   rules: {
-    ...fastImportPlugin.configs.recommended.rules,
+    ...importIntegrityPlugin.configs.recommended.rules,
   },
   settings: {
-    'fast-import': {
+    'import-integrity': {
       monorepoRootDir: import.meta.dirname,
     },
   },
@@ -600,13 +600,13 @@ And here's the raw data:
 
 |             | No Unused  | No Cycle   | No Unresolved | Total      |
 | ----------- | ---------- | ---------- | ------------- | ---------- |
-| Fast Import | 55.6ms     | 1,880.6ms  | 15.2ms        | 1,936.2ms  |
+| Import Integrity | 55.6ms     | 1,880.6ms  | 15.2ms        | 1,936.2ms  |
 | Import      | 25,903.8ms | 42,710.7ms | 399.1ms       | 68,614.5ms |
 | Import X    | 36,200.9ms | 16,931.7ms | 821.6ms       | 53,132.5ms |
 
-If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/fast-import-perf/compare.ts).
+If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/import-integrity-perf/compare.ts).
 
-Fun fact: Fast Import was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of Oxc, which you can see [here](https://github.com/nebrius/eslint-plugin-fast-import/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Fast Import took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvement of this plugin is split almost exactly 50/50 between the switch to Oxc and the [algorithm described below](#algorithm). Rust helped, as expected, but a faster algorithm helped _just as much._
+Fun fact: Import Integrity was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of Oxc, which you can see [here](https://github.com/nebrius/import-integrity-lint/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Import Integrity took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvement of this plugin is split almost exactly 50/50 between the switch to Oxc and the [algorithm described below](#algorithm). Rust helped, as expected, but a faster algorithm helped _just as much._
 
 ### Accuracy
 
@@ -614,22 +614,22 @@ The performance script I wrote above also counts the number of errors found. Bef
 
 |             | Unused | Cycle | Unresolved |
 | ----------- | ------ | ----- | ---------- |
-| Fast Import | 4,672  | 686   | 306        |
+| Import Integrity | 4,672  | 686   | 306        |
 | Import      | 4,500  | 600   | 29         |
 | Import X    | 4,521  | 600   | 49         |
 
-We notice that the numbers are pretty close to each other, with Fast Import reporting a few more. While I haven't looked at each error to determine precisely what's going on, I'm pretty certain it's due to:
+We notice that the numbers are pretty close to each other, with Import Integrity reporting a few more. While I haven't looked at each error to determine precisely what's going on, I'm pretty certain it's due to:
 
-- Fast Import flagging non-test exports as unused if they are only imported in test files, which the other two don't check
-- Fast Import flagging imports of third party modules that are not listed in package.json (aka transient imports) as unresolved
+- Import Integrity flagging non-test exports as unused if they are only imported in test files, which the other two don't check
+- Import Integrity flagging imports of third party modules that are not listed in package.json (aka transient imports) as unresolved
 
-I do find it interesting that Fast Import finds a few more cycles. The 600 number is oddly round though, so perhaps their cycle detection algorithm has a limit on how many cycles it reports.
+I do find it interesting that Import Integrity finds a few more cycles. The 600 number is oddly round though, so perhaps their cycle detection algorithm has a limit on how many cycles it reports.
 
 Details aside, we can safely say that all three libraries have about the same level of accuracy
 
 ## Algorithm
 
-Fast Import works by using a four phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
+Import Integrity works by using a four phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
 
 ### Phase 1: AST analysis
 
@@ -659,13 +659,13 @@ Details for the information computed in this stage can be viewed in the [types f
 
 This phase goes through every import/reexport entry from the first phase and resolves the module specifier. This phase is the second most performance intensive phase, taking around 15% of total execution time. On VS Code, this phase takes 0.21 seconds, out of 1.52 seconds total.
 
-Fast Import uses its own high-performance resolver to achieve this speed. It resolves module specifiers to one of three types in a very specific order:
+Import Integrity uses its own high-performance resolver to achieve this speed. It resolves module specifiers to one of three types in a very specific order:
 
 1. A Node.js built-in module, as reported by `builtinModules()` in the `node:module` module
 2. A file within the current `packageRootDir`, aka first party
 3. A third party module
 
-Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Fast Import's resolution algorithm considerably faster than other resolvers, and is even as fast as algorithms written in Rust despite being written in JavaScript. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
+Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Import Integrity's resolution algorithm considerably faster than other resolvers, and is even as fast as algorithms written in Rust despite being written in JavaScript. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
 
 In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measurably improve performance.
 
@@ -693,7 +693,7 @@ export { default } from './d';
 export default 10; // Export for import in file a.ts!
 ```
 
-As we've seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Fast Import does not do any caching during this phase, since it has little effect on overall performance anyways.
+As we've seen, this phase is not performance intensive due to all the heavy lifting we've done in the first two phases. It is also the most entangled and difficult to cache, as we saw in the example above. As a result, Import Integrity does not do any caching during this phase, since it has little effect on overall performance anyways.
 
 Details for the information computed in this stage can be viewed in the [types file for analyzed information](./src/types/analyzed.ts).
 
@@ -717,7 +717,7 @@ If your code base mixes CommonJS and ESM, then this plugin will report any impor
 
 ### Barrel exporting from third-party/built-in modules are ignored
 
-Fast Import disables all checks on barrel imports from third party/builtin modules. For example, if you do this:
+Import Integrity disables all checks on barrel imports from third party/builtin modules. For example, if you do this:
 
 ```js
 // a.ts
@@ -727,7 +727,7 @@ export * from 'node:path';
 import { fake } from './a';
 ```
 
-Fast Import will not flag this as an error. This level of indirection is discouraged anyways, and is why Fast Import ships with the [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) rule.
+Import Integrity will not flag this as an error. This level of indirection is discouraged anyways, and is why Import Integrity ships with the [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) rule.
 
 For more details, see the limitations section of the [src/rules/no-unresolved-imports/README.md#limitations](src/rules/no-unresolved-imports/README.md)
 
@@ -743,14 +743,14 @@ export * from 'some-package';
 import { something } from 'package-one/a';
 ```
 
-Fast Import will not know about the second import. This means that rules such as
+Import Integrity will not know about the second import. This means that rules such as
 [no-unused-package-exports](src/rules/no-unused-package-exports/README.md) will not flag that this export is unused if package two stops importing it.
 
-Fast Import includes the [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) rule that addresses this limitation.
+Import Integrity includes the [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) rule that addresses this limitation.
 
 ### Case insensitivity inconsistency in ESLint arguments
 
-If you pass a file pattern or path to ESLint, ESLint inconsistently applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Fast Import will only be aware of the file at `src/someFile.ts`.
+If you pass a file pattern or path to ESLint, ESLint inconsistently applies case insensitivity. For example, let's say you have a file at `src/someFile.ts`, and you run ESLint with `eslint src/somefile.ts`. ESLint will parse the file, but it reports the filename internally as `src/somefile.ts`, not `src/someFile.ts`. However, Import Integrity will only be aware of the file at `src/someFile.ts`.
 
 ### Entrypoint file patterns with more than one wildcard are not supported
 
@@ -768,17 +768,17 @@ In this case, the single \* from the subpath gets repeated in the file path.
 
 ## Creating new rules
 
-Fast Import is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/no-unused-exports/rule.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/no-cycle/rule.ts) rule for a more complex example. Fast Import exports a few helper functions used to write rules.
+Import Integrity is designed to be extended. For a complete example, check out the source code for the [no-unused-exports](src/rules/no-unused-exports/rule.ts) lint rule for a relatively simple example, or the source code for the [no-cycle](src/rules/no-cycle/rule.ts) rule for a more complex example. Import Integrity exports a few helper functions used to write rules.
 
 ### getESMInfo(context)
 
-This is the most important of the four functions. If the file represented by the ESLint context has been analyzed by Fast Import, an object with the following properties is returned, otherwise `undefined` is returned:
+This is the most important of the four functions. If the file represented by the ESLint context has been analyzed by Import Integrity, an object with the following properties is returned, otherwise `undefined` is returned:
 
 - `fileInfo`: analyzed ESM info for the current file
 - `packageInfo`: analyzed ESM info for the current package
-- `packageSettings`: the computed package settings, with defaults applied, used by Fast Import for the current file
+- `packageSettings`: the computed package settings, with defaults applied, used by Import Integrity for the current file
 
-In monorepos, `packageSettings` may come from a package-local Fast Import config file while repo-level settings such as `mode` still come from the root ESLint or Oxlint config.
+In monorepos, `packageSettings` may come from a package-local Import Integrity config file while repo-level settings such as `mode` still come from the root ESLint or Oxlint config.
 
 See the TypeScript types for full details, which are reasonably well commented.
 
@@ -812,7 +812,7 @@ Note that an empty object is returned, indicating we don't want to traverse the 
 
 ### getLocFromRange(context, range)
 
-As we read in the previous section, Fast Import provides AST ranges for reporting errors. `context.report` however doesn't accept ranges directly, so we need to convert it first. `getLocFromRange` is a small wrapper around ESLint's built-in utilities for converting ranges to locations, which `context.report` _can_ accept. Reporting an error using this function looks like this:
+As we read in the previous section, Import Integrity provides AST ranges for reporting errors. `context.report` however doesn't accept ranges directly, so we need to convert it first. `getLocFromRange` is a small wrapper around ESLint's built-in utilities for converting ranges to locations, which `context.report` _can_ accept. Reporting an error using this function looks like this:
 
 ```js
 context.report({
@@ -823,7 +823,7 @@ context.report({
 
 ### registerUpdateListener(listener)
 
-Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on `registerUpdateListener` to be notified any time Fast Import refreshes the cache for a package. The callback receives the affected `packageRootDir`.
+Some rules may compute their own derived information that is also performance sensitive, such as the `no-cycle` rule. In these cases, you can rely on `registerUpdateListener` to be notified any time Import Integrity refreshes the cache for a package. The callback receives the affected `packageRootDir`.
 
 ### isNonTestFile(filePath)
 
@@ -841,13 +841,13 @@ if (isNonTestFile(context.filename)) {
 
 ### Is this plugin a replacement for eslint-plugin-import/eslint-plugin-import-x?
 
-No, not for the most part. Fast Import replaces a few select rules from import and import x that are known to be slow, such as `no-cycle`, but otherwise strives to coexist with these packages. It is recommended that you continue to use rules these packages provide that Fast Import does not.
+No, not for the most part. Import Integrity replaces a few select rules from import and import x that are known to be slow, such as `no-cycle`, but otherwise strives to coexist with these packages. It is recommended that you continue to use rules these packages provide that Import Integrity does not.
 
 ### Do you support user-supplied resolvers like eslint-plugin-import does?
 
-No, Fast Import cannot use off the shelf resolvers, by design. Off the shelf resolvers work by reading the filesystem to see what files are available, which is inherently slow. By contrast, Fast Import uses its own resolution algorithm that reuses information that already exists in memory so that it never has to touch the filesystem. This resolution algorithm is one of the key reasons Fast Import is able to achieve the performance it does.
+No, Import Integrity cannot use off the shelf resolvers, by design. Off the shelf resolvers work by reading the filesystem to see what files are available, which is inherently slow. By contrast, Import Integrity uses its own resolution algorithm that reuses information that already exists in memory so that it never has to touch the filesystem. This resolution algorithm is one of the key reasons Import Integrity is able to achieve the performance it does.
 
-If Fast Import's resolution algorithm does not support your use case, please file an issue and I'll try to add support for it.
+If Import Integrity's resolution algorithm does not support your use case, please file an issue and I'll try to add support for it.
 
 For more information, see the algorithm section [Phase 2: Module specifier resolution](#phase-2-module-specifier-resolution).
 

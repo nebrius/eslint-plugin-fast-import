@@ -158,7 +158,7 @@ it('Returns one entry per workspace package and reads each package config file',
     join(fixtureDir, 'packages', 'withJsonc'),
   ]);
 
-  // Packages without a fast-import config get the empty-object default.
+  // Packages without a import-integrity config get the empty-object default.
   const noConfig = result.find((r) => r.packageRootDir.endsWith('noConfig'));
   expect(noConfig?.configFileContents).toBe('{}');
 
@@ -166,7 +166,7 @@ it('Returns one entry per workspace package and reads each package config file',
   const withJson = result.find((r) => r.packageRootDir.endsWith('withJson'));
   expect(withJson?.configFileContents).toBe(
     readFileSync(
-      join(fixtureDir, 'packages', 'withJson', 'fast-import.config.json'),
+      join(fixtureDir, 'packages', 'withJson', 'import-integrity.config.json'),
       'utf-8'
     )
   );
@@ -176,13 +176,18 @@ it('Returns one entry per workspace package and reads each package config file',
   const withJsonc = result.find((r) => r.packageRootDir.endsWith('withJsonc'));
   expect(withJsonc?.configFileContents).toBe(
     readFileSync(
-      join(fixtureDir, 'packages', 'withJsonc', 'fast-import.config.jsonc'),
+      join(
+        fixtureDir,
+        'packages',
+        'withJsonc',
+        'import-integrity.config.jsonc'
+      ),
       'utf-8'
     )
   );
 });
 
-it('Ignores fast-import config files outside declared workspace globs', () => {
+it('Ignores import-integrity config files outside declared workspace globs', () => {
   const fixtureDir = join(TEST_PACKAGE_DIR, 'monorepoDiscovery');
   const result = getRawMonorepoPackageSettings(fixtureDir);
 
@@ -191,10 +196,10 @@ it('Ignores fast-import config files outside declared workspace globs', () => {
   );
 });
 
-it('Throws when both fast-import.config.json and .jsonc exist in the same package', () => {
+it('Throws when both import-integrity.config.json and .jsonc exist in the same package', () => {
   const fixtureDir = join(TEST_PACKAGE_DIR, 'monorepoConflict');
   expect(() => getRawMonorepoPackageSettings(fixtureDir)).toThrow(
-    `Multiple fast-import.config.json(c) files found in ${join(fixtureDir, 'packages', 'conflict')}`
+    `Multiple import-integrity.config.json(c) files found in ${join(fixtureDir, 'packages', 'conflict')}`
   );
 });
 
@@ -205,6 +210,6 @@ it('Returns the root as a single package when the root has no workspaces config'
   expect(result).toHaveLength(1);
   expect(result[0].packageRootDir).toBe(fixtureDir);
   expect(result[0].configFileContents).toBe(
-    readFileSync(join(fixtureDir, 'fast-import.config.json'), 'utf-8')
+    readFileSync(join(fixtureDir, 'import-integrity.config.json'), 'utf-8')
   );
 });

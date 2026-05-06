@@ -10,7 +10,7 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-import fastImportPlugin from './dist/plugin.js';
+import importIntegrityPlugin from './dist/plugin.js';
 
 const ROOT_DIR = import.meta.dirname;
 
@@ -37,14 +37,14 @@ export default defineConfig([
       'no-unused-vars': 'off',
     },
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: import.meta.dirname,
         debugLogging: true,
       },
     },
   },
 
-  fastImportPlugin.configs.recommended,
+  importIntegrityPlugin.configs.recommended,
 
   ...tseslint.configs.strictTypeChecked.map((r) =>
     r.name === 'typescript-eslint/strict-type-checked'

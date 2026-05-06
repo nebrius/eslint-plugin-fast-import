@@ -1,6 +1,6 @@
 {
-  "name": "eslint-plugin-fast-import",
-  "version": "2.2.1",
+  "name": "import-integrity-lint",
+  "version": "1.0.0",
   "description": "ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports",
   "keywords": [
     "eslint",
@@ -9,13 +9,13 @@
     "oxlint",
     "oxlint-plugin"
   ],
-  "homepage": "https://github.com/nebrius/eslint-plugin-fast-import",
-  "bugs": "https://github.com/nebrius/eslint-plugin-fast-import/issues",
+  "homepage": "https://github.com/nebrius/import-integrity-lint",
+  "bugs": "https://github.com/nebrius/import-integrity-lint/issues",
   "license": "MIT",
   "author": "Bryan Hughes <bryan@nebri.us>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nebrius/eslint-plugin-fast-import.git"
+    "url": "https://github.com/nebrius/import-integrity-lint.git"
   },
   "type": "module",
   "main": "dist/plugin.js",

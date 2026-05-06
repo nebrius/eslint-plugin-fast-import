@@ -171,7 +171,7 @@ function parseTsConfig(
   for (const [symbol, path] of Object.entries(paths)) {
     if (path.length !== 1) {
       warn(
-        `fast-import only supports tsconfig.compilerOptions.paths entries with exactly one path. ${symbol} will be ignored.`
+        `import-integrity only supports tsconfig.compilerOptions.paths entries with exactly one path. ${symbol} will be ignored.`
       );
       continue;
     }

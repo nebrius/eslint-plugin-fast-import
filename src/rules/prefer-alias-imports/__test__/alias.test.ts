@@ -35,7 +35,7 @@ const ruleTester = new RuleTester({
 });
 
 const WILDCARD_SETTINGS = {
-  'fast-import': {
+  'import-integrity': {
     packageRootDir: TEST_PACKAGE_DIR,
     alias: {
       '@/*': './src/*',
@@ -45,7 +45,7 @@ const WILDCARD_SETTINGS = {
 };
 
 const WILDCARD_AND_FIXED_SETTINGS = {
-  'fast-import': {
+  'import-integrity': {
     packageRootDir: TEST_PACKAGE_DIR,
     alias: {
       '@/*': './src/*',
@@ -80,7 +80,7 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       code: `import { standalone } from '../standalone';\n`,
       filename: FILE_INDEX,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           alias: {
             '@/*': './src/*',
@@ -95,7 +95,7 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       code: `import { Button } from './components/Button';\n`,
       filename: FILE_INDEX,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

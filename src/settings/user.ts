@@ -86,20 +86,21 @@ export function getUserRepoSettings(
   settings: GenericContext['settings'] | undefined
 ): RepoUserSettings & { editorUpdateRate: number } {
   // Parse the raw settings, if supplied
-  const fastEsmSettings = settings?.['fast-import'];
-  if (!fastEsmSettings) {
+  const importIntegritySettings = settings?.['import-integrity'];
+  if (!importIntegritySettings) {
     throw new Error(
-      `eslint-plugin-fast-import settings are required in your ESLint/Oxlint config file`
+      `import-integrity-lint settings are required in your ESLint/Oxlint config file`
     );
   }
 
   // Check if this is a monorepo configuration
   if (
-    typeof fastEsmSettings === 'object' &&
-    'monorepoRootDir' in fastEsmSettings
+    typeof importIntegritySettings === 'object' &&
+    'monorepoRootDir' in importIntegritySettings
   ) {
-    const parseResult =
-      monorepoPackageSettingsSchema.safeParse(fastEsmSettings);
+    const parseResult = monorepoPackageSettingsSchema.safeParse(
+      importIntegritySettings
+    );
     if (!parseResult.success) {
       throwFormattedErrors(parseResult.error);
     }
@@ -133,7 +134,9 @@ export function getUserRepoSettings(
       repoRootDir: trimmedMonorepoRootDir,
     };
   } else {
-    const parseResult = singleRepoSettingsSchema.safeParse(fastEsmSettings);
+    const parseResult = singleRepoSettingsSchema.safeParse(
+      importIntegritySettings
+    );
     if (!parseResult.success) {
       throwFormattedErrors(parseResult.error);
     }
@@ -160,7 +163,7 @@ export function getUserRepoSettings(
     // Set verbose logging, if enabled
     setVerbose(debugLogging);
 
-    // If a fast-import.config.json(c) file exists in packageRootDir, load
+    // If a import-integrity.config.json(c) file exists in packageRootDir, load
     // package-level settings from it. This lets the same config file serve a
     // root-level monorepo config and a per-package single-repo config without
     // duplication. Mixing the two sources is rejected to keep a single source

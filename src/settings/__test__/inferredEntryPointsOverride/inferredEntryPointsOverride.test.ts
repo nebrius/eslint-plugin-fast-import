@@ -11,7 +11,7 @@ it('Merges user-supplied entryPointFiles with inferred entries (override on coll
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_INDEX,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: {

@@ -31,7 +31,7 @@ export const a2 = 10;
 `,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -46,7 +46,7 @@ export function a1(arg: number | string): void {
 `,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -56,7 +56,7 @@ export function a1(arg: number | string): void {
       code: readFileSync(FILE_B, 'utf8'),
       filename: FILE_B,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': './f.ts' },
@@ -67,7 +67,7 @@ export function a1(arg: number | string): void {
       code: readFileSync(FILE_D_DTS, 'utf8'),
       filename: FILE_D_DTS,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -77,7 +77,7 @@ export function a1(arg: number | string): void {
       code: readFileSync(FILE_E, 'utf8'),
       filename: FILE_E,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': './e.ts' },
@@ -96,7 +96,7 @@ export function a1(arg: number | string): void {
       filename: FILE_A,
       errors: [{ messageId: 'noUnusedExports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

@@ -25,7 +25,7 @@ ruleTester.run('require-node-prefix', requireNodePrefix, {
       code: `import fs from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -39,7 +39,7 @@ ruleTester.run('require-node-prefix', requireNodePrefix, {
       filename: FILE_A,
       errors: [{ messageId: 'missingNodePrefix' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -52,7 +52,7 @@ ruleTester.run('require-node-prefix', requireNodePrefix, {
       filename: FILE_A,
       errors: [{ messageId: 'missingNodePrefix' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

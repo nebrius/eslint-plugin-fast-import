@@ -12,7 +12,7 @@ function getPackageSettings(fixtureName: string): ParsedPackageSettings {
   const { packageSettings } = getAllPackageSettings({
     filename: join(fixtureDir, 'package.json'),
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: fixtureDir,
       },

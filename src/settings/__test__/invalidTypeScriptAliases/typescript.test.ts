@@ -12,7 +12,7 @@ it('Throws on invalid tsconfig.compilerOptions.paths', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
         },
       },

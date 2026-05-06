@@ -71,7 +71,7 @@ function initialize() {
   initializeRepo({
     filename: FILE_A,
     settings: {
-      'fast-import': { monorepoRootDir: MONOREPO_DIR },
+      'import-integrity': { monorepoRootDir: MONOREPO_DIR },
     },
   });
 }
@@ -278,7 +278,7 @@ it('Files inside packageD beyond the entry point are reachable via getPackageInf
   initialize();
 
   const pkgDInfo = getPackageInfo(PACKAGE_D_DIR);
-  // d.ts, internal.ts, internal2.ts, package.json, fast-import.config.json = 5
+  // d.ts, internal.ts, internal2.ts, package.json, import-integrity.config.json = 5
   expect(pkgDInfo.files.size).toBe(5);
   expect(pkgDInfo.files.has(FILE_D)).toBe(true);
   expect(pkgDInfo.files.has(join(PACKAGE_D_DIR, 'internal.ts'))).toBe(true);

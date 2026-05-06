@@ -1,4 +1,4 @@
-# fast-import/no-cycle
+# import-integrity/no-cycle
 
 Ensures that there are no cycles in imports/reexports.
 

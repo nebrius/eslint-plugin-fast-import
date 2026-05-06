@@ -1,4 +1,4 @@
-# fast-import/no-test-imports-in-prod
+# import-integrity/no-test-imports-in-prod
 
 Ensures that production code does not import test code.
 

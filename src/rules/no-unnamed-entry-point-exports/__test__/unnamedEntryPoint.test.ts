@@ -37,7 +37,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
       code: `export * as internal from './internal';`,
       filename: FILE_INDEX,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
@@ -49,7 +49,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
       code: `export { foo } from './internal';`,
       filename: FILE_INDEX,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
@@ -61,7 +61,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
       code: `export * from './internal';`,
       filename: FILE_INDEX,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -73,7 +73,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
       code: `export * from './internal';`,
       filename: FILE_INTERNAL,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
@@ -86,7 +86,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
       code: `export * from './internal';`,
       filename: FILE_INDEX,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           externallyImportedFiles: [FILE_INDEX_ENTRY],
@@ -102,7 +102,7 @@ ruleTester.run('no-unnamed-entry-point-exports', noUnnamedEntryPointExports, {
       filename: FILE_INDEX,
       errors: [{ messageId: 'noUnnamedEntryPointExports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },
@@ -116,7 +116,7 @@ export * from './internal';`,
       filename: FILE_INDEX,
       errors: [{ messageId: 'noUnnamedEntryPointExports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_INDEX_ENTRY}` },

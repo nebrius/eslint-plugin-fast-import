@@ -1,4 +1,4 @@
-# fast-import/no-restricted-imports
+# import-integrity/no-restricted-imports
 
 Restricts which files can import which modules.
 

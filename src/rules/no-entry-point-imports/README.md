@@ -1,4 +1,4 @@
-# fast-import/no-entry-point-imports
+# import-integrity/no-entry-point-imports
 
 Ensures that exports from entry point files are not imported.
 

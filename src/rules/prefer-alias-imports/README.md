@@ -1,4 +1,4 @@
-# fast-import/prefer-alias-imports
+# import-integrity/prefer-alias-imports
 
 Enforces the use of alias imports instead of relative paths when an alias is available, and optionally enforces relative imports for sufficiently local files under the same alias.
 

@@ -11,9 +11,9 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Removed `all()` and `recommended()` config helpers, and removed the `all` config
   - These helpers became less useful due to other changes
   - Given that they were a departure from standard plugin configuration mechanisms, I think the value they brought is now outweighed by the confusion they caused
-  - Use `fastImportPlugin.configs.recommended`, `fastImportPlugin.configs.monorepoRecommended`, and `fastImportPlugin.configs.off`
+  - Use `importIntegrityPlugin.configs.recommended`, `importIntegrityPlugin.configs.monorepoRecommended`, and `importIntegrityPlugin.configs.off`
   - `monorepoRecommended` is additive to `recommended`, not a replacement; enable both if you want the standard recommended rules plus the monorepo-only rule
-  - Put plugin settings in `settings['fast-import']`
+  - Put plugin settings in `settings['import-integrity']`
   - The `all` config was removed because, with the rules that were previously only in `all` now folded into `recommended`, there was no longer any meaningful difference between the two
 - Replaced `entryPoints` with `entryPointFiles` and `externallyImported` with `externallyImportedFiles`
   - Previously, `entryPoints`/`externallyImported` indicated a list of exports from a given file that were considered for analysis. In practice this has proven difficult for users to maintain, so basically everyone wrote `/.*/` to include all exports from that file.
@@ -21,16 +21,16 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
   - The new approach is to simply specify files, inside of which _all_ exports are considered entry points/externally imported
   - `entryPointFiles` now uses a `package.json` `exports`-style subpath map instead of per-symbol file entries
   - `externallyImportedFiles` is now a list of gitignore-style file patterns
-- Reworked `fast-import.config.json`/`fast-import.config.jsonc` handling
-  - Repo-scoped settings such as `packageRootDir`/`monorepoRootDir`, `mode`, `editorUpdateRate`, and `debugLogging` now live only in `settings['fast-import']`
-  - Fast Import config files are now package-scoped and must live in the package root
+- Reworked `import-integrity.config.json`/`import-integrity.config.jsonc` handling
+  - Repo-scoped settings such as `packageRootDir`/`monorepoRootDir`, `mode`, `editorUpdateRate`, and `debugLogging` now live only in `settings['import-integrity']`
+  - Import Integrity config files are now package-scoped and must live in the package root
   - In single-repo mode, a package config file in `packageRootDir` is auto-discovered
-  - In single-repo mode, you can define package-scoped options in `settings['fast-import']` or in the package config file, but not both
+  - In single-repo mode, you can define package-scoped options in `settings['import-integrity']` or in the package config file, but not both
 - Renamed `rootDir` to `packageRootDir` across all API surfaces
-  - The previous naming was a little confusing. It is intended to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause Fast Import to not parse `tsconfig.json` and automatically detect aliases, etc., even though tsconfig's `rootDir` option _is_ intended to point to `src`
+  - The previous naming was a little confusing. It is intended to point to the directory containing `tsconfig.json`, and setting it to a nested `src` directory would cause Import Integrity to not parse `tsconfig.json` and automatically detect aliases, etc., even though tsconfig's `rootDir` option _is_ intended to point to `src`
 - `recommended` config now sets `require-node-prefix` to `error`
   - Previously this rule was set to `off` in `recommended` and `error` only in `all`. With `all` removed, `recommended` now enables it.
-  - To preserve the previous behavior, add `'fast-import/require-node-prefix': 'off'` to your config.
+  - To preserve the previous behavior, add `'import-integrity/require-node-prefix': 'off'` to your config.
 - Default ignore folder list expanded to include folders that start with a dot (e.g. `.git`, `.next`, etc.) and `out`
   - The hard-coded list was also adjusted: `node_modules`, `dist`, `build`, and `out` are always ignored, and any path segment starting with `.` is ignored (which subsumes the previous explicit `.git` entry)
 - Config files matching `/*.config.*` are now automatically treated as externally imported
@@ -42,7 +42,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
   - This rule papered over gaps in tooling that is no longer needed, and was difficult to use and maintain properly
 - The `no-unused-exports` rule was split into two rules: `no-unused-exports` and `no-test-only-imports`
   - The previous version of `no-unused-exports` also checked whether exports were only imported by tests, and `allowNonTestTypeExports` controlled whether type-only exports were exempt from that check
-  - To preserve the previous behavior if you manually enabled `fast-import/no-unused-exports`, also enable `fast-import/no-test-only-imports`
+  - To preserve the previous behavior if you manually enabled `import-integrity/no-unused-exports`, also enable `import-integrity/no-test-only-imports`
   - There is no direct replacement for `allowNonTestTypeExports: false`; `no-test-only-imports` now always ignores type-only exports
   - The two new rules no longer take any options
 
@@ -61,13 +61,13 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 
 - Monorepo root-config mode
   - Set `monorepoRootDir` (mutually exclusive with `packageRootDir`) in your root ESLint/Oxlint config to enable a single config that covers all packages
-  - Repo-scoped settings stay in `settings['fast-import']`; workspace packages are discovered from the monorepo's declared workspaces via `@manypkg/get-packages`
-  - Each discovered workspace package becomes a Fast Import `packageRootDir`; if `fast-import.config.json`/`fast-import.config.jsonc` exists at that package root, its package-scoped settings are loaded
-  - Discovered workspace packages without a Fast Import config file are still analyzed with default package-level settings, and stray config files outside declared workspace globs are ignored
+  - Repo-scoped settings stay in `settings['import-integrity']`; workspace packages are discovered from the monorepo's declared workspaces via `@manypkg/get-packages`
+  - Each discovered workspace package becomes a Import Integrity `packageRootDir`; if `import-integrity.config.json`/`import-integrity.config.jsonc` exists at that package root, its package-scoped settings are loaded
+  - Discovered workspace packages without a Import Integrity config file are still analyzed with default package-level settings, and stray config files outside declared workspace globs are ignored
   - Monorepo packages should define `package.json.name`; cross-package analysis and package entry-point matching depend on it
-- Support for `fast-import.config.jsonc` files, including comments and trailing commas in both `.json` and `.jsonc` config files
+- Support for `import-integrity.config.jsonc` files, including comments and trailing commas in both `.json` and `.jsonc` config files
 - Next.js auto-detection: when Next.js is detected, default `externallyImportedFiles` patterns for app router, pages router, and mixed-router projects (with or without a `src/` directory) are pre-applied. User-supplied patterns override the defaults.
-- Entry point inference: when `package.json` declares `main`/`exports` and `tsconfig.json` declares both `outDir` and `rootDir`, Fast Import now derives `entryPointFiles` from the compiled `exports` paths automatically. User-supplied `entryPointFiles` still takes precedence.
+- Entry point inference: when `package.json` declares `main`/`exports` and `tsconfig.json` declares both `outDir` and `rootDir`, Import Integrity now derives `entryPointFiles` from the compiled `exports` paths automatically. User-supplied `entryPointFiles` still takes precedence.
 
 #### Rules
 
@@ -75,7 +75,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Added the `no-unnamed-entry-point-exports` rule (in `recommended`): flags bare `export * from './x'` in entry-point files; named barrel reexports (`export * as foo from ...`) are still allowed
 - Added the `no-unused-package-exports` rule (in `monorepoRecommended`): cross-package version of `no-unused-exports` that reports entry-point exports that are not imported by any other package in the monorepo
   - `monorepoRecommended` only enables this monorepo-only rule; also enable `recommended` if you want the standard recommended rules
-  - This rule depends on `monorepoRootDir` workspace package discovery and does not work when Fast Import only sees isolated package-local ESLint/Oxlint configs
+  - This rule depends on `monorepoRootDir` workspace package discovery and does not work when Import Integrity only sees isolated package-local ESLint/Oxlint configs
 - `no-test-only-imports` and `no-test-imports-in-prod` were both updated to be aware of non-test file exports prefixed with `_testOnly`. When a non-test file exports something with this prefix, it is considered a test-only export and can be imported by test files but not by production code.
 - Cross-package import analysis now considers dynamic imports (statically-resolvable specifiers are tracked; non-static specifiers are skipped) and resolves third-party package exports using `package.json` `exports` subpaths and conditions
 
@@ -108,7 +108,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Added `prefer-alias-imports` rule
 - BREAKING CHANGE: added `prefer-alias-imports` rule to the recommend and all configs
   - This rule is likely to cause new errors in codebases that use aliases and have the recommended or all configs enabled
-  - To disable this rule to preserve existing behavior, add `"fast-import/prefer-alias-imports": "off"` to your eslint config.
+  - To disable this rule to preserve existing behavior, add `"import-integrity/prefer-alias-imports": "off"` to your eslint config.
 
 ## 1.12.0 (2/15/2026)
 

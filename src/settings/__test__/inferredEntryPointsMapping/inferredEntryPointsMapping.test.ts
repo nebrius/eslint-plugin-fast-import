@@ -11,7 +11,7 @@ it('Infers entry points by mapping outDir to rootDir, with .ts and .tsx fallback
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_INDEX,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
       },

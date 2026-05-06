@@ -1,11 +1,11 @@
 import globals from 'globals';
 import { globalIgnores } from 'eslint/config';
-import fastEsm from '../../../../../dist/plugin.js';
+import importIntegrity from '../../../../../dist/plugin.js';
 
 export default [
   {
     settings: {
-      'fast-import': {
+      'import-integrity': {
         debugLogging: true,
       },
     },
@@ -15,5 +15,5 @@ export default [
     },
   },
   globalIgnores(['./eslint.config.mjs']),
-  fastEsm.configs.recommended,
+  importIntegrity.configs.recommended,
 ];

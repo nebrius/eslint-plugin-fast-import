@@ -26,7 +26,7 @@ ruleTester.run('no-named-as-default', noNamedAsDefault, {
 import bDefault from './b';`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -41,7 +41,7 @@ import b from './b';`,
       filename: FILE_A,
       errors: [{ messageId: 'noNamedAsDefault' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -52,7 +52,7 @@ import b from './b';`,
       filename: FILE_A,
       errors: [{ messageId: 'noNamedAsDefault' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },

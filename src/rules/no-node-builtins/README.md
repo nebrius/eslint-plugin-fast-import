@@ -1,4 +1,4 @@
-# fast-import/no-node-builtins
+# import-integrity/no-node-builtins
 
 Disallows imports of Node.js built-in modules.
 

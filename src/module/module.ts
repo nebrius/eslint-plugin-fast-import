@@ -173,7 +173,7 @@ export function initializeRepo(
 
 // Testing this logic through initializeRepo would be more difficult than just
 // testing this function directly, since we'd have to create full packages
-// eslint-disable-next-line fast-import/no-test-only-imports
+// eslint-disable-next-line import-integrity/no-test-only-imports
 export function initializePackage({
   packageRootDir,
   repoRootDir,

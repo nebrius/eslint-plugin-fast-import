@@ -539,7 +539,7 @@ it('Computes analyzed info', () => {
       })
     )
   );
-  // This lookup gets two package.json files: this test and the root fast-import
+  // This lookup gets two package.json files: this test and the root import-integrity
   // package.json. We only look at the test package's dependencies in this test.
   expect(info.availableThirdPartyDependencies.size).toBe(2);
   expect(info.availableThirdPartyDependencies.get(TEST_PACKAGE_DIR)).toEqual([

@@ -29,7 +29,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       code: `import * as b from './b'`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -39,7 +39,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       code: `import * as tf from 'type-fest'`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -49,7 +49,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       code: `import type { JSX } from 'react'`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -59,7 +59,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       code: `export * from 'type-fest'`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -67,12 +67,12 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
     },
     {
       // packages/two is still a known workspace package even without its own
-      // fast-import.config.json. With no module specifiers to resolve, this
+      // import-integrity.config.json. With no module specifiers to resolve, this
       // file should stay quiet.
       code: `export const d = 10`,
       filename: FILE_D,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -82,7 +82,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       code: `import { foo } from '@test/two'`,
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -96,7 +96,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -107,7 +107,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -118,7 +118,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noTransientDependencies' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -129,7 +129,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noTransientDependencies' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -143,7 +143,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_D,
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -154,7 +154,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },
@@ -165,7 +165,7 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
       filename: FILE_A,
       errors: [{ messageId: 'noUnresolvedImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_ROOT_DIR,
           mode: 'fix',
         },

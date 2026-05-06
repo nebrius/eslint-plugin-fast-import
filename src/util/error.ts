@@ -13,7 +13,7 @@ type SourceDetails = {
 /* istanbul ignore next */
 export class InternalError extends Error {
   constructor(message: string, sourceDetails?: SourceDetails) {
-    let formattedMessage = `Internal error: ${message}. This is a bug, please report the message and the stack trace to the maintainer at https://github.com/nebrius/fast-import/issues`;
+    let formattedMessage = `Internal error: ${message}. This is a bug, please report the message and the stack trace to the maintainer at https://github.com/nebrius/import-integrity/issues`;
     if (sourceDetails) {
       if (sourceDetails.fileContents) {
         formattedMessage += `\n\nIn ${sourceDetails.filePath}:\n\n${sourceDetails.fileContents.substring(sourceDetails.range[0], sourceDetails.range[1])}\n`;

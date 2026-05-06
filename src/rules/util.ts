@@ -27,7 +27,7 @@ import {
 
 export const createRule = ESLintUtils.RuleCreator(
   (name) =>
-    `https://github.com/nebrius/eslint-plugin-fast-import/tree/main/src/rules/${name}/README.md`
+    `https://github.com/nebrius/import-integrity-lint/tree/main/src/rules/${name}/README.md`
 );
 
 const updateListeners = new Set<(packageRootDir: string) => void>();
@@ -216,7 +216,7 @@ export function isNonTestFile(filePath: string) {
     throw new InternalError('package settings are unexpectedly undefined');
   }
   // We want to ignore folders named __test__ outside of this package, in case
-  // the entire package is itself a test (e.g. the unit tests for fast-import)
+  // the entire package is itself a test (e.g. the unit tests for import-integrity)
   const relativeFilePath = getRelativePathFromRoot(
     packageSettings.packageRootDir,
     filePath

@@ -34,7 +34,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -57,7 +57,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -80,7 +80,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -103,7 +103,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -126,7 +126,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { b } from './b';\nimport { c } from './c';\nimport { fs } from 'node:fs';`,
       filename: FILE_A,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -149,7 +149,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { e1 } from './e1';`,
       filename: FILE_E2,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -167,7 +167,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import { e1 } from './e1';`,
       filename: FILE_E2,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -185,7 +185,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
       code: `import type { e1 } from '../e/e1';`,
       filename: FILE_D,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -216,7 +216,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -252,7 +252,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -288,7 +288,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -324,7 +324,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
         },
@@ -356,7 +356,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {
@@ -380,7 +380,7 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
       options: [
         {

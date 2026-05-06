@@ -1,4 +1,4 @@
-# fast-import/no-unused-package-exports
+# import-integrity/no-unused-package-exports
 
 Ensures entry point exports are imported by other packages in a monorepo.
 
@@ -6,7 +6,7 @@ Ensures entry point exports are imported by other packages in a monorepo.
 
 `no-unused-package-exports` looks at all exports in [entry point files](../../../README.md#externallyimportedfiles--entrypointfiles) and analyzes whether any other package in the monorepo imports them. An export is considered used if it is imported in at least one other package.
 
-This rule only applies to files matched by the `entryPointFiles` setting. Files matched by `externallyImportedFiles` are not checked, because those represent files imported by a framework runtime (e.g. Next.js `page.tsx`) where Fast Import cannot see the consumer. `entryPointFiles`, by contrast, represent a package's public API intended for use by other packages in the monorepo, which Fast Import _can_ analyze.
+This rule only applies to files matched by the `entryPointFiles` setting. Files matched by `externallyImportedFiles` are not checked, because those represent files imported by a framework runtime (e.g. Next.js `page.tsx`) where Import Integrity cannot see the consumer. `entryPointFiles`, by contrast, represent a package's public API intended for use by other packages in the monorepo, which Import Integrity _can_ analyze.
 
 This rule is only meaningful in a monorepo. See [Use in monorepos](../../../README.md#use-in-monorepos) for more info.
 
@@ -69,7 +69,7 @@ In this example, `a2` is not actually used, but we can't determine this concrete
 
 A bare `export * from` reexport in an entry point file has no resolvable name and is skipped by this rule.
 
-Additionally, when an entry point file uses a bare barrel reexport, Fast Import cannot track cross-package imports of the reexported names. For example:
+Additionally, when an entry point file uses a bare barrel reexport, Import Integrity cannot track cross-package imports of the reexported names. For example:
 
 ```js
 // packages/one/entry.ts
@@ -79,6 +79,6 @@ export * from 'some-package';
 import { something } from 'one';
 ```
 
-Fast Import will not know about the second import. This means that this rule will not flag the export as unused if `packages/two` stops importing it.
+Import Integrity will not know about the second import. This means that this rule will not flag the export as unused if `packages/two` stops importing it.
 
-This is a general Fast Import limitation; see the [main README](../../../README.md) for more details.
+This is a general Import Integrity limitation; see the [main README](../../../README.md) for more details.

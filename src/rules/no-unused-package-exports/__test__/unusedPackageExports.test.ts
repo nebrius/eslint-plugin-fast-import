@@ -34,7 +34,7 @@ const FILE_THREE_ENTRY = join(PACKAGE_THREE_DIR, 'entry.ts');
 const FILE_FOUR_ENTRY = join(PACKAGE_FOUR_DIR, 'entry.ts');
 
 const MONOREPO_SETTINGS = {
-  'fast-import': {
+  'import-integrity': {
     monorepoRootDir: MONOREPO_ROOT_DIR,
     mode: 'fix' as const,
   },
@@ -46,7 +46,7 @@ const ruleTester = new RuleTester({
       // Use the monorepo-root tsconfig under `project/` for type resolution,
       // which declares path aliases for `one`, `two`, and `three`. This lets
       // TypeScript resolve cross-package imports in consumer/*.ts without
-      // `@ts-expect-error` suppressions. fast-import's per-package alias
+      // `@ts-expect-error` suppressions. import-integrity's per-package alias
       // filter (settings.ts) drops these aliases when analyzing any package
       // whose packageRootDir doesn't contain the alias target, so these
       // imports are still treated as cross-package imports at runtime.

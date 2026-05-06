@@ -39,7 +39,7 @@ it('Fetchings user supplied settings', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
         alias: {
@@ -94,7 +94,7 @@ it('Parses multiple static entry points', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: { '.': './src/a.ts', './b': './src/b.ts' },
@@ -116,7 +116,7 @@ it('Parses a dynamic (wildcard) entry point', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: { './lib/*': './src/lib/*.ts' },
@@ -157,7 +157,7 @@ it('Escapes regex metacharacters around the wildcard in a dynamic entry point', 
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
         entryPointFiles: { './(lib)/*': './src/(lib)/*.ts' },
@@ -187,7 +187,7 @@ it('Throws when entry point subpath pattern does not start with "." or "./"', ()
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { foo: './a.ts' },
@@ -204,7 +204,7 @@ it('Throws when entry point file pattern does not start with "./"', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { '.': 'a.ts' },
@@ -219,7 +219,7 @@ it('Throws when entry point subpath pattern contains more than one wildcard', ()
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { './*/*': './src/*.ts' },
@@ -236,7 +236,7 @@ it('Throws when entry point file pattern contains more than one wildcard', () =>
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { './*': './src/*/*.ts' },
@@ -253,7 +253,7 @@ it('Throws when entry point file pattern has no wildcard but subpath pattern doe
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: TEST_PACKAGE_DIR,
           entryPointFiles: { './*': './src/index.ts' },
@@ -272,7 +272,7 @@ it('Throws on missing settings', () => {
       settings: {},
     })
   ).toThrow(
-    `eslint-plugin-fast-import settings are required in your ESLint/Oxlint config file`
+    `import-integrity-lint settings are required in your ESLint/Oxlint config file`
   );
 });
 
@@ -281,7 +281,7 @@ it('Throws on missing packageRootDir in settings', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {},
+        'import-integrity': {},
       },
     })
   ).toThrow(`Invalid settings:
@@ -296,7 +296,7 @@ it('Throws on relative packageRootDir in settings', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: './foo',
         },
       },
@@ -309,7 +309,7 @@ it("Throws on packageRootDir that doesn't exist in settings", () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: join(TEST_PACKAGE_DIR, 'fake'),
         },
       },
@@ -324,7 +324,7 @@ it('Throws on invalid user supplied mode', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'fake',
           packageRootDir: TEST_PACKAGE_DIR,
         },
@@ -342,7 +342,7 @@ it('Throws on mismatched wildcard aliases', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           alias: {
             '@/*': 'src/a.ts',
@@ -360,7 +360,7 @@ it('Throws on mismatched fixed aliases', () => {
     getAllPackageSettings({
       filename: FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           alias: {
             '@a': 'src/a.ts*',
@@ -377,7 +377,7 @@ it('Can set mode to editor', () => {
   const editorSettings = getRepoSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'editor',
         packageRootDir: TEST_PACKAGE_DIR,
       },
@@ -390,7 +390,7 @@ it('Can set mode to fix', () => {
   const fixSettings = getRepoSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'fix',
         packageRootDir: TEST_PACKAGE_DIR,
       },
@@ -403,7 +403,7 @@ it('Ignores aliases that point outside of packageRootDir', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: TEST_PACKAGE_DIR,
         alias: {
           '@foo': '../foo',
@@ -425,7 +425,7 @@ it('Returns full single-repo structure from getRepoSettings', () => {
   const repoSettings = getRepoSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: TEST_PACKAGE_DIR,
         mode: 'one-shot',
       },
@@ -450,7 +450,7 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
   getRepoSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: TEST_PACKAGE_DIR,
         mode: 'one-shot',
       },
@@ -461,7 +461,7 @@ it('Populates package settings cache as side effect of getRepoSettings (single-r
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: TEST_PACKAGE_DIR,
         mode: 'one-shot',
       },
@@ -481,7 +481,7 @@ it('Returns monorepo structure and discovers packages from getRepoSettings', () 
   const repoSettings = getRepoSettings({
     filename: MONOREPO_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -497,7 +497,7 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
   getRepoSettings({
     filename: MONOREPO_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -507,7 +507,7 @@ it('Populates package settings cache for packageOne after monorepo getRepoSettin
   const { packageSettings } = getAllPackageSettings({
     filename: MONOREPO_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -525,7 +525,7 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
   getRepoSettings({
     filename: MONOREPO_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -535,7 +535,7 @@ it('Returns correct package settings for packageTwo via longest-prefix match', (
   const { packageSettings } = getAllPackageSettings({
     filename: MONOREPO_FILE_C,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -553,7 +553,7 @@ it('Returns undefined packageSettings for a file outside any known package', () 
   getRepoSettings({
     filename: MONOREPO_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -563,7 +563,7 @@ it('Returns undefined packageSettings for a file outside any known package', () 
   const { packageSettings } = getAllPackageSettings({
     filename: join(MONOREPO_DIR, 'eslint.config.js'),
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix',
       },
@@ -578,7 +578,7 @@ it('Throws on relative monorepoRootDir', () => {
     getRepoSettings({
       filename: MONOREPO_FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: './foo',
         },
       },
@@ -591,7 +591,7 @@ it("Throws on monorepoRootDir that doesn't exist", () => {
     getRepoSettings({
       filename: MONOREPO_FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: join(MONOREPO_DIR, 'fake'),
         },
       },
@@ -604,7 +604,7 @@ it('Throws when mixing monorepoRootDir and packageRootDir in settings', () => {
     getRepoSettings({
       filename: MONOREPO_FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           monorepoRootDir: MONOREPO_DIR,
           packageRootDir: TEST_PACKAGE_DIR,
         },
@@ -619,7 +619,7 @@ it('markSettingsForRefresh forces a re-read of user settings (single-repo)', () 
   const context = {
     filename: FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         packageRootDir: TEST_PACKAGE_DIR,
         mode: 'fix' as string,
       },
@@ -648,7 +648,7 @@ it('markSettingsForRefresh forces a re-read of user settings (monorepo)', () => 
   const context = {
     filename: MONOREPO_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         monorepoRootDir: MONOREPO_DIR,
         mode: 'fix' as string,
       },
@@ -701,13 +701,13 @@ it('Parses a JSONC config file with comments and trailing commas', () => {
   });
 });
 
-// ─── single-repo + fast-import.config.json(c) ────────────────────────────────
+// ─── single-repo + import-integrity.config.json(c) ────────────────────────────────
 
-it('Loads package settings from fast-import.config.json in single-repo mode', () => {
+it('Loads package settings from import-integrity.config.json in single-repo mode', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: CONFIG_FILE_FILE_A,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: CONFIG_FILE_PACKAGE_DIR,
       },
@@ -753,13 +753,13 @@ it('Loads package settings from fast-import.config.json in single-repo mode', ()
 it('Throws when single-repo settings include package-level keys alongside a config file', () => {
   const expectedConfigFilePath = join(
     CONFIG_FILE_PACKAGE_DIR,
-    'fast-import.config.json'
+    'import-integrity.config.json'
   );
   expect(() =>
     getAllPackageSettings({
       filename: CONFIG_FILE_FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: CONFIG_FILE_PACKAGE_DIR,
           alias: { '@x': 'src/a.ts' },
@@ -771,18 +771,18 @@ it('Throws when single-repo settings include package-level keys alongside a conf
   );
 });
 
-it('Throws when both fast-import.config.json and .jsonc exist in packageRootDir', () => {
+it('Throws when both import-integrity.config.json and .jsonc exist in packageRootDir', () => {
   expect(() =>
     getAllPackageSettings({
       filename: MULTI_CONFIG_FILE_A,
       settings: {
-        'fast-import': {
+        'import-integrity': {
           mode: 'one-shot',
           packageRootDir: MULTI_CONFIG_PACKAGE_DIR,
         },
       },
     })
   ).toThrow(
-    `Multiple fast-import.config.json(c) files found in ${MULTI_CONFIG_PACKAGE_DIR}`
+    `Multiple import-integrity.config.json(c) files found in ${MULTI_CONFIG_PACKAGE_DIR}`
   );
 });

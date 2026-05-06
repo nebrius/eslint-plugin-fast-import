@@ -1,4 +1,4 @@
-# fast-import/no-unnamed-entry-point-exports
+# import-integrity/no-unnamed-entry-point-exports
 
 Ensures that barrel reexports in entry point files are named.
 

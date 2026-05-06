@@ -64,7 +64,7 @@ const FILE_TS_NEW_PKG1 = join(PACKAGE_ONE_DIR, 'new.ts');
 const FILE_TS_NEW_PKG2 = join(PACKAGE_TWO_DIR, 'new.ts');
 const FILE_JSON_NEW = join(PACKAGE_ONE_DIR, 'new.json');
 
-// fast-import.config.json and package.json files live inside each
+// import-integrity.config.json and package.json files live inside each
 // packageRootDir and are picked up by the package scanner as non-code files.
 //
 // The package.json files are load-bearing for these tests: initializePackageInfo
@@ -72,8 +72,8 @@ const FILE_JSON_NEW = join(PACKAGE_ONE_DIR, 'new.json');
 // matches cross-package imports against those names. If either package.json
 // were missing, packageName would be undefined and cross-package wiring would
 // silently skip, causing every externallyImportedBy assertion below to fail.
-const PKG1_CONFIG = join(PACKAGE_ONE_DIR, 'fast-import.config.json');
-const PKG2_CONFIG = join(PACKAGE_TWO_DIR, 'fast-import.config.json');
+const PKG1_CONFIG = join(PACKAGE_ONE_DIR, 'import-integrity.config.json');
+const PKG2_CONFIG = join(PACKAGE_TWO_DIR, 'import-integrity.config.json');
 const PKG1_PACKAGE_JSON = join(PACKAGE_ONE_DIR, 'package.json');
 const PKG2_PACKAGE_JSON = join(PACKAGE_TWO_DIR, 'package.json');
 
@@ -98,7 +98,7 @@ function initialize() {
   initializeRepo({
     filename: FILE_A,
     settings: {
-      'fast-import': { monorepoRootDir: MONOREPO_DIR },
+      'import-integrity': { monorepoRootDir: MONOREPO_DIR },
     },
   });
   const packageOneSettings = getPackageCacheEntryForFile(FILE_A);

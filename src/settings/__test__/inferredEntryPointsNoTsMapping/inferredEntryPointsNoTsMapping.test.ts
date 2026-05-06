@@ -11,7 +11,7 @@ it('Skips inferring compiled exports when there is no tsconfig mapping', () => {
   const { packageSettings } = getAllPackageSettings({
     filename: FILE_INDEX,
     settings: {
-      'fast-import': {
+      'import-integrity': {
         mode: 'one-shot',
         packageRootDir: TEST_PACKAGE_DIR,
       },

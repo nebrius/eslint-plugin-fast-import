@@ -1,4 +1,4 @@
-import fastImportPlugin from './dist/plugin.js';
+import importIntegrityPlugin from './dist/plugin.js';
 
 export default {
   plugins: ['typescript', 'jest'],
@@ -9,7 +9,7 @@ export default {
     typeAware: true,
   },
   jsPlugins: [
-    { name: 'fast-import', specifier: './dist/plugin.js' },
+    { name: 'import-integrity', specifier: './dist/plugin.js' },
     'eslint-plugin-simple-import-sort',
   ],
   ignorePatterns: [
@@ -40,10 +40,10 @@ export default {
     'typescript/consistent-type-imports': 'error',
     'typescript/no-unsafe-enum-comparison': 'off',
 
-    ...fastImportPlugin.configs.recommended.rules,
+    ...importIntegrityPlugin.configs.recommended.rules,
   },
   settings: {
-    'fast-import': {
+    'import-integrity': {
       packageRootDir: import.meta.dirname,
       debugLogging: true,
     },

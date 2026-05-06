@@ -1,4 +1,4 @@
-# fast-import/require-node-prefix
+# import-integrity/require-node-prefix
 
 Requires that Node.js built-in module imports are prefixed with `node:`
 

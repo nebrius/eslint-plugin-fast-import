@@ -7,7 +7,7 @@ import { getTypeScriptSettings } from '../../typescript.js';
 it('Normalizes absolute rootDir/outDir into relative paths with a "./" prefix', () => {
   // Use an OS temp dir so we can place a tsconfig that points at machine-local
   // absolute paths without checking those paths into the repo.
-  const tempDir = mkdtempSync(join(tmpdir(), 'fast-import-ts-absolute-'));
+  const tempDir = mkdtempSync(join(tmpdir(), 'import-integrity-ts-absolute-'));
   try {
     const absoluteSrc = join(tempDir, 'src');
     const absoluteDist = join(tempDir, 'dist');

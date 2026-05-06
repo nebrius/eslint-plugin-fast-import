@@ -29,28 +29,28 @@ export function isDefaultIgnoredPath(path: string) {
   );
 }
 
-// Look for a single fast-import.config.json(c) file directly inside dir.
+// Look for a single import-integrity.config.json(c) file directly inside dir.
 // Returns the absolute path if exactly one is present, undefined if none, and
 // throws if both filename variants exist in the same directory.
 export function findPackageConfigFile(dir: string): string | undefined {
   const directoryContents = readdirSync(dir, { withFileTypes: true });
   const configFiles = directoryContents.filter(
     (item) =>
-      item.name === 'fast-import.config.json' ||
-      item.name === 'fast-import.config.jsonc'
+      item.name === 'import-integrity.config.json' ||
+      item.name === 'import-integrity.config.jsonc'
   );
   if (configFiles.length === 0) {
     return undefined;
   }
   if (configFiles.length > 1) {
     throw new Error(
-      `Multiple fast-import.config.json(c) files found in ${dir}`
+      `Multiple import-integrity.config.json(c) files found in ${dir}`
     );
   }
   return join(dir, configFiles[0].name);
 }
 
-// Fetch a list of all fast-import.config.json files, which correspond to each
+// Fetch a list of all import-integrity.config.json files, which correspond to each
 // package that we want to analyze in a monorepo. We use our own recursive
 // implementation instead of a library like glob to avoid recusring into folders
 // that are a) very large and b) guaranteed to not be analyzed.

@@ -40,14 +40,14 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       code: FILE_B_CONTENTS,
       filename: FILE_B,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
     },
     {
       code: FILE_C_CONTENTS,
       filename: FILE_C,
       settings: {
-        'fast-import': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
     },
   ],
@@ -57,7 +57,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       filename: FILE_B,
       errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_A_ENTRY_POINT}` },
@@ -69,7 +69,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       filename: FILE_B,
       errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           externallyImportedFiles: [FILE_A_ENTRY_POINT],
@@ -81,7 +81,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       filename: FILE_C,
       errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           entryPointFiles: { '.': `./${FILE_A_ENTRY_POINT}` },
@@ -93,7 +93,7 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
       filename: FILE_C,
       errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
-        'fast-import': {
+        'import-integrity': {
           packageRootDir: TEST_PACKAGE_DIR,
           mode: 'fix',
           externallyImportedFiles: [FILE_A_ENTRY_POINT],

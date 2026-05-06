@@ -60,53 +60,53 @@ const plugin = {
 
 const recommendedConfig = {
   plugins: {
-    'fast-import': plugin,
+    'import-integrity': plugin,
   },
   rules: {
-    'fast-import/no-cycle': 'error',
-    'fast-import/no-empty-entry-points': 'error',
-    'fast-import/no-entry-point-imports': 'error',
-    'fast-import/no-external-barrel-reexports': 'error',
-    'fast-import/no-named-as-default': 'error',
-    'fast-import/no-test-imports-in-prod': 'error',
-    'fast-import/no-test-only-imports': 'error',
-    'fast-import/no-unnamed-entry-point-exports': 'error',
-    'fast-import/no-unresolved-imports': 'error',
-    'fast-import/no-unused-exports': 'error',
-    'fast-import/prefer-alias-imports': 'error',
-    'fast-import/require-node-prefix': 'error',
+    'import-integrity/no-cycle': 'error',
+    'import-integrity/no-empty-entry-points': 'error',
+    'import-integrity/no-entry-point-imports': 'error',
+    'import-integrity/no-external-barrel-reexports': 'error',
+    'import-integrity/no-named-as-default': 'error',
+    'import-integrity/no-test-imports-in-prod': 'error',
+    'import-integrity/no-test-only-imports': 'error',
+    'import-integrity/no-unnamed-entry-point-exports': 'error',
+    'import-integrity/no-unresolved-imports': 'error',
+    'import-integrity/no-unused-exports': 'error',
+    'import-integrity/prefer-alias-imports': 'error',
+    'import-integrity/require-node-prefix': 'error',
   },
 } as const;
 
 const monorepoRecommendedConfig = {
   plugins: {
-    'fast-import': plugin,
+    'import-integrity': plugin,
   },
   rules: {
-    'fast-import/no-unused-package-exports': 'error',
+    'import-integrity/no-unused-package-exports': 'error',
   },
 } as const;
 
 const offConfig = {
   plugins: {
-    'fast-import': plugin,
+    'import-integrity': plugin,
   },
   rules: {
-    'fast-import/no-cycle': 'off',
-    'fast-import/no-empty-entry-points': 'off',
-    'fast-import/no-entry-point-imports': 'off',
-    'fast-import/no-external-barrel-reexports': 'off',
-    'fast-import/no-named-as-default': 'off',
-    'fast-import/no-node-builtins': 'off',
-    'fast-import/no-restricted-imports': 'off',
-    'fast-import/no-test-imports-in-prod': 'off',
-    'fast-import/no-test-only-imports': 'off',
-    'fast-import/no-unnamed-entry-point-exports': 'off',
-    'fast-import/no-unresolved-imports': 'off',
-    'fast-import/no-unused-exports': 'off',
-    'fast-import/no-unused-package-exports': 'off',
-    'fast-import/prefer-alias-imports': 'off',
-    'fast-import/require-node-prefix': 'off',
+    'import-integrity/no-cycle': 'off',
+    'import-integrity/no-empty-entry-points': 'off',
+    'import-integrity/no-entry-point-imports': 'off',
+    'import-integrity/no-external-barrel-reexports': 'off',
+    'import-integrity/no-named-as-default': 'off',
+    'import-integrity/no-node-builtins': 'off',
+    'import-integrity/no-restricted-imports': 'off',
+    'import-integrity/no-test-imports-in-prod': 'off',
+    'import-integrity/no-test-only-imports': 'off',
+    'import-integrity/no-unnamed-entry-point-exports': 'off',
+    'import-integrity/no-unresolved-imports': 'off',
+    'import-integrity/no-unused-exports': 'off',
+    'import-integrity/no-unused-package-exports': 'off',
+    'import-integrity/prefer-alias-imports': 'off',
+    'import-integrity/require-node-prefix': 'off',
   },
 } as const;
 

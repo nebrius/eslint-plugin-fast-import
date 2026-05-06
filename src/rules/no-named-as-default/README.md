@@ -1,4 +1,4 @@
-# fast-import/no-named-as-default
+# import-integrity/no-named-as-default
 
 Ensures that default imports do not have the same name as a named export in the file being imported from.
 
