@@ -44,11 +44,32 @@ export default defineConfig({
     config: rewriteIncludedReadmeLinks,
   },
   themeConfig: {
-    nav: [{ text: 'Rules', link: '/rules/' }],
+    nav: [
+      { text: 'Configuration', link: '/configuration/' },
+      { text: 'Rules', link: '/rules/' },
+    ],
     search: {
       provider: 'local',
     },
     sidebar: {
+      '/configuration/': [
+        {
+          text: 'Configuration',
+          items: [
+            { text: 'Overview', link: '/configuration/' },
+            {
+              text: 'Repo-level options',
+              link: '/configuration/repo-level-options',
+            },
+            {
+              text: 'Package-level options',
+              link: '/configuration/package-level-options',
+            },
+            { text: 'Monorepos', link: '/configuration/monorepos' },
+            { text: 'Oxlint', link: '/configuration/oxlint' },
+          ],
+        },
+      ],
       '/rules/': [
         {
           text: 'Rules',
