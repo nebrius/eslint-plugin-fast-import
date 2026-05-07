@@ -31,6 +31,9 @@
     "lint:eslint:fix": "eslint --fix \"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "lint:oxlint": "oxlint --type-aware",
     "build": "tsc",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage src",
     "format": "prettier --write A\"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
     "publish-package": "node --experimental-strip-types scripts/publish.ts"
@@ -74,7 +77,8 @@
     "ts-node": "^10.9.2",
     "type-fest": "^5.0.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.29.1"
+    "typescript-eslint": "^8.29.1",
+    "vitepress": "1.6.4"
   },
   "peerDependencies": {
     "eslint": ">=9.0.0"
