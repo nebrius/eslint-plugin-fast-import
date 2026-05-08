@@ -108,7 +108,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Added `prefer-alias-imports` rule
 - BREAKING CHANGE: added `prefer-alias-imports` rule to the recommend and all configs
   - This rule is likely to cause new errors in codebases that use aliases and have the recommended or all configs enabled
-  - To disable this rule to preserve existing behavior, add `"import-integrity/prefer-alias-imports": "off"` to your eslint config.
+  - To disable this rule to preserve existing behavior, add `"fast-import/prefer-alias-imports": "off"` to your eslint config.
 
 ## 1.12.0 (2/15/2026)
 

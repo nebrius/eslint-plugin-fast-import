@@ -40,6 +40,7 @@ export default defineConfig([
       'import-integrity': {
         packageRootDir: import.meta.dirname,
         debugLogging: true,
+        externallyImportedFiles: ['docs/.vitepress/config.mjs'],
       },
     },
   },

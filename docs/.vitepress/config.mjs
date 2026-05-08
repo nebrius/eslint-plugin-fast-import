@@ -45,6 +45,7 @@ export default defineConfig({
   },
   themeConfig: {
     nav: [
+      { text: 'Guide', link: '/guide/' },
       { text: 'Configuration', link: '/configuration/' },
       { text: 'Rules', link: '/rules/' },
     ],
@@ -52,6 +53,20 @@ export default defineConfig({
       provider: 'local',
     },
     sidebar: {
+      '/guide/': [
+        {
+          text: 'Guide',
+          items: [
+            { text: 'Overview', link: '/guide/' },
+            { text: 'Getting started', link: '/guide/getting-started' },
+            { text: 'Comparisons', link: '/guide/comparisons' },
+            { text: 'Algorithm', link: '/guide/algorithm' },
+            { text: 'Limitations', link: '/guide/limitations' },
+            { text: 'Creating rules', link: '/guide/creating-rules' },
+            { text: 'FAQ', link: '/guide/faq' },
+          ],
+        },
+      ],
       '/configuration/': [
         {
           text: 'Configuration',
