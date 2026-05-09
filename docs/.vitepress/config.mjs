@@ -39,6 +39,7 @@ export default defineConfig({
   title: 'Import Integrity',
   description:
     'ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports',
+  base: '/eslint-plugin-fast-import/',
   outDir: '../dist-docs',
   markdown: {
     config: rewriteIncludedReadmeLinks,
