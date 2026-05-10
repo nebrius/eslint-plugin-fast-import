@@ -14,21 +14,29 @@ Import Integrity rules are grouped by the kind of import/export issue they detec
 | 🧰    | Enabled by the monorepo recommended configuration |
 | 🔧    | Automatically fixable with `--fix`                |
 
-## Usage
+## Correctness
 
-These rules look for issues with how you're using imports and exports.
+These rules detect imports and exports that are incorrect, unused, or invalid for the current package.
 
 | Rule                                                                       | Recommended | Monorepo | Fixable |
 | -------------------------------------------------------------------------- | ----------- | -------- | ------- |
 | [import-integrity/no-cycle](./no-cycle/)                                   | ☑️          |          |         |
-| [import-integrity/no-test-only-imports](./no-test-only-imports/)           | ☑️          |          |         |
-| [import-integrity/no-test-imports-in-prod](./no-test-imports-in-prod/)     | ☑️          |          |         |
 | [import-integrity/no-unused-exports](./no-unused-exports/)                 | ☑️          |          |         |
 | [import-integrity/no-unused-package-exports](./no-unused-package-exports/) |             | 🧰       |         |
-| [import-integrity/no-node-builtins](./no-node-builtins/)                   |             |          |         |
-| [import-integrity/no-restricted-imports](./no-restricted-imports/)         |             |          |         |
+| [import-integrity/no-unresolved-imports](./no-unresolved-imports/)         | ☑️          |          |         |
 
-## Style
+## Boundaries
+
+These rules enforce boundaries between production code, test code, and restricted modules.
+
+| Rule                                                                   | Recommended | Monorepo | Fixable |
+| ---------------------------------------------------------------------- | ----------- | -------- | ------- |
+| [import-integrity/no-test-only-imports](./no-test-only-imports/)       | ☑️          |          |         |
+| [import-integrity/no-test-imports-in-prod](./no-test-imports-in-prod/) | ☑️          |          |         |
+| [import-integrity/no-restricted-imports](./no-restricted-imports/)     |             |          |         |
+| [import-integrity/no-node-builtins](./no-node-builtins/)               |             |          |         |
+
+## Aesthetics
 
 These rules govern the style of imports and exports.
 
@@ -48,7 +56,6 @@ These rules prevent import/export patterns that are prone to easy-to-miss proble
 | [import-integrity/no-external-barrel-reexports](./no-external-barrel-reexports/)     | ☑️          |          |         |
 | [import-integrity/no-named-as-default](./no-named-as-default/)                       | ☑️          |          |         |
 | [import-integrity/no-unnamed-entry-point-exports](./no-unnamed-entry-point-exports/) | ☑️          |          |         |
-| [import-integrity/no-unresolved-imports](./no-unresolved-imports/)                   | ☑️          |          |         |
 
 ## Notes
 

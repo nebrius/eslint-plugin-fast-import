@@ -92,9 +92,23 @@ export default defineConfig({
           items: [{ text: 'Overview', link: '/rules/' }],
         },
         {
-          text: 'Usage',
+          text: 'Correctness',
           items: [
             { text: 'no-cycle', link: '/rules/no-cycle/' },
+            { text: 'no-unused-exports', link: '/rules/no-unused-exports/' },
+            {
+              text: 'no-unused-package-exports',
+              link: '/rules/no-unused-package-exports/',
+            },
+            {
+              text: 'no-unresolved-imports',
+              link: '/rules/no-unresolved-imports/',
+            },
+          ],
+        },
+        {
+          text: 'Boundaries',
+          items: [
             {
               text: 'no-test-only-imports',
               link: '/rules/no-test-only-imports/',
@@ -103,20 +117,15 @@ export default defineConfig({
               text: 'no-test-imports-in-prod',
               link: '/rules/no-test-imports-in-prod/',
             },
-            { text: 'no-unused-exports', link: '/rules/no-unused-exports/' },
-            {
-              text: 'no-unused-package-exports',
-              link: '/rules/no-unused-package-exports/',
-            },
-            { text: 'no-node-builtins', link: '/rules/no-node-builtins/' },
             {
               text: 'no-restricted-imports',
               link: '/rules/no-restricted-imports/',
             },
+            { text: 'no-node-builtins', link: '/rules/no-node-builtins/' },
           ],
         },
         {
-          text: 'Style',
+          text: 'Aesthetics',
           items: [
             {
               text: 'prefer-alias-imports',
@@ -150,10 +159,6 @@ export default defineConfig({
             {
               text: 'no-unnamed-entry-point-exports',
               link: '/rules/no-unnamed-entry-point-exports/',
-            },
-            {
-              text: 'no-unresolved-imports',
-              link: '/rules/no-unresolved-imports/',
             },
           ],
         },
