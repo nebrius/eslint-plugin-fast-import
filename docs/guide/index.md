@@ -13,8 +13,8 @@ Import Integrity is a linter for ESLint and Oxlint that analyzes the imports, ex
 These docs are split into the following sections:
 
 - [Guide](./) — walkthroughs and explanations. Start here if you're setting up Import Integrity, evaluating it, or trying to understand how it works.
-- [Configuration](../configuration.md) — the full reference for repo-level and package-level settings.
-- [Rules](../rules.md) — the full reference for the built-in lint rules.
+- [Configuration](../configuration/index.md) — the full reference for repo-level and package-level settings.
+- [Rules](../rules/index.md) — the full reference for the built-in lint rules.
 
 ## Where to start
 
