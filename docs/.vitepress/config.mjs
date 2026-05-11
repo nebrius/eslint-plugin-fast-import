@@ -62,7 +62,6 @@ export default defineConfig({
             { text: 'Getting started', link: '/guide/getting-started' },
             { text: 'Comparisons', link: '/guide/comparisons' },
             { text: 'Algorithm', link: '/guide/algorithm' },
-            { text: 'Limitations', link: '/guide/limitations' },
             { text: 'Creating rules', link: '/guide/creating-rules' },
             { text: 'FAQ', link: '/guide/faq' },
           ],

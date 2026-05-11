@@ -134,8 +134,12 @@ These rules enforce boundaries between production code, test code, and restricte
 | -------------------------------------------------------------------------------- | ----- | --- |
 | [no-test-only-imports](src/rules/no-test-only-imports/README.md)                 |    ☑️ |     |
 | [no-test-imports-in-prod](src/rules/no-test-imports-in-prod/README.md)           |    ☑️ |     |
-| [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*\*          |       |     |
-| [no-node-builtins](src/rules/no-node-builtins/README.md) \*                      |       |     |
+| [no-restricted-imports](src/rules/no-restricted-imports/README.md) \*            |       |     |
+| [no-node-builtins](src/rules/no-node-builtins/README.md) \*\*                    |       |     |
+
+\* No restricted imports requires rule-specific options for use, and so is not enabled in any default configuration.
+
+\*\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any default configuration.
 
 ### Aesthetics
 
@@ -157,10 +161,6 @@ These rules are designed to prevent certain types of imports/export usage that a
 | [no-external-barrel-reexports](src/rules/no-external-barrel-reexports/README.md) |    ☑️ |     |
 | [no-named-as-default](src/rules/no-named-as-default/README.md)                   |    ☑️ |     |
 | [no-unnamed-entry-point-exports](src/rules/no-unnamed-entry-point-exports/README.md) |    ☑️ |     |
-
-\* No node builtins is intended for non-Node.js environments which can only be determined by the user, and so is not enabled in any default configuration.
-
-\*\* No restricted imports requires rule-specific options for use, and so is not enabled in any default configuration.
 
 ## Configuration
 

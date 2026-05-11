@@ -16,7 +16,7 @@ Import Integrity rules are grouped by the kind of import/export issue they detec
 
 ## Correctness
 
-These rules detect imports and exports that are incorrect, unused, or invalid for the current package.
+These rules detect imports and exports that are not being used correctly.
 
 | Rule                                                                       | Recommended | Monorepo | Fixable |
 | -------------------------------------------------------------------------- | ----------- | -------- | ------- |
@@ -27,14 +27,18 @@ These rules detect imports and exports that are incorrect, unused, or invalid fo
 
 ## Boundaries
 
-These rules enforce boundaries between production code, test code, and restricted modules.
+These rules enforce boundaries between different parts of your codebase.
 
-| Rule                                                                   | Recommended | Monorepo | Fixable |
-| ---------------------------------------------------------------------- | ----------- | -------- | ------- |
-| [import-integrity/no-test-only-imports](./no-test-only-imports/)       | ☑️          |          |         |
-| [import-integrity/no-test-imports-in-prod](./no-test-imports-in-prod/) | ☑️          |          |         |
-| [import-integrity/no-restricted-imports](./no-restricted-imports/)     |             |          |         |
-| [import-integrity/no-node-builtins](./no-node-builtins/)               |             |          |         |
+| Rule                                                                      | Recommended | Monorepo | Fixable |
+| ------------------------------------------------------------------------- | ----------- | -------- | ------- |
+| [import-integrity/no-test-only-imports](./no-test-only-imports/)          | ☑️          |          |         |
+| [import-integrity/no-test-imports-in-prod](./no-test-imports-in-prod/)    | ☑️          |          |         |
+| [import-integrity/no-restricted-imports](./no-restricted-imports/) \*     |             |          |         |
+| [import-integrity/no-node-builtins](./no-node-builtins/) \*\*             |             |          |         |
+
+\* `import-integrity/no-restricted-imports` requires rule-specific options, so it is not enabled by default.
+
+\*\* `import-integrity/no-node-builtins` is intended for non-Node.js environments (aka browsers, edge compute, etc.), but should not be used in Node.js projects, so it is not enabled by default.
 
 ## Aesthetics
 
@@ -57,8 +61,3 @@ These rules prevent import/export patterns that are prone to easy-to-miss proble
 | [import-integrity/no-named-as-default](./no-named-as-default/)                       | ☑️          |          |         |
 | [import-integrity/no-unnamed-entry-point-exports](./no-unnamed-entry-point-exports/) | ☑️          |          |         |
 
-## Notes
-
-`import-integrity/no-node-builtins` is intended for non-Node.js environments (aka browsers, edge compute, etc.), but should not be used in Node.js projects, so it is not enabled by default.
-
-`import-integrity/no-restricted-imports` requires rule-specific options, so it is not enabled by default.
