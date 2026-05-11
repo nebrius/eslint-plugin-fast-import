@@ -12,10 +12,9 @@ Install the plugin from npm:
 npm install --save-dev import-integrity-lint
 ```
 
-For typical single-package-per-repo projects, you can enable Import Integrity with:
+For typical setups where the lint config is configured to lint a single package, you can enable Import Integrity in ESLint with:
 
 ```js
-// ESLint
 import { defineConfig } from 'eslint/config';
 import importIntegrityPlugin from 'import-integrity-lint';
 
@@ -31,8 +30,9 @@ export default defineConfig([
 ]);
 ```
 
+And if you're using Oxlint, you can enable Import Integrity with:
+
 ```js
-// Oxlint
 import importIntegrityPlugin from 'import-integrity-lint';
 
 export default {
