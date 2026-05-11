@@ -1,24 +1,25 @@
 ---
-title: Overview
+title: Welcome
 description: Start here to learn how to use Import Integrity.
 outline: deep
 ---
 
-# Overview of Import Integrity
+# Welcome to the Import Integrity docs
 
-Import Integrity implements a series of lint rules for ESLint and Oxlint that validates imports and exports are used correctly. These rules specifically analyze who is importing what and looking for errors.
+Import Integrity is a linter for ESLint and Oxlint that analyzes the imports, exports, and module relationships across your codebase. It catches dead exports, broken boundaries, common footguns, and other issues that accumulate as a codebase grows.
 
-Import Integrity uses a novel algorithm combined with the [Oxc Rust based parser](https://www.npmjs.com/package/oxc-parser) that is significantly more performant than other third-party ESLint import plugins.
+## Sections
 
-## Pages
+These docs are split into the following sections:
 
-- [Quickstart](./quickstart) shows the minimal ESLint and Oxlint setup.
-- [Comparisons](./comparisons) explains the performance and accuracy comparison with `eslint-plugin-import` and `eslint-plugin-import-x`.
-- [How it works](./how-it-works) explains the four-phase analysis pipeline.
-- [Creating rules](./creating-rules) explains extension helpers for custom Import Integrity-powered rules.
-- [FAQ](./faq) answers common questions and documents important unsupported or intentionally limited patterns.
+- [Guide](./) — walkthroughs and explanations. Start here if you're setting up Import Integrity, evaluating it, or trying to understand how it works.
+- [Configuration](../configuration.md) — the full reference for repo-level and package-level settings.
+- [Rules](../rules.md) — the full reference for the built-in lint rules.
 
-## Reference
+## Where to start
 
-- [Configuration](../configuration/) documents all repo-level and package-level settings.
-- [Rules](../rules/) lists the built-in lint rules.
+- If you've never used Import Integrity before, head to [Quickstart](./quickstart.md). It covers a minimal setup for both ESLint and Oxlint.
+- If you're evaluating Import Integrity against other plugins, [Comparisons](./comparisons.md) covers how it differs from eslint-plugin-import and eslint-plugin-import-x.
+- If you want to understand the internals, [How it works](./how-it-works.md) walks through the four-phase analysis pipeline that makes whole-codebase analysis tractable.
+- If you're hitting an edge case, the [FAQ](./faq.md) covers common questions and documents limitations of Import Integrity.
+- If you want to build your own rules on top of Import Integrity, [Creating rules](./creating-rules.md) explains the extension API.
