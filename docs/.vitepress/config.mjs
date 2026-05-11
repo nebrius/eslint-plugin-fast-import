@@ -59,9 +59,9 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Overview', link: '/guide/' },
-            { text: 'Getting started', link: '/guide/getting-started' },
+            { text: 'Quickstart', link: '/guide/quickstart' },
             { text: 'Comparisons', link: '/guide/comparisons' },
-            { text: 'Algorithm', link: '/guide/algorithm' },
+            { text: 'How it works', link: '/guide/how-it-works' },
             { text: 'Creating rules', link: '/guide/creating-rules' },
             { text: 'FAQ', link: '/guide/faq' },
           ],

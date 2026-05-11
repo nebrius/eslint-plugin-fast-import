@@ -7,8 +7,8 @@ hero:
   tagline: A real codebase carries a lot of intent in how files are organized; what's reusable, what's local, what shouldn't be mixed. But day-to-day, that intent erodes. Import Integrity is a plugin for ESLint/Oxlint that analyzes imports and exports through your codebase. It flags dead exports, broken boundaries, and other issues that accumulate over time.
   actions:
     - theme: brand
-      text: Get Started
-      link: /guide/getting-started
+      text: Quickstart
+      link: /guide/quickstart
     - theme: alt
       text: View Rules
       link: /rules

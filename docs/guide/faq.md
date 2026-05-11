@@ -22,7 +22,7 @@ No, Import Integrity cannot use off the shelf resolvers, by design. Off the shel
 
 If Import Integrity's resolution algorithm does not support your use case, please file an issue and I'll try to add support for it.
 
-For more information, see [Phase 2: Module specifier resolution](./algorithm#phase-2-module-specifier-resolution).
+For more information, see [Phase 2: Module specifier resolution](./how-it-works#phase-2-module-specifier-resolution).
 
 ## Configuration and setup
 

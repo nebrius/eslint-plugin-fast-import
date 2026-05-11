@@ -1,10 +1,10 @@
 ---
-title: Getting started
+title: Quickstart
 description: Install Import Integrity and enable the recommended config.
 outline: deep
 ---
 
-# Getting started
+# Quickstart
 
 Install the plugin from npm:
 

@@ -1,10 +1,10 @@
 ---
-title: Algorithm
+title: How it works
 description: How Import Integrity analyzes imports and exports.
 outline: deep
 ---
 
-# Algorithm
+# How it works
 
 Import Integrity works by using a four phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
 

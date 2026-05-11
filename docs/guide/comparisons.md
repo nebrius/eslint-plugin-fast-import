@@ -32,7 +32,7 @@ And here's the raw data:
 
 If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/import-integrity-perf/compare.ts).
 
-Fun fact: Import Integrity was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of Oxc, which you can see [here](https://github.com/nebrius/import-integrity-lint/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Import Integrity took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvement of this plugin is split almost exactly 50/50 between the switch to Oxc and the [algorithm described here](./algorithm). Rust helped, as expected, but a faster algorithm helped _just as much._
+Fun fact: Import Integrity was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of Oxc, which you can see [here](https://github.com/nebrius/import-integrity-lint/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Import Integrity took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvement of this plugin is split almost exactly 50/50 between the switch to Oxc and the [algorithm described here](./how-it-works). Rust helped, as expected, but a faster algorithm helped _just as much._
 
 ## Accuracy
 
