@@ -19,6 +19,7 @@ These docs are split into the following sections:
 ## Where to start
 
 - If you've never used Import Integrity before, head to [Quickstart](./quickstart.md). It covers a minimal setup for both ESLint and Oxlint.
+- If you're using Import Integrity in a workspace repo, [Monorepos](./monorepos.md) covers the recommended setup patterns.
 - If you're evaluating Import Integrity against other plugins, [Comparisons](./comparisons.md) covers how it differs from eslint-plugin-import and eslint-plugin-import-x.
 - If you want to understand the internals, [How it works](./how-it-works.md) walks through the four-phase analysis pipeline that makes whole-codebase analysis tractable.
 - If you're hitting an edge case, the [FAQ](./faq.md) covers common questions and documents limitations of Import Integrity.

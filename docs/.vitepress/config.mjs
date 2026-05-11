@@ -60,6 +60,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/guide/' },
             { text: 'Quickstart', link: '/guide/quickstart' },
+            { text: 'Monorepos', link: '/guide/monorepos' },
             { text: 'Comparisons', link: '/guide/comparisons' },
             { text: 'How it works', link: '/guide/how-it-works' },
             { text: 'Creating rules', link: '/guide/creating-rules' },
@@ -80,7 +81,6 @@ export default defineConfig({
               text: 'Package-level options',
               link: '/configuration/package-level-options',
             },
-            { text: 'Monorepos', link: '/configuration/monorepos' },
           ],
         },
       ],

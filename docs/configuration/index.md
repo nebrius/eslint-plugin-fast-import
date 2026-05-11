@@ -6,7 +6,7 @@ outline: deep
 
 # Configuration
 
-Configuration options are split into two groups: repo-level configuration options and package-level configuration options. In the single package case, which we call "single package mode", there isn't a distinction between the two groups. When [using a lint config at the repo root](./monorepos#option-1-one-root-config-with-monoreporootdir) to apply to more than one package, which we call "monorepo mode," repo-level options apply to all packages in the monorepo, while package-level options are specified per-package.
+Configuration options are split into two groups: repo-level configuration options and package-level configuration options. In the single package case, which we call "single package mode", there isn't a distinction between the two groups. When [using a lint config at the repo root](../guide/monorepos#option-1-one-root-config-with-monoreporootdir) to apply to more than one package, which we call "monorepo mode," repo-level options apply to all packages in the monorepo, while package-level options are specified per-package.
 
 To support this "split-level" configuration, Import Integrity uses separate configuration files for package-level options that are independent of the ESLint/Oxlint configuration, while repo-level options go in `settings['import-integrity']` in the ESLint/Oxlint configuration file.
 
@@ -20,4 +20,4 @@ Configuration files are written using JSON-C (JSON with comments) and are named 
 
 - [Repo-level options](./repo-level-options) cover settings that apply to a whole package or monorepo.
 - [Package-level options](./package-level-options) cover settings scoped to one package.
-- [Monorepos](./monorepos) covers the recommended setup patterns for workspace repositories.
+- [Monorepos](../guide/monorepos) covers the recommended setup patterns for workspace repositories.

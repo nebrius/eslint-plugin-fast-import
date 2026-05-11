@@ -52,7 +52,7 @@ Files specified with `externallyImportedFiles` or `entryPointFiles` define files
 - `entryPointFiles` are intended to represent entry points in a library intended for use by others, aka a "public API."
 - `externallyImportedFiles` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application.
 
-In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary to determine if a package's entry points are intended to be used by other packages in the monorepo to, and thus should be analyzed for usage for the [no-unused-package-exports](../rules/no-unused-package-exports/) rule. See [Monorepos](./monorepos) for more info.
+In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary to determine if a package's entry points are intended to be used by other packages in the monorepo to, and thus should be analyzed for usage for the [no-unused-package-exports](../rules/no-unused-package-exports/) rule. See [Monorepos](../guide/monorepos) for more info.
 
 Entry points/externally imported files enable other useful checks such as the [no-entry-point-imports](../rules/no-entry-point-imports/) rule.
 

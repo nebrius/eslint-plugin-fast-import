@@ -6,7 +6,7 @@ outline: deep
 
 # Monorepos
 
-Import Integrity is designed to work well in monorepos. The caching mechanism described in [the algorithm](https://github.com/nebrius/import-integrity-lint/blob/main/README.md#algorithm) is monorepo aware, allowing Import Integrity to manage multiple caches for different packages in the monorepo simultaneously.
+Import Integrity is designed to work well in monorepos. The caching mechanism described in [How it works](./how-it-works) is monorepo aware, allowing Import Integrity to manage multiple caches for different packages in the monorepo simultaneously.
 
 Monorepos can be configured in a few ways, as described below.
 
@@ -97,4 +97,4 @@ To combine these two options, you use per-package Import Integrity configuration
 
 For a complete working example of this approach, see my [Aquarium Control project](https://github.com/nebrius/aquarium-control).
 
-Warning: as of this writing (2026/04/25), Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you may need to use the first option. ESLint handles nested configs without any issues.
+Warning: as of this writing, Oxlint struggles with nested configs when combined with an LSP (editor or AI agent) and may throw an error. See https://github.com/oxc-project/oxc/issues/19937 for more details. Hopefully this will be resolved soon, but if you need to run in an LSP-based environment, you may need to use the first option. ESLint handles nested configs without any issues.
