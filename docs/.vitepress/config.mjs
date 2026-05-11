@@ -81,7 +81,6 @@ export default defineConfig({
               link: '/configuration/package-level-options',
             },
             { text: 'Monorepos', link: '/configuration/monorepos' },
-            { text: 'Oxlint', link: '/configuration/oxlint' },
           ],
         },
       ],

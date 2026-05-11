@@ -21,4 +21,3 @@ Configuration files are written using JSON-C (JSON with comments) and are named 
 - [Repo-level options](./repo-level-options) cover settings that apply to a whole package or monorepo.
 - [Package-level options](./package-level-options) cover settings scoped to one package.
 - [Monorepos](./monorepos) covers the recommended setup patterns for workspace repositories.
-- [Oxlint](./oxlint) covers Import Integrity's Oxlint JS plugin setup.

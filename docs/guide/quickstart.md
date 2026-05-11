@@ -6,13 +6,17 @@ outline: deep
 
 # Quickstart
 
+## Installation
+
 Install the plugin from npm:
 
 ```bash
 npm install --save-dev import-integrity-lint
 ```
 
-For typical setups where the lint config is configured to lint a single package, you can enable Import Integrity in ESLint with:
+## ESLint
+
+For typical setups where one lint config covers one package, you can enable Import Integrity in your ESLint configuration file with:
 
 ```js
 import { defineConfig } from 'eslint/config';
@@ -30,7 +34,11 @@ export default defineConfig([
 ]);
 ```
 
-And if you're using Oxlint, you can enable Import Integrity with:
+For a full working example, see this repo's own [eslint.config.mjs](https://github.com/nebrius/import-integrity-lint/blob/main/eslint.config.mjs).
+
+## Oxlint
+
+You can enable Import Integrity in your Oxlint configuration file with:
 
 ```js
 import importIntegrityPlugin from 'import-integrity-lint';
@@ -53,9 +61,9 @@ export default {
 };
 ```
 
+For a full working example, see this repo's own [oxlint.config.ts](https://github.com/nebrius/import-integrity-lint/blob/main/oxlint.config.ts).
+
 ## Next steps
 
 - Review the [Configuration](../configuration/) section for available settings.
 - Review the [Rules](../rules/) reference to see what the recommended config enables.
-- If you use a workspace repository, see [Monorepos](../configuration/monorepos).
-- If you use Oxlint, see the [Oxlint configuration guide](../configuration/oxlint).
