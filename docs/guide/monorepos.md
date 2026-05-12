@@ -14,9 +14,25 @@ _Use this when each package is linted independently._
 
 Each package has its own ESLint or Oxlint config, with its own `packageRootDir` and the standard `recommended` config. The monorepo task runner (Nx, Turborepo, etc.) handles invoking the linter across packages.
 
-Because each config sees only its own package, cross-package rules like [no-unused-package-exports](../rules/no-unused-package-exports/index.md) can't be used with this setup because they require a config that sees the whole monorepo. If you need those rules, see Option 2 or 3.
+In this setup, each config sees only its own package. This means cross-package rules like [no-unused-package-exports](../rules/no-unused-package-exports/index.md) can't be used with this setup because they require a config that sees the whole monorepo. If you need those rules, see Option 2 or 3.
 
 ### Setup
+
+Create an ESLint config file in each package root directory and set `settings['import-integrity'].packageRootDir` to the package root directory.
+
+**Example structure:**
+
+```text
+repo
+└── packages
+    ├── web
+    │   ├── eslint.config.mjs
+    │   └── src
+    └── shared
+        ├── eslint.config.mjs
+        ├── import-integrity.config.jsonc
+        └── src
+```
 
 In each package's ESLint config:
 
@@ -48,7 +64,8 @@ This option has performance implications for larger codebases, since we need to 
 
 ### Setup
 
-Set `settings['import-integrity'].monorepoRootDir` in your root config and add the `monorepoRecommended` config. Optionally add an `import-integrity.config.json` (or `.jsonc`) file to any workspace package that needs non-default package-scoped options.
+1. Set `settings['import-integrity'].monorepoRootDir` in your root config and add the `monorepoRecommended` config.
+2. Optionally add an `import-integrity.config.json` (or `.jsonc`) file to any workspace package that needs non-default package-scoped options.
 
 **Example structure:**
 
@@ -76,7 +93,7 @@ export default defineConfig([
         monorepoRootDir: import.meta.dirname,
       },
     },
-  }
+  },
   importIntegrityPlugin.configs.monorepoRecommended,
 ]);
 ```
@@ -138,7 +155,7 @@ export default defineConfig([
         monorepoRootDir: import.meta.dirname,
       },
     },
-  }
+  },
   importIntegrityPlugin.configs.monorepoRecommended,
 ]);
 ```
