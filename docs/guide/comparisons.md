@@ -33,10 +33,6 @@ The matrix shows where each tool's capabilities overlap. A few rows warrant more
 
 **Entry-point and barrel mistakes.** `eslint-plugin-import` and `eslint-plugin-import-x` cover pieces of this category (`no-named-as-default` and a few related rules), but not broader entry-point validation. Import Integrity adds rules for empty entry points, imports between entry points, and other subtle export mistakes that don't show up until something breaks.
 
-# Comparisons to import and import-x
-
-Below are performance and accuracy comparisons to [eslint-plugin-import](https://github.com/import-js/eslint-plugin-import) and [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x).
-
 ## Performance
 
 To compare performance of this plugin vs the other plugins, I forked the VS Code codebase. VS Code is a large codebase with the following stats as of this writing:
