@@ -17,7 +17,6 @@ This page compares Import Integrity against other tools that overlap with parts 
 | Capability | Import Integrity | eslint-plugin-import | eslint-plugin-import-x | ESLint built-ins | Oxlint built-ins |
 | --- | --- | --- | --- | --- | --- |
 | Detects unused exports | ✓ | ✓ | ✓ |  |  |
-| Detects unused exports across monorepo packages | ✓ |  |  |  |  |
 | Detects circular imports | ✓ | ✓ | ✓ |  | ✓ |
 | Enforces test/prod separation | ✓ |  |  |  |  |
 | Enforces user-defined import boundaries | ✓ | ✓ | ✓ | _partial_ |  |
@@ -27,9 +26,11 @@ This page compares Import Integrity against other tools that overlap with parts 
 
 The matrix shows where each tool's capabilities overlap. A few rows warrant more detail.
 
-**User-defined import boundaries.** Both Import Integrity and `eslint-plugin-import`'s `no-restricted-paths` are resolution-aware: aliases and relative paths to the same file are treated as equivalent (ESLint's built-in `no-restricted-imports` is not). The two differ in setup: `eslint-plugin-import` works without a resolver, but struggles to reliably catch what you expect unless you choose, install, and configure the right resolver plugin for your codebase. Import Integrity ships its own out of the box. [How it works](./how-it-works.md) covers the resolver in detail.
+**User-defined import boundaries.** Both Import Integrity and `eslint-plugin-import`/`eslint-plugin-import-x`'s `no-restricted-paths` are resolution-aware: aliases and relative paths to the same file are treated as equivalent (ESLint's built-in `no-restricted-imports` is not). The two differ in setup: `eslint-plugin-import`/`eslint-plugin-import-x` works without a resolver, but struggles to reliably catch what you expect unless you choose, install, and configure the right resolver plugin for your codebase. Import Integrity ships its own out of the box. [How it works](./how-it-works.md) covers the resolver in more detail.
 
-**Entry-point and barrel mistakes.** `eslint-plugin-import` and `eslint-plugin-import-x` cover pieces of this category (`no-named-as-default` and a few related rules), but not broader entry-point validation. Import Integrity adds rules for empty entry points, imports between entry points, and other subtle export mistakes that don't show up until something breaks.
+**Entry-point and subtle export mistakes.** `eslint-plugin-import` and `eslint-plugin-import-x` cover pieces of this category (`no-named-as-default` and a few related rules), but not broader entry-point validation. Import Integrity adds rules for empty entry points, imports between entry points, and other subtle export mistakes that don't show up until something breaks.
+
+**Monorepo and test/prod coverage.** Several rows in the table highlight Import Integrity's unique capabilities. Monorepo-aware analysis means that each package's exports are tracked and analyzed for use in other packages, which allows us to find dead code masked by an export statement. Test/prod separation has dedicated rules for clean separation of test and production code, and for flagging production exports whose only consumers are tests, a.k.a. dead code obscured by a test import.
 
 ## Performance
 
