@@ -29,8 +29,6 @@ The matrix shows where each tool's capabilities overlap. A few rows warrant more
 
 **User-defined import boundaries.** Both Import Integrity and `eslint-plugin-import`'s `no-restricted-paths` are resolution-aware: aliases and relative paths to the same file are treated as equivalent (ESLint's built-in `no-restricted-imports` is not). The two differ in setup: `eslint-plugin-import` works without a resolver, but struggles to reliably catch what you expect unless you choose, install, and configure the right resolver plugin for your codebase. Import Integrity ships its own out of the box. [How it works](./how-it-works.md) covers the resolver in detail.
 
-`eslint-plugin-boundaries` takes a different approach to this problem space: users define element types, tag files via patterns, and declare a dependency matrix between types. Files that aren't tagged are skipped or flagged as errors, depending on configuration.
-
 **Entry-point and barrel mistakes.** `eslint-plugin-import` and `eslint-plugin-import-x` cover pieces of this category (`no-named-as-default` and a few related rules), but not broader entry-point validation. Import Integrity adds rules for empty entry points, imports between entry points, and other subtle export mistakes that don't show up until something breaks.
 
 ## Performance
