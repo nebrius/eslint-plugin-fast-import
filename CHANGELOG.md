@@ -86,6 +86,10 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
 - Fixed a bug where Oxlint was not running in editor mode
 - Fixed a bug where files outside any workspace-discovered package would cause analysis failures; these files are now safely skipped
 - Hardened `package.json` reading against malformed or partially-populated files
+- Fixed a bug in the `no-cycle` rule where the number of reported cycles could vary across runs on large codebases
+  - The previous DFS-with-memoization implementation was order-dependent: when files in overlapping cycles were linted in certain orders, edges shared between cycles could be silently dropped from the report
+  - Cycle detection now uses Tarjan's strongly-connected-components algorithm, which is order-independent by construction
+  - The `no-cycle` error message now includes a representative cycle path (e.g. `a.ts → b.ts → c.ts → a.ts`); long cycles are truncated for readability
 
 ## 2.2.1 (4/9/2026)
 
