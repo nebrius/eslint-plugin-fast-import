@@ -1,9 +1,10 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 import ts from 'typescript';
 
+import { VALID_EXTENSIONS } from '../util/code.js';
 import { isDefaultIgnoredPath } from '../util/files.js';
 import { warn } from '../util/logging.js';
 import type { PackageSettings } from './user.js';
@@ -80,6 +81,61 @@ function normalizePath(
 
   // Otherwise, return as-is
   return path;
+}
+
+// Resolve a tsconfig `paths` entry to an absolute path on disk, mirroring the
+// subset of TypeScript's resolution behavior we care about for alias tracking.
+//
+// - Wildcard entries (`@/*` -> `src/*`) keep the `*` in the returned path; we
+//   only verify that the directory portion exists, since the wildcard is
+//   substituted at import resolution time.
+// - Direct file matches (e.g. `src/a.ts`) are returned as-is.
+// - Directories are resolved to their `index.<ext>` if one exists, otherwise
+//   the directory path itself is returned.
+// - Bare module-style entries (e.g. `./foo` referring to `./foo.ts`) are
+//   resolved by appending the supported code extensions in order.
+//
+// Returns `undefined` if nothing on disk matches, so the caller can skip the
+// alias instead of throwing.
+function resolveTsConfigPathEntry(
+  absolutePathEntry: string
+): string | undefined {
+  if (absolutePathEntry.includes('*')) {
+    return existsSync(absolutePathEntry.replace('*', ''))
+      ? absolutePathEntry
+      : undefined;
+  }
+
+  if (existsSync(absolutePathEntry)) {
+    let isDirectory = false;
+    try {
+      isDirectory = statSync(absolutePathEntry).isDirectory();
+    } catch {
+      // Race conditions on the filesystem are rare but possible; treat as
+      // a non-directory match.
+    }
+    if (isDirectory) {
+      for (const ext of VALID_EXTENSIONS) {
+        const indexCandidate = join(absolutePathEntry, 'index' + ext);
+        if (existsSync(indexCandidate)) {
+          return indexCandidate;
+        }
+      }
+    }
+    return absolutePathEntry;
+  }
+
+  // TypeScript's `paths` convention allows pointing to a module specifier
+  // without an extension (e.g. `"foo": ["./bar"]` referring to `./bar.ts`).
+  // Try the supported code extensions in order.
+  for (const ext of VALID_EXTENSIONS) {
+    const candidate = absolutePathEntry + ext;
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return undefined;
 }
 
 function parseTsConfig(
@@ -177,19 +233,25 @@ function parseTsConfig(
     }
 
     const absolutePathEntry = resolve(baseUrl, path[0]);
-    if (!existsSync(absolutePathEntry.replace('*', ''))) {
-      throw new Error(
-        `tsconfig path "${path[0]}", resolved as "${absolutePathEntry}", does not exist`
+    const resolvedPathEntry = resolveTsConfigPathEntry(absolutePathEntry);
+    if (!resolvedPathEntry) {
+      // TypeScript's own behavior is to silently skip paths that don't resolve
+      // to anything on disk, since the entry might still be valid for IDEs or
+      // other tooling. Match that with a warning so a single iffy alias does
+      // not take down the whole rule.
+      warn(
+        `tsconfig path "${path[0]}", resolved as "${absolutePathEntry}", does not exist; alias "${symbol}" will be ignored`
       );
+      continue;
     }
     if (
-      !absolutePathEntry.startsWith(absoluteRootDir ?? dirname(configPath)) ||
-      isDefaultIgnoredPath(absolutePathEntry)
+      !resolvedPathEntry.startsWith(absoluteRootDir ?? dirname(configPath)) ||
+      isDefaultIgnoredPath(resolvedPathEntry)
     ) {
       continue;
     }
 
-    parsedPaths[symbol] = absolutePathEntry;
+    parsedPaths[symbol] = resolvedPathEntry;
   }
 
   return {

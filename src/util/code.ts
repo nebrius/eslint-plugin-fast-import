@@ -1,6 +1,6 @@
 import { extname } from 'node:path';
 
-const VALID_EXTENSIONS = [
+export const VALID_EXTENSIONS = [
   '.ts',
   '.tsx',
   '.mts',

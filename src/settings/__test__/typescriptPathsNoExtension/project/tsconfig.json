@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@a": ["src/a"],
+      "@dir": ["src/dir"],
+      "@subdir/*": ["src/sub/*"]
+    }
+  }
+}

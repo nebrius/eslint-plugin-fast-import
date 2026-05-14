@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@valid": ["src/a"],
+      "@missing": ["src/does-not-exist"],
+      "@missing/*": ["src/no-such-dir/*"]
+    }
+  }
+}
