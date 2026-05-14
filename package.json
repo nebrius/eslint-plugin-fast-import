@@ -68,6 +68,7 @@
     "global": "^4.4.0",
     "globals": "^17.0.0",
     "jest-diff": "^30.0.0",
+    "mermaid": "11.14.0",
     "oxlint": "^1.59.0",
     "oxlint-tsgolint": "^0.20.0",
     "prettier": "^3.8.3",
@@ -78,7 +79,8 @@
     "type-fest": "^5.0.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.29.1",
-    "vitepress": "1.6.4"
+    "vitepress": "1.6.4",
+    "vitepress-plugin-mermaid": "2.0.17"
   },
   "peerDependencies": {
     "eslint": ">=9.0.0"

@@ -32,47 +32,100 @@ The matrix shows where each tool's capabilities overlap. A few rows warrant more
 
 **Monorepo and test/prod coverage.** Several rows in the table highlight Import Integrity's unique capabilities. Monorepo-aware analysis means that each package's exports are tracked and analyzed for use in other packages, which allows us to find dead code masked by an export statement. Test/prod separation has dedicated rules for clean separation of test and production code, and for flagging production exports whose only consumers are tests, a.k.a. dead code obscured by a test import.
 
-## Performance
+## Performance and Accuracy
 
-To compare performance of this plugin vs the other plugins, I forked the VS Code codebase. VS Code is a large codebase with the following stats as of this writing:
+Import Integrity was benchmarked against `eslint-plugin-import`, `eslint-plugin-import-x`, and Oxlint's built-in rules on three real-world codebases of different shapes and sizes.
 
-- 5,299 files
-- 1,255,760 lines of code, excluding blank lines and comments (according to [cloc](https://github.com/AlDanial/cloc))
-- 88,623 imports
-- 17,477 exports
-- 184 reexports
+### Methodology
 
-Here are the results for three commonly expensive rules that flag unused exports, import cycles, and unresolved imports:
+Each tool was run with two configurations: a baseline that enables only `no-debugger` (a trivial rule whose detection cost is essentially free) and a test that enables only the rule under comparison. Each configuration ran five times in separate, isolated processes. The reported timing is the median test time minus the median baseline time, approximating the rule's cost without the overhead of the linter itself.
 
-<img src="https://github.com/nebrius/import-integrity-lint/raw/main/perf.png" alt="Performance comparison of three import plugins" width="700"/>
+This methodology isolates rule performance but isn't perfect: rules may share or differ in work that doesn't subtract cleanly. The numbers are useful for comparison between tools, not as absolute measurements of rule cost.
 
-And here's the raw data:
+Benchmarks were run on a desktop with an AMD Ryzen 5 5600X (6 cores / 12 threads), 128GB of DDR4 memory, a Samsung 980 Pro NVMe SSD, on Linux Mint 22.2. The machine wasn't thermally constrained during runs, and run-to-run variance was within 1%. Full benchmark configurations and instructions are available in forked repositories for [VS Code](https://github.com/nebrius/vscode/tree/fast-import-perf), [Astro](https://github.com/nebrius/astro/tree/fast-import-perf), and [Next.js](https://github.com/nebrius/next.js/tree/fast-import-perf), so anyone can reproduce these numbers.
 
-|                  | No Unused  | No Cycle   | No Unresolved | Total      |
-| ---------------- | ---------- | ---------- | ------------- | ---------- |
-| Import Integrity | 55.6ms     | 1,880.6ms  | 15.2ms        | 1,936.2ms  |
-| Import           | 25,903.8ms | 42,710.7ms | 399.1ms       | 68,614.5ms |
-| Import X         | 36,200.9ms | 16,931.7ms | 821.6ms       | 53,132.5ms |
+### VS Code
 
-If you would like to see details of how this data was computed, see the [script I wrote in my fork of VS Code](https://github.com/nebrius/vscode/blob/import-integrity-perf/compare.ts).
+A large, deeply-connected single-package codebase.
 
-Fun fact: Import Integrity was originally written using [TypeScript ESLint's parser](https://www.npmjs.com/package/@typescript-eslint/parser) instead of Oxc, which you can see [here](https://github.com/nebrius/import-integrity-lint/blob/4dde22b599db22dbb7421bf094edb48dddf6bb6b/src/module/computeBaseFileDetails.ts). That version of Import Integrity took about 12 seconds to lint VS Code, which is still considerably faster than the others. The performance improvement of this plugin is split almost exactly 50/50 between the switch to Oxc and the [algorithm described here](./how-it-works). Rust helped, as expected, but a faster algorithm helped _just as much._
+- 7,199 files
+- 121,040 imports
+- 21,709 exports
 
-## Accuracy
+| Tool | Cycles found | Time |
+| --- | --- | --- |
+| Oxlint built-in | 1,537 | 5,951ms |
+| Import Integrity (Oxlint host) | 1,537 | 3,335ms |
+| Import Integrity (ESLint host) | 1,537 | 3,479ms |
+| `eslint-plugin-import` | 738 | 159,436ms |
+| `eslint-plugin-import-x` | 738 | 64,560ms |
 
-The performance script I wrote above also counts the number of errors found. Before I present the results, I want to emphasize that these are _not_ issues in VS Code! I intentionally configured ESLint to check test files, and VS Code includes test files with intentional errors so that they can make sure VS Code handles errors correctly. Now on to the errors:
+```mermaid
+xychart-beta horizontal
+    title "VS Code: no-cycle time (s)"
+    x-axis ["eslint-plugin-import", "eslint-plugin-import-x", "Oxlint built-in", "Import Integrity (ESLint)", "Import Integrity (Oxlint)"]
+    y-axis "Time (s)" 0 --> 160
+    bar [159.4, 64.6, 6.0, 3.5, 3.3]
+```
 
-|                  | Unused | Cycle | Unresolved |
-| ---------------- | ------ | ----- | ---------- |
-| Import Integrity | 4,672  | 686   | 306        |
-| Import           | 4,500  | 600   | 29         |
-| Import X         | 4,521  | 600   | 49         |
+Import Integrity and Oxlint's built-in `no-cycle` agree exactly on cycle count, which is a useful correctness signal. `eslint-plugin-import` and `-x` find about half as many cycles; the gap is consistent across this benchmark and Next.js, but we haven't investigated why.
 
-We notice that the numbers are pretty close to each other, with Import Integrity reporting a few more. While I haven't looked at each error to determine precisely what's going on, I'm pretty certain it's due to:
+### Astro
 
-- Import Integrity flagging non-test exports as unused if they are only imported in test files, which the other two don't check
-- Import Integrity flagging imports of third party modules that are not listed in package.json (aka transient imports) as unresolved
+A monorepo with lighter graph density than VS Code.
 
-I do find it interesting that Import Integrity finds a few more cycles. The 600 number is oddly round though, so perhaps their cycle detection algorithm has a limit on how many cycles it reports.
+- 6,219 files
+- 13,507 imports
+- 3,778 exports
 
-Details aside, we can safely say that all three libraries have about the same level of accuracy.
+| Tool | Cycles found | Time |
+| --- | --- | --- |
+| Oxlint built-in | 66 | 965ms |
+| Import Integrity (Oxlint host) | 64 | 1,013ms |
+| Import Integrity (ESLint host) | 64 | 782ms |
+| `eslint-plugin-import` | 53 | 8,252ms |
+| `eslint-plugin-import-x` | 53 | 11,052ms |
+
+```mermaid
+xychart-beta horizontal
+    title "Astro: no-cycle time (s)"
+    x-axis ["eslint-plugin-import-x", "eslint-plugin-import", "Import Integrity (Oxlint)", "Oxlint built-in", "Import Integrity (ESLint)"]
+    y-axis "Time (s)" 0 --> 12
+    bar [11.1, 8.3, 1.0, 1.0, 0.8]
+```
+
+The 2-cycle gap between Import Integrity and Oxlint's built-in is in `.astro` files, which Oxlint can parse and Import Integrity doesn't process.
+
+### Next.js
+
+A large monorepo with many small files and a sparse graph.
+
+- 23,154 files
+- 28,310 imports
+- 19,029 exports
+
+| Tool | Cycles found | Time |
+| --- | --- | --- |
+| Oxlint built-in | 174 | 1,365ms |
+| Import Integrity (Oxlint host) | 179 | 3,576ms |
+| Import Integrity (ESLint host) | 179 | 3,255ms |
+| `eslint-plugin-import` | 114 | 52,813ms |
+| `eslint-plugin-import-x` | 114 | 13,032ms |
+
+```mermaid
+xychart-beta horizontal
+    title "Next.js: no-cycle time (s)"
+    x-axis ["eslint-plugin-import", "eslint-plugin-import-x", "Import Integrity (Oxlint)", "Import Integrity (ESLint)", "Oxlint built-in"]
+    y-axis "Time (s)" 0 --> 55
+    bar [52.8, 13.0, 3.6, 3.3, 1.4]
+```
+
+The 5-cycle gap between Import Integrity (179) and Oxlint's built-in (174) is explained by two factors: Import Integrity counts 6 self-imports (files that import themselves) which Oxlint deliberately excludes from its cycle count, and Oxlint reports one cycle twice. Either tool's framing is defensible.
+
+### Observations
+
+Across all three benchmarks, Import Integrity and Oxlint's built-in `no-cycle` agree on cycle count exactly (VS Code) or with small explainable gaps (Astro, Next.js). `eslint-plugin-import` and `-x` consistently find fewer cycles than the other tools, by 17% on Astro, 36% on Next.js, and 52% on VS Code. We haven't investigated this gap in detail.
+
+On performance, Import Integrity is roughly 5-50x faster than `eslint-plugin-import` and `eslint-plugin-import-x` on every benchmark. Against Oxlint's built-in `no-cycle`, the picture varies by codebase shape. On VS Code (large and densely-connected), Import Integrity is about 1.8x faster. On Astro and Next.js (smaller or more sparsely-connected), Oxlint's built-in is faster: by a hair on Astro, by about 2.6x on Next.js. Oxlint's underlying linter is multi-threaded and written in Rust, so it's faster than Import Integrity for many workloads; the VS Code result is the surprise.
+
+One technical note relevant to interpreting these numbers: Import Integrity parses each file twice. The first parse is internal, to build the whole module graph upfront; the second parse is when the host invokes our per-file callback, which provides its own parsed AST. This is a consequence of plugin APIs being synchronous and per-file while whole-codebase analysis needs the full graph before it can report on any file. `eslint-plugin-import`, `eslint-plugin-import-x`, and `@typescript-eslint` share the same constraint. Oxlint's built-in rule presumably avoids this overhead because it isn't a plugin. Import Integrity is doing at least as much parse work as the built-in, and on VS Code is finishing faster anyway.

@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress';
+import { withMermaid } from 'vitepress-plugin-mermaid';
 
 const ROOT_README_URL =
   'https://github.com/nebrius/import-integrity-lint/blob/main/README.md';
@@ -35,7 +36,7 @@ function rewriteIncludedReadmeLinks(md) {
   };
 }
 
-export default defineConfig({
+export default withMermaid(defineConfig({
   title: 'Import Integrity',
   description:
     'ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports',
@@ -169,4 +170,4 @@ export default defineConfig({
       },
     ],
   },
-});
+}));
