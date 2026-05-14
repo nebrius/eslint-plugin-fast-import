@@ -5,7 +5,7 @@ import type { Ignore } from 'ignore';
 import ignore from 'ignore';
 
 import type { GenericContext } from '../types/context.js';
-import { InternalError } from '../util/error.js';
+import { exitWithError, exitWithInternalError } from '../util/error.js';
 import {
   getRawMonorepoPackageSettings,
   trimTrailingPathSeparator,
@@ -102,7 +102,7 @@ export function markSettingsForRefresh(packageRootDir: string) {
     );
     /* instanbul ignore next */
     if (!repoCacheEntry) {
-      throw new InternalError(
+      exitWithInternalError(
         'Could not get repo cache settings from package cache settings'
       );
     }
@@ -305,14 +305,14 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     // Determine if this is a wildcard or fixed alias, and validate consistency
     if (symbol.endsWith('*')) {
       if (!path.endsWith('*')) {
-        throw new Error(
+        exitWithError(
           `Alias path ${path} must end with "*" when ${symbol} ends with "*"`
         );
       }
       wildcardAliases[symbol.replace(/\*$/, '')] = path.replace(/\*$/, '');
     } else {
       if (path.endsWith('*')) {
-        throw new Error(
+        exitWithError(
           `Alias path ${path} must not end with "*" when ${symbol} does not end with "*"`
         );
       }
@@ -324,12 +324,12 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   const parsedEntryPoints: ParsedPackageSettings['entryPoints'] = [];
   for (const [subPathPattern, filePattern] of Object.entries(entryPointFiles)) {
     if (subPathPattern !== '.' && !subPathPattern.startsWith('./')) {
-      throw new Error(
+      exitWithError(
         `Entry point subpath pattern ${subPathPattern} must equal "." or start with "./"`
       );
     }
     if (!filePattern.startsWith('./')) {
-      throw new Error(
+      exitWithError(
         `Entry point file pattern ${filePattern} must start with "./"`
       );
     }
@@ -337,7 +337,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
       // Node.js requires that subpaths only contain 1 wildcard, so this is just
       // a sanity check in practice.
       if (subPathPattern.split('*').length > 2) {
-        throw new Error(
+        exitWithError(
           `Entry point subpath pattern ${subPathPattern} must not contain more than one wildcard`
         );
       }
@@ -345,7 +345,7 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
       // them is intractible, because the process is not fully reversible
       // and would require a significant rearchitect that would hurt performance
       if (filePattern.split('*').length > 2 || !filePattern.includes('*')) {
-        throw new Error(
+        exitWithError(
           `Entry point file pattern ${filePattern} must contain exactly one wildcard`
         );
       }

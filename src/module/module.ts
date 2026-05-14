@@ -20,7 +20,11 @@ import type { BasePackageInfo } from '../types/base.js';
 import type { GenericContext } from '../types/context.js';
 import type { ResolvedPackageInfo } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
-import { InternalError } from '../util/error.js';
+import {
+  exitWithError,
+  exitWithException,
+  exitWithInternalError,
+} from '../util/error.js';
 import {
   convertToUnixishPath,
   getDependenciesFromPackageJson,
@@ -99,7 +103,7 @@ function getGetEntryPointSpecifier({
         }
 
         if (entryPointSpecifier) {
-          throw new Error(
+          exitWithError(
             `Multiple entry points matched for file "${filePath}". Entry points must not be ambiguous.`
           );
         }
@@ -114,7 +118,7 @@ function getGetEntryPointSpecifier({
       } else {
         if (entryPoint.filePath === relativePath) {
           if (entryPointSpecifier) {
-            throw new Error(
+            exitWithError(
               `Multiple entry points matched for file "${filePath}". Entry points must not be ambiguous.`
             );
           }
@@ -275,7 +279,7 @@ export function getPackageInfo(packageRootDir: string) {
   const analyzedPackageInfo = getAnalyzedPackageInfo(packageRootDir);
   /* istanbul ignore if */
   if (!analyzedPackageInfo) {
-    throw new InternalError('Package info requested before initialization');
+    exitWithInternalError('Package info requested before initialization');
   }
   return analyzedPackageInfo;
 }
@@ -316,7 +320,7 @@ export function updateCacheFromFileSystem({
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
   if (!basePackageInfo || !resolvedPackageInfo || !analyzedPackageInfo) {
-    throw new InternalError('Package info not initialized');
+    exitWithInternalError('Package info not initialized');
   }
 
   // First update the dependencies list
@@ -384,7 +388,7 @@ export function updateCacheFromFileSystem({
           debug(`Could not parse ${filePath}, reusing previously parsed info`);
           return;
         }
-        throw e;
+        exitWithException(e);
       }
     }
   }
@@ -435,7 +439,7 @@ export function updateCacheFromFileSystem({
           debug(`Could not parse ${filePath}, reusing previously parsed info`);
           return;
         }
-        throw e;
+        exitWithException(e);
       }
       updateResolvedInfoForFile(filePath, basePackageInfo, resolvedPackageInfo);
     }
@@ -502,7 +506,7 @@ export function updateCacheForFile({
   // This shouldn't be possible and is just to make sure TypeScript is happy
   /* istanbul ignore if */
   if (!basePackageInfo || !resolvedPackageInfo || !analyzedPackageInfo) {
-    throw new InternalError('Package info not initialized');
+    exitWithInternalError('Package info not initialized');
   }
 
   const baseOptions = {
@@ -573,7 +577,7 @@ export function updateCacheForFile({
         !analyzedFileInfo ||
         analyzedFileInfo.fileType !== 'code'
       ) {
-        throw new InternalError(`Could not get file info for "${filePath}"`);
+        exitWithInternalError(`Could not get file info for "${filePath}"`);
       }
       for (let i = 0; i < baseFileInfo.exports.length; i++) {
         resolvedFileInfo.exports[i] = {

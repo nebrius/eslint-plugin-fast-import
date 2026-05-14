@@ -18,7 +18,7 @@ import {
   markSettingsForRefresh,
 } from '../settings/settings.js';
 import type { GenericContext } from '../types/context.js';
-import { InternalError } from '../util/error.js';
+import { exitWithInternalError } from '../util/error.js';
 import {
   getFiles,
   getRelativePathFromRoot,
@@ -213,7 +213,7 @@ const DEFAULT_TEST_FILE_PATTERNS = [
 export function isNonTestFile(filePath: string) {
   const packageSettings = getPackageCacheEntryForFile(filePath);
   if (!packageSettings) {
-    throw new InternalError('package settings are unexpectedly undefined');
+    exitWithInternalError('package settings are unexpectedly undefined');
   }
   // We want to ignore folders named __test__ outside of this package, in case
   // the entire package is itself a test (e.g. the unit tests for import-integrity)

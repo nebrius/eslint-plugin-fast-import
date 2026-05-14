@@ -5,6 +5,7 @@ import { parse, printParseErrorCode } from 'jsonc-parser';
 import { z, type ZodError } from 'zod';
 
 import type { GenericContext } from '../types/context.js';
+import { exitWithError } from '../util/error.js';
 import {
   findPackageConfigFile,
   trimTrailingPathSeparator,
@@ -79,7 +80,7 @@ function throwFormattedErrors(error: ZodError): never {
     }
     issues.push(formattedIssue);
   }
-  throw new Error('Invalid settings:\n' + issues.join('\n'));
+  exitWithError('Invalid settings:\n' + issues.join('\n'));
 }
 
 export function getUserRepoSettings(
@@ -88,7 +89,7 @@ export function getUserRepoSettings(
   // Parse the raw settings, if supplied
   const importIntegritySettings = settings?.['import-integrity'];
   if (!importIntegritySettings) {
-    throw new Error(
+    exitWithError(
       `import-integrity-lint settings are required in your ESLint/Oxlint config file`
     );
   }
@@ -115,9 +116,9 @@ export function getUserRepoSettings(
 
     // Validate monorepoRootDir exists
     if (!isAbsolute(monorepoRootDir)) {
-      throw new Error(`monorepoRootDir "${monorepoRootDir}" must be absolute`);
+      exitWithError(`monorepoRootDir "${monorepoRootDir}" must be absolute`);
     } else if (!existsSync(monorepoRootDir)) {
-      throw new Error(`monorepoRootDir "${monorepoRootDir}" does not exist`);
+      exitWithError(`monorepoRootDir "${monorepoRootDir}" does not exist`);
     }
 
     // Trim off the end `/` in case it was supplied
@@ -152,9 +153,9 @@ export function getUserRepoSettings(
 
     // Validate packageRootDir exists
     if (!isAbsolute(packageRootDir)) {
-      throw new Error(`packageRootDir "${packageRootDir}" must be absolute`);
+      exitWithError(`packageRootDir "${packageRootDir}" must be absolute`);
     } else if (!existsSync(packageRootDir)) {
-      throw new Error(`packageRootDir "${packageRootDir}" does not exist`);
+      exitWithError(`packageRootDir "${packageRootDir}" does not exist`);
     }
 
     // Trim off the end `/` in case it was supplied
@@ -172,7 +173,7 @@ export function getUserRepoSettings(
     let resolvedPackageSettings: PackageSettings;
     if (configFilePath) {
       if (Object.keys(packageSettings).length > 0) {
-        throw new Error(
+        exitWithError(
           `Found ${configFilePath} and package-level settings in ESLint config. Config files and package-level settings cannot be used together.`
         );
       }
@@ -223,7 +224,7 @@ export function getUserPackageSettingsFromConfigFile({
         (e) => `${printParseErrorCode(e.error)} at offset ${String(e.offset)}`
       )
       .join(', ');
-    throw new Error(
+    exitWithError(
       `Failed to parse config file for package ${packageRootDir}: ${formatted}`
     );
   }

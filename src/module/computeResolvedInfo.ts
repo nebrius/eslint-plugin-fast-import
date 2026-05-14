@@ -8,7 +8,7 @@ import type {
   ResolvedPackageInfo,
 } from '../types/resolved.js';
 import { isCodeFile } from '../util/code.js';
-import { InternalError } from '../util/error.js';
+import { exitWithError, exitWithInternalError } from '../util/error.js';
 import {
   getRelativePathFromRoot,
   splitPathIntoSegments,
@@ -63,12 +63,12 @@ export function addResolvedInfoForFile(
   const baseFileInfo = newBasePackageInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!baseFileInfo) {
-    throw new InternalError(`Could not get base file info for ${filePath}`);
+    exitWithInternalError(`Could not get base file info for ${filePath}`);
   }
   if (isCodeFile(filePath)) {
     /* istanbul ignore if */
     if (baseFileInfo.fileType !== 'code') {
-      throw new InternalError(`Mismatched file types for ${filePath}`);
+      exitWithInternalError(`Mismatched file types for ${filePath}`);
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
@@ -109,13 +109,13 @@ export function updateResolvedInfoForFile(
     const baseFileInfo = basePackageInfo.files.get(filePathToUpdate);
     /* istanbul ignore if */
     if (!baseFileInfo) {
-      throw new InternalError(
+      exitWithInternalError(
         `Could not get base file info for ${filePathToUpdate}`
       );
     }
     /* istanbul ignore if */
     if (baseFileInfo.fileType !== 'code') {
-      throw new InternalError(`Mismatched file types for ${filePathToUpdate}`);
+      exitWithInternalError(`Mismatched file types for ${filePathToUpdate}`);
     }
     const resolvedCodeFileDetails: ResolvedCodeFileDetails = {
       fileType: 'code',
@@ -147,7 +147,7 @@ export function deleteResolvedInfoForFile(
   const baseFileInfo = newBasePackageInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!baseFileInfo) {
-    throw new InternalError(`Could not get base file info for ${filePath}`);
+    exitWithInternalError(`Could not get base file info for ${filePath}`);
   }
 
   const filePathsToUpdate = getFileReferences(
@@ -160,14 +160,14 @@ export function deleteResolvedInfoForFile(
 
     /* istanbul ignore if */
     if (!fileDetailsToUpdate) {
-      throw new InternalError(
+      exitWithInternalError(
         'filePathToUpdate missing in resolved package info'
       );
     }
 
     /* istanbul ignore if */
     if (fileDetailsToUpdate.fileType !== 'code') {
-      throw new InternalError('fileDetailsToUpdate is not a code file');
+      exitWithInternalError('fileDetailsToUpdate is not a code file');
     }
 
     // We have to wait to delete the file info until after we're done fetching
@@ -216,7 +216,7 @@ export function computeFolderTree(baseInfo: BasePackageInfo) {
     const basefile = folders.pop();
     /* istanbul ignore if */
     if (!basefile) {
-      throw new InternalError(`Could not get basefile for path ${file}`);
+      exitWithInternalError(`Could not get basefile for path ${file}`);
     }
 
     let currentFolderTreeNode = folderTree;
@@ -265,7 +265,7 @@ function getFileReferences(
     previousResolvedPackageInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!previousResolvedFileEntry) {
-    throw new InternalError(
+    exitWithInternalError(
       `Could not get previous resolved entry for ${filePath}`
     );
   }
@@ -475,7 +475,7 @@ function resolveModuleSpecifier({
     const folderSegments = [...segments];
     /* istanbul ignore if */
     if (!lastSegment) {
-      throw new InternalError(
+      exitWithInternalError(
         `lastSegment for ${absolutishFilePath} is undefined`
       );
     }
@@ -561,7 +561,7 @@ function resolveModuleSpecifier({
           if (numCodeFiles === 1 && candidateExtension) {
             return computeFilePath(basename + candidateExtension);
           }
-          throw new Error(
+          exitWithError(
             `Module specifier ${moduleSpecifier} in file ${filePath} is ambiguous because there is more than one file with this name`
           );
         }

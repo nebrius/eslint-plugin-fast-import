@@ -8,7 +8,7 @@ import type { Ignore } from 'ignore';
 import ignore from 'ignore';
 
 import type { IgnorePattern } from '../settings/settings.js';
-import { InternalError } from './error.js';
+import { exitWithError, exitWithInternalError } from './error.js';
 import { debug } from './logging.js';
 
 type PotentialFile = {
@@ -43,7 +43,7 @@ export function findPackageConfigFile(dir: string): string | undefined {
     return undefined;
   }
   if (configFiles.length > 1) {
-    throw new Error(
+    exitWithError(
       `Multiple import-integrity.config.json(c) files found in ${dir}`
     );
   }
@@ -170,7 +170,7 @@ export async function getFiles(
 const WINDOWS_ABSOLUTE_PATH_REGEX = /^[A-Z]:\\/;
 export function convertToUnixishPath(path: string) {
   if (path.includes('/') && path.includes('\\')) {
-    throw new InternalError(`Path ${path} contains both / and \\`);
+    exitWithInternalError(`Path ${path} contains both / and \\`);
   }
   if (WINDOWS_ABSOLUTE_PATH_REGEX.test(path)) {
     path = path.substring(2);

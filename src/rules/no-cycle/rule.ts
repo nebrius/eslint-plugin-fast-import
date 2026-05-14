@@ -1,7 +1,7 @@
 import { relative } from 'node:path';
 
 import type { AnalyzedPackageInfo } from '../../types/analyzed.js';
-import { InternalError } from '../../util/error.js';
+import { exitWithInternalError } from '../../util/error.js';
 import {
   createRule,
   getESMInfo,
@@ -144,9 +144,7 @@ function computeSccs(packageInfo: AnalyzedPackageInfo): SccData {
           const wIndex = index.get(w);
           /* istanbul ignore if */
           if (vLow === undefined || wIndex === undefined) {
-            throw new InternalError(
-              'Tarjan low/index missing for stacked nodes'
-            );
+            exitWithInternalError('Tarjan low/index missing for stacked nodes');
           }
           lowLink.set(v, Math.min(vLow, wIndex));
         }
@@ -163,7 +161,7 @@ function computeSccs(packageInfo: AnalyzedPackageInfo): SccData {
             popped = sccStack.pop();
             /* istanbul ignore if */
             if (popped === undefined) {
-              throw new InternalError(
+              exitWithInternalError(
                 'Tarjan SCC stack unexpectedly empty while popping component'
               );
             }
@@ -180,7 +178,7 @@ function computeSccs(packageInfo: AnalyzedPackageInfo): SccData {
           const vLow = lowLink.get(v);
           /* istanbul ignore if */
           if (parentLow === undefined || vLow === undefined) {
-            throw new InternalError(
+            exitWithInternalError(
               'Tarjan lowlink missing while propagating to parent'
             );
           }
@@ -277,9 +275,7 @@ function findCyclePath(
     const p = parents.get(cursor);
     /* istanbul ignore if */
     if (p === undefined) {
-      throw new InternalError(
-        `Could not reconstruct cycle path for ${u} → ${v}`
-      );
+      exitWithInternalError(`Could not reconstruct cycle path for ${u} → ${v}`);
     }
     pathFromV.unshift(p);
     cursor = p;

@@ -1,4 +1,4 @@
-import { InternalError } from '../../util/error.js';
+import { exitWithInternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 export const noUnresolvedImports = createRule({
@@ -70,7 +70,7 @@ export const noUnresolvedImports = createRule({
         // Quick sanity check to see if there was a bug
         /* istanbul ignore if */
         if (importEntry.moduleSpecifier?.startsWith('.')) {
-          throw new InternalError(
+          exitWithInternalError(
             `Module specifier ${importEntry.moduleSpecifier} was misclassified as a third party import`
           );
         }

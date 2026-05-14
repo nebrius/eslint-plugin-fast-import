@@ -9,7 +9,7 @@ import type {
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
 import type { ResolvedPackageInfo } from '../types/resolved.js';
-import { InternalError } from '../util/error.js';
+import { exitWithInternalError } from '../util/error.js';
 
 export function computeAnalyzedInfo(
   resolvedPackageInfo: ResolvedPackageInfo
@@ -210,7 +210,7 @@ function linkImportToExport(
 ) {
   /* istanbul ignore if */
   if (importEntry.resolvedModuleType !== 'firstPartyCode') {
-    throw new InternalError(
+    exitWithInternalError(
       `Attempted to link export that is first party to import not marked as first party`
     );
   }
@@ -221,7 +221,7 @@ function linkImportToExport(
     !importEntry.isEntryPoint &&
     !importEntry.isExternallyImported
   ) {
-    throw new InternalError(
+    exitWithInternalError(
       `Attempted to link reexport that is not an entry point or externally imported`
     );
   }
@@ -271,20 +271,17 @@ function analyzeSingleImport({
 
     /* istanbul ignore if */
     if (!targetFileDetails) {
-      throw new InternalError(
-        `File ${currentFile} is missing in package info`,
-        {
-          filePath: originAnalyzedImport.filePath,
-          range: originAnalyzedImport.importEntry.statementNodeRange,
-        }
-      );
+      exitWithInternalError(`File ${currentFile} is missing in package info`, {
+        filePath: originAnalyzedImport.filePath,
+        range: originAnalyzedImport.importEntry.statementNodeRange,
+      });
     }
 
     // Shouldn't happen in practice, but check anyways to make TypeScript happy,
     // plus "shouldn't happen" has a funny way of coming true sometimes
     /* istanbul ignore if */
     if (targetFileDetails.fileType !== 'code') {
-      throw new InternalError(
+      exitWithInternalError(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
           filePath: originAnalyzedImport.filePath,
@@ -474,20 +471,17 @@ function analyzeBarrelImport({
 
     /* istanbul ignore if */
     if (!targetFileDetails) {
-      throw new InternalError(
-        `File ${currentFile} is missing in package info`,
-        {
-          filePath: originAnalyzedImport.filePath,
-          range: originAnalyzedImport.importEntry.statementNodeRange,
-        }
-      );
+      exitWithInternalError(`File ${currentFile} is missing in package info`, {
+        filePath: originAnalyzedImport.filePath,
+        range: originAnalyzedImport.importEntry.statementNodeRange,
+      });
     }
 
     // Shouldn't happen in practice, but check anyways to make TypeScript happy,
     // plus "shouldn't happen" has a funny way of coming true sometimes
     /* istanbul ignore if */
     if (targetFileDetails.fileType !== 'code') {
-      throw new InternalError(
+      exitWithInternalError(
         `moduleType on consumer of ${currentFile} is "code", but file type is "${targetFileDetails.fileType}"`,
         {
           filePath: originAnalyzedImport.filePath,
@@ -519,7 +513,7 @@ function analyzeBarrelImport({
 
   /* istanbul ignore if */
   if (pivotAnalyzedImport.resolvedModuleType !== 'firstPartyCode') {
-    throw new InternalError(
+    exitWithInternalError(
       `Attempted to traverse barrel import that is not first party code`,
       {
         filePath: originAnalyzedImport.filePath,

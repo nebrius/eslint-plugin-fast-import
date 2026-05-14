@@ -18,7 +18,7 @@ import type {
   BasePackageInfo,
 } from '../types/base.js';
 import { getTextForRange, isCodeFile } from '../util/code.js';
-import { InternalError } from '../util/error.js';
+import { exitWithInternalError } from '../util/error.js';
 import { getDependenciesFromPackageJson, getFilesSync } from '../util/files.js';
 import { debug } from '../util/logging.js';
 
@@ -223,19 +223,19 @@ export function updateBaseInfoForFile(
   const previousFileDetails = basePackageInfo.files.get(filePath);
   /* istanbul ignore if */
   if (!isCodeFile(filePath)) {
-    throw new InternalError(
+    exitWithInternalError(
       `updateBaseInfoForFile called for non-code file ${filePath}`
     );
   }
   /* istanbul ignore if */
   if (!previousFileDetails) {
-    throw new InternalError(
+    exitWithInternalError(
       `updateBaseInfoForFile called for file ${filePath} that didn't previously exist`
     );
   }
   /* istanbul ignore if */
   if (previousFileDetails.fileType !== 'code') {
-    throw new InternalError(
+    exitWithInternalError(
       `previous file type was not code for file ${filePath}`
     );
   }
@@ -284,7 +284,7 @@ function getRange(
         return fallBack;
       }
       /* istanbul ignore next */
-      throw new InternalError('Could not get range for import entry');
+      exitWithInternalError('Could not get range for import entry');
     }
     return [start, end];
   }
@@ -346,7 +346,7 @@ function computeFileDetails({
             : entry.importName.name;
         /* istanbul ignore if */
         if (!importName) {
-          throw new InternalError(`importName is undefined`);
+          exitWithInternalError(`importName is undefined`);
         }
         fileDetails.singleImports.push({
           type: 'singleImport',
@@ -376,7 +376,7 @@ function computeFileDetails({
     // Make sure we parsed the text correctly
     /* istanbul ignore if */
     if (result.errors.length || result.program.body.length !== 1) {
-      throw new InternalError(`Error reparsing "${moduleSpecifierText}"`, {
+      exitWithInternalError(`Error reparsing "${moduleSpecifierText}"`, {
         filePath,
         range: [importEntry.moduleRequest.start, importEntry.moduleRequest.end],
       });
@@ -430,12 +430,12 @@ function computeFileDetails({
           const importName = entry.importName.name;
           /* istanbul ignore if */
           if (!importName) {
-            throw new InternalError(`importName is undefined`);
+            exitWithInternalError(`importName is undefined`);
           }
           const exportName = entry.exportName.name;
           /* istanbul ignore if */
           if (!exportName) {
-            throw new InternalError(`exportName is undefined`);
+            exitWithInternalError(`exportName is undefined`);
           }
           fileDetails.singleReexports.push({
             type: 'singleReexport',
@@ -459,7 +459,7 @@ function computeFileDetails({
             : entry.exportName.name;
         /* istanbul ignore if */
         if (!exportName) {
-          throw new InternalError(`exportName is undefined`);
+          exitWithInternalError(`exportName is undefined`);
         }
         fileDetails.exports.push({
           type: 'export',

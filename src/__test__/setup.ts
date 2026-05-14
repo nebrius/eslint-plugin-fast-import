@@ -1,3 +1,4 @@
+import { beforeEach, expect, jest } from '@jest/globals';
 import deepEqual from 'fast-deep-equal';
 import { diff } from 'jest-diff';
 
@@ -5,7 +6,6 @@ import { _testOnlyResetPackageInfo } from '../module/module.js';
 import { _testOnlyResetAllSettings } from '../settings/settings.js';
 import type { AnalyzedPackageInfo } from '../types/analyzed.js';
 import type { BaseESMStatement, BasePackageInfo } from '../types/base.js';
-import { InternalError } from '../util/error.js';
 import { _testOnlyResetFiles } from '../util/files.js';
 import type {
   StrippedAnalyzedFileDetails,
@@ -127,7 +127,7 @@ function toMatchSpec<
         const formattedDiff = diff(expected, actualStripped);
         /* istanbul ignore if */
         if (!formattedDiff) {
-          throw new InternalError('formattedDiff is undefined');
+          throw new Error('formattedDiff is undefined');
         }
         return formattedDiff;
       }
@@ -252,7 +252,25 @@ expect.extend({
   },
 });
 
+// Production code uses `exitWithError` / `exitWithInternalError` (which call
+// `console.error` then `process.exit(1)`) instead of throwing, so that oxlint
+// can't swallow plugin failures. Under test we shim those into a throw whose
+// message is the original error message, so existing `toThrow(...)` assertions
+// keep working.
+let lastConsoleError = '';
+jest.spyOn(console, 'error').mockImplementation((msg: unknown) => {
+  // `exitWithInternalError` calls console.error twice (message then stack);
+  // keep the first, which is what tests assert on.
+  if (!lastConsoleError) lastConsoleError = String(msg);
+});
+jest.spyOn(process, 'exit').mockImplementation((() => {
+  const message = lastConsoleError;
+  lastConsoleError = '';
+  throw new Error(message);
+}) as never);
+
 beforeEach(() => {
+  lastConsoleError = '';
   _testOnlyResetAllSettings();
   _testOnlyResetPackageInfo();
   _testOnlyResetFiles();

@@ -1,6 +1,6 @@
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
-import { InternalError } from '../../util/error.js';
+import { exitWithInternalError } from '../../util/error.js';
 import { createRule, getESMInfo, getLocFromRange } from '../util.js';
 
 type ImportDeclaration = TSESTree.ImportDeclaration | TSESTree.ImportExpression;
@@ -63,7 +63,7 @@ export const requireNodePrefix = createRule({
             ) as ImportDeclaration | ReexportDeclaration;
             /* istanbul ignore if */
             if (!('raw' in sourceNode.source)) {
-              throw new InternalError(
+              exitWithInternalError(
                 `Property "raw" is missing in sourceNode.source`
               );
             }
