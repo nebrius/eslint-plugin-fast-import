@@ -5,6 +5,7 @@ import type {
   AnalyzedDynamicImport,
   AnalyzedExport,
   AnalyzedOtherFileDetails,
+  AnalyzedSideEffectImport,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
@@ -15,6 +16,7 @@ import type {
   BaseDynamicImport,
   BaseExport,
   BaseOtherFileDetails,
+  BaseSideEffectImport,
   BaseSingleImport,
   BaseSingleReexport,
 } from '../types/base.js';
@@ -25,6 +27,7 @@ import type {
   ResolvedDynamicImport,
   ResolvedExport,
   ResolvedOtherFileDetails,
+  ResolvedSideEffectImport,
   ResolvedSingleImport,
   ResolvedSingleReexport,
 } from '../types/resolved.js';
@@ -35,6 +38,7 @@ type StrippedFileDetails<
   SingleImport extends BaseSingleImport,
   BarrelImport extends BaseBarrelImport,
   DynamicImport extends BaseDynamicImport,
+  SideEffectImport extends BaseSideEffectImport,
   Export extends BaseExport,
   SingleReexport extends BaseSingleReexport,
   BarrelReexport extends BaseBarrelReexport,
@@ -45,6 +49,7 @@ type StrippedFileDetails<
       | 'singleImports'
       | 'barrelImports'
       | 'dynamicImports'
+      | 'sideEffectImports'
       | 'exports'
       | 'singleReexports'
       | 'barrelReexports'
@@ -58,6 +63,9 @@ type StrippedFileDetails<
       >;
       dynamicImports: Array<
         Omit<DynamicImport, 'statementNodeRange' | 'reportNodeRange'>
+      >;
+      sideEffectImports: Array<
+        Omit<SideEffectImport, 'statementNodeRange' | 'reportNodeRange'>
       >;
       exports: Array<Omit<Export, 'statementNodeRange' | 'reportNodeRange'>>;
       singleReexports: Array<
@@ -74,6 +82,7 @@ export type StrippedBaseFileDetails = StrippedFileDetails<
   BaseSingleImport,
   BaseBarrelImport,
   BaseDynamicImport,
+  BaseSideEffectImport,
   BaseExport,
   BaseSingleReexport,
   BaseBarrelReexport
@@ -85,6 +94,7 @@ export type StrippedResolvedFileDetails = StrippedFileDetails<
   ResolvedSingleImport,
   ResolvedBarrelImport,
   ResolvedDynamicImport,
+  ResolvedSideEffectImport,
   ResolvedExport,
   ResolvedSingleReexport,
   ResolvedBarrelReexport
@@ -150,6 +160,7 @@ export type StrippedAnalyzedFileDetails = StrippedFileDetails<
   },
   AnalyzedBarrelImport,
   AnalyzedDynamicImport,
+  AnalyzedSideEffectImport,
   Omit<
     AnalyzedExport,
     'importedBy' | 'barrelImportedBy' | 'externallyImportedBy'

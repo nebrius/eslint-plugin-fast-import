@@ -394,5 +394,29 @@ ruleTester.run('no-restricted-imports', noRestrictedImports, {
         },
       ],
     },
+    {
+      code: `import './b';`,
+      filename: FILE_A,
+      errors: [
+        {
+          messageId: 'restrictedImport',
+          data: { message: `${FILE_A} is denied from importing ./b` },
+        },
+      ],
+      settings: {
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+      },
+      options: [
+        {
+          rules: [
+            {
+              type: 'first-party',
+              filepath: './b.ts',
+              denied: ['./a.ts'],
+            },
+          ],
+        },
+      ],
+    },
   ],
 });

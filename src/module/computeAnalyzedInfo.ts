@@ -46,6 +46,7 @@ export function computeAnalyzedInfo(
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     };
@@ -114,6 +115,12 @@ export function computeAnalyzedInfo(
         ...importDetails,
       });
     }
+
+    for (const importDetails of fileDetails.sideEffectImports) {
+      analyzedFileInfo.sideEffectImports.push({
+        ...importDetails,
+      });
+    }
   }
 
   // Now that we have placeholder values for each entry, we're ready to
@@ -125,6 +132,8 @@ export function computeAnalyzedInfo(
     }
 
     // First, analyze all imports
+    // Note: we don't analyze side effect imports, since there is no imported
+    // symbol to correlate to an export
     for (const importDetails of fileDetails.singleImports) {
       analyzeSingleImport({
         originAnalyzedImport: {

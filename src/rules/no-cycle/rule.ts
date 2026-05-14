@@ -58,6 +58,7 @@ function getOutgoingEdges(
     ...fileDetails.singleReexports,
     ...fileDetails.barrelImports,
     ...fileDetails.barrelReexports,
+    ...fileDetails.sideEffectImports,
   ]) {
     if (
       // Type imports/reexports are erased at compile time, so they cannot
@@ -349,11 +350,17 @@ export const noCycle = createRule<Options, MessageIds>({
     // report, matching the previous rule's behavior.
     const reportedTargets = new Set<string>();
 
+    // We intentionally skip dynamic imports because they are always safe to
+    // import in a cycle, since they're guaranteed to happen after the entire
+    // file is done loading (and thus can't cause a deadlock), but they're the
+    // only type of import this is true of. Side effect imports can still cause
+    // deadlock issues though, especially if they modify globalThis.
     for (const importEntry of [
       ...fileInfo.singleImports,
       ...fileInfo.singleReexports,
       ...fileInfo.barrelImports,
       ...fileInfo.barrelReexports,
+      ...fileInfo.sideEffectImports,
     ]) {
       if (
         ('isTypeImport' in importEntry && importEntry.isTypeImport) ||

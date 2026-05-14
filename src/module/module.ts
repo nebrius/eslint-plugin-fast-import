@@ -13,6 +13,7 @@ import type {
   AnalyzedBarrelReexport,
   AnalyzedDynamicImport,
   AnalyzedPackageInfo,
+  AnalyzedSideEffectImport,
   AnalyzedSingleImport,
   AnalyzedSingleReexport,
 } from '../types/analyzed.js';
@@ -251,6 +252,7 @@ export function initializePackage({
     numImports += fileDetails.singleImports.length;
     numImports += fileDetails.barrelImports.length;
     numImports += fileDetails.dynamicImports.length;
+    numImports += fileDetails.sideEffectImports.length;
     numExports += fileDetails.exports.length;
     numReexports += fileDetails.singleReexports.length;
     numReexports += fileDetails.barrelReexports.length;
@@ -621,6 +623,17 @@ export function updateCacheForFile({
           ...analyzedFileInfo.dynamicImports[i],
           ...resolvedFileInfo.dynamicImports[i],
         } as AnalyzedDynamicImport;
+      }
+
+      for (let i = 0; i < baseFileInfo.sideEffectImports.length; i++) {
+        resolvedFileInfo.sideEffectImports[i] = {
+          ...resolvedFileInfo.sideEffectImports[i],
+          ...baseFileInfo.sideEffectImports[i],
+        };
+        analyzedFileInfo.sideEffectImports[i] = {
+          ...analyzedFileInfo.sideEffectImports[i],
+          ...resolvedFileInfo.sideEffectImports[i],
+        } as AnalyzedSideEffectImport;
       }
 
       for (let i = 0; i < baseFileInfo.singleReexports.length; i++) {

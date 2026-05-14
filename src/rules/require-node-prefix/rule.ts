@@ -44,6 +44,7 @@ export const requireNodePrefix = createRule({
       ...fileInfo.singleImports,
       ...fileInfo.barrelImports,
       ...fileInfo.dynamicImports,
+      ...fileInfo.sideEffectImports,
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {

@@ -31,7 +31,7 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": ["${workspaceRoot}/node_modules/.bin/eslint"],
-      "args": ["-c", "eslint.config.mjs", "**/*.{ts,tsx,mts,js,jsx,mjs}"],
+      "args": ["-c", "eslint.perf.fast-import.config.mjs", "**/*.{ts,tsx,mts,js,jsx,mjs}"],
       "cwd": "/Users/bryan/Projects/next.js",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"

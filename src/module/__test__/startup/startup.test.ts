@@ -62,6 +62,7 @@ it('Updates cache when a new file is added', () => {
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
       exports: [

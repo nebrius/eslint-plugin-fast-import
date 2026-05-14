@@ -71,5 +71,16 @@ console.log(_testOnlyHelper);
         },
       },
     },
+    {
+      code: `import './__test__/b';\n`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTestImports' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 });

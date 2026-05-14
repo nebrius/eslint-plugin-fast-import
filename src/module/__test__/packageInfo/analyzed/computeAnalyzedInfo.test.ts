@@ -124,6 +124,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
     },
   ],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [
     {
@@ -152,6 +153,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [
@@ -189,6 +191,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [
     {
       type: 'export',
@@ -239,6 +242,7 @@ const EXPECTED_CYCLE_FILE_A: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [
     {
       type: 'singleReexport',
@@ -267,6 +271,7 @@ const EXPECTED_CYCLE_FILE_B: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [
     {
       type: 'singleReexport',
@@ -295,6 +300,7 @@ const EXPECTED_CYCLE_FILE_C: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [
     {
       type: 'singleReexport',
@@ -322,6 +328,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [
     {
       type: 'export',
@@ -371,6 +378,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [
     {
@@ -442,6 +450,7 @@ const EXPECTED_FILE_F: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [
     {
@@ -483,6 +492,7 @@ const EXPECTED_FILE_G: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [
@@ -703,6 +713,26 @@ it('Computes analyzed info for a package with a named barrel reexport of a first
 
 it('Computes analyzed info for a package with a dynamic import', () => {
   const packageRootDir = join(getDirname(), 'project', 'dynamic-import');
+  expect(() =>
+    computeAnalyzedInfo(
+      computeResolvedInfo(
+        computeBaseInfo({
+          packageRootDir,
+          packageName: 'test',
+          wildcardAliases: {},
+          fixedAliases: {},
+          ignorePatterns: [],
+          ignoreOverridePatterns: [],
+          getEntryPointSpecifier: () => undefined,
+          isExternallyImportedCheck: () => false,
+        })
+      )
+    )
+  ).not.toThrow();
+});
+
+it('Computes analyzed info for a package with a side-effect import', () => {
+  const packageRootDir = join(getDirname(), 'project', 'side-effect-import');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(

@@ -41,6 +41,7 @@ export function computeResolvedInfo(
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     };
@@ -79,6 +80,7 @@ export function addResolvedInfoForFile(
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     };
@@ -126,6 +128,7 @@ export function updateResolvedInfoForFile(
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     };
@@ -185,6 +188,7 @@ export function deleteResolvedInfoForFile(
       singleImports: [],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     };
@@ -286,6 +290,7 @@ function getFileReferences(
       ...candidateFileDetails.singleImports,
       ...candidateFileDetails.barrelImports,
       ...candidateFileDetails.dynamicImports,
+      ...candidateFileDetails.sideEffectImports,
       ...candidateFileDetails.singleReexports,
       ...candidateFileDetails.barrelReexports,
     ].some(
@@ -305,6 +310,7 @@ function getFileReferences(
       ...previousResolvedFileEntry.singleImports,
       ...previousResolvedFileEntry.barrelImports,
       ...previousResolvedFileEntry.dynamicImports,
+      ...previousResolvedFileEntry.sideEffectImports,
       ...previousResolvedFileEntry.singleReexports,
       ...previousResolvedFileEntry.barrelReexports,
     ].some(
@@ -380,6 +386,25 @@ function populateFileDetails(
       isTypeImport: false,
     });
     resolvedCodeFileDetails.dynamicImports.push({
+      ...importDetails,
+      ...resolvedModuleSpecifier,
+    });
+  }
+
+  // Resolve side effect imports
+  for (const importDetails of baseCodeFileDetails.sideEffectImports) {
+    // Lack of a module specifier means this is a dynamic import with a
+    // non-static, which we can't analyze, so we skip it
+    if (!importDetails.moduleSpecifier) {
+      continue;
+    }
+    const resolvedModuleSpecifier = resolveModuleSpecifier({
+      basePackageInfo,
+      filePath,
+      moduleSpecifier: importDetails.moduleSpecifier,
+      isTypeImport: false,
+    });
+    resolvedCodeFileDetails.sideEffectImports.push({
       ...importDetails,
       ...resolvedModuleSpecifier,
     });

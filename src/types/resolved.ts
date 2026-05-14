@@ -6,6 +6,7 @@ import type {
   BaseExport,
   BaseOtherFileDetails,
   BasePackageInfo,
+  BaseSideEffectImport,
   BaseSingleImport,
   BaseSingleReexport,
 } from './base.js';
@@ -68,6 +69,7 @@ export type Resolved =
 export type ResolvedSingleImport = BaseSingleImport & Resolved;
 export type ResolvedBarrelImport = BaseBarrelImport & Resolved;
 export type ResolvedDynamicImport = BaseDynamicImport & Resolved;
+export type ResolvedSideEffectImport = BaseSideEffectImport & Resolved;
 
 /* Exports */
 
@@ -95,6 +97,7 @@ export type ResolvedCodeFileDetails = Omit<
   singleImports: ResolvedSingleImport[];
   barrelImports: ResolvedBarrelImport[];
   dynamicImports: ResolvedDynamicImport[];
+  sideEffectImports: ResolvedSideEffectImport[];
   singleReexports: ResolvedSingleReexport[];
   barrelReexports: ResolvedBarrelReexport[];
 };

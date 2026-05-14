@@ -92,22 +92,77 @@ function toMatchSpec<
       };
     }
 
+    if (expectedFileDetails.exports.length !== fileDetails.exports.length) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong number of exports.` +
+          `Expected ${expectedFileDetails.exports.length.toString()}, received ${fileDetails.exports.length.toString()}`,
+        pass: false,
+      };
+    }
     if (
-      expectedFileDetails.exports.length !== fileDetails.exports.length ||
-      expectedFileDetails.singleImports.length !==
-        fileDetails.singleImports.length ||
-      expectedFileDetails.barrelImports.length !==
-        fileDetails.barrelImports.length ||
-      expectedFileDetails.dynamicImports.length !==
-        fileDetails.dynamicImports.length ||
       expectedFileDetails.singleReexports.length !==
-        fileDetails.singleReexports.length ||
-      expectedFileDetails.barrelReexports.length !==
-        fileDetails.barrelReexports.length
+      fileDetails.singleReexports.length
     ) {
       return {
         message: () =>
-          `file path ${filePath} has the wrong number of exports, singleImports, barrelImports, dynamicImports, singleReexports, or barrelReexports`,
+          `file path ${filePath} has the wrong number of singleReexports.` +
+          `Expected ${expectedFileDetails.singleReexports.length.toString()}, received ${fileDetails.singleReexports.length.toString()}`,
+        pass: false,
+      };
+    }
+    if (
+      expectedFileDetails.barrelReexports.length !==
+      fileDetails.barrelReexports.length
+    ) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong number of barrelReexports.` +
+          `Expected ${expectedFileDetails.singleReexports.length.toString()}, received ${fileDetails.singleReexports.length.toString()}`,
+        pass: false,
+      };
+    }
+    if (
+      expectedFileDetails.singleImports.length !==
+      fileDetails.singleImports.length
+    ) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong number of singleImports.` +
+          `Expected ${expectedFileDetails.singleImports.length.toString()}, received ${fileDetails.singleImports.length.toString()}`,
+        pass: false,
+      };
+    }
+    if (
+      expectedFileDetails.barrelImports.length !==
+      fileDetails.barrelImports.length
+    ) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong number of barrelImports.` +
+          `Expected ${expectedFileDetails.barrelImports.length.toString()}, received ${fileDetails.barrelImports.length.toString()}`,
+        pass: false,
+      };
+    }
+    if (
+      expectedFileDetails.dynamicImports.length !==
+      fileDetails.dynamicImports.length
+    ) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong number of dynamicImports.` +
+          `Expected ${expectedFileDetails.dynamicImports.length.toString()}, received ${fileDetails.dynamicImports.length.toString()}`,
+        pass: false,
+      };
+    }
+    if (
+      expectedFileDetails.sideEffectImports.length !==
+      fileDetails.sideEffectImports.length
+    ) {
+      return {
+        message: () =>
+          `file path ${filePath} has the wrong number of sideEffectImports.` +
+          `Expected ${expectedFileDetails.sideEffectImports.length.toString()}, received ${fileDetails.sideEffectImports.length.toString()}`,
         pass: false,
       };
     }
@@ -193,6 +248,7 @@ expect.extend({
         ...fileDetails.singleImports,
         ...fileDetails.barrelImports,
         ...fileDetails.dynamicImports,
+        ...fileDetails.sideEffectImports,
       ]) {
         if ('importedBy' in exportEntry) {
           for (let i = 0; i < exportEntry.importedBy.length; i++) {

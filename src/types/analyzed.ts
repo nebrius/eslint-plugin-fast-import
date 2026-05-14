@@ -6,6 +6,7 @@ import type {
   ResolvedExport,
   ResolvedOtherFileDetails,
   ResolvedPackageInfo,
+  ResolvedSideEffectImport,
   ResolvedSingleImport,
   ResolvedSingleReexport,
 } from './resolved.js';
@@ -179,6 +180,7 @@ type AnalyzedExportBase = {
 export type AnalyzedSingleImport = ResolvedSingleImport & AnalyzedImportBase;
 export type AnalyzedBarrelImport = ResolvedBarrelImport;
 export type AnalyzedDynamicImport = ResolvedDynamicImport;
+export type AnalyzedSideEffectImport = ResolvedSideEffectImport;
 
 /* Exports */
 
@@ -209,6 +211,7 @@ export type AnalyzedCodeFileDetails = Omit<
   singleImports: AnalyzedSingleImport[];
   barrelImports: AnalyzedBarrelImport[];
   dynamicImports: AnalyzedDynamicImport[];
+  sideEffectImports: AnalyzedSideEffectImport[];
   singleReexports: AnalyzedSingleReexport[];
   barrelReexports: AnalyzedBarrelReexport[];
 };

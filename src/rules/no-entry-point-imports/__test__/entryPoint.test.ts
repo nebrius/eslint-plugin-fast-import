@@ -13,8 +13,10 @@ const TEST_PACKAGE_DIR = join(getDirname(), 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
 const FILE_C = join(TEST_PACKAGE_DIR, 'c.ts');
+const FILE_E = join(TEST_PACKAGE_DIR, 'e.ts');
 const FILE_B_CONTENTS = readFileSync(FILE_B, 'utf-8');
 const FILE_C_CONTENTS = readFileSync(FILE_C, 'utf-8');
+const FILE_E_CONTENTS = readFileSync(FILE_E, 'utf-8');
 
 const FILE_A_ENTRY_POINT = getRelativePathFromRoot(TEST_PACKAGE_DIR, FILE_A);
 
@@ -46,6 +48,13 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
     {
       code: FILE_C_CONTENTS,
       filename: FILE_C,
+      settings: {
+        'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
+      },
+    },
+    {
+      code: FILE_E_CONTENTS,
+      filename: FILE_E,
       settings: {
         'import-integrity': { packageRootDir: TEST_PACKAGE_DIR, mode: 'fix' },
       },
@@ -91,6 +100,30 @@ ruleTester.run('no-entry-point-imports', noEntryPointImports, {
     {
       code: FILE_C_CONTENTS,
       filename: FILE_C,
+      errors: [{ messageId: 'noEntryPointImports' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+          externallyImportedFiles: [FILE_A_ENTRY_POINT],
+        },
+      },
+    },
+    {
+      code: FILE_E_CONTENTS,
+      filename: FILE_E,
+      errors: [{ messageId: 'noEntryPointImports' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+          entryPointFiles: { '.': `./${FILE_A_ENTRY_POINT}` },
+        },
+      },
+    },
+    {
+      code: FILE_E_CONTENTS,
+      filename: FILE_E,
       errors: [{ messageId: 'noEntryPointImports' }],
       settings: {
         'import-integrity': {

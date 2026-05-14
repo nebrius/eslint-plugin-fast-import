@@ -43,7 +43,10 @@ export const noEntryPointImports = createRule({
       }
     }
 
-    for (const importEntry of fileInfo.barrelImports) {
+    for (const importEntry of [
+      ...fileInfo.barrelImports,
+      ...fileInfo.sideEffectImports,
+    ]) {
       if (!importEntry.resolvedModulePath) {
         continue;
       }

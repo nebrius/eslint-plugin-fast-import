@@ -59,5 +59,17 @@ ruleTester.run('require-node-prefix', requireNodePrefix, {
       },
       output: `import fs from "node:fs";`,
     },
+    {
+      code: `import 'fs';`,
+      filename: FILE_A,
+      errors: [{ messageId: 'missingNodePrefix' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+      output: `import 'node:fs';`,
+    },
   ],
 });

@@ -39,6 +39,7 @@ const EXPECTED_FILE_A: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [
     {
       type: 'export',
@@ -96,6 +97,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   ],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [],
@@ -140,6 +142,7 @@ it('Updates package cache when a new file is added', () => {
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [],
     singleReexports: [],
     barrelReexports: [],
@@ -184,6 +187,7 @@ export type Two = string;
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [
       {
         type: 'export',
@@ -250,6 +254,7 @@ export type Two = string;
     ],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [],
     singleReexports: [],
     barrelReexports: [],
@@ -292,6 +297,7 @@ it('Updates package cache in bulk for a code file', () => {
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [],
     singleReexports: [],
     barrelReexports: [],
@@ -329,6 +335,7 @@ it('Updates package cache in bulk for a code file', () => {
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [],
     singleReexports: [],
     barrelReexports: [],

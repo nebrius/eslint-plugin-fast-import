@@ -177,6 +177,15 @@ ruleTester.run('prefer-alias-imports (always)', preferAliasImports, {
       errors: [{ messageId: 'preferAlias' }],
       output: `export * from '@/components/Button';\n`,
     },
+    // Side-effect import
+    {
+      code: `import './components/Button';\n`,
+      filename: FILE_INDEX,
+      settings: WILDCARD_SETTINGS,
+      options: [{ mode: 'always' }],
+      errors: [{ messageId: 'preferAlias' }],
+      output: `import '@/components/Button';\n`,
+    },
   ],
 });
 

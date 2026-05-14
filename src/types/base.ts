@@ -114,6 +114,25 @@ export type BaseDynamicImport = BaseESMStatement & {
   moduleSpecifier: string | undefined;
 };
 
+export type BaseSideEffectImport = BaseESMStatement & {
+  /**
+   * A top-level type that can be used at runtime to see what type of ESM
+   * statement this is
+   */
+  type: 'sideEffectImport';
+
+  /**
+   * Where we're importing from, e.g. `'./bar'` in:
+   *
+   * ```
+   * import './bar';
+   * ```
+   *
+   * Note: if the value is not a string literal, then this value is `undefined`
+   */
+  moduleSpecifier: string | undefined;
+};
+
 /* Exports */
 
 export type BaseExport = BaseESMStatement & {
@@ -308,6 +327,7 @@ export type BaseCodeFileDetails = {
   singleImports: BaseSingleImport[];
   barrelImports: BaseBarrelImport[];
   dynamicImports: BaseDynamicImport[];
+  sideEffectImports: BaseSideEffectImport[];
   singleReexports: BaseSingleReexport[];
   barrelReexports: BaseBarrelReexport[];
 };

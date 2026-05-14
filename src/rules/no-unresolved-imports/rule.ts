@@ -39,6 +39,7 @@ export const noUnresolvedImports = createRule({
       ...fileInfo.singleImports,
       ...fileInfo.barrelImports,
       ...fileInfo.dynamicImports,
+      ...fileInfo.sideEffectImports,
     ]) {
       // First, check if this is a third party dependency, and ensure that the dependency is listed
       // in a package.json

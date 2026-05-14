@@ -106,5 +106,17 @@ ruleTester.run('no-node-builtins', noNodeBuiltins, {
         },
       },
     },
+    // Side-effect import of builtin
+    {
+      code: `import 'node:fs';`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noNodeBuiltins' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 });

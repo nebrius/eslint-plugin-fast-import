@@ -143,6 +143,7 @@ const EXPECTED_FILE_A: StrippedResolvedFileDetails = {
   ],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -163,6 +164,7 @@ const EXPECTED_FILE_INDEX: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -183,6 +185,7 @@ const EXPECTED_FILE_B: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -203,6 +206,7 @@ const EXPECTED_FILE_C: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -234,6 +238,7 @@ const EXPECTED_FILE_D_DECLARATION: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -254,6 +259,7 @@ const EXPECTED_FILE_D: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -274,6 +280,7 @@ const EXPECTED_FILE_E: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -301,6 +308,7 @@ const EXPECTED_FILE_F_DECLARATION: StrippedResolvedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -331,6 +339,7 @@ const EXPECTED_FILE_F: StrippedResolvedFileDetails = {
   ],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -412,6 +421,7 @@ it('Adds and updates resolved info for files', () => {
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     },
@@ -463,6 +473,7 @@ it('Adds and updates resolved info for files', () => {
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     },
@@ -524,6 +535,7 @@ it('Resolves Vite-style imports with query strings', () => {
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     },
@@ -583,6 +595,7 @@ it('Resolves an extensionless import when one code file shares a basename with a
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
     },

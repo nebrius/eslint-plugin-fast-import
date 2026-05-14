@@ -90,6 +90,7 @@ Version 3 introduces a fairly large refactor of the plugin's configuration syste
   - The previous DFS-with-memoization implementation was order-dependent: when files in overlapping cycles were linted in certain orders, edges shared between cycles could be silently dropped from the report
   - Cycle detection now uses Tarjan's strongly-connected-components algorithm, which is order-independent by construction
   - The `no-cycle` error message now includes a representative cycle path (e.g. `a.ts → b.ts → c.ts → a.ts`); long cycles are truncated for readability
+- Side effect imports (e.g. `import 'foo'`) are now properly tracked. Notably, this means they are considered in cycle detection and can surface cycles that were previously missed
 
 ## 2.2.1 (4/9/2026)
 

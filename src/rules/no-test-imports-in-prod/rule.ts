@@ -38,6 +38,7 @@ export const noTestImportsInProd = createRule({
       ...fileInfo.singleImports,
       ...fileInfo.barrelImports,
       ...fileInfo.dynamicImports,
+      ...fileInfo.sideEffectImports,
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {

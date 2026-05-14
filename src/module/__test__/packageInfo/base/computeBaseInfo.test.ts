@@ -208,6 +208,7 @@ const EXPECTED_FILE_A: StrippedBaseFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -308,6 +309,12 @@ const EXPECTED_FILE_B: StrippedBaseFileDetails = {
       moduleSpecifier: './a.js',
     },
   ],
+  sideEffectImports: [
+    {
+      type: 'sideEffectImport',
+      moduleSpecifier: './a.js',
+    },
+  ],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -328,6 +335,7 @@ const EXPECTED_FILE_C: StrippedBaseFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [
     {
       type: 'singleReexport',
@@ -416,6 +424,7 @@ const EXPECTED_FILE_D: StrippedBaseFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   singleReexports: [],
   barrelReexports: [],
 };
@@ -495,6 +504,7 @@ it('Adds, modifies, and deletes a new file', () => {
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [],
       barrelReexports: [],
       exports: [],
@@ -534,6 +544,7 @@ it('Adds, modifies, and deletes a new file', () => {
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [
         {
           type: 'singleReexport',
@@ -590,6 +601,7 @@ it('Adds, modifies, and deletes a new file', () => {
       ],
       barrelImports: [],
       dynamicImports: [],
+      sideEffectImports: [],
       singleReexports: [
         {
           type: 'singleReexport',

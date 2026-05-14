@@ -10,6 +10,9 @@ const PROJECT_ROOT = join(getDirname(), 'project');
 const SIMPLE_PACKAGE_DIR = join(PROJECT_ROOT, 'simple');
 const FILE_A = join(SIMPLE_PACKAGE_DIR, 'a.ts');
 
+const SIMPLE_SIDE_EFFECT_PACKAGE_DIR = join(PROJECT_ROOT, 'simple-side-effect');
+const SIDE_EFFECT_FILE_A = join(SIMPLE_SIDE_EFFECT_PACKAGE_DIR, 'a.ts');
+
 // Fixture for the order-independence regression. The graph contains two
 // overlapping cycles that share an edge, which is the minimal case where the
 // previous DFS-with-memoization implementation produced different cycle
@@ -35,7 +38,11 @@ const ruleTester = new RuleTester({
   languageOptions: {
     parserOptions: {
       projectService: {
-        allowDefaultProject: ['simple/*.ts*', 'overlapping/*.ts*'],
+        allowDefaultProject: [
+          'simple/*.ts*',
+          'simple-side-effect/*.ts*',
+          'overlapping/*.ts*',
+        ],
       },
       tsconfigRootDir: PROJECT_ROOT,
     },
@@ -98,6 +105,25 @@ export const a = 10;`,
       settings: {
         'import-integrity': {
           packageRootDir: SIMPLE_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+
+    // Side-effect imports (`import 'foo'` with no specifiers) participate in
+    // cycle detection too, since they can deadlock or mutate shared state at
+    // load time. This mirrors the simple a -> c -> b -> a fixture above but
+    // uses side-effect imports for every edge.
+    {
+      code: `import './c';
+
+export const a = 10;
+`,
+      filename: SIDE_EFFECT_FILE_A,
+      errors: [{ messageId: 'noCycles' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: SIMPLE_SIDE_EFFECT_PACKAGE_DIR,
           mode: 'fix',
         },
       },

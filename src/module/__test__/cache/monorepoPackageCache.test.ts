@@ -86,6 +86,7 @@ const EMPTY_CODE_FILE: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [],
@@ -193,6 +194,7 @@ function buildExpectedFileA({
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [
       {
         type: 'export',
@@ -271,6 +273,7 @@ const EXPECTED_FILE_B: StrippedAnalyzedFileDetails = {
   ],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [],
@@ -283,6 +286,7 @@ const EXPECTED_FILE_C: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [
     {
       type: 'export',
@@ -306,6 +310,7 @@ const EXPECTED_FILE_D: StrippedAnalyzedFileDetails = {
   singleImports: [FILE_D_SINGLE_IMPORT],
   barrelImports: [],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [],
@@ -318,6 +323,7 @@ const EXPECTED_FILE_E: StrippedAnalyzedFileDetails = {
   singleImports: [],
   barrelImports: [FILE_E_BARREL_IMPORT],
   dynamicImports: [],
+  sideEffectImports: [],
   exports: [],
   singleReexports: [],
   barrelReexports: [],
@@ -865,6 +871,7 @@ export type Two = AlsoOne;
     singleImports: [FILE_C_SINGLE_IMPORT],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     exports: [
       {
         type: 'export',

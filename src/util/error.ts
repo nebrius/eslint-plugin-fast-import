@@ -36,6 +36,7 @@ export function exitWithError(message: string): never {
   process.exit(1);
 }
 
+/* istanbul ignore next */
 export function exitWithException(error: unknown): never {
   if (error instanceof Error) {
     console.error(error.message);

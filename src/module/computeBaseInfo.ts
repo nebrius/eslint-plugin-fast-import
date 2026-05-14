@@ -157,6 +157,8 @@ function hasFileChanged(
       previousFileDetails.barrelImports.length ||
     updatedFileDetails.dynamicImports.length !==
       previousFileDetails.dynamicImports.length ||
+    updatedFileDetails.sideEffectImports.length !==
+      previousFileDetails.sideEffectImports.length ||
     updatedFileDetails.singleReexports.length !==
       previousFileDetails.singleReexports.length ||
     updatedFileDetails.barrelReexports.length !==
@@ -204,6 +206,13 @@ function hasFileChanged(
   for (let i = 0; i < previousFileDetails.dynamicImports.length; i++) {
     const previousImport = previousFileDetails.dynamicImports[i];
     const updatedImport = updatedFileDetails.dynamicImports[i];
+    if (hasEsmEntryChanged(previousImport, updatedImport)) {
+      return true;
+    }
+  }
+  for (let i = 0; i < previousFileDetails.sideEffectImports.length; i++) {
+    const previousImport = previousFileDetails.sideEffectImports[i];
+    const updatedImport = updatedFileDetails.sideEffectImports[i];
     if (hasEsmEntryChanged(previousImport, updatedImport)) {
       return true;
     }
@@ -313,6 +322,7 @@ function computeFileDetails({
     singleImports: [],
     barrelImports: [],
     dynamicImports: [],
+    sideEffectImports: [],
     singleReexports: [],
     barrelReexports: [],
     exports: [],
@@ -326,6 +336,19 @@ function computeFileDetails({
   for (const importEntry of result.module.staticImports) {
     const statementNodeRange = getRange(importEntry);
     const moduleSpecifier = importEntry.moduleRequest.value;
+
+    // Check if this is a side effect import, aka we don't import any symbols
+    if (importEntry.entries.length === 0) {
+      fileDetails.sideEffectImports.push({
+        type: 'sideEffectImport',
+        statementNodeRange,
+        reportNodeRange: statementNodeRange,
+        moduleSpecifier,
+      });
+      continue;
+    }
+
+    // Otherwise we continue processing regular imports
     for (const entry of importEntry.entries) {
       const reportNodeRange = getRange(entry);
       const importAlias = entry.localName.value;

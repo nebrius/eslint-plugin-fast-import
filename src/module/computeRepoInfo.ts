@@ -45,6 +45,9 @@ export function computeRepoInfo(
       if (fileDetails.fileType !== 'code') {
         continue;
       }
+
+      // We don't include side effect imports because they don't import any
+      // actual exports, and thus we should make any of them as exprted
       for (const importEntry of [
         ...fileDetails.singleImports,
         ...fileDetails.barrelImports,

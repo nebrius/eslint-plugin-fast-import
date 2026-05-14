@@ -135,6 +135,7 @@ export const preferAliasImports = createRule<
       ...fileInfo.singleImports,
       ...fileInfo.barrelImports,
       ...fileInfo.dynamicImports,
+      ...fileInfo.sideEffectImports,
       ...fileInfo.singleReexports,
       ...fileInfo.barrelReexports,
     ]) {
