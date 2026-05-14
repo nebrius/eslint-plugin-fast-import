@@ -1,4 +1,3 @@
 - Proper docs site on GitHub Pages
-- Add Oxlint perf comparison
 - Convert Changelog into upgrade guide
 - Add srcRoot package option

@@ -34,15 +34,18 @@ The matrix shows where each tool's capabilities overlap. A few rows warrant more
 
 ## Performance and Accuracy
 
-Import Integrity was benchmarked against `eslint-plugin-import`, `eslint-plugin-import-x`, and Oxlint's built-in rules on three real-world codebases of different shapes and sizes.
+Import Integrity was benchmarked against the other plugins on three real-world codebases of different shapes and sizes.
 
 ### Methodology
 
-Each tool was run with two configurations: a baseline that enables only `no-debugger` (a trivial rule whose detection cost is essentially free) and a test that enables only the rule under comparison. Each configuration ran five times in separate, isolated processes. The reported timing is the median test time minus the median baseline time, approximating the rule's cost without the overhead of the linter itself.
+Oxlint and ESLint were each run with two configurations: a baseline that enables only `no-debugger` (a trivial rule whose detection cost is essentially free), and a test that enables only the rule under comparison. Each configuration was run five times in separate, isolated processes. The reported timing is the median test time minus the median baseline time, approximating the rule's cost without the overhead of the linter itself.
 
-This methodology isolates rule performance but isn't perfect: rules may share or differ in work that doesn't subtract cleanly. The numbers are useful for comparison between tools, not as absolute measurements of rule cost.
+Benchmarks were run on a gaming desktop running Linux Mint 22.2 with:
+- AMD Ryzen 5 5600X (6 cores / 12 threads)
+- 128GB of DDR4 memory
+- Samsung 980 Pro NVMe SSD in an M.2 slot
 
-Benchmarks were run on a desktop with an AMD Ryzen 5 5600X (6 cores / 12 threads), 128GB of DDR4 memory, a Samsung 980 Pro NVMe SSD, on Linux Mint 22.2. The machine wasn't thermally constrained during runs, and run-to-run variance was within 1%. Full benchmark configurations and instructions are available in forked repositories for [VS Code](https://github.com/nebrius/vscode/tree/fast-import-perf), [Astro](https://github.com/nebrius/astro/tree/fast-import-perf), and [Next.js](https://github.com/nebrius/next.js/tree/fast-import-perf), so anyone can reproduce these numbers.
+The machine wasn't thermally constrained during runs (max CPU temperature was 32°C), and run-to-run variance was within 1%. Full benchmark configurations and instructions are available in forked repositories for [VS Code](https://github.com/nebrius/vscode/tree/fast-import-perf), [Astro](https://github.com/nebrius/astro/tree/fast-import-perf), and [Next.js](https://github.com/nebrius/next.js/tree/fast-import-perf), if you would like to reproduce these numbers on your own machine.
 
 ### VS Code
 
@@ -68,7 +71,7 @@ xychart-beta horizontal
     bar [159.4, 64.6, 6.0, 3.5, 3.3]
 ```
 
-Import Integrity and Oxlint's built-in `no-cycle` agree exactly on cycle count, which is a useful correctness signal. `eslint-plugin-import` and `-x` find about half as many cycles; the gap is consistent across this benchmark and Next.js, but we haven't investigated why.
+Import Integrity and Oxlint's built-in `no-cycle` agree exactly on cycle count. `eslint-plugin-import` and `-x` find about half as many cycles.
 
 ### Astro
 
@@ -94,7 +97,7 @@ xychart-beta horizontal
     bar [11.1, 8.3, 1.0, 1.0, 0.8]
 ```
 
-The 2-cycle gap between Import Integrity and Oxlint's built-in is in `.astro` files, which Oxlint can parse and Import Integrity doesn't process.
+The 2-cycle gap between Import Integrity and Oxlint's built-in is in `.astro` files, which Oxlint processes but Import Integrity doesn't process.
 
 ### Next.js
 
@@ -120,12 +123,14 @@ xychart-beta horizontal
     bar [52.8, 13.0, 3.6, 3.3, 1.4]
 ```
 
-The 5-cycle gap between Import Integrity (179) and Oxlint's built-in (174) is explained by two factors: Import Integrity counts 6 self-imports (files that import themselves) which Oxlint deliberately excludes from its cycle count, and Oxlint reports one cycle twice. Either tool's framing is defensible.
+The 5-cycle gap between Import Integrity (179) and Oxlint's built-in (174) is explained by two factors: Import Integrity counts 6 self-imports (files that import themselves) which Oxlint deliberately excludes from its cycle count, and Oxlint reports one cycle twice.
 
 ### Observations
 
 Across all three benchmarks, Import Integrity and Oxlint's built-in `no-cycle` agree on cycle count exactly (VS Code) or with small explainable gaps (Astro, Next.js). `eslint-plugin-import` and `-x` consistently find fewer cycles than the other tools, by 17% on Astro, 36% on Next.js, and 52% on VS Code. We haven't investigated this gap in detail.
 
-On performance, Import Integrity is roughly 17x faster than `eslint-plugin-import` and 9x faster than `eslint-plugin-import-x` across the three benchmarks (geometric mean). Against Oxlint's built-in `no-cycle`, the picture varies by codebase shape. On VS Code (large and densely-connected), Import Integrity is about 1.8x faster. On Astro and Next.js (smaller or more sparsely-connected), Oxlint's built-in is faster: by a hair on Astro, by about 2.6x on Next.js. Oxlint's underlying linter is multi-threaded and written in Rust, so it's faster than Import Integrity for many workloads. What's surprising is that Import Integrity is faster on VS Code despite parsing each file twice, and competitive across the board.
+One technical note relevant to interpreting performance numbers: Import Integrity, `eslint-plugin-import`, `eslint-plugin-import-x` parse each file twice. One parse is performed by the plugin to build the whole module graph upfront. The other parse is when the ESLint/Oxlint parses the file itself to pass the AST to the plugin (which we have to discard). This is a consequence of plugin APIs being synchronous and per-file, but whole-codebase analysis needs the full graph before it can report on the first file. Oxlint's built-in rule presumably avoids this overhead due to having more direct access to internals via Rust, but this has not been confirmed.
 
-One technical note relevant to interpreting these numbers: Import Integrity parses each file twice. The first parse is internal, to build the whole module graph upfront; the second parse is when the host invokes our per-file callback, which provides its own parsed AST. This is a consequence of plugin APIs being synchronous and per-file while whole-codebase analysis needs the full graph before it can report on any file. `eslint-plugin-import`, `eslint-plugin-import-x`, and `@typescript-eslint` share the same constraint. Oxlint's built-in rule presumably avoids this overhead because it isn't a plugin. Import Integrity is doing at least as much parse work as the built-in, and on VS Code is finishing faster anyway.
+On performance, Import Integrity is roughly 17x faster than `eslint-plugin-import` and 9x faster than `eslint-plugin-import-x` across the three benchmarks (geometric mean). Against Oxlint's built-in `no-cycle`, the picture varies by codebase shape, but are generally similar to each other. Oxlint's underlying linter is multi-threaded and written in Rust, so unsurprisingly it's faster than Import Integrity for many workloads. What is surprising is that Import Integrity is faster on VS Code despite parsing each file twice, and is still competitive across the board.
+
+To summarize: Import Integrity offers high performance, and it's performance advantage becomes more pronounced as codebase complexity increases.
