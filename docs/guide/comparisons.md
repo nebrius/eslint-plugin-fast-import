@@ -45,7 +45,7 @@ Benchmarks were run on a gaming desktop running Linux Mint 22.2 with:
 - 128GB of DDR4 memory
 - Samsung 980 Pro NVMe SSD in an M.2 slot
 
-The machine wasn't thermally constrained during runs (max CPU temperature was 32°C), and run-to-run variance was within 1%. Full benchmark configurations and instructions are available in forked repositories for [VS Code](https://github.com/nebrius/vscode/tree/fast-import-perf), [Astro](https://github.com/nebrius/astro/tree/fast-import-perf), and [Next.js](https://github.com/nebrius/next.js/tree/fast-import-perf), if you would like to reproduce these numbers on your own machine.
+The machine wasn't thermally constrained during runs (max CPU temperature was 61°C, well below the 90°C throttling threshold), and run-to-run variance was within 1%. Full benchmark configurations and instructions are available in forked repositories for [VS Code](https://github.com/nebrius/vscode/tree/fast-import-perf), [Astro](https://github.com/nebrius/astro/tree/fast-import-perf), and [Next.js](https://github.com/nebrius/next.js/tree/fast-import-perf), if you would like to reproduce these numbers on your own machine.
 
 ### VS Code
 
