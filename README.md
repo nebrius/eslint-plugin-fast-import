@@ -3,7 +3,7 @@
 [![npm version](https://badge.fury.io/js/import-integrity-lint.svg)](https://badge.fury.io/js/import-integrity-lint) ![ci workflow](https://github.com/nebrius/import-integrity-lint/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/import-integrity-lint/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/import-integrity-lint)
 
 > [!WARNING]
-> This README documents version 3 of Import Integrity. Version 3 is currently under active development on main and is a significant rewrite. To see documentation for the current production version, see the [version 2.2.1 docs](https://github.com/nebrius/import-integrity-lint/tree/2.2.1).
+> This README documentsImport Integrity, an upcoming rebrand and rewrite of Fast Import, aka Fast Import v3. Version 3 is currently under active development on main and is a significant rewrite. To see documentation for the current production version, see the [version 2.2.1 docs](https://github.com/nebrius/import-integrity-lint/tree/2.2.1).
 
 - [Installation](#installation)
 - [Rules](#rules)
