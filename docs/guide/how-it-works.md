@@ -88,6 +88,6 @@ Details for the information computed in this stage can be viewed in the [types f
 
 This fourth phase collects the import graph analysis from each package in the monorepo to analyze cross-package imports and exports. This phase produces data similar to the third phase, except it utilizes information from the third phase to short-circuit many of its computations.
 
-This phase is the least performance intensive, representing less than 1% of total run time. On the VS Code Codebase, this phase takes 13ms, out of 2.6 seconds total. Similar to the third phase, this phase is not easily cached, but any caching would have negligible impact on total performance.
+This phase is the least performance intensive, representing less than 1% of total run time. On the VS Code Codebase, this phase takes 13ms, out of 2.6 seconds total. Similar to the third phase, this phase is not easily cached, but any caching would have negligible effect on total performance.
 
 Details for the information computed in this stage can also be viewed in the [types file for analyzed information](https://github.com/nebrius/import-integrity-lint/blob/main/src/types/analyzed.ts). Data populated by this phase have comments indicating that they are phase 4 data.
