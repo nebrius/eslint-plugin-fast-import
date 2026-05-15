@@ -66,6 +66,8 @@ Example:
 }
 ```
 
+For details on how to structure your config when using `monorepoRootDir`, see the [Monorepos](../guide/monorepos.html) guide.
+
 ## `mode`
 
 Type: `'auto' | 'one-shot' | 'fix' | 'editor'`
@@ -94,10 +96,13 @@ Example:
       mode: 'editor',
     },
   },
-},
+}
 ```
 
-Note: when running in ESLint currently, VS Code, Cursor, and Windsurf are the only supported editors. Oxlint is reliably detected regardless of editor as long as the `--lsp` flag is passed to Oxlint. If you use ESLint and would like support for another editor, open an issue and I'll work with you to get the information needed to support your editor. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use the derived config.
+Notes:
+
+- ESLint editor detection works by inspecting the running process for the VS Code, Cursor, or Windsurf executable. These are currently the only editors detected automatically. If you use ESLint with a different editor, open an issue and I'll work with you to add support. In the meantime, you can create a config that extends your standard config, set the mode to `editor`, and tell your editor to use the derived config.
+- Oxlint is reliably detected regardless of editor as long as the `--lsp` flag is passed to Oxlint.
 
 ## `editorUpdateRate`
 
