@@ -1,3 +1,2 @@
 - Proper docs site on GitHub Pages
 - Convert Changelog into upgrade guide
-- Add srcRoot package option

@@ -6,10 +6,17 @@ outline: deep
 
 # How it works
 
-Import Integrity works by using a four phase pipelined algorithm that is very cache friendly. Each phase is isolated from the other phases so that they can each implement a caching layer that is tuned for that specific phase.
+Import Integrity has to analyze how every file in a codebase imports and exports relative to every other file, while running through a per-file synchronous plugin API. This page describes the four-phase pipelined algorithm it uses to do this efficiently, and how caching at each phase keeps re-runs fast.
 
-Import Integrity also includes an editor mode that tightly integrates with the caching layers. This mode keeps its internal datastructures and settings up to date with file system changes, even if the LSP server never sees those changes.
+Import Integrity also includes an editor mode that tightly integrates with the caching layers. This mode keeps its internal data structures and settings up to date with file system changes, even if the LSP server never sees those changes.
 
+The four phases are:
+1. Parsing each file's imports and exports into an analysis-friendly form
+2. Resolving module specifiers to actual files
+3. Traversing the resulting graph to link imports to their ultimate exports
+4. Connecting cross-package data for monorepo analysis
+
+Each phase has different caching characteristics, which is why they're isolated. See [Performance and Accuracy](./comparisons.md#performance-and-accuracy) for benchmark numbers showing how this design plays out in practice.
 
 ## Phase 1: AST analysis
 
@@ -20,7 +27,7 @@ For example, the import statement `import { foo } from './bar'` gets boiled down
 ```js
 {
   importAlias: 'foo',
-  importName: 'foo'
+  importName: 'foo',
   importType: 'single',
   isTypeImport: false,
   moduleSpecifier: './bar',
@@ -29,15 +36,15 @@ For example, the import statement `import { foo } from './bar'` gets boiled down
 }
 ```
 
-This phase is by far the most performance intensive of the four phases due to file reads and AST parsing, comprising over 80% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This correlation is exploited at the caching layer, because changes to any one file do not result in cache invalidations of any other file.
+This phase is by far the most performance intensive of the four phases due to file reads and AST parsing, comprising about 80% of total execution time on a cold cache. At the same time, information computed for each file is completely independent of information in any other file. This independence is exploited at the caching layer: changes to any one file do not invalidate the cache for any other file.
 
-For example, this phase takes 1.26 seconds on a cold cache running on the VS Code codebase on my laptop, out of 1.52 seconds total. Subsequent file edits in the editor only take ~1ms due to the high cacheability of this phase.
+For example, this phase takes 2.1 seconds on a cold cache running on the VS Code codebase out of 2.6 seconds total, when run on the same system used in [the comparisons benchmarks](./comparisons.md#performance-and-accuracy). Subsequent file edits in the editor only take ~1ms due to the high cacheability of this phase.
 
 Details for the information computed in this stage can be viewed in the [types file for base information](https://github.com/nebrius/import-integrity-lint/blob/main/src/types/base.ts).
 
 ## Phase 2: Module specifier resolution
 
-This phase goes through every import/reexport entry from the first phase and resolves the module specifier. This phase is the second most performance intensive phase, taking around 15% of total execution time. On VS Code, this phase takes 0.21 seconds, out of 1.52 seconds total.
+This phase goes through every import/reexport entry from the first phase and resolves the module specifier. This phase is the second most performance intensive phase, taking around 15% of total execution time. On VS Code, this phase takes 0.4 seconds, out of 2.6 seconds total.
 
 Import Integrity uses its own high-performance resolver to achieve this speed. It resolves module specifiers to one of three types in a very specific order:
 
@@ -45,9 +52,9 @@ Import Integrity uses its own high-performance resolver to achieve this speed. I
 2. A file within the current `packageRootDir`, aka first party
 3. A third party module
 
-Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_. By following this flow, we never have to touch the file system to do any resolving! This makes Import Integrity's resolution algorithm considerably faster than other resolvers, and is even as fast as algorithms written in Rust despite being written in JavaScript. In specific, by moving third party module resolution to the end, we can "default" to imports being third party imports and never have to look at `node_modules`.
+Module specifiers are resolved in this order because we already have a list of built-in modules and first party files _in memory_, meaning we never have to touch the filesystem. By skipping file I/O, resolving is significantly faster than it would be otherwise, and is even on par with [OXC's Rust-based resolver](https://github.com/oxc-project/oxc-resolver) despite being written in JavaScript. We can get away with this because we move third party module resolution to the end, and can "default" to imports being third party imports if not found in memory (the only case where file-system lookups are usually needed).
 
-In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files is impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measurably improve performance.
+In this phase, changes to one file may impact the information in another file. Nonetheless, determining which files are impacted is relatively straightforward. In addition, changes typically do not impact a large number of other file's caches. This means we can still use caching in this phase to measurably improve performance.
 
 Details for the information computed in this stage can be viewed in the [types file for resolved information](https://github.com/nebrius/import-integrity-lint/blob/main/src/types/resolved.ts).
 
@@ -55,7 +62,7 @@ Details for the information computed in this stage can be viewed in the [types f
 
 This third phase traverses the import/export graph created in the second phase to determine the ultimate source of all imports/reexports. In addition, we store other useful pieces of information, such as collecting a list of every file that imports a specific export, and linking each import statement to a specific export statement.
 
-This phase is the second least performance intensive, representing only about 3% of total run time. On the VS Code Codebase, this phase takes 48ms, out of 1.52 seconds total.
+This phase is the second least performance intensive, representing only about 4% of total run time. On the VS Code Codebase, this phase takes 100ms, out of 2.6 seconds total.
 
 Linking imports to exports can be non-trivial, especially if there are a lot of reexports. For example:
 
@@ -81,6 +88,6 @@ Details for the information computed in this stage can be viewed in the [types f
 
 This fourth phase collects the import graph analysis from each package in the monorepo to analyze cross-package imports and exports. This phase produces data similar to the third phase, except it utilizes information from the third phase to short-circuit many of its computations.
 
-This phase is the least performance intensive, representing less than 1% of total run time. On the VS Code Codebase, this phase takes 10ms, out of 1.52 seconds total. Similar to the third phase, this phase is not easily cached, but any caching would have negligible impact on total performance.
+This phase is the least performance intensive, representing less than 1% of total run time. On the VS Code Codebase, this phase takes 13ms, out of 2.6 seconds total. Similar to the third phase, this phase is not easily cached, but any caching would have negligible impact on total performance.
 
 Details for the information computed in this stage can also be viewed in the [types file for analyzed information](https://github.com/nebrius/import-integrity-lint/blob/main/src/types/analyzed.ts). Data populated by this phase have comments indicating that they are phase 4 data.
