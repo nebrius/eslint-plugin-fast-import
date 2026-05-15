@@ -71,7 +71,7 @@ Entry points are inferred automatically if your `package.json` declares `exports
 - Your `tsconfig.json` declares both `outDir` and `rootDir`, in which case Import Integrity maps the compiled output paths (what `package.json` points to) back to the source paths (what Import Integrity needs).
 - The file `package.json` points to has a `.ts` extension, in which case the path is used directly.
 
-If you provide your own `entryPointFiles`, then inferred entry points will be ignored.
+If you provide your own `entryPointFiles`, the inferred entry points are ignored.
 
 ### Use in monorepos
 
@@ -107,11 +107,9 @@ Example:
 
 ### Auto-inference
 
-Two categories of files are auto-included in `externallyImportedFiles`:
+**Config files.** Files matching `/*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are always included as externally imported. This is unconditional and cannot be overridden by user-supplied patterns.
 
-**Config files.** Files matching `/*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are always included and cannot be overridden.
-
-**Next.js routing files.** When Next.js is detected, the appropriate externally-imported patterns are inferred for app router or pages router projects, with or without a `src/` directory. If your project uses both routers, only the app router defaults are inferred. User-supplied patterns cause inferred Next.js defaults to be ignored.
+**Next.js routing files.** When Next.js is detected, the appropriate externally-imported patterns are inferred for app router or pages router projects, with or without a `src/` directory. If your project uses both routers, only the app router defaults are inferred. If you provide your own `externallyImportedFiles` patterns, the inferred Next.js defaults are ignored.
 
 ### Use with `entryPointFiles`
 
