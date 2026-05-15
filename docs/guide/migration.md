@@ -71,7 +71,7 @@ export default defineConfig([
 
 Key shape changes:
 - Settings now live in `settings['import-integrity']` in a separate config object
-- `importIntegrityPlugin.configs.recommended` is spread as a static object, not called as a function
+- `importIntegrityPlugin.configs.recommended` is included statically like other ESLint plugins, not called as a function
 - `rootDir` is renamed to `packageRootDir` (see Step 4)
 
 ## Step 4: Rename `rootDir` to `packageRootDir`
