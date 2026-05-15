@@ -105,13 +105,13 @@ Example:
 }
 ```
 
-### Auto-handling
+### Auto-inference
 
 Two categories of files are auto-included in `externallyImportedFiles`:
 
 **Config files.** Files matching `/*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are always included and cannot be overridden.
 
-**Next.js routing files.** When Next.js is detected, the appropriate externally-imported patterns are pre-applied for app router or pages router projects, with or without a `src/` directory. If your project uses both routers, only the app router defaults are auto-applied. User-supplied patterns cause inferred Next.js defaults to be ignored.
+**Next.js routing files.** When Next.js is detected, the appropriate externally-imported patterns are inferred for app router or pages router projects, with or without a `src/` directory. If your project uses both routers, only the app router defaults are inferred. User-supplied patterns cause inferred Next.js defaults to be ignored.
 
 ### Use with `entryPointFiles`
 
