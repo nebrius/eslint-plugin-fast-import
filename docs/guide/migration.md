@@ -165,7 +165,7 @@ entryPointFiles: {
 
 The old per-symbol filtering (the `['default', 'metadata']` array) is gone. All exports from the listed file are now treated as entry points.
 
-In most cases, by the time you've worked through steps 1 and 2 above, `entryPointFiles` is empty or unnecessary and you can omit it entirely.
+In most cases, by the time you've worked through the bullets above, `entryPointFiles` is empty or unnecessary and you can omit it entirely.
 
 ## Step 7: Convert `externallyImported` to `externallyImportedFiles`
 
@@ -184,7 +184,7 @@ externallyImported: {
 
 1. **Remove config-file entries.** Files matching `/*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are now automatically treated as externally imported. If your old `externallyImported` listed any config files explicitly, remove them.
 
-2. **Check whether Next.js auto-detection covers it.** Import Integrity now auto-detects Next.js projects and pre-applies appropriate `externallyImportedFiles` patterns for app router or pages router projects (with or without a `src/` directory). If your old entries were Next.js app router or pages router patterns (`page.tsx`, `layout.tsx`, etc.), they can be removed entirely. If your project uses both routers, only the app router defaults are auto-applied; you'll still need to list pages router patterns explicitly in bullet 2 below.
+2. **Check whether Next.js auto-detection covers it.** Import Integrity now auto-detects Next.js projects and pre-applies appropriate `externallyImportedFiles` patterns for app router or pages router projects (with or without a `src/` directory). If your old entries were Next.js app router or pages router patterns (`page.tsx`, `layout.tsx`, etc.), they can be removed entirely. If your project uses both routers, only the app router defaults are auto-applied; you'll still need to list pages router patterns explicitly in the bullet below.
 
 3. **For anything that remains, write it as a gitignore-style pattern array.** The new shape is a flat array of gitignore-style patterns. Leading `/` anchors to the package root:
 
