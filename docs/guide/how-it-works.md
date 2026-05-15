@@ -8,8 +8,6 @@ outline: deep
 
 Import Integrity has to analyze how every file in a codebase imports and exports relative to every other file, while running through a per-file synchronous plugin API. This page describes the four-phase pipelined algorithm it uses to do this efficiently, and how caching at each phase keeps re-runs fast.
 
-Import Integrity also includes an editor mode that tightly integrates with the caching layers. This mode keeps its internal data structures and settings up to date with file system changes, even if the LSP server never sees those changes.
-
 The four phases are:
 1. Parsing each file's imports and exports into an analysis-friendly form
 2. Resolving module specifiers to actual files
@@ -17,6 +15,8 @@ The four phases are:
 4. Connecting cross-package data for monorepo analysis
 
 Each phase has different caching characteristics, which is why they're isolated. See [Performance and Accuracy](./comparisons.md#performance-and-accuracy) for benchmark numbers showing how this design plays out in practice.
+
+Import Integrity includes an editor mode that tightly integrates with the caching layers at each phase of the algorithm, and also polls the file system for changes. This mode keeps import/export information up to date, even if the LSP server never sees those changes, ensuring you never get stale lint errors and keeping your editor snappy.
 
 ## Phase 1: AST analysis
 

@@ -66,7 +66,7 @@ export default withMermaid(
               { text: 'Comparisons', link: '/guide/comparisons' },
               { text: 'How it works', link: '/guide/how-it-works' },
               { text: 'Creating rules', link: '/guide/creating-rules' },
-              { text: 'FAQ', link: '/guide/faq' },
+              { text: 'FAQ and caveats', link: '/guide/faq' },
             ],
           },
         ],
