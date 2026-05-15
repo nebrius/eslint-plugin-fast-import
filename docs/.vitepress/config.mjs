@@ -67,6 +67,7 @@ export default withMermaid(
               { text: 'How it works', link: '/guide/how-it-works' },
               { text: 'Creating rules', link: '/guide/creating-rules' },
               { text: 'FAQ and caveats', link: '/guide/faq' },
+              { text: 'Fast Import migration', link: '/guide/migration' },
             ],
           },
         ],

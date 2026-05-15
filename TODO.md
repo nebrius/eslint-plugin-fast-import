@@ -1,2 +1,3 @@
 - Proper docs site on GitHub Pages
-- Convert Changelog into upgrade guide
+- Different README that doesn't repeat docs site
+- Fork repo?
