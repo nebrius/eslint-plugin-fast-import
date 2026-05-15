@@ -117,12 +117,11 @@ Two categories of files are auto-included in `externallyImportedFiles`:
 
 If a file is part of your package's public API rather than imported by an external system, use [`entryPointFiles`](#entrypointfiles) instead. For a fuller discussion of when to use which, see [the FAQ entry on choosing between them](../guide/faq.html#when-should-i-use-entrypointfiles-vs-externallyimportedfiles).
 
-
 ## `ignorePatterns`
 
-Type : `string[]`
+Type: `string[]`
 
-Default; `[]`
+Default: `[]`
 
 A list of ignore patterns, using the format used by `.gitignore` files. Files that match these patterns are excluded from analysis.
 
@@ -146,9 +145,9 @@ Example:
 
 ## `ignoreOverridePatterns`
 
-Type : `string[]`
+Type: `string[]`
 
-Default; `[]`
+Default: `[]`
 
 A list of "inverse" ignore patterns that negate other ignore patterns, using the format used by `.gitignore` files. This pattern is useful if your `.gitignore` file includes generated code that is needed for proper import/export analysis.
 
@@ -169,11 +168,11 @@ Example:
 
 ## `testFilePatterns`
 
-type: `string[]`
+Type: `string[]`
 
 Default: `[ '.test.', '.spec', '__test__', '__tests__', '__fixture__' ]`
 
-Several rules take into account whether or not a given file is a "test" file or a "production" file. This option allows you to define extra patterns in addition to the default three to indicate other test files. Note that globs are not currently supported.
+Several rules take into account whether or not a given file is a "test" file or a "production" file. This option allows you to define extra patterns in addition to the default to indicate other test files. Note that globs are not currently supported.
 
 Example:
 
