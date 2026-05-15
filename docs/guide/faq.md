@@ -24,6 +24,18 @@ If Import Integrity's resolution algorithm does not support your use case, pleas
 
 For more information, see [Phase 2: Module specifier resolution](./how-it-works.html#phase-2-module-specifier-resolution).
 
+### When should I use `entryPointFiles` vs `externallyImportedFiles`?
+
+Both options exempt files from unused-export analysis, but they signal different things about *who* imports the file's exports:
+
+- Use [`entryPointFiles`](../configuration/package-level-options.html#entrypointfiles) for files that are part of your package's public API — exports intended to be consumed by other code that imports your package (whether external consumers or other packages in your monorepo).
+
+- Use [`externallyImportedFiles`](../configuration/package-level-options.html#externallyimportedfiles) for files whose exports are imported by an external system such as a framework — for example, Next.js's `page.tsx` files, which the Next.js runtime imports directly without your code referencing them.
+
+The distinction matters most in monorepos. The [`no-unused-package-exports`](../rules/no-unused-package-exports/) rule (enabled in `monorepoRecommended`) flags entry-point exports that aren't imported by any other package in the monorepo. It doesn't flag externally-imported exports, since by definition those are consumed outside the monorepo.
+
+In single-package setups, these options are the same in practice: both options exempt the file's exports from unused-export checking. Using the right one keeps your intent clear and makes the monorepo check work correctly if you ever add this package to a monorepo.
+
 ## Caveats
 
 ### All first-party code must live inside `packageRootDir`

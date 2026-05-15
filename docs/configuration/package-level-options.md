@@ -39,26 +39,55 @@ Example:
 
 Note: patterns with a single star after them will match any symbols/files that start with the symbol/filepath.
 
-## `externallyImportedFiles` / `entryPointFiles`
+## `entryPointFiles`
 
-Type: `string[]` / `Record<string, string>`
+Type: `Record<string, string>`
 
-Default (`entryPointFiles`): package.json entry points under certan conditions, else `{}`
+Default: package.json entry points under certain conditions, else `{}`
 
-Default (`externallyImportedFiles`): Next.js values if Next.js is detected, else `[]`
+Files representing your package's public API — the set of files whose exports are intended to be consumed by code outside this package. All exports from any matching file are treated as entry points and are exempted from unused-export analysis within the package.
 
-Files specified with `externallyImportedFiles` or `entryPointFiles` define files whose exports are not imported by code inside of the codebase, but instead by code outside of the codebase. All exports from any matching file are treated as entry points or externally imported. The difference between the two is:
+`entryPointFiles` is specified as an object of subpaths to files, like the `exports` field in `package.json` (without conditions), including the use of `*` as a wildcard. See the [Node.js package entry points documentation](https://nodejs.org/api/packages.html#package-entry-points) for more info. Note the [limitation on entry-point patterns with more than one wildcard](../guide/faq.html#entry-point-patterns-with-multiple-wildcards-are-not-supported).
 
-- `entryPointFiles` are intended to represent entry points in a library intended for use by others, aka a "public API."
-- `externallyImportedFiles` are intended to represent exports intended for use by a specific framework, e.g. the default export in a `page.tsx` file in a Next.js application.
+Example:
 
-In practice, this distinction only matters in monorepos. In the monorepo case, this categorization is necessary to determine if a package's entry points are intended to be used by other packages in the monorepo to, and thus should be analyzed for usage for the [no-unused-package-exports](../rules/no-unused-package-exports/) rule. See [Monorepos](../guide/monorepos) for more info.
+```js
+{
+  settings: {
+    'import-integrity': {
+      packageRootDir: import.meta.dirname,
+      entryPointFiles: {
+        '.': './src/index.ts',
+      },
+    },
+  },
+}
+```
 
-Entry points/externally imported files enable other useful checks such as the [no-entry-point-imports](../rules/no-entry-point-imports/) rule.
+### Auto-inference
 
-`externallyImportedFiles` are specified as an array of strings using the same ignore syntax you find in `.gitignore`, including the use of `/` to anchor an entry to the root of the package, and the use of `*` and `**` as wildcards.
+Entry points are inferred automatically if your `package.json` declares `exports` or `main` and one of the following is true:
 
-`entryPointFiles` are specified as an object of subpaths to files, like you use in the `exports` field in package.json without conditions, including the use of `*` as a wildcard. See the [Node.js package entry points](https://nodejs.org/api/packages.html#package-entry-points) documentation for more info, and note the limitation on [entry point file patterns with more than one wildcard](https://github.com/nebrius/import-integrity-lint/blob/main/README.md#entrypoint-file-patterns-with-more-than-one-wildcard-are-not-supported).
+- Your `tsconfig.json` declares both `outDir` and `rootDir`, in which case Import Integrity maps the compiled output paths (what `package.json` points to) back to the source paths (what Import Integrity needs).
+- The file `package.json` points to has a `.ts` extension, in which case the path is used directly.
+
+If you provide your own `entryPointFiles`, then inferred entry points will be ignored.
+
+### Use in monorepos
+
+Entry points are particularly meaningful in monorepos. The [no-unused-package-exports](../rules/no-unused-package-exports/) rule (enabled in `monorepoRecommended`) checks whether entry-point exports are imported by any other package in the monorepo, flagging those that are not. See [Monorepos](../guide/monorepos.html) for more info.
+
+If you're not sure whether to use `entryPointFiles` or `externallyImportedFiles`, see [the FAQ entry on choosing between them](../guide/faq.html#when-should-i-use-entrypointfiles-vs-externallyimportedfiles).
+
+## `externallyImportedFiles`
+
+Type: `string[]`
+
+Default: Next.js values if Next.js is detected, else `[]`
+
+Files whose exports are imported by external systems such as frameworks, not by code inside the codebase. All exports from any matching file are treated as externally imported and are exempted from unused-export analysis.
+
+`externallyImportedFiles` is specified as an array of strings using `.gitignore`-style syntax, including `/` to anchor an entry to the root of the package, and `*` and `**` as wildcards.
 
 Example:
 
@@ -71,21 +100,23 @@ Example:
         '/src/app/**/page.tsx',
         '/src/app/**/layout.tsx',
       ],
-      entryPointFiles: {
-        '.': './src/index.ts',
-      },
     },
   },
 }
 ```
 
-Import Integrity inspects your app and applies a few common defaults for `externallyImportedFiles` and `entryPointFiles`.
+### Auto-handling
 
-Entry points will be autopopulated for you if you populate the `exports`/`main` field in `package.json` _and_ you define `outDir` and `rootDir` in your `tsconfig.json`. Import Integrity requires both in order to be confident that we can and should map from the compiled output (what `package.json` points to) back to the source code (what Import Integrity needs).
+Two categories of files are auto-included in `externallyImportedFiles`:
 
-Config files matching `/*.config.*` are always included in `externallyImportedFiles` and cannot be overridden.
+**Config files.** Files matching `/*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are always included and cannot be overridden.
 
-Next.js is autodetected by Import Integrity, and the appropriate externally imported patterns are pre-applied. Import Integrity takes into account whether you are using a `src` directory or not, and whether app router patterns should be applied. When app router patterns are applied, pages router patterns are included too because Next.js allows both routers to coexist. If you supply your own patterns, they will override these defaults.
+**Next.js routing files.** When Next.js is detected, the appropriate externally-imported patterns are pre-applied for app router or pages router projects, with or without a `src/` directory. If your project uses both routers, only the app router defaults are auto-applied. User-supplied patterns cause inferred Next.js defaults to be ignored.
+
+### Use with `entryPointFiles`
+
+If a file is part of your package's public API rather than imported by an external system, use [`entryPointFiles`](#entrypointfiles) instead. For a fuller discussion of when to use which, see [the FAQ entry on choosing between them](../guide/faq.html#when-should-i-use-entrypointfiles-vs-externallyimportedfiles).
+
 
 ## `ignorePatterns`
 
