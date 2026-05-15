@@ -136,7 +136,7 @@ Also update any ESLint disable comments in source code:
 
 ## Step 6: Convert `entryPoints` to `entryPointFiles`
 
-The shape of this option changed. The old form mapped file paths to lists of exported symbols. The new form uses a `package.json` `exports`-style subpath map.
+The shape of this option changed, and the new version often doesn't need to be set at all.
 
 **Old:**
 
@@ -147,7 +147,15 @@ entryPoints: {
 }
 ```
 
-**New:**
+**Migration logic, in priority order:**
+
+1. **Check whether the inference covers it.** Import Integrity now infers entry points automatically in some cases. The inference applies if your package.json declares exports or main and one of the following is true: your tsconfig.json declares both outDir and rootDir, or the file package.json points to has a .ts extension. If either case applies, remove the entry from the new config.
+
+2. **Remove config-file entries.** Files matching `*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are now automatically treated as externally imported. If your old `entryPoints` listed any config files explicitly, remove them.
+
+3. **Move Next.js routing patterns to `externallyImportedFiles`.** The old `./src/app/**/page.tsx` pattern moves to `externallyImportedFiles` (see Step 7), not `entryPointFiles`. Next.js routing exports are externally imported by the framework, not entry points of a public API. If you have Next.js patterns, they likely don't need to be listed explicitly anyway — Next.js auto-detection pre-applies them.
+
+4. **For anything that remains, write it as a subpath map.** The new shape uses a `package.json` `exports`-style subpath map. The subpath (typically `'.'`) is the key and the file path is the value:
 
 ```js
 entryPointFiles: {
@@ -155,16 +163,13 @@ entryPointFiles: {
 }
 ```
 
-Migration logic:
-- The old `./src/app/**/page.tsx` pattern (Next.js routing) moves to `externallyImportedFiles` (see Step 7), not `entryPointFiles`. This is because Next.js routing exports are externally imported by the framework, not entry points of a public API.
-- The old `./src/index.ts` library entry point becomes an entry in the new subpath map, with the subpath (typically `'.'`) as the key and the file path as the value.
-- The old per-symbol filtering (the `['default', 'metadata']` array) is gone. All exports from the listed file are now treated as entry points.
+The old per-symbol filtering (the `['default', 'metadata']` array) is gone. All exports from the listed file are now treated as entry points.
 
-If your old config used `entryPoints` for Next.js patterns specifically, you can likely remove that section entirely — Import Integrity now auto-detects Next.js and pre-applies the appropriate patterns.
+In most cases, by the time you've worked through steps 1 and 2 above, `entryPointFiles` is empty or unnecessary and you can omit it entirely.
 
 ## Step 7: Convert `externallyImported` to `externallyImportedFiles`
 
-The shape of this option changed. The old form mapped file paths to lists of exported symbols (often `/.*/` to mean "all"). The new form is a flat list of gitignore-style file patterns.
+The shape of this option changed, and many entries can likely be removed entirely.
 
 **Old:**
 
@@ -175,21 +180,21 @@ externallyImported: {
 }
 ```
 
-**New:**
+**Migration logic, in priority order:**
+
+1. **Remove config-file entries.** Files matching `/*.config.*` (e.g. `eslint.config.mjs`, `vite.config.ts`, `tailwind.config.js`) are now automatically treated as externally imported. If your old `externallyImported` listed any config files explicitly, remove them.
+
+2. **Check whether Next.js auto-detection covers it.** Import Integrity now auto-detects Next.js projects and pre-applies appropriate `externallyImportedFiles` patterns for app router or pages router projects (with or without a `src/` directory). If your old entries were Next.js app router or pages router patterns (`page.tsx`, `layout.tsx`, etc.), they can be removed entirely. If your project uses both routers, only the app router defaults are auto-applied; you'll still need to list pages router patterns explicitly in bullet 2 below.
+
+3. **For anything that remains, write it as a gitignore-style pattern array.** The new shape is a flat array of gitignore-style patterns. Leading `/` anchors to the package root:
 
 ```js
 externallyImportedFiles: [
   '/index.ts',
-  '/src/app/**/page.tsx',
 ]
 ```
 
-Migration logic:
-- The keys of the old object become entries in the new array
-- The regex values are dropped entirely — the new form treats all exports from listed files as externally imported
-- Patterns now use gitignore syntax (leading `/` anchors to the package root)
-
-If your old config used `externallyImported` for Next.js routing patterns, you can likely remove those entries — Import Integrity auto-detects Next.js and pre-applies them.
+The old per-symbol filtering (the regex values like `/.*/`) is gone. All exports from listed files are now treated as externally imported.
 
 ## Step 8: Remove `requireFileExtensions` from your config
 
@@ -231,7 +236,44 @@ rules: {
 
 If your old config used the `allowNonTestTypeExports` option on `no-unused-exports`, there is no equivalent. Type-only exports are now always ignored by `no-test-only-imports`. Remove the option from your config.
 
-## Step 10: Decide on `require-node-prefix`
+## Step 10: (Optional) Refactor test-only export workarounds
+
+This step is optional and improves code quality but is not required for the upgrade to work.
+
+If your codebase has exports that were previously suppressed with disable pragmas because they're only consumed by tests, you can now mark them explicitly with the `_testOnly` prefix. This is cleaner than disable pragmas and is the supported pattern in Import Integrity.
+
+**Find:**
+
+```js
+// eslint-disable-next-line fast-import/no-unused-exports
+export function helperUsedOnlyByTests() { /* ... */ }
+```
+
+**Replace with:**
+
+```js
+export function _testOnlyHelperUsedOnlyByTests() { /* ... */ }
+```
+
+Then update the import sites in test files to use the new name:
+
+**Find:**
+
+```js
+import { helperUsedOnlyByTests } from './module';
+```
+
+**Replace with:**
+
+```js
+import { _testOnlyHelperUsedOnlyByTests } from './module';
+```
+
+The `_testOnly` prefix tells Import Integrity that this export is intended to be imported only by test files. The `no-test-only-imports` rule (enabled in `recommended`) will flag any non-test file that tries to import a `_testOnly`-prefixed symbol.
+
+**Note for AI agents:** This refactor requires renaming exports and updating import sites across the codebase. The find/replace pattern above is mechanical but the cascade of rename impacts is wide. After completing the renames, run your test suite to verify nothing is broken before proceeding.
+
+## Step 11: Decide on `require-node-prefix`
 
 The `require-node-prefix` rule was previously only enabled in the `all` config. In Import Integrity, it is enabled in `recommended` and may flag new errors in code that imports Node built-ins without the `node:` prefix (e.g. `import 'path'` instead of `import 'node:path'`).
 
@@ -245,9 +287,9 @@ rules: {
 }
 ```
 
-## Step 11: Custom rule helpers (only if you wrote custom rules)
+## Step 12: Custom rule helpers (only if you wrote custom rules)
 
-If you wrote custom lint rules using Import Integrity's helper API, update the call shapes:
+If you wrote custom lint rules using Import Integrity's helper API, the helper function call shapes changed.
 
 **`getESMInfo` return shape changed:**
 
@@ -271,7 +313,7 @@ Settings are now resolved internally.
 
 **`registerUpdateListener` callback signature changed:**
 
-The callback now receives a per-package `packageRootDir` argument rather than nothing. In monorepos, the listener may be invoked once per package.
+The callback now receives a per-package `packageRootDir` argument. In monorepos, the listener may be invoked once per package.
 
 ```js
 // Old
@@ -280,6 +322,12 @@ registerUpdateListener(() => { /* ... */ });
 // New
 registerUpdateListener((packageRootDir) => { /* ... */ });
 ```
+
+**Downstream type changes need human review.**
+
+The data structures returned by these helpers have many additional changes beyond the surface-level renames above (fields renamed, restructured, added, or removed). These changes are too numerous to enumerate here and depend on what your custom rule actually does with the returned data.
+
+If you are an AI agent following this guide, do not attempt to mechanically update custom rule code beyond the surface-level changes shown above. Stop and surface this step to the human user. The TypeScript types are well-documented with JSDoc comments in `src/types/base.ts`, `src/types/resolved.ts`, and `src/types/analyzed.ts` of the [import-integrity-lint repository](https://github.com/nebrius/import-integrity-lint), and should be reviewed together with the custom rule code to update everything correctly.
 
 ## Behavior changes to expect after upgrading
 
@@ -291,15 +339,11 @@ After completing the migration, lint output may differ from the old version in a
 
 **Default ignored folders expanded.** Any folder starting with `.` is now ignored (which subsumes the previous explicit `.git` entry). The folder `out` is now also ignored by default. If you previously relied on linting code in such folders, you'll need to file an issue.
 
-**Config files are auto-treated as externally imported.** Files matching `/*.config.*` are automatically treated as externally imported. If your old config explicitly listed these in `externallyImported`, you can remove those entries.
-
 ## Optional: features available after upgrading
 
 These are new features in Import Integrity that you can adopt at your discretion. None are required for the migration itself.
 
 - **Monorepo root-config mode.** Set `monorepoRootDir` (mutually exclusive with `packageRootDir`) in a single root ESLint or Oxlint config to cover the whole monorepo. See [Monorepos](./monorepos.html) for details.
 - **`.jsonc` config files.** `import-integrity.config.json` and `import-integrity.config.jsonc` are both supported, including comments and trailing commas.
-- **Next.js auto-detection.** When Next.js is detected, appropriate `externallyImportedFiles` patterns for app router, pages router, and mixed-router projects are pre-applied. User-supplied patterns override the defaults.
-- **Entry point inference.** When `package.json` declares `main`/`exports` and `tsconfig.json` declares both `outDir` and `rootDir`, Import Integrity derives `entryPointFiles` automatically from the compiled exports.
 - **New rules.** `no-empty-entry-points`, `no-unnamed-entry-point-exports`, and `no-unused-package-exports` (monorepo-only) are in the recommended configs.
 - **Test-only export prefix.** Non-test files can export symbols prefixed with `_testOnly` to indicate they're only intended for test consumption. See [no-test-only-imports](../rules/no-test-only-imports/) for details.
