@@ -1,0 +1,9 @@
+{
+  "name": "inferred-entry-points-declaration-test",
+  "exports": {
+    ".": "./src/index.ts",
+    "./decl": "./dist/decl.d.ts",
+    "./decl-mts": "./dist/decl.d.mts",
+    "./decl-cts": "./dist/decl.d.cts"
+  }
+}

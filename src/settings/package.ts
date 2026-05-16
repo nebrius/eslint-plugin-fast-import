@@ -43,6 +43,11 @@ export function getPackageJsonSettings(
           parsedExports[key] = value['module-sync'];
         } else if (typeof value.default === 'string') {
           parsedExports[key] = value.default;
+        } else if (typeof value.types === 'string') {
+          // Types are not officially part of the Nodes.js spec, but are
+          // sometimes used for type-only packages where we still want to
+          // analyze their exports for use.
+          parsedExports[key] = value.types;
         } else {
           warn(
             `Could not identify a valid condition for export "${key}" in ${packageJsonPath}. Got ${Object.keys(value).join(', ')} but expected a known Node.js condition`

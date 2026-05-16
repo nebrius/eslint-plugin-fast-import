@@ -21,8 +21,11 @@ it('Parses package.json exports with conditional resolution and main fallback', 
       './require': './r.js',
       './module-sync': './ms.js',
       './default': './d.js',
-      // "types" is intentionally ignored; falls through to "import"
-      './types-ignored': './i.js',
+      // standard Node.js conditions take precedence over "types"
+      './types-fallthrough': './i.js',
+      // "types" is used as a final fallback when no standard Node.js
+      // condition matches (e.g. type-only packages)
+      './types-only': './t.d.ts',
     },
   });
 });

@@ -243,11 +243,17 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
   if (packageJsonExports) {
     for (const [key, value] of Object.entries(packageJsonExports)) {
       // If this is a TypeScript file, we know it's not mapped and can use its
-      // entry directly
+      // entry directly. We have to be careful not to match `.d.ts` files though
+      // since those are compiled artifacts
       if (
-        value.endsWith('.ts') ||
-        value.endsWith('.mts') ||
-        value.endsWith('.cts')
+        (value.endsWith('.ts') ||
+          value.endsWith('.mts') ||
+          value.endsWith('.cts')) &&
+        !(
+          value.endsWith('.d.ts') ||
+          value.endsWith('.d.mts') ||
+          value.endsWith('.d.cts')
+        )
       ) {
         inferredEntryPoints[key] = value;
       }

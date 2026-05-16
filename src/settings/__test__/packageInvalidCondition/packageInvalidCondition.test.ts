@@ -20,7 +20,7 @@ it('Skips and warns on conditional exports with no recognized condition', () => 
 
   expect(warnSpy).toHaveBeenCalledTimes(1);
   expect(warnSpy.mock.calls[0][0]).toContain('"."');
-  expect(warnSpy.mock.calls[0][0]).toContain('types, browser');
+  expect(warnSpy.mock.calls[0][0]).toContain('worker, browser');
 
   warnSpy.mockRestore();
 });

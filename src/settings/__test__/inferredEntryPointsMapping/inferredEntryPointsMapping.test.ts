@@ -29,5 +29,8 @@ it('Infers entry points by mapping outDir to rootDir, with .ts and .tsx fallback
     { type: 'static', subPath: './direct', filePath: './src/raw.js' },
     // .ts substitution works against non-.js source extensions too
     { type: 'static', subPath: './mjs-sub', filePath: './src/legacy.ts' },
+    // .d.ts exports are not used directly (they're compiled artifacts) — they
+    // go through the outDir/rootDir mapping like any other compiled path
+    { type: 'static', subPath: './decl', filePath: './src/decl.d.ts' },
   ]);
 });

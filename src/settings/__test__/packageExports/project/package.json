@@ -37,9 +37,12 @@
     "./default": {
       "default": "./d.js"
     },
-    "./types-ignored": {
+    "./types-fallthrough": {
       "types": "./t.d.ts",
       "import": "./i.js"
+    },
+    "./types-only": {
+      "types": "./t.d.ts"
     }
   }
 }

@@ -4,6 +4,7 @@
     ".": "./dist/index.js",
     "./tsx-sub": "./dist/comp.js",
     "./direct": "./dist/raw.js",
-    "./mjs-sub": "./dist/legacy.mjs"
+    "./mjs-sub": "./dist/legacy.mjs",
+    "./decl": "./dist/decl.d.ts"
   }
 }
