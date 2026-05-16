@@ -40,7 +40,7 @@ This enables the recommended ruleset and points Import Integrity at the current 
 
 ### Monorepo
 
-For monorepos with a single root config, switch to `monorepoRecommended` and use `monorepoRootDir` instead of `packageRootDir`. A root config typically also needs a couple of additional pieces because it sits above package-specific configs:
+For monorepos with a single root config, switch to `monorepoRecommended` and use `monorepoRootDir` instead of `packageRootDir`. A root config typically also needs a couple of additional pieces to coexist with code written primarily for the package-level config.
 
 ```js
 import { defineConfig } from 'eslint/config';
@@ -88,7 +88,9 @@ For a full working example, see this repo's own [eslint.config.mjs](https://gith
 
 ## Oxlint
 
-Oxlint's plugin integration is simpler than ESLint's. The full working config:
+### Single package
+
+For a single-package codebase:
 
 ```js
 import importIntegrityPlugin from 'import-integrity-lint';
@@ -110,6 +112,42 @@ export default {
   },
 };
 ```
+
+### Monorepo
+
+For monorepos with a single root config, switch to `monorepoRecommended` and use `monorepoRootDir`. A root config typically also needs a couple of additional pieces to coexist with code written primarily for the package-level config.
+
+```js
+import importIntegrityPlugin from 'import-integrity-lint';
+
+export default {
+  settings: {
+    'import-integrity': {
+      monorepoRootDir: import.meta.dirname,
+    },
+  },
+  options: {
+    // This minimal config produces many false positives for unused
+    // disable directives, since they likely are used in package-specific
+    // configs. We disable the check to avoid noise.
+    reportUnusedDisableDirectives: 'off',
+  },
+  jsPlugins: [
+    {
+      name: 'import-integrity',
+      specifier: 'import-integrity-lint',
+    },
+  ],
+  rules: {
+    ...importIntegrityPlugin.configs.monorepoRecommended.rules,
+  },
+};
+```
+
+A few notes:
+
+- `monorepoRecommended` includes the cross-package rules like `no-unused-package-exports`
+- `monorepoRootDir` points at the monorepo root; individual package roots are auto-discovered
 
 For a full working example, see this repo's own [oxlint.config.ts](https://github.com/nebrius/import-integrity-lint/blob/main/oxlint.config.ts).
 
