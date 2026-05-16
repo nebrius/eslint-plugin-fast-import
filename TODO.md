@@ -1,1 +1,2 @@
 - Fork repo?
+- Logging should take a packageRootDir

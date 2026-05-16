@@ -22,7 +22,9 @@ Install:
 npm install --save-dev import-integrity-lint
 ```
 
-Add to your `eslint.config.js`:
+### ESLint
+
+Minimal `eslint.config.js`:
 
 ```js
 import { defineConfig } from 'eslint/config';
@@ -40,7 +42,11 @@ export default defineConfig([
 ]);
 ```
 
-Or add to your `oxlint.config.ts`:
+This is enough for a single-package JavaScript codebase. For TypeScript, monorepos, and other real-world setups, see the [Quickstart documentation](https://nebrius.github.io/eslint-plugin-fast-import/guide/quickstart).
+
+### Oxlint
+
+Add to your `oxlint.config.ts`:
 
 ```js
 import importIntegrityPlugin from 'import-integrity-lint';
