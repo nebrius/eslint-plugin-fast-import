@@ -2,7 +2,7 @@
 
 Helps keep imports correct and tidy.
 
-[![npm version](https://badge.fury.io/js/import-integrity-lint.svg)](https://badge.fury.io/js/import-integrity-lint) ![ci workflow](https://github.com/nebrius/import-integrity-lint/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/import-integrity-lint/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/import-integrity-lint)
+[![npm version](https://badge.fury.io/js/eslint-plugin-fast-import.svg)](https://badge.fury.io/js/eslint-plugin-fast-import) ![ci workflow](https://github.com/nebrius/eslint-plugin-fast-import/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/eslint-plugin-fast-import/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/eslint-plugin-fast-import)
 
 A high-performance ESLint and Oxlint plugin for analyzing import and export relationships across your codebase. It catches dead code, broken imports, and architectural violations that other tools miss, while running faster than most alternatives.
 

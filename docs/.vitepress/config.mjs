@@ -17,7 +17,7 @@ function rewriteIncludedReadmeLinks(md) {
     if (hrefIndex >= 0 && token.attrs) {
       const href = token.attrs[hrefIndex][1];
       const ruleReadmeMatch = href.match(
-        /^\.\.\/([^/]+)\/README\.md(#[^\s)]*)?$/
+        /^\.\.\/([^/#]+)(?:\/README\.md)?(#[^\s)]*)?$/
       );
       const rootReadmeMatch = href.match(
         /^\.\.\/\.\.\/\.\.\/README\.md(#[^\s)]*)?$/
