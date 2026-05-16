@@ -16,11 +16,9 @@ npm install --save-dev import-integrity-lint
 
 ## ESLint
 
-The following sections build up from a minimal config to a typical real-world config. Stop at the level that matches your project.
+### Single package
 
-### Minimal config
-
-The simplest working config for a single-package JavaScript codebase:
+For a single-package codebase, the configuration is minimal:
 
 ```js
 import { defineConfig } from 'eslint/config';
@@ -38,49 +36,11 @@ export default defineConfig([
 ]);
 ```
 
-This enables the recommended ruleset and points Import Integrity at the current directory as the package root.
+This enables the recommended ruleset and points Import Integrity at the current directory as the package root. Combine with your usual TypeScript parser setup if you have one.
 
-### Adding TypeScript support
+### Monorepo
 
-To lint TypeScript files, ESLint needs the TypeScript parser registered. Install the parser:
-
-```bash
-npm install --save-dev typescript-eslint
-```
-
-And update your config:
-
-```js
-import { defineConfig } from 'eslint/config';
-import importIntegrityPlugin from 'import-integrity-lint';
-import tseslint from 'typescript-eslint';
-
-export default defineConfig([
-  {
-    settings: {
-      'import-integrity': {
-        packageRootDir: import.meta.dirname,
-      },
-    },
-  },
-  importIntegrityPlugin.configs.recommended,
-  {
-    files: ['**/*.{ts,tsx,mts,cts}'],
-    languageOptions: {
-      parser: tseslint.parser,
-    },
-    plugins: {
-      '@typescript-eslint': tseslint.plugin,
-    },
-  },
-]);
-```
-
-The `@typescript-eslint` plugin is registered (not configured with rules) so that `// eslint-disable` pragmas pointing to `@typescript-eslint/*` rules don't error out as unknown rules.
-
-### Monorepo setup
-
-For monorepos, switch to `monorepoRecommended` and use `monorepoRootDir` instead of `packageRootDir`:
+For monorepos with a single root config, switch to `monorepoRecommended` and use `monorepoRootDir` instead of `packageRootDir`. A root config typically also needs a couple of additional pieces because it sits above package-specific configs:
 
 ```js
 import { defineConfig } from 'eslint/config';
@@ -117,11 +77,10 @@ export default defineConfig([
 ]);
 ```
 
-A few changes worth noting:
+A few notes:
 
 - `monorepoRecommended` includes the cross-package rules like `no-unused-package-exports`
 - `monorepoRootDir` points at the monorepo root; individual package roots are auto-discovered
-- `reportUnusedDisableDirectives: 'off'` is included because a minimal config like this one doesn't enable enough rules to validate every disable directive, leading to false positives
 
 For more on monorepo setup, including the alternative one-config-per-package pattern, see [Monorepos](./monorepos).
 
