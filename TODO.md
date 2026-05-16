@@ -1,4 +1,2 @@
-- Proper docs site on GitHub Pages
-- Different README that doesn't repeat docs site
 - Fork repo?
 - Does package.main TS support all TS extensions, or just .ts?
