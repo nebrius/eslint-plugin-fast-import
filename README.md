@@ -2,7 +2,7 @@
 
 Helps keep imports correct and tidy.
 
-[![npm version](https://badge.fury.io/js/eslint-plugin-fast-import.svg)](https://badge.fury.io/js/eslint-plugin-fast-import) ![ci workflow](https://github.com/nebrius/eslint-plugin-fast-import/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/eslint-plugin-fast-import/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/eslint-plugin-fast-import)
+[![npm version](https://badge.fury.io/js/import-integrity-lint.svg)](https://badge.fury.io/js/import-integrity-lint) ![ci workflow](https://github.com/nebrius/import-integrity-lint/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/import-integrity-lint/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/import-integrity-lint)
 
 A high-performance ESLint and Oxlint plugin for analyzing import and export relationships across your codebase. It catches dead code, broken imports, and architectural violations that other tools miss, while running faster than most alternatives.
 
@@ -12,7 +12,7 @@ A high-performance ESLint and Oxlint plugin for analyzing import and export rela
 - 🤖 **Guardrails for agentic coding** that catch common AI-generated mistakes before they ship
 
 > [!TIP]
-> **Migrating from `eslint-plugin-fast-import`?** See the [migration guide](https://nebrius.github.io/eslint-plugin-fast-import/guide/migration).
+> **Migrating from `import-integrity-lint`?** See the [migration guide](https://nebrius.github.io/import-integrity-lint/guide/migration).
 
 ## Quickstart
 
@@ -42,7 +42,7 @@ export default defineConfig([
 ]);
 ```
 
-This is enough for a single-package JavaScript codebase. For TypeScript, monorepos, and other real-world setups, see the [Quickstart documentation](https://nebrius.github.io/eslint-plugin-fast-import/guide/quickstart).
+This is enough for a single-package JavaScript codebase. For TypeScript, monorepos, and other real-world setups, see the [Quickstart documentation](https://nebrius.github.io/import-integrity-lint/guide/quickstart).
 
 ### Oxlint
 
@@ -71,7 +71,7 @@ export default {
 
 Then run ESLint/Oxlint as usual. Import Integrity will analyze your imports and exports and flag issues based on its recommended ruleset.
 
-For configuration options, the full rules reference, monorepo setup, comparisons with other tools, and more, see the [documentation](https://nebrius.github.io/eslint-plugin-fast-import).
+For configuration options, the full rules reference, monorepo setup, comparisons with other tools, and more, see the [documentation](https://nebrius.github.io/import-integrity-lint).
 
 ## License
 

@@ -41,7 +41,7 @@ export default withMermaid(
     title: 'Import Integrity',
     description:
       'ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports',
-    base: '/eslint-plugin-fast-import/',
+    base: '/import-integrity-lint/',
     outDir: '../dist-docs',
     markdown: {
       config: rewriteIncludedReadmeLinks,
