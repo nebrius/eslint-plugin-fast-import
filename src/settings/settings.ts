@@ -244,7 +244,11 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     for (const [key, value] of Object.entries(packageJsonExports)) {
       // If this is a TypeScript file, we know it's not mapped and can use its
       // entry directly
-      if (value.endsWith('.ts')) {
+      if (
+        value.endsWith('.ts') ||
+        value.endsWith('.mts') ||
+        value.endsWith('.cts')
+      ) {
         inferredEntryPoints[key] = value;
       }
       // Otherwise we require a mapping from tsconfig

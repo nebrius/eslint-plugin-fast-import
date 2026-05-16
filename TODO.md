@@ -1,2 +1,1 @@
 - Fork repo?
-- Does package.main TS support all TS extensions, or just .ts?
