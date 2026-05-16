@@ -1,6 +1,6 @@
 {
   "name": "import-integrity-lint",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports",
   "keywords": [
     "eslint",
@@ -35,8 +35,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage src",
-    "format": "prettier --write A\"**/*.{js,jsx,mjs,ts,tsx,mts}\"",
-    "publish-package": "node --experimental-strip-types scripts/publish.ts"
+    "format": "prettier --write A\"**/*.{js,jsx,mjs,ts,tsx,mts}\""
   },
   "dependencies": {
     "@manypkg/get-packages": "3.1.0",
@@ -71,7 +70,6 @@
     "oxlint": "^1.59.0",
     "oxlint-tsgolint": "^0.20.0",
     "prettier": "^3.8.3",
-    "simple-git": "^3.27.0",
     "ts-jest": "^29.2.5",
     "ts-jest-resolver": "^2.0.1",
     "ts-node": "^10.9.2",
