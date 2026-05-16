@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.2.2 (5/16/2026)
+
+- Deprecated `eslint-plugin-fast-import` in favor of `import-integrity-lint`, a partial rewrite of Fast Import that brings first class monorepo support and Oxlint support
+
 ## 2.2.1 (10/13/2025)
 
 - Added missing export for `getLocFromRange`

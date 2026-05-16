@@ -1,5 +1,8 @@
 # eslint-plugin-fast-import
 
+> [!WARNING]
+> This plugin has been deprecated in favor of [Import Integrity](https://github.com/nebrius/import-integrity-lint). Import Integrity is a partial rewrite and rebrand that brings first class Oxlint support and new monorepo-specific rules. See the migration guide [on the docs site](https://nebrius.github.io/import-integrity-lint/guide/migration.html) or in [Markdown](https://github.com/nebrius/import-integrity-lint/blob/7cc026e7298ded64371c7b6772cf2c814a314c56/docs/guide/migration.md) for AI-friendly details.
+
 [![npm version](https://badge.fury.io/js/eslint-plugin-fast-import.svg)](https://badge.fury.io/js/eslint-plugin-fast-import) ![ci workflow](https://github.com/nebrius/eslint-plugin-fast-import/actions/workflows/ci.yml/badge.svg) [![codecov](https://codecov.io/gh/nebrius/eslint-plugin-fast-import/graph/badge.svg?token=T6O54TXTKU)](https://codecov.io/gh/nebrius/eslint-plugin-fast-import)
 
 - [Installation](#installation)

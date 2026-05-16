@@ -1,17 +1,15 @@
 {
   "name": "eslint-plugin-fast-import",
-  "version": "2.2.1",
-  "description": "ESLint plugin with rules to ensure proper usage of imports and exports",
+  "version": "2.2.2",
+  "description": "[DEPRECATED] Use import-integrity-lint instead. ESLint plugin with rules to ensure proper usage of imports and exports.",
   "keywords": [
-    "eslint",
-    "eslintplugin",
-    "eslint-plugin"
+    "deprecated"
   ],
-  "homepage": "https://github.com/nebrius/eslint-plugin-fast-import",
-  "bugs": "https://github.com/nebrius/eslint-plugin-fast-import/issues",
+  "homepage": "https://nebrius.github.io/import-integrity-lint/guide/migration.html",
+  "bugs": "https://github.com/nebrius/import-integrity-lint/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nebrius/eslint-plugin-fast-import.git"
+    "url": "https://github.com/nebrius/import-integrity-lint.git"
   },
   "author": "Bryan Hughes <bryan@nebri.us>",
   "license": "MIT",

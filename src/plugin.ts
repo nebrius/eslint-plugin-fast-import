@@ -17,6 +17,12 @@ import { noTestImportsInProd } from './rules/testInProd/testInProd.js';
 import { noUnresolvedImports } from './rules/unresolved/unresolved.js';
 import { noUnusedExports } from './rules/unused/unused.js';
 import type { UserSettings } from './settings/user.js';
+import { warn } from './util/logging.js';
+
+warn(
+  'This package is deprecated. Please migrate to "import-integrity-lint": ' +
+    'https://github.com/nebrius/import-integrity-lint'
+);
 
 // Helper exports
 export {
