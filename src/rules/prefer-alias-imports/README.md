@@ -1,24 +1,30 @@
 # import-integrity/prefer-alias-imports
 
-Enforces the use of alias imports instead of relative paths when an alias is available, and optionally enforces relative imports for sufficiently local files under the same alias.
+Enforces the use of alias imports instead of relative paths when an alias is available, with optional support for keeping nearby imports relative.
 
 ## Rule Details
 
-When a package configures import aliases (e.g. `@/*` mapping to `src/*`), it can be inconsistent whether developers use relative paths or alias paths for imports. This rule enforces a consistent style.
+When a package configures import aliases (e.g. `@/*` mapping to `src/*`), it can be inconsistent whether developers use relative paths or alias paths. One developer writes `import { Button } from '@/components/Button'`, another writes `import { Button } from './Button'`, and the codebase ends up with both styles for the same import. This rule enforces a consistent style.
 
-In `relative-if-local` mode (default), the rule enforces that:
+This rule is auto-fixable — most violations can be resolved by running ESLint with `--fix`.
 
-- Imports between files under the **same** wildcard alias use **relative** paths only when they share at least `minSharedPathDepth` path segments within that alias
-- Imports between files under **different** alias scopes, from outside an alias scope, or that are not local enough use **alias** paths
+The rule has two modes:
 
-With the default `minSharedPathDepth: 1`, a single alias like `@/* -> src/*` prefers relative imports within the same top-level folder, while imports across top-level folders still use the alias.
+### `relative-if-local` (default)
 
-In `always` mode, the rule enforces that all relative imports that could use an alias should use one, regardless of whether the source and target files share the same alias scope.
+The default mode optimizes for readability. Imports between files that are "near" each other use relative paths, since the relationship between them is short and easy to read. Imports between files that aren't near each other use alias paths, since the relative path would have too many `../` segments to be readable.
 
-Examples of _incorrect_ code with mode = relative-if-local (default)
+"Near" is defined by [`minSharedPathDepth`](#minsharedpathdepth): two files are considered near if they share at least that many path segments below the alias root. With the default value of `1`, files in the same top-level folder under the alias (e.g. both under `src/components/`) are considered near.
 
-```js
-/*
+### `always`
+
+The `always` mode prefers alias imports unconditionally. Any relative import that could use an alias instead is flagged. This mode is simpler but produces longer paths for nearby files.
+
+## Examples
+
+The examples below assume `alias: { '@/*': 'src/*' }` and the following file structure:
+
+```
 .
 ├── package.json
 └── src
@@ -27,65 +33,80 @@ Examples of _incorrect_ code with mode = relative-if-local (default)
     │   └── Card.ts
     └── utils
         └── helper.ts
+```
 
-alias: { '@/*': 'src/*' }
-*/
+### `relative-if-local` mode (default)
 
+#### Incorrect
+
+```js
 // src/components/Card.ts
 
 // Wrong: uses alias for a local file in the same top-level folder
 import { Button } from '@/components/Button';
+
 // Wrong: uses a relative path across top-level folders
 import { helper } from '../utils/helper';
 ```
 
-Examples of _correct_ code with mode = relative-if-local (default)
+#### Correct
 
 ```js
 // src/components/Card.ts
 
-// Correct: uses a relative path for a local file in the same top-level folder
+// Correct: relative path for a nearby file
 import { Button } from './Button';
-// Correct: uses an alias path across top-level folders
+
+// Correct: alias path across top-level folders
 import { helper } from '@/utils/helper';
 ```
 
-Examples of _incorrect_ code with mode = always
+### `always` mode
+
+#### Incorrect
 
 ```js
-/*
-.
-├── package.json
-└── src
-    ├── components
-    │   ├── Button.ts
-    │   └── Card.ts
-    └── utils
-        └── helper.ts
-
-alias: { '@/*': 'src/*' }
-*/
-
 // src/components/Card.ts
 
-// Wrong: uses relative path when an alias is available
+// Wrong: relative path when an alias is available
 import { Button } from './Button';
 import { helper } from '../utils/helper';
 ```
 
-Examples of _correct_ code with mode = always
+#### Correct
 
 ```js
 // src/components/Card.ts
 
-// Correct: uses alias path
+// Correct: alias paths everywhere
 import { Button } from '@/components/Button';
 import { helper } from '@/utils/helper';
 ```
 
-## Options
+## Configuration
 
-This rule takes an options object with the following properties:
+### Options
 
-- `mode` - When set to `relative-if-local`, imports between files that are local enough within the same wildcard alias use relative paths, and other imports use alias paths. When set to `always`, all imports that can use an alias must use one. Defaults to `relative-if-local`
-- `minSharedPathDepth` - The minimum number of shared path segments, counted from the wildcard alias root using resolved absolute file paths, required before `relative-if-local` prefers a relative import. Defaults to `1`
+#### `mode`
+
+Type: `'relative-if-local' | 'always'`
+
+Default: `'relative-if-local'`
+
+Controls when alias imports are preferred over relative imports. See [Rule Details](#rule-details) for details on each mode.
+
+#### `minSharedPathDepth`
+
+Type: `number`
+
+Default: `1`
+
+The minimum number of shared path segments (counted from the alias root, using resolved absolute file paths) before `relative-if-local` mode considers two files near enough for a relative import. Only applies when `mode` is `'relative-if-local'`.
+
+For example, with `@/*` mapping to `src/*` and `minSharedPathDepth: 2`, files at `src/components/forms/Input.ts` and `src/components/forms/Label.ts` would use relative paths between each other (they share two segments below `src/`: `components/forms`), but files at `src/components/Button.ts` and `src/components/forms/Input.ts` would use the alias (only one shared segment).
+
+### When not to use this rule
+
+We don't recommend disabling this rule if you use aliases. The rule is auto-fixable, so the typical workflow is to run `--fix` once and let the rule keep your imports consistent going forward. If you don't use aliases at all, the rule does nothing.
+
+If you have a strong preference for always using relative paths or always using alias paths regardless of the configured alias structure, this rule with `mode: 'always'` matches the "always alias" preference. For "always relative," the fix is to remove the alias from your configuration. Without an alias, there's nothing for this rule to prefer.

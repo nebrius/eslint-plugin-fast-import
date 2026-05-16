@@ -4,34 +4,35 @@ Flags entry point and externally imported files that have no exports.
 
 ## Rule Details
 
-The configuration entries `entryPointFiles` and `externallyImportedFiles` settings tell Import Integrity which files have exports that are imported by other packages or frameworks. If a file matched by either setting has no exports at all, then the configuration is almost certainly wrong. This can happen when a file is modified to remove exports, or is accidentally added to the list (AI is notorious for adding files it shouldn't).
+The `entryPointFiles` and `externallyImportedFiles` settings tell Import Integrity which files have exports that are imported by other packages or frameworks. If a file matched by either setting has no exports at all, the configuration is almost certainly wrong. This can happen when a file is modified to remove its exports, or when a file is accidentally added to the list (AI coding agents are particularly prone to adding files that shouldn't be there).
 
-This rule reports any file matched by `entryPointFiles` or `externallyImportedFiles` that has no exports, no barrel reexports, and no single reexports. Note: files matching `/*.config*`, which are automatically set as `externallyImportedFiles`, are excluded from this rule.
+This rule reports any file matched by `entryPointFiles` or `externallyImportedFiles` that has no exports, no barrel reexports, and no single reexports.
 
-Examples of _incorrect_ code, with `index.ts` configured in `entryPointFiles`
+## Examples
+
+The examples below assume `entryPointFiles: { '.': './index.ts' }`.
+
+### Incorrect
 
 ```js
 /*
 .
 └── index.ts
-
-entryPointFiles: { '.': './index.ts' }
 */
 
 // index.ts
 console.log('I have no exports');
 ```
 
-Examples of _correct_ code
+### Correct
 
 ```js
 /*
 .
 ├── index.ts
 └── internal.ts
-
-entryPointFiles: { '.': './index.ts' }
 */
+
 // index.ts
 export const foo = 10;
 ```
@@ -41,8 +42,6 @@ export const foo = 10;
 .
 ├── index.ts
 └── internal.ts
-
-entryPointFiles: { '.': './index.ts' }
 */
 
 // internal.ts
@@ -51,3 +50,19 @@ export const publicThing = 10;
 // index.ts
 export { publicThing } from './internal';
 ```
+
+## Behavior
+
+### Auto-included config files are excluded
+
+Files matching `/*.config.*` are automatically included in `externallyImportedFiles` (see [externallyImportedFiles auto-inference](../../configuration/package-level-options#auto-inference-1)). Since this auto-inclusion cannot be disabled, this rule excludes those files defensively. Config files almost always have exports, but if one didn't, the user would otherwise have no way to silence the resulting error.
+
+## Configuration
+
+### Options
+
+This rule has no options.
+
+### When not to use this rule
+
+We don't recommend disabling this rule. If you have a deliberately empty entry-point file (which is unusual), remove it from `entryPointFiles` or `externallyImportedFiles` rather than disabling the rule.

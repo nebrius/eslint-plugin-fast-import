@@ -1,23 +1,7 @@
-# import-integrity/no-node-builtins
+### When not to use this rule
 
-Disallows imports of Node.js built-in modules.
+Don't use this rule if your code runs in Node.js. It's not part of the recommended configuration for that reason — Node.js codebases need their built-ins, and flagging them would be noise.
 
-## Rule Details
+Enable this rule only in projects that run in non-Node environments. If you have a monorepo with separate Node and non-Node packages (e.g. a Node backend and a browser frontend in different workspace packages), enable this rule only in the non-Node packages.
 
-This rule flags any import of a Node.js built-in module such as `fs`, `path`, `node:fs`, etc. This is useful for codebases that need to run in non-Node.js environments (browsers, edge runtimes, etc.) where Node.js built-ins are not available.
-
-Examples of _incorrect_ code
-
-```js
-import fs from 'node:fs';
-import { join } from 'path';
-import * as crypto from 'node:crypto';
-export { readFile } from 'node:fs/promises';
-```
-
-Examples of _correct_ code
-
-```js
-import { something } from './myModule';
-import lodash from 'lodash';
-```
+This rule isn't a good fit for codebases that mix Node and non-Node code within a single package. Next.js is the most common example: server components and route handlers run in Node and can use built-ins, while client components run in the browser and can't, and these can live in sibling files. This rule operates at the package level, so it can't distinguish between them. For Next.js or similar setups, leave this rule disabled.

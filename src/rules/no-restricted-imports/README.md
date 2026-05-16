@@ -4,72 +4,145 @@ Restricts which files can import which modules.
 
 ## Rule Details
 
-This rule can be used to restrict which files can import which modules. This can be useful for enforcing code organization when you want to restrict imports to certain parts of a codebase.
+This rule lets you define restrictions on which files can import which modules. Restrictions can apply to first-party files within your codebase or to third-party packages, and can use either string paths or regular expressions (with capture groups for parameterized restrictions).
 
-For example, let's say you're building a library with a virtualized file system. In this case, you'll want to restrict most of the codebase from importing `node:fs` in all files _except_ for the file that implements the virtualized file system.
+Unlike most rules in Import Integrity, `no-restricted-imports` is not enabled in the default configuration. It requires rule-specific options that depend on your codebase's architecture, so it can't be configured automatically.
 
-Similarly, let's say you're building a Next.js application. In this case, you'll likely have a handful of components that are usable on any page. You'll also have some components that can only be used on a specific page (e.g. due to assumptions that certain global state unique to that page are available). In this case, you'll want to restrict the page specific components from being imported in any other page.
+## Motivating example
+
+Many frontend frameworks support loading bootstrap data at the page level. Next.js is the most common example: an async server component on a page route can load page-specific data and pass it to children via a React context. That context is only available within the subtree of that one page.
+
+This pattern is powerful but fragile. Any component imported into a page-specific subtree may rely on that context to function. If a component that depends on a page-specific context is accidentally imported into a different page, things break (and often subtly). The hooks reading from the absent context return `undefined`, no exception is thrown, and downstream code limps along until something else fails in a way that doesn't point back to the actual problem.
+
+`no-restricted-imports` can prevent this by enforcing folder-structure conventions at lint time. Consider this layout:
+
+```
+src/
+├── app/
+│   ├── settings/
+│   │   └── page.tsx  // imports page-contents/settings/index.tsx
+│   └── posts/
+│       └── page.tsx  // imports page-contents/posts/index.tsx
+├── components/
+├── hooks/
+└── page-contents/
+    ├── settings/
+    │   ├── components/
+    │   ├── hooks/
+    │   ├── context.ts
+    │   └── index.tsx
+    └── posts/
+        ├── components/
+        ├── hooks/
+        ├── context.ts
+        └── index.tsx
+```
+
+Next.js routes the URL `/settings` to `app/settings/page.tsx`, which imports the entry point of `page-contents/settings/`. Everything under `page-contents/settings/` uses the settings page's context. Same shape for posts. By configuring `no-restricted-imports` so that files under `page-contents/<page>/` can only be imported by `app/<page>/page.tsx` or by other files under `page-contents/<page>/`, the page-specific code is structurally walled off. A developer can't accidentally pull a settings-page component into the posts page, because the lint error would catch it before the runtime bug ever appears.
+
+Another common use case is enforcing that low-level implementation details are always accessed through a designated wrapper, never directly. A virtualized file system, an internal logger, or a database driver might each have a thin wrapper that the rest of the codebase is required to use.
 
 ## Options
 
-### rules
+The rule takes one option, `rules`, which is an array of restriction definitions. Each entry has the following properties:
 
-The `rules` option is an array of objects that define the rules for restricting imports. Each rule has the following properties:
+### `type`
 
-- `type`: The type of module we're restricting. Must be one of `first-party` or `third-party`.
-- `filepath`: (first-party) The filepath to restrict. Can be a string or a regular expression.
-  - If `filepath` is a regular expression, then you can specify capture groups and reference them in `allowed` or `denied`.
-- `moduleSpecifier`: (third-party) The module specifier to restrict. Can be a string or a regular expression.
-- `allowed`: An array of filepaths that are allowed to import the restricted filepath. Can be strings or regular expressions.
-  - If `allowed` and `filepath` are regular expressions, then you can specify capture groups from `filepath` and reference them in `allowed` as `$1`, `$2`, etc.
-- `denied`: An array of filepaths that are denied from importing the restricted filepath. Can be strings or regular expressions.
-  - If `denied` and `filepath` are regular expressions, then you can specify capture groups from `filepath` and reference them in `denied` as `$1`, `$2`, etc.
-- `message`: An optional custom message to display when a restricted import is found.
-  - Supplying a custom message is strongly recommended, because you can communicate to your users _why_ this import is restricted, e.g. `this component can only be used on the settings page`.
-- `excludeTypeImports`: A boolean that indicates whether to exclude type imports from being considered restricted when non-type exports are considered restricted. Defaults to `false`.
+The kind of module being restricted. Must be either `'first-party'` (files within your codebase) or `'third-party'` (npm packages or built-in modules).
 
-For properties that take filepaths, be aware of how filepath matching works. If a string is specified and is a relative path, it is assumed to be relative to the current package's `packageRootDir`. If a regular expression is specified, be aware that files tested using this regular expression are _always_ absolute. This means that you cannot do something like `allowed: [/^\.\/a.ts$/]`, since no file passed in will ever start with `./`.
+### `filepath` (first-party only)
 
-Examples of _incorrect_ code
+The file path being restricted. Can be a string or a regular expression. If a regular expression with capture groups is used, the groups can be referenced in `allowed` and `denied` as `$1`, `$2`, etc.
 
-Given the configuration:
+### `moduleSpecifier` (third-party only)
 
-```json
+The module specifier being restricted. Can be a string or a regular expression.
+
+### `allowed`
+
+An array of file paths that are allowed to import the restricted module. Can be strings or regular expressions. If `filepath` and `allowed` are both regular expressions, capture groups from `filepath` can be referenced in `allowed`.
+
+### `denied`
+
+An array of file paths that are denied from importing the restricted module. Same shape as `allowed`. If both `allowed` and `denied` are specified, the import is allowed only if it matches `allowed` and does not match `denied`.
+
+### `message`
+
+An optional custom error message shown when a restriction is violated. Strongly recommended — telling the user *why* the import is restricted is much more useful than a generic error. For example: `"this component can only be used on the settings page"`.
+
+### `excludeTypeImports`
+
+A boolean. When `true`, type-only imports (`import type`) are not considered restricted even if the underlying export is. Defaults to `false`.
+
+### File path matching
+
+A note on how file paths are matched:
+
+- String paths are interpreted as relative to the current package's `packageRootDir`.
+- Regular expressions are matched against the **absolute** file path. This means a pattern like `/^\.\/a\.ts$/` will never match anything, because the file paths passed to the regex never start with `./`. Use patterns like `/\/a\.ts$/` or anchor against your project's absolute path.
+
+## Examples
+
+### Basic restriction
+
+```js
+// Configuration
 {
-  "rules": [
+  rules: [
     {
-      "type": "first-party",
-      "filepath": "./a.ts",
-      "allowed": ["./b.ts", "./c.ts"],
-      "denied": ["./d.ts", "./e.ts"],
-      "message": "This file can only be imported by ./b.ts and ./c.ts"
-    }
-  ]
+      type: 'first-party',
+      filepath: './sensitive.ts',
+      allowed: ['./wrapper.ts'],
+      message: 'Only wrapper.ts may import sensitive.ts',
+    },
+  ],
 }
 ```
 
-The following code is incorrect:
+```js
+// wrapper.ts — allowed
+import { thing } from './sensitive';
 
-```ts
-// a.ts
-import { a } from './a.ts';
-
-// d.ts
-import { a } from './a.ts';
-
-// e.ts
-import { a } from './a.ts';
-
-// f.ts
-import { a } from './a.ts';
+// other.ts — flagged
+import { thing } from './sensitive';
 ```
 
-The following code is correct:
+### Page-isolated imports with capture groups
 
-```ts
-// b.ts
-import { a } from './a.ts';
-
-// c.ts
-import { a } from './a.ts';
+```js
+// Configuration
+{
+  rules: [
+    {
+      type: 'first-party',
+      filepath: /\/page-contents\/([^/]+)\//,
+      allowed: [/\/page-contents\/$1\//],
+      message: 'Page-specific code can only be imported within the same page',
+    },
+  ],
+}
 ```
+
+With this configuration, the regex captures the page name (`settings`, `posts`, etc.) and the `allowed` pattern references that capture as `$1`. A file under `page-contents/settings/` can only be imported by other files under `page-contents/settings/`.
+
+### Restricting a third-party module
+
+```js
+// Configuration
+{
+  rules: [
+    {
+      type: 'third-party',
+      moduleSpecifier: 'node:fs',
+      allowed: ['./src/virtual-fs.ts'],
+      message: 'Use virtual-fs.ts instead of importing node:fs directly',
+    },
+  ],
+}
+```
+
+## Configuration
+
+### When not to use this rule
+
+This rule has no default behavior — without `rules` configured, it does nothing. There's no reason to "disable" it. If you don't have a use case for import restrictions, simply don't configure any rules.

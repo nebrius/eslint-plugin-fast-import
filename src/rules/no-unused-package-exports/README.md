@@ -4,13 +4,17 @@ Ensures entry point exports are imported by other packages in a monorepo.
 
 ## Rule Details
 
-`no-unused-package-exports` looks at all exports in [entry point files](../../../README.md#externallyimportedfiles--entrypointfiles) and analyzes whether any other package in the monorepo imports them. An export is considered used if it is imported in at least one other package.
+`no-unused-package-exports` looks at all exports in [entry point files](../../configuration/package-level-options#entrypointfiles) and analyzes whether any other package in the monorepo imports them. An export is considered used if it is imported by at least one other package.
 
-This rule only applies to files matched by the `entryPointFiles` setting. Files matched by `externallyImportedFiles` are not checked, because those represent files imported by a framework runtime (e.g. Next.js `page.tsx`) where Import Integrity cannot see the consumer. `entryPointFiles`, by contrast, represent a package's public API intended for use by other packages in the monorepo, which Import Integrity _can_ analyze.
+This is the cross-package counterpart to [`no-unused-exports`](../no-unused-exports). Where `no-unused-exports` checks whether a package's internal exports are imported within the same package, `no-unused-package-exports` checks whether the package's public-API exports are imported by other packages.
 
-This rule is only meaningful in a monorepo. See [Use in monorepos](../../../README.md#use-in-monorepos) for more info.
+The rule only applies to files matched by `entryPointFiles`. Files matched by `externallyImportedFiles` are deliberately not checked, because those represent files imported by a framework runtime (e.g. Next.js `page.tsx`) where Import Integrity cannot see the consumer. `entryPointFiles`, by contrast, represent a package's public API intended for use by other packages in the monorepo, which Import Integrity *can* analyze.
 
-Examples of _incorrect_ code
+This rule is only meaningful in a monorepo. See [Monorepos](../../guide/monorepos) for more info.
+
+## Examples
+
+### Incorrect
 
 ```js
 /*
@@ -29,7 +33,7 @@ export const Unused = 1;
 // (does not import from 'one')
 ```
 
-Examples of _correct_ code
+### Correct
 
 ```js
 /*
@@ -51,7 +55,8 @@ import { Used } from 'one';
 ## Limitations
 
 ### Barrel imports
-If an entry point export is later imported as a barrel import, then this rule may report a false negative and claim the export is being used when it is not. This happens because an export in a barrel object may not be referenced, but the object containing that export by definition _is_ referenced. Take the following example:
+
+If an entry point export is imported as part of a barrel, the rule may report a false negative and claim the export is used when it isn't. The barrel object is referenced, and the rule can't follow the object through arbitrary code to determine which specific exports get accessed:
 
 ```js
 // packages/one/entry.ts
@@ -63,13 +68,11 @@ import * as one from 'one';
 console.log(one.a1);
 ```
 
-In this example, `a2` is not actually used, but we can't determine this concretely. While this specific example is simple, we can imagine more complicated cases where `one` might be passed to other functions and only referenced (or not) in other files.
+In this example, `a2` is not actually used, but the rule can't determine that.
 
 ### Non-named barrel reexports
 
-A bare `export * from` reexport in an entry point file has no resolvable name and is skipped by this rule.
-
-Additionally, when an entry point file uses a bare barrel reexport, Import Integrity cannot track cross-package imports of the reexported names. For example:
+A bare `export * from` in an entry point file has no resolvable name and is skipped by this rule. More importantly, when an entry point uses a bare barrel reexport, Import Integrity cannot track cross-package imports of the reexported names. For example:
 
 ```js
 // packages/one/entry.ts
@@ -79,6 +82,18 @@ export * from 'some-package';
 import { something } from 'one';
 ```
 
-Import Integrity will not know about the second import. This means that this rule will not flag the export as unused if `packages/two` stops importing it.
+The rule won't see the second import. If `packages/two` stops importing `something`, the export won't be flagged as unused.
 
-This is a general Import Integrity limitation; see the [main README](../../../README.md) for more details.
+The [`no-unnamed-entry-point-exports`](../no-unnamed-entry-point-exports) rule mitigates this by requiring entry points to use named barrels (`export * as foo from ...`) or explicit reexports (`export { foo } from ...`) instead of bare ones. For more context on this limitation, see the [barrel-reexport caveat](../../guide/faq#non-named-barrel-export-entry-points-are-not-tracked) in the FAQ.
+
+## Configuration
+
+### Options
+
+This rule has no options.
+
+### When not to use this rule
+
+This rule is only meaningful in a monorepo, so it's not enabled in the default `recommended` configuration. Enable it via `monorepoRecommended`.
+
+If you're in a monorepo but have a deliberately unused entry-point export (e.g. an API surface that external consumers will use but no in-monorepo package consumes), the cleanest fix is to remove the export from the entry point file rather than disabling the rule. If the value needs to remain in the package for some reason, make it a non-exported value, or export it from a non-entry-point file.
