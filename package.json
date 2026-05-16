@@ -9,7 +9,7 @@
     "oxlint",
     "oxlint-plugin"
   ],
-  "homepage": "https://github.com/nebrius/import-integrity-lint",
+  "homepage": "https://nebrius.github.io/import-integrity-lint/",
   "bugs": "https://github.com/nebrius/import-integrity-lint/issues",
   "license": "MIT",
   "author": "Bryan Hughes <bryan@nebri.us>",
