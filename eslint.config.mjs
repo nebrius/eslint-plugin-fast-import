@@ -40,7 +40,10 @@ export default defineConfig([
       'import-integrity': {
         packageRootDir: import.meta.dirname,
         debugLogging: true,
-        externallyImportedFiles: ['docs/.vitepress/config.mjs'],
+        externallyImportedFiles: [
+          'docs/.vitepress/config.mjs',
+          'docs/.vitepress/theme/index.js',
+        ],
       },
     },
   },
