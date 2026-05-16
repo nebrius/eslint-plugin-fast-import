@@ -3,14 +3,13 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import readLine from 'node:readline/promises';
 
-import { getDirname } from 'cross-dirname';
 import { simpleGit } from 'simple-git';
 
-const ROOT_DIR = resolve(getDirname(), '..');
+const ROOT_DIR = resolve(import.meta.dirname, '..');
 const DRY_RUN = process.argv.includes('--dry-run');
 
 const version = JSON.parse(
-  readFileSync(join(getDirname(), '..', 'package.json'), 'utf-8')
+  readFileSync(join(import.meta.dirname, '..', 'package.json'), 'utf-8')
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 ).version as string;
 

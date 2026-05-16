@@ -2,14 +2,13 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname } from 'cross-dirname';
 
 import { _testOnlyResetPackageInfo } from '../../../module/module.js';
 import { _testOnlyResetAllSettings } from '../../../settings/settings.js';
 import { getRelativePathFromRoot } from '../../../util/files.js';
 import { noEntryPointImports } from '../rule.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
 const FILE_C = join(TEST_PACKAGE_DIR, 'c.ts');

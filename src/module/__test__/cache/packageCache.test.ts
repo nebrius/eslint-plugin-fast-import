@@ -2,7 +2,6 @@ import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { parse } from '@typescript-eslint/typescript-estree';
-import { getDirname } from 'cross-dirname';
 
 import type { StrippedAnalyzedFileDetails } from '../../../__test__/util.js';
 import type { ParsedPackageSettings } from '../../../settings/settings.js';
@@ -13,7 +12,7 @@ import {
   updateCacheFromFileSystem,
 } from '../../module.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project', 'singlerepo');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project', 'singlerepo');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
 const FILE_TS_NEW = join(TEST_PACKAGE_DIR, 'new.ts');

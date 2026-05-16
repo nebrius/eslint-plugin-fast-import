@@ -1,11 +1,10 @@
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname } from 'cross-dirname';
 
 import { _testOnlyResetCycleMap, noCycle } from '../rule.js';
 
-const PROJECT_ROOT = join(getDirname(), 'project');
+const PROJECT_ROOT = join(import.meta.dirname, 'project');
 
 const SIMPLE_PACKAGE_DIR = join(PROJECT_ROOT, 'simple');
 const FILE_A = join(SIMPLE_PACKAGE_DIR, 'a.ts');

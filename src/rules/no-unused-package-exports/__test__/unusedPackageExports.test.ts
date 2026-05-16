@@ -1,7 +1,6 @@
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname } from 'cross-dirname';
 
 import { noUnusedPackageExports } from '../rule.js';
 
@@ -21,7 +20,7 @@ import { noUnusedPackageExports } from '../rule.js';
 // (not internal.ts) so it doesn't disturb the reexport source.
 // project/lerna.json is load-bearing: @manypkg uses it to detect this fixture
 // as a Lerna monorepo.
-const MONOREPO_ROOT_DIR = join(getDirname(), 'project');
+const MONOREPO_ROOT_DIR = join(import.meta.dirname, 'project');
 const PACKAGE_ONE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');
 const PACKAGE_TWO_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'two');
 const PACKAGE_THREE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'three');

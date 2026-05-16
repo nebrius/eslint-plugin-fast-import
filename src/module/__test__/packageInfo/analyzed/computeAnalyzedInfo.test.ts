@@ -1,13 +1,11 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type { StrippedAnalyzedFileDetails } from '../../../../__test__/util.js';
 import { computeAnalyzedInfo } from '../../../computeAnalyzedInfo.js';
 import { computeBaseInfo } from '../../../computeBaseInfo.js';
 import { computeResolvedInfo } from '../../../computeResolvedInfo.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project', 'default');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project', 'default');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
 const FILE_C = join(TEST_PACKAGE_DIR, 'c.ts');
@@ -570,7 +568,11 @@ it('Computes analyzed info', () => {
 });
 
 it('Computes analyzed info for a package with a file that imports itself', () => {
-  const selfImportPackageDir = join(getDirname(), 'project', 'self-import');
+  const selfImportPackageDir = join(
+    import.meta.dirname,
+    'project',
+    'self-import'
+  );
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
@@ -591,7 +593,7 @@ it('Computes analyzed info for a package with a file that imports itself', () =>
 
 it('Computes analyzed info for a package with a reexport cycle triggered by an entry point', () => {
   const reexportCyclePackageDir = join(
-    getDirname(),
+    import.meta.dirname,
     'project',
     'reexport-cycle'
   );
@@ -617,7 +619,7 @@ it('Computes analyzed info for a package with a reexport cycle triggered by an e
 
 it('Computes analyzed info for a package with a reexport cycle triggered by an import', () => {
   const reexportCyclePackageDir = join(
-    getDirname(),
+    import.meta.dirname,
     'project',
     'reexport-cycle-import'
   );
@@ -641,7 +643,7 @@ it('Computes analyzed info for a package with a reexport cycle triggered by an i
 
 it('Computes analyzed info for a package with a single reexport of a firstPartyOther module', () => {
   const packageRootDir = join(
-    getDirname(),
+    import.meta.dirname,
     'project',
     'single-reexport-of-other'
   );
@@ -665,7 +667,7 @@ it('Computes analyzed info for a package with a single reexport of a firstPartyO
 
 it('Computes analyzed info for a package with a named barrel reexport of a builtin module', () => {
   const packageRootDir = join(
-    getDirname(),
+    import.meta.dirname,
     'project',
     'named-barrel-reexport-of-builtin'
   );
@@ -689,7 +691,7 @@ it('Computes analyzed info for a package with a named barrel reexport of a built
 
 it('Computes analyzed info for a package with a named barrel reexport of a firstPartyOther module', () => {
   const packageRootDir = join(
-    getDirname(),
+    import.meta.dirname,
     'project',
     'named-barrel-reexport-of-other'
   );
@@ -712,7 +714,7 @@ it('Computes analyzed info for a package with a named barrel reexport of a first
 });
 
 it('Computes analyzed info for a package with a dynamic import', () => {
-  const packageRootDir = join(getDirname(), 'project', 'dynamic-import');
+  const packageRootDir = join(import.meta.dirname, 'project', 'dynamic-import');
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
@@ -732,7 +734,11 @@ it('Computes analyzed info for a package with a dynamic import', () => {
 });
 
 it('Computes analyzed info for a package with a side-effect import', () => {
-  const packageRootDir = join(getDirname(), 'project', 'side-effect-import');
+  const packageRootDir = join(
+    import.meta.dirname,
+    'project',
+    'side-effect-import'
+  );
   expect(() =>
     computeAnalyzedInfo(
       computeResolvedInfo(
@@ -753,7 +759,7 @@ it('Computes analyzed info for a package with a side-effect import', () => {
 
 it('Computes analyzed info for a package with a barrel reexport that is an entry point and forms a cycle', () => {
   const packageRootDir = join(
-    getDirname(),
+    import.meta.dirname,
     'project',
     'barrel-reexport-entry-point'
   );

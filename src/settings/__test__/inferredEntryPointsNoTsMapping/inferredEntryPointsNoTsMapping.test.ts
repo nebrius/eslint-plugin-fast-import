@@ -1,10 +1,8 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import { getAllPackageSettings } from '../../settings.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_INDEX = join(TEST_PACKAGE_DIR, 'src', 'index.ts');
 
 it('Skips inferring compiled exports when there is no tsconfig mapping', () => {

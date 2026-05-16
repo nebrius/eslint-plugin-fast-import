@@ -1,13 +1,12 @@
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname } from 'cross-dirname';
 
 import { _testOnlyResetPackageInfo } from '../../../module/module.js';
 import { _testOnlyResetAllSettings } from '../../../settings/settings.js';
 import { noRestrictedImports } from '../rule.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_D = join(TEST_PACKAGE_DIR, 'd/d.ts');
 const FILE_E2 = join(TEST_PACKAGE_DIR, 'e/e2.ts');

@@ -1,11 +1,9 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type { ParsedPackageSettings } from '../../settings.js';
 import { getAllPackageSettings } from '../../settings.js';
 
-const PROJECTS_DIR = join(getDirname(), 'project');
+const PROJECTS_DIR = join(import.meta.dirname, 'project');
 
 function getPackageSettings(fixtureName: string): ParsedPackageSettings {
   const fixtureDir = join(PROJECTS_DIR, fixtureName);

@@ -1,1 +1,0 @@
-../src/types/cross-dirname.d.ts

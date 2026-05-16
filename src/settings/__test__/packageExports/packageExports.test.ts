@@ -1,10 +1,8 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import { getPackageJsonSettings } from '../../package.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 
 it('Parses package.json exports with conditional resolution and main fallback', () => {
   const result = getPackageJsonSettings(TEST_PACKAGE_DIR);

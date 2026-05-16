@@ -1,13 +1,12 @@
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname } from 'cross-dirname';
 
 import { noUnresolvedImports } from '../rule.js';
 
 // project/package-lock.json is load-bearing: @manypkg uses it to detect this
 // fixture as an npm-workspaces monorepo.
-const MONOREPO_ROOT_DIR = join(getDirname(), 'project');
+const MONOREPO_ROOT_DIR = join(import.meta.dirname, 'project');
 const TEST_PACKAGE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_D = join(MONOREPO_ROOT_DIR, 'packages', 'two', 'd.ts');

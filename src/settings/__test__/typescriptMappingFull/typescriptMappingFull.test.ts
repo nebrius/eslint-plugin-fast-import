@@ -1,10 +1,8 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import { getTypeScriptSettings } from '../../typescript.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 
 it('Returns mapping with normalized rootDir and outDir when both are set', () => {
   const result = getTypeScriptSettings(TEST_PACKAGE_DIR);

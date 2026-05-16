@@ -1,8 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type {
   ParsedPackageSettings,
   ParsedRepoSettings,
@@ -14,20 +12,23 @@ import {
 } from '../../settings.js';
 import { getUserPackageSettingsFromConfigFile } from '../../user.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
-const CONFIG_FILE_PACKAGE_DIR = join(getDirname(), 'project-with-config');
+const CONFIG_FILE_PACKAGE_DIR = join(
+  import.meta.dirname,
+  'project-with-config'
+);
 const CONFIG_FILE_FILE_A = join(CONFIG_FILE_PACKAGE_DIR, 'src', 'a.ts');
 
 const MULTI_CONFIG_PACKAGE_DIR = join(
-  getDirname(),
+  import.meta.dirname,
   'project-with-multiple-configs'
 );
 const MULTI_CONFIG_FILE_A = join(MULTI_CONFIG_PACKAGE_DIR, 'src', 'a.ts');
 
 const MONOREPO_DIR = join(
-  getDirname(),
+  import.meta.dirname,
   '../../../module/__test__/cache/project/monorepo'
 );
 const MONOREPO_PKG_ONE = join(MONOREPO_DIR, 'packages', 'packageOne');

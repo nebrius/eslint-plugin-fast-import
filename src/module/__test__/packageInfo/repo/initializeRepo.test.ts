@@ -1,7 +1,5 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type { ParsedPackageSettings } from '../../../../settings/settings.js';
 import type { AnalyzedCodeFileDetails } from '../../../../types/analyzed.js';
 import {
@@ -45,7 +43,7 @@ function findExport(fileDetails: AnalyzedCodeFileDetails, exportName: string) {
 
 // project/monorepo/yarn.lock is load-bearing: @manypkg uses it to detect this
 // fixture as a Yarn-workspaces monorepo.
-const MONOREPO_DIR = join(getDirname(), 'project', 'monorepo');
+const MONOREPO_DIR = join(import.meta.dirname, 'project', 'monorepo');
 const PACKAGES_DIR = join(MONOREPO_DIR, 'packages');
 const PACKAGE_A_DIR = join(PACKAGES_DIR, 'packageA');
 const PACKAGE_B_DIR = join(PACKAGES_DIR, 'packageB');

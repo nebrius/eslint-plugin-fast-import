@@ -1,8 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import { noCycle } from './rules/no-cycle/rule.js';
 import { noEmptyEntryPoints } from './rules/no-empty-entry-points/rule.js';
 import { noEntryPointImports } from './rules/no-entry-point-imports/rule.js';
@@ -29,7 +27,7 @@ export {
 
 // Plugin export
 const { name, version } = JSON.parse(
-  readFileSync(join(getDirname(), '..', 'package.json'), 'utf8')
+  readFileSync(join(import.meta.dirname, '..', 'package.json'), 'utf8')
 ) as { name: string; version: string };
 
 const plugin = {

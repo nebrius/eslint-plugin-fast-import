@@ -1,8 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import {
   _testOnlyResetFiles,
   convertToUnixishPath,
@@ -13,8 +11,8 @@ import {
   trimTrailingPathSeparator,
 } from '../files.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
-const ROOT_DIR = resolve(join(getDirname(), '..', '..', '..'));
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
+const ROOT_DIR = resolve(join(import.meta.dirname, '..', '..', '..'));
 
 // Each major monorepo fixture across the test suite intentionally uses a
 // different package-manager marker so @manypkg's detection paths all get

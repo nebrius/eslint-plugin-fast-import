@@ -2,7 +2,6 @@ import { existsSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { parse } from '@typescript-eslint/typescript-estree';
-import { getDirname } from 'cross-dirname';
 
 import type { StrippedAnalyzedFileDetails } from '../../../__test__/util.js';
 import { getPackageCacheEntryForFile } from '../../../settings/settings.js';
@@ -51,7 +50,7 @@ function expectNoDuplicateExternalImporters(
   }
 }
 
-const MONOREPO_DIR = join(getDirname(), 'project', 'monorepo');
+const MONOREPO_DIR = join(import.meta.dirname, 'project', 'monorepo');
 const PACKAGE_ONE_DIR = join(MONOREPO_DIR, 'packages', 'packageOne');
 const PACKAGE_TWO_DIR = join(MONOREPO_DIR, 'packages', 'packageTwo');
 

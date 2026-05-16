@@ -1,11 +1,10 @@
 import { join } from 'node:path';
 
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { getDirname } from 'cross-dirname';
 
 import { preferAliasImports } from '../rule.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_INDEX = join(TEST_PACKAGE_DIR, 'src', 'index.ts');
 const FILE_BUTTON = join(TEST_PACKAGE_DIR, 'src', 'components', 'Button.ts');
 const FILE_LABEL = join(

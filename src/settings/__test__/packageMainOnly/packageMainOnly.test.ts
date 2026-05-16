@@ -1,10 +1,8 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import { getPackageJsonSettings } from '../../package.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 
 it('Falls back to main and normalizes bare main paths when no exports field is present', () => {
   const result = getPackageJsonSettings(TEST_PACKAGE_DIR);

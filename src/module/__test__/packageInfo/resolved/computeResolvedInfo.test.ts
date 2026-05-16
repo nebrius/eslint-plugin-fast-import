@@ -1,7 +1,5 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type { StrippedResolvedFileDetails } from '../../../../__test__/util.js';
 import {
   addBaseInfoForFile,
@@ -16,7 +14,7 @@ import {
   updateResolvedInfoForFile,
 } from '../../../computeResolvedInfo.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const NEW_FILE_PATH = join(TEST_PACKAGE_DIR, 'newFile.ts');
 const FILE_INDEX = join(TEST_PACKAGE_DIR, 'index.ts');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');

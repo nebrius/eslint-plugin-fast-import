@@ -1,11 +1,9 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type { ParsedPackageSettings } from '../../settings.js';
 import { getAllPackageSettings } from '../../settings.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
 it('Fetchings settings from typescript', () => {

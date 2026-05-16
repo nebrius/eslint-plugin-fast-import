@@ -1,7 +1,5 @@
 import { join } from 'node:path';
 
-import { getDirname } from 'cross-dirname';
-
 import type { StrippedBaseFileDetails } from '../../../../__test__/util.js';
 import {
   addBaseInfoForFile,
@@ -10,7 +8,7 @@ import {
   updateBaseInfoForFile,
 } from '../../../computeBaseInfo.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'a.ts');
 const FILE_B = join(TEST_PACKAGE_DIR, 'b.ts');
 const FILE_C = join(TEST_PACKAGE_DIR, 'c.ts');

@@ -1,11 +1,10 @@
 import { join } from 'node:path';
 
 import { jest } from '@jest/globals';
-import { getDirname } from 'cross-dirname';
 
 import { getAllPackageSettings } from '../../settings.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 const FILE_A = join(TEST_PACKAGE_DIR, 'src', 'a.ts');
 
 // A tsconfig `paths` entry pointing to a non-existent location used to throw,

@@ -1,7 +1,6 @@
 import { join } from 'node:path';
 
 import { parse } from '@typescript-eslint/typescript-estree';
-import { getDirname } from 'cross-dirname';
 
 import type { ParsedPackageSettings } from '../../../settings/settings.js';
 import {
@@ -19,7 +18,7 @@ function parseContents(contents: string) {
   });
 }
 
-const SINGLEREPO_DIR = join(getDirname(), 'project');
+const SINGLEREPO_DIR = join(import.meta.dirname, 'project');
 const SINGLEREPO_FILE_A = join(SINGLEREPO_DIR, 'a.ts');
 
 it('Updates cache when a new file is added', () => {

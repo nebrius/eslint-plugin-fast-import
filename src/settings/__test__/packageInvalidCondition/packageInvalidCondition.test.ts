@@ -1,11 +1,10 @@
 import { join } from 'node:path';
 
 import { jest } from '@jest/globals';
-import { getDirname } from 'cross-dirname';
 
 import { getPackageJsonSettings } from '../../package.js';
 
-const TEST_PACKAGE_DIR = join(getDirname(), 'project');
+const TEST_PACKAGE_DIR = join(import.meta.dirname, 'project');
 
 it('Skips and warns on conditional exports with no recognized condition', () => {
   const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
