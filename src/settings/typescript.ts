@@ -156,7 +156,7 @@ function parseTsConfig(
         ? config.error.messageText
         : config.error.messageText.messageText;
     warn(
-      `Could not load TypeScript config, skipping settings analysis:\n  ${errorText}`
+      `Could not load TypeScript config from ${configPath}, skipping settings analysis:\n  ${errorText}`
     );
     return {};
   }
@@ -166,7 +166,7 @@ function parseTsConfig(
   /* istanbul ignore if */
   if (!config.config) {
     warn(
-      `Could not load TypeScript config, skipping settings analysis:\n  empty config`
+      `Could not load TypeScript config from ${configPath}, skipping settings analysis:\n  empty config`
     );
     return {};
   }
@@ -203,7 +203,9 @@ function parseTsConfig(
         const resolvedPath = require.resolve(configExtends);
         baseConfig = parseTsConfig(resolvedPath, absoluteRootDir);
       } catch {
-        warn(`Could not resolve tsconfig extends path "${configExtends}"`);
+        warn(
+          `Could not resolve tsconfig extends path "${configExtends}" in ${configPath}`
+        );
       }
     }
   }
@@ -227,7 +229,7 @@ function parseTsConfig(
   for (const [symbol, path] of Object.entries(paths)) {
     if (path.length !== 1) {
       warn(
-        `import-integrity only supports tsconfig.compilerOptions.paths entries with exactly one path. ${symbol} will be ignored.`
+        `import-integrity only supports tsconfig.compilerOptions.paths entries with exactly one path. ${symbol} in ${configPath} will be ignored.`
       );
       continue;
     }
@@ -240,7 +242,7 @@ function parseTsConfig(
       // other tooling. Match that with a warning so a single iffy alias does
       // not take down the whole rule.
       warn(
-        `tsconfig path "${path[0]}", resolved as "${absolutePathEntry}", does not exist; alias "${symbol}" will be ignored`
+        `tsconfig path "${path[0]}", resolved as "${absolutePathEntry}", does not exist; alias "${symbol}" in ${configPath} will be ignored`
       );
       continue;
     }

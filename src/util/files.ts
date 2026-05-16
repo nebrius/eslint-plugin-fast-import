@@ -9,7 +9,7 @@ import ignore from 'ignore';
 
 import type { IgnorePattern } from '../settings/settings.js';
 import { exitWithError, exitWithInternalError } from './error.js';
-import { debug } from './logging.js';
+import { debug, warn } from './logging.js';
 
 type PotentialFile = {
   filePath: string;
@@ -281,7 +281,9 @@ export function getDependenciesFromPackageJson(packageJsonPath: string) {
       workspaces?: string[];
     };
   } catch (e) {
-    console.warn('Failed to parse package.json', e);
+    warn(
+      `Failed to parse ${packageJsonPath}: ${e instanceof Error ? e.message : String(e)}`
+    );
     return [];
   }
 

@@ -45,7 +45,7 @@ export function getPackageJsonSettings(
           parsedExports[key] = value.default;
         } else {
           warn(
-            `Could not identify a valid condition for export "${key}". Got ${Object.keys(value).join(', ')} but expected a known Node.js condition`
+            `Could not identify a valid condition for export "${key}" in ${packageJsonPath}. Got ${Object.keys(value).join(', ')} but expected a known Node.js condition`
           );
         }
       }
