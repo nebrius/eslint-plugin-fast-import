@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.2 (2026-05-16)
+
+- Follow-up fix for `.d.ts` entry point mapping
+
 ## 1.0.1 (2026-05-16)
 
 - Fix: Add support for type-only packages, as indicated by only having a `types` key in `package.json`'s `exports` field

@@ -266,15 +266,25 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
           continue;
         }
         const baseFile = value.replace(mapping.outDir, mapping.rootDir);
+        // Strip an extension. Treats `.d.ts`, `.d.mts`, `.d.cts` as single
+        // units so the types-only-package case (`exports: { '.': { types:
+        // './dist/index.d.ts' } }`, source at `./src/index.ts`) survives the
+        // dist→src rewrite. The alternation tries `.d.<ext>` first so the
+        // declaration-extension family is matched before the single-extension
+        // fallback.
+        function stripExtension(path: string): string {
+          return path.replace(/\.d\.(?:ts|mts|cts)$|\.[^/.]+$/, '');
+        }
         let srcFile: string | undefined;
         if (existsSync(join(packageRootDir, baseFile))) {
           srcFile = baseFile;
         } else {
-          const tsBaseFile = baseFile.replace(/\.[^/.]+$/, '.ts');
+          const withoutExt = stripExtension(baseFile);
+          const tsBaseFile = `${withoutExt}.ts`;
           if (existsSync(join(packageRootDir, tsBaseFile))) {
             srcFile = tsBaseFile;
           } else {
-            const tsxBaseFile = baseFile.replace(/\.[^/.]+$/, '.tsx');
+            const tsxBaseFile = `${withoutExt}.tsx`;
             if (existsSync(join(packageRootDir, tsxBaseFile))) {
               srcFile = tsxBaseFile;
             }

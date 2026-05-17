@@ -32,5 +32,14 @@ it('Infers entry points by mapping outDir to rootDir, with .ts and .tsx fallback
     // .d.ts exports are not used directly (they're compiled artifacts) — they
     // go through the outDir/rootDir mapping like any other compiled path
     { type: 'static', subPath: './decl', filePath: './src/decl.d.ts' },
+    // types-only conditional exports map .d.ts → .ts source (the package only
+    // declares a `types` condition, so package.ts resolves the export value to
+    // the .d.ts path; the dist→src rewrite must strip `.d.ts` cleanly to find
+    // the real source).
+    {
+      type: 'static',
+      subPath: './types-only',
+      filePath: './src/types-entry.ts',
+    },
   ]);
 });

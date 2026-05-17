@@ -5,6 +5,7 @@
     "./tsx-sub": "./dist/comp.js",
     "./direct": "./dist/raw.js",
     "./mjs-sub": "./dist/legacy.mjs",
-    "./decl": "./dist/decl.d.ts"
+    "./decl": "./dist/decl.d.ts",
+    "./types-only": { "types": "./dist/types-entry.d.ts" }
   }
 }
