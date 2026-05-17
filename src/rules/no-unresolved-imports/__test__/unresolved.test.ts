@@ -87,6 +87,56 @@ ruleTester.run('no-unresolved-exports', noUnresolvedImports, {
         },
       },
     },
+    {
+      code: `import x from 'https://example.com/mod.js'`,
+      filename: FILE_A,
+      settings: {
+        'import-integrity': {
+          monorepoRootDir: MONOREPO_ROOT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import x from 'http://example.com/mod.js'`,
+      filename: FILE_A,
+      settings: {
+        'import-integrity': {
+          monorepoRootDir: MONOREPO_ROOT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import 'https://example.com/polyfill.js'`,
+      filename: FILE_A,
+      settings: {
+        'import-integrity': {
+          monorepoRootDir: MONOREPO_ROOT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `async function load() { return await import('https://example.com/mod.js'); }`,
+      filename: FILE_A,
+      settings: {
+        'import-integrity': {
+          monorepoRootDir: MONOREPO_ROOT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    {
+      code: `import * as x from 'https://example.com/mod.js'`,
+      filename: FILE_A,
+      settings: {
+        'import-integrity': {
+          monorepoRootDir: MONOREPO_ROOT_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 
   invalid: [

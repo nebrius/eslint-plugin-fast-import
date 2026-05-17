@@ -3,6 +3,7 @@
 ## 1.1.0 (2026-05-17)
 
 - Added `test/` to the list of default test patterns
+- `no-unresolved-exports` now treats remote packages (aka module specifiers starting with `http://` or `https://`) as always valid
 
 ## 1.0.2 (2026-05-16)
 

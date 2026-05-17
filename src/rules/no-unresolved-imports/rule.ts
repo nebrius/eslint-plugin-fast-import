@@ -44,6 +44,15 @@ export const noUnresolvedImports = createRule({
       // First, check if this is a third party dependency, and ensure that the dependency is listed
       // in a package.json
       if (importEntry.resolvedModuleType === 'thirdParty') {
+        // Check if this is a URL dependency (Deno, k6, etc.)
+        if (
+          importEntry.moduleSpecifier?.startsWith('http://') ||
+          importEntry.moduleSpecifier?.startsWith('https://')
+        ) {
+          continue outer;
+        }
+
+        // Now check if this dependency is listed in package.json
         for (const [
           path,
           deps,
