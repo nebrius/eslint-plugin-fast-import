@@ -4,6 +4,15 @@
 /* eslint-disable simple-import-sort/imports */
 import DefaultTheme from 'vitepress/theme';
 import './custom.css';
+import CopyOrDownloadAsMarkdownButtons from 'vitepress-plugin-llms/vitepress-components/CopyOrDownloadAsMarkdownButtons.vue';
 /* eslint-enable simple-import-sort/imports */
 
-export default DefaultTheme;
+export default {
+  extends: DefaultTheme,
+  enhanceApp({ app }) {
+    app.component(
+      'CopyOrDownloadAsMarkdownButtons',
+      CopyOrDownloadAsMarkdownButtons
+    );
+  },
+};

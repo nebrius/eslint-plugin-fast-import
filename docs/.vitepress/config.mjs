@@ -1,4 +1,7 @@
 import { defineConfig } from 'vitepress';
+import llmstxt, {
+  copyOrDownloadAsMarkdownButtons,
+} from 'vitepress-plugin-llms';
 import { withMermaid } from 'vitepress-plugin-mermaid';
 
 const ROOT_README_URL =
@@ -44,7 +47,13 @@ export default withMermaid(
     base: '/import-integrity-lint/',
     outDir: '../dist-docs',
     markdown: {
-      config: rewriteIncludedReadmeLinks,
+      config(md) {
+        rewriteIncludedReadmeLinks(md);
+        md.use(copyOrDownloadAsMarkdownButtons);
+      },
+    },
+    vite: {
+      plugins: [llmstxt()],
     },
     themeConfig: {
       nav: [
