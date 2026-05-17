@@ -90,7 +90,13 @@ The [`no-unnamed-entry-point-exports`](../no-unnamed-entry-point-exports) rule m
 
 ### Options
 
-This rule has no options.
+#### `ignorePackages`
+
+Type: `string[]`
+
+Default: `[]`
+
+An array of package names to ignore when checking for unused exports. Some monorepos have packages that are published publically, even though most packages are only used internally within the monorepo. When this happens, add the publicly published package names to this array to prevent the rule from flagging exports that are actually used by external consumers.
 
 ### When not to use this rule
 

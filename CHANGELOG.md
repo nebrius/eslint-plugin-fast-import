@@ -4,6 +4,7 @@
 
 - Added `test/` to the list of default test patterns
 - `no-unresolved-exports` now treats remote packages (aka module specifiers starting with `http://` or `https://`) as always valid
+- Added `ignorePackages` option to `no-unused-package-exports` rule
 
 ## 1.0.2 (2026-05-16)
 

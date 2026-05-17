@@ -25,12 +25,17 @@ const PACKAGE_ONE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'one');
 const PACKAGE_TWO_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'two');
 const PACKAGE_THREE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'three');
 const PACKAGE_FOUR_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'four');
+// packages/five intentionally has folder name `five` but package.json name
+// `pkg-five` so the ignorePackages tests can prove the rule matches against
+// the package name, not the folder name.
+const PACKAGE_FIVE_DIR = join(MONOREPO_ROOT_DIR, 'packages', 'five');
 
 const FILE_ONE_ENTRY = join(PACKAGE_ONE_DIR, 'entry.ts');
 const FILE_ONE_SCRATCH = join(PACKAGE_ONE_DIR, 'scratch.ts');
 const FILE_TWO_ENTRY = join(PACKAGE_TWO_DIR, 'entry.ts');
 const FILE_THREE_ENTRY = join(PACKAGE_THREE_DIR, 'entry.ts');
 const FILE_FOUR_ENTRY = join(PACKAGE_FOUR_DIR, 'entry.ts');
+const FILE_FIVE_ENTRY = join(PACKAGE_FIVE_DIR, 'entry.ts');
 
 const MONOREPO_SETTINGS = {
   'import-integrity': {
@@ -167,6 +172,37 @@ export const alsoScratch = 2;
       filename: FILE_ONE_SCRATCH,
       settings: MONOREPO_SETTINGS,
     },
+
+    // --- ignorePackages option ---
+    // Package five is folder `five` / name `pkg-five`. Listing the package
+    // name suppresses what would otherwise be an unused-export report.
+    {
+      code: `export const Unused = 1;
+`,
+      filename: FILE_FIVE_ENTRY,
+      options: [{ ignorePackages: ['pkg-five'] }],
+      settings: MONOREPO_SETTINGS,
+    },
+    // Multiple entries in ignorePackages: matching is by `includes`, not just
+    // the first element.
+    {
+      code: `export const Unused = 1;
+`,
+      filename: FILE_FIVE_ENTRY,
+      options: [{ ignorePackages: ['one', 'pkg-five'] }],
+      settings: MONOREPO_SETTINGS,
+    },
+    // ignorePackages set, but the file under lint belongs to a non-ignored
+    // package whose export is actually imported elsewhere — still valid,
+    // confirming the option doesn't perturb the normal path for other
+    // packages.
+    {
+      code: `export const Used = 1;
+`,
+      filename: FILE_ONE_ENTRY,
+      options: [{ ignorePackages: ['pkg-five'] }],
+      settings: MONOREPO_SETTINGS,
+    },
   ],
 
   invalid: [
@@ -247,6 +283,44 @@ export const SecondUnused = 2;
       filename: FILE_ONE_ENTRY,
       errors: [
         { messageId: 'noUnusedPackageExports', data: { name: 'Namespace' } },
+      ],
+      settings: MONOREPO_SETTINGS,
+    },
+
+    // --- ignorePackages option (negative cases) ---
+    // The folder name (`five`) must NOT match — matching is against the
+    // package.json `name` field (`pkg-five`).
+    {
+      code: `export const Unused = 1;
+`,
+      filename: FILE_FIVE_ENTRY,
+      options: [{ ignorePackages: ['five'] }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'Unused' } },
+      ],
+      settings: MONOREPO_SETTINGS,
+    },
+    // ignorePackages contains unrelated package names — current package
+    // (`pkg-five`) is not in the list, so reports still fire.
+    {
+      code: `export const Unused = 1;
+`,
+      filename: FILE_FIVE_ENTRY,
+      options: [{ ignorePackages: ['one', 'two'] }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'Unused' } },
+      ],
+      settings: MONOREPO_SETTINGS,
+    },
+    // Empty ignorePackages array must be a no-op (guards against treating
+    // empty list as "ignore everything").
+    {
+      code: `export const Unused = 1;
+`,
+      filename: FILE_FIVE_ENTRY,
+      options: [{ ignorePackages: [] }],
+      errors: [
+        { messageId: 'noUnusedPackageExports', data: { name: 'Unused' } },
       ],
       settings: MONOREPO_SETTINGS,
     },
