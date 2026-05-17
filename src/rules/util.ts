@@ -20,6 +20,7 @@ import {
 import type { GenericContext } from '../types/context.js';
 import { exitWithInternalError } from '../util/error.js';
 import {
+  convertToUnixishPath,
   getFiles,
   getRelativePathFromRoot,
   isFileIgnored,
@@ -209,7 +210,8 @@ const DEFAULT_TEST_FILE_PATTERNS = [
   '__test__',
   '__tests__',
   '__fixture__',
-  'test/',
+  '/test/',
+  '/tests/',
 ];
 export function isNonTestFile(filePath: string) {
   const packageSettings = getPackageCacheEntryForFile(filePath);
@@ -218,10 +220,13 @@ export function isNonTestFile(filePath: string) {
   }
   // We want to ignore folders named __test__ outside of this package, in case
   // the entire package is itself a test (e.g. the unit tests for import-integrity)
-  const relativeFilePath = getRelativePathFromRoot(
-    packageSettings.packageRootDir,
-    filePath
-  );
+  // We add a leading slash to cover test patterns that start with a slash,
+  // such as the built-in '/test/' and '/tests/' patterns
+  const relativeFilePath =
+    '/' +
+    convertToUnixishPath(
+      getRelativePathFromRoot(packageSettings.packageRootDir, filePath)
+    );
   for (const pattern of [
     ...DEFAULT_TEST_FILE_PATTERNS,
     ...packageSettings.testFilePatterns,

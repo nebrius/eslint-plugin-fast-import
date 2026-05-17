@@ -37,6 +37,23 @@ ruleTester.run('no-test-imports-in-prod', noTestImportsInProd, {
         },
       },
     },
+    // testing/e.ts lives in a directory whose name contains "test" but is
+    // neither `test/` nor `tests/`. The default patterns are anchored, so it
+    // is treated as a production file and importing it from production code
+    // is allowed.
+    {
+      code: `import { eHelper } from './testing/e';
+
+console.log(eHelper);
+`,
+      filename: FILE_A,
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
   invalid: [
     {
@@ -81,11 +98,27 @@ console.log(_testOnlyHelper);
         },
       },
     },
-    // test/b.ts is recognized as a test file via the `test/` default pattern.
+    // test/b.ts is recognized as a test file via the `/test/` default pattern.
     {
       code: `import { bTest } from './test/b';
 
 console.log(bTest);
+`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTestImports' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    // tests/d.ts is recognized as a test file via the `/tests/` default
+    // pattern (plural).
+    {
+      code: `import { dTest } from './tests/d';
+
+console.log(dTest);
 `,
       filename: FILE_A,
       errors: [{ messageId: 'noTestImports' }],

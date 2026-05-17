@@ -2,7 +2,9 @@
 
 ## 1.1.0 (2026-05-17)
 
-- Added `test/` to the list of default test patterns
+- Added `/test/` and `/tests/` to the list of default test patterns
+- Improved test pattern matching to handle paths that start with a slash
+- Test patterns are now always treated as UNIX file paths, even on Windows, so you don't have to duplicate patterns with slashes in it for both platforms
 - `no-unresolved-exports` now treats remote packages (aka module specifiers starting with `http://` or `https://`) as always valid
 - Added `ignorePackages` option to `no-unused-package-exports` rule
 - Normalized externally imported files merge behavior to match entry point files merge behavior. Technically this is a breaking change, but the package is so new that it's not worth a major version bump.

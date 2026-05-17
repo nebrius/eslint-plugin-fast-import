@@ -23,6 +23,7 @@ const ruleTester = new RuleTester({
           '__custom_test__/*.ts*',
           '__test__/*.ts*',
           'test/*.ts*',
+          'tests/*.ts*',
         ],
       },
       tsconfigRootDir: TEST_PACKAGE_DIR,
@@ -145,12 +146,29 @@ export const a2 = 10;
         },
       },
     },
-    // a5 is only imported by test/i-test.ts. The `test/` default pattern means
-    // that file is treated as a test file, so a5 is a test-only export.
+    // a5 is only imported by test/i-test.ts. The `/test/` default pattern
+    // means that file is treated as a test file, so a5 is a test-only export.
     {
       code: `export const a1 = 10;
 export const a2 = 10;
 export const a5 = 10;
+`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTestOnlyImports' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
+    // a6 is only imported by tests/j-test.ts. The `/tests/` default pattern
+    // (plural) means that file is treated as a test file, so a6 is a
+    // test-only export.
+    {
+      code: `export const a1 = 10;
+export const a2 = 10;
+export const a6 = 10;
 `,
       filename: FILE_A,
       errors: [{ messageId: 'noTestOnlyImports' }],
