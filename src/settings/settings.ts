@@ -12,7 +12,7 @@ import {
 } from '../util/files.js';
 import { getSubpathEntry } from '../util/getSubpathEntry.js';
 import { debug, warn } from '../util/logging.js';
-import { getFrameworkSettings } from './framework.js';
+import { getInferredFrameworkImportedFiles } from './framework.js';
 import { getPackageJsonSettings } from './package.js';
 import { getTypeScriptSettings } from './typescript.js';
 import type { PackageSettings, RepoUserSettings } from './user.js';
@@ -228,11 +228,11 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     getPackageJsonSettings(packageRootDir);
 
   // Get frameworks-specific settings
-  const frameworkSettings = getFrameworkSettings(packageRootDir);
+  const inferredFrameworkImportedFiles =
+    getInferredFrameworkImportedFiles(packageRootDir);
 
   // Merge TypeScript and user settings, with user settings taking precedence
   const mergedSettings = {
-    ...frameworkSettings,
     ...typeScriptSettings,
     ...packageJsonSettings,
     ...userPackageSettings,
@@ -390,13 +390,17 @@ function populatePackageSettingsCache(userPackageSettings: PackageSettings) {
     }
   }
 
+  const externallyImportedFilesToUse = Array.from(
+    new Set([
+      // Always ignore config files in the root directory
+      '/*.config.*',
+      ...(inferredFrameworkImportedFiles ?? []),
+      ...externallyImportedFiles,
+    ])
+  );
   const parsedExternallyImported: ParsedPackageSettings['externallyImported'] =
     [];
-  for (const filePattern of [
-    // Always ignore config files in the root directory
-    '/*.config.*',
-    ...externallyImportedFiles,
-  ]) {
+  for (const filePattern of externallyImportedFilesToUse) {
     parsedExternallyImported.push({
       file: ignore().add(filePattern),
     });

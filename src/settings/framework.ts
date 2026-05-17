@@ -78,7 +78,7 @@ const FRAMEWORKS = [
 
 // Attempts to detect common frameworks that need an externally
 // imported files entry, and supplies them
-export function getFrameworkSettings(packageRootDir: string) {
+export function getInferredFrameworkImportedFiles(packageRootDir: string) {
   const directoryFiles = readdirSync(packageRootDir);
   for (const framework of FRAMEWORKS) {
     let isMatch = false;
@@ -90,10 +90,7 @@ export function getFrameworkSettings(packageRootDir: string) {
     }
     if (isMatch) {
       debug(`Applying ${framework.name} externally imported files`);
-      return {
-        externallyImportedFiles:
-          framework.getExternallyImportedFiles(packageRootDir),
-      };
+      return framework.getExternallyImportedFiles(packageRootDir);
     }
   }
   return undefined;

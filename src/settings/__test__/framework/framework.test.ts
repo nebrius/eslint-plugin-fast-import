@@ -2,10 +2,14 @@ import { join } from 'node:path';
 
 import type { ParsedPackageSettings } from '../../settings.js';
 import { getAllPackageSettings } from '../../settings.js';
+import type { PackageSettings } from '../../user.js';
 
 const PROJECTS_DIR = join(import.meta.dirname, 'project');
 
-function getPackageSettings(fixtureName: string): ParsedPackageSettings {
+function getPackageSettings(
+  fixtureName: string,
+  extraSettings: Partial<PackageSettings> = {}
+): ParsedPackageSettings {
   const fixtureDir = join(PROJECTS_DIR, fixtureName);
   const { packageSettings } = getAllPackageSettings({
     filename: join(fixtureDir, 'package.json'),
@@ -13,6 +17,7 @@ function getPackageSettings(fixtureName: string): ParsedPackageSettings {
       'import-integrity': {
         mode: 'one-shot',
         packageRootDir: fixtureDir,
+        ...extraSettings,
       },
     },
   });
@@ -85,5 +90,24 @@ it('App Router takes precedence when app/ and pages/ coexist', () => {
   // The App Router list excludes pages/**/*, so legacy pages should not match.
   expect(isMatched(settings, 'pages/legacy.tsx')).toBe(false);
 
+  expect(isMatched(settings, 'lib/utils.ts')).toBe(false);
+});
+
+it('Merges user-supplied externallyImportedFiles with framework-inferred patterns', () => {
+  const settings = getPackageSettings('appRouter', {
+    externallyImportedFiles: ['src/scripts/build.ts'],
+  });
+
+  // User-supplied pattern is preserved.
+  expect(isMatched(settings, 'src/scripts/build.ts')).toBe(true);
+
+  // Framework-inferred Next.js patterns still apply.
+  expect(isMatched(settings, 'app/page.tsx')).toBe(true);
+  expect(isMatched(settings, 'middleware.ts')).toBe(true);
+
+  // The always-on config-files pattern still applies.
+  expect(isMatched(settings, 'eslint.config.mjs')).toBe(true);
+
+  // Unrelated files still do not match.
   expect(isMatched(settings, 'lib/utils.ts')).toBe(false);
 });

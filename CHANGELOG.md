@@ -5,6 +5,7 @@
 - Added `test/` to the list of default test patterns
 - `no-unresolved-exports` now treats remote packages (aka module specifiers starting with `http://` or `https://`) as always valid
 - Added `ignorePackages` option to `no-unused-package-exports` rule
+- Normalized externally imported files merge behavior to match entry point files merge behavior. Technically this is a breaking change, but the package is so new that it's not worth a major version bump.
 
 ## 1.0.2 (2026-05-16)
 
