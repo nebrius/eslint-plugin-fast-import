@@ -1,6 +1,6 @@
 {
   "name": "import-integrity-lint",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "ESLint/Oxlint plugin with rules to ensure proper semantic usage of imports and exports",
   "keywords": [
     "eslint",

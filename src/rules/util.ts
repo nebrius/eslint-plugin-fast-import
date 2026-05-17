@@ -209,6 +209,7 @@ const DEFAULT_TEST_FILE_PATTERNS = [
   '__test__',
   '__tests__',
   '__fixture__',
+  'test/',
 ];
 export function isNonTestFile(filePath: string) {
   const packageSettings = getPackageCacheEntryForFile(filePath);

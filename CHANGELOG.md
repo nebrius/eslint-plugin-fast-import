@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.0 (2026-05-17)
+
+- Added `test/` to the list of default test patterns
+
 ## 1.0.2 (2026-05-16)
 
 - Follow-up fix for `.d.ts` entry point mapping

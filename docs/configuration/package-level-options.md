@@ -168,7 +168,7 @@ Example:
 
 Type: `string[]`
 
-Default: `[ '.test.', '.spec', '__test__', '__tests__', '__fixture__' ]`
+Default: `[ '.test.', '.spec', '__test__', '__tests__', '__fixture__', 'test/' ]`
 
 Several rules take into account whether or not a given file is a "test" file or a "production" file. This option allows you to define extra patterns in addition to the default to indicate other test files. Note that globs are not currently supported.
 

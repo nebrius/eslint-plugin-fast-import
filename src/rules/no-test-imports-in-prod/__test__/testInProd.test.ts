@@ -81,5 +81,20 @@ console.log(_testOnlyHelper);
         },
       },
     },
+    // test/b.ts is recognized as a test file via the `test/` default pattern.
+    {
+      code: `import { bTest } from './test/b';
+
+console.log(bTest);
+`,
+      filename: FILE_A,
+      errors: [{ messageId: 'noTestImports' }],
+      settings: {
+        'import-integrity': {
+          packageRootDir: TEST_PACKAGE_DIR,
+          mode: 'fix',
+        },
+      },
+    },
   ],
 });
