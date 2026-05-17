@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.1 (2026-10-14)
+
+- Added missing Next.js inferred externally imported entries (`/proxy` and `/global-not-found`)
+
 ## 1.1.0 (2026-05-17)
 
 - Added `/test/` and `/tests/` to the list of default test patterns

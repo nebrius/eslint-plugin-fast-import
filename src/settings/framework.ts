@@ -23,6 +23,7 @@ const NEXT_JS_APP_ROUTER_EXTERNALLY_IMPORTED_FILES = addExtensions([
   ['/app/**/error', REACT_EXTENSIONS],
   ['/app/**/global-error', REACT_EXTENSIONS],
   ['/app/**/not-found', REACT_EXTENSIONS],
+  ['/app/global-not-found', REACT_EXTENSIONS],
   ['/app/**/forbidden', REACT_EXTENSIONS],
   ['/app/**/unauthorized', REACT_EXTENSIONS],
   ['/app/**/default', REACT_EXTENSIONS],
@@ -38,7 +39,10 @@ const NEXT_JS_APP_ROUTER_EXTERNALLY_IMPORTED_FILES = addExtensions([
   ['/app/**/manifest', REACT_EXTENSIONS],
   // Top-level entry points. Next looks for these at either the project
   // root or under src/, which the caller handles via the src/ prefix.
+  // proxy is the Next 16+ rename of middleware; both names are kept so
+  // pre- and post-16 projects are both covered.
   ['/middleware', REACT_EXTENSIONS],
+  ['/proxy', REACT_EXTENSIONS],
   ['/instrumentation', REACT_EXTENSIONS],
   ['/instrumentation-client', REACT_EXTENSIONS],
   // Required by @next/mdx with the App Router; lives at project root or under src/.
@@ -50,7 +54,10 @@ const NEXT_JS_PAGES_ROUTER_EXTERNALLY_IMPORTED_FILES = addExtensions([
   ['/pages/**/*', REACT_EXTENSIONS],
   // Top-level entry points. Next looks for these at either the project
   // root or under src/, which the caller handles via the src/ prefix.
+  // proxy is the Next 16+ rename of middleware; both names are kept so
+  // pre- and post-16 projects are both covered.
   ['/middleware', REACT_EXTENSIONS],
+  ['/proxy', REACT_EXTENSIONS],
   ['/instrumentation', REACT_EXTENSIONS],
   ['/instrumentation-client', REACT_EXTENSIONS],
 ]);
